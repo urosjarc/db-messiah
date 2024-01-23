@@ -1,6 +1,6 @@
-package com.urosjarc.diysqlservice.domain
+package com.urosjarc.dbjesus.domain
 
-import com.urosjarc.diysqlservice.extend.kclass
+import com.urosjarc.dbjesus.extend.kclass
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -17,15 +17,15 @@ class SqlMapper(val sqlMappings: List<SqlMapping<*>>) {
     fun getDbType(kclass: KClass<*>): String = this.sqlMappings.first { it.kclass == kclass }.dbType
 
     fun decode(kp: KParameter, i: Int, rs: ResultSet): Any? {
-        val javaSql = rs.metaData.getColumnType(i)
-        val javaSqlName = rs.metaData.getColumnTypeName(i)
+        val jdbcType = rs.metaData.getColumnType(i)
+        val jdbcTypeName = rs.metaData.getColumnTypeName(i)
         val name = rs.metaData.getColumnName(i)
         for (map in this.sqlMappings) {
-            if (map.jdbcType.ordinal == javaSql && kp.kclass == map.kclass) {
+            if (map.jdbcType.ordinal == jdbcType && kp.kclass == map.kclass) {
                 return map.decoding(i, rs)
             }
         }
-        throw SqlMappingException("Missing DbMapping decoding for: $name[$javaSqlName] -> ${kp.name}[${kp.type}]")
+        throw SqlMappingException("Missing decoding for: ResultSet(column=$name, jdbcTypeName=${jdbcTypeName}) -> ObjField(name=${kp.name}, type=${kp.type})")
     }
 
     fun <T : Any> decode(kclass: KClass<T>, resultSet: ResultSet): T {
@@ -38,8 +38,7 @@ class SqlMapper(val sqlMappings: List<SqlMapping<*>>) {
                 val columnInt = resultSet.findColumn(kp.name)
                 args[kp] = this.decode(kp = kp, i = columnInt, rs = resultSet)
             } catch (e: Throwable) {
-                this.log.error(e)
-                continue
+                throw SqlMappingException("Decoding error", cause = e)
             }
         }
 
@@ -50,23 +49,22 @@ class SqlMapper(val sqlMappings: List<SqlMapping<*>>) {
         }
     }
 
-    fun encodeObj(obj: Any): SqlMap {
-        val keys = mutableListOf<String>()
-        val values = mutableListOf<String>()
-        obj::class.declaredMemberProperties.map {
-            keys.add(it.name)
-            values.add(this.encodeValue(obj = (it as KProperty1<Any, *>).get(receiver = obj)))
-        }
-        return SqlMap(keys = keys, values = values)
+    fun encode(obj: Any, valueOnNull: String): List<ObjField> = obj::class.declaredMemberProperties.map {
+        val prop = (it as KProperty1<Any, *>)
+        ObjField(
+            name = it.name,
+            encodedValue = this.encodeValue(value=prop.get(obj)) ?: valueOnNull,
+            kProperty1 = prop
+        )
     }
 
-    fun encodeValue(obj: Any?): String {
-        if (obj == null) return "NULL"
+    private fun encodeValue(value: Any?): String? {
+        if (value == null) return null
         for (map in this.sqlMappings) {
-            if (map.kclass == obj::class) {
-                return (map as SqlMapping<Any>).encoding(obj)
+            if (map.kclass == value::class) {
+                return (map as SqlMapping<Any>).encoding(value)
             }
         }
-        throw SQLException("Missing DbMapping encoding for: ${obj::class}")
+        throw SQLException("Missing DbMapping encoding for: ${value::class}")
     }
 }

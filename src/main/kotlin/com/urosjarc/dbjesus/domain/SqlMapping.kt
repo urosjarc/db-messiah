@@ -1,4 +1,4 @@
-package com.urosjarc.diysqlservice.domain
+package com.urosjarc.dbjesus.domain
 
 import java.sql.JDBCType
 import java.sql.ResultSet

@@ -1,7 +1,7 @@
-package com.urosjarc.diysqlservice.impl
+package com.urosjarc.dbjesus.mappings
 
-import com.urosjarc.diysqlservice.domain.SqlMapping
-import com.urosjarc.diysqlservice.extend.capitalize
+import com.urosjarc.dbjesus.domain.SqlMapping
+import com.urosjarc.dbjesus.extend.capitalized
 import java.sql.JDBCType
 
 fun stringMapping(dbType: String = "TEXT") = SqlMapping(
@@ -26,10 +26,10 @@ val floatMapping = SqlMapping(
     encoding = { it.toString() })
 
 val doubleMapping = SqlMapping(
-    kclass = Float::class,
+    kclass = Double::class,
     dbType = "DOUBLE",
     jdbcType = JDBCType.DOUBLE,
-    decoding = { i, rs -> rs.getFloat(i) },
+    decoding = { i, rs -> rs.getDouble(i) },
     encoding = { it.toString() })
 
 val booleanMapping = SqlMapping(
@@ -37,14 +37,14 @@ val booleanMapping = SqlMapping(
     dbType = "BOOLEAN",
     jdbcType = JDBCType.BOOLEAN,
     decoding = { i, rs -> rs.getBoolean(i) },
-    encoding = { it.toString().capitalize() })
+    encoding = { it.toString().capitalized })
 
 val charMapping = SqlMapping(
     kclass = Char::class,
     dbType = "CHAR",
     jdbcType = JDBCType.CHAR,
     decoding = { i, rs -> rs.getString(i).firstOrNull() },
-    encoding = { it.toString().capitalize() })
+    encoding = { it.toString().capitalized })
 
 val baseMappings = listOf<SqlMapping<*>>(
     stringMapping(),

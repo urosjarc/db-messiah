@@ -1,4 +1,4 @@
-package com.urosjarc.diysqlservice
+package com.urosjarc.dbjesus
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -7,7 +7,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
-import kotlin.reflect.KClass
 
 
 abstract class SqlEngine(config: HikariConfig) {

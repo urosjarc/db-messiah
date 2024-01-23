@@ -1,4 +1,5 @@
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
 }
-rootProject.name = "diy-sql-service"
+rootProject.name = "db-jesus"
+include("lib")
