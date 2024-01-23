@@ -14,7 +14,7 @@ class SqlMapper(val sqlMappings: List<SqlMapping<*>>) {
 
     private val log = this.logger()
 
-    fun dbType(kclass: KClass<*>): String = this.sqlMappings.first { it.kclass == kclass }.dbType
+    fun getDbType(kclass: KClass<*>): String = this.sqlMappings.first { it.kclass == kclass }.dbType
 
     fun decode(kp: KParameter, i: Int, rs: ResultSet): Any? {
         val javaSql = rs.metaData.getColumnType(i)

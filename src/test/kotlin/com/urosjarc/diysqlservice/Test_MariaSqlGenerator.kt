@@ -1,7 +1,7 @@
 package com.urosjarc.diysqlservice
 
 import com.urosjarc.diysqlservice.domain.SqlMapper
-import com.urosjarc.diysqlservice.impl.MariaSqlMapper
+import com.urosjarc.diysqlservice.impl.MariaSqlGenerator
 import com.urosjarc.diysqlservice.impl.baseMappings
 import com.zaxxer.hikari.HikariConfig
 import org.apache.logging.log4j.kotlin.logger
@@ -9,10 +9,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.test.assertEquals
 
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_MariaSqlMapper {
+class Test_MariaSqlGenerator {
 
     val log = logger()
 
@@ -24,7 +25,7 @@ class Test_MariaSqlMapper {
 
     val sqlMapper = SqlMapper(baseMappings)
 
-    val service = MariaSqlMapper(config = config, sqlMapper = sqlMapper)
+    val service = MariaSqlGenerator(sqlMapper = sqlMapper)
 
     data class Phone(
         val id: Int,
@@ -48,6 +49,16 @@ class Test_MariaSqlMapper {
 
     @Test
     fun test_db_service() {
-        this.service.createTable()
+        assertEquals(
+            "CREATE OR REPLACE TABLE User (" +
+                    "id INT AUTO_INCREMENT, " +
+                    "PRIMARY KEY(id), " +
+                    "id_phone INT NOT NULL, " +
+                    "constraint fk_type foreign key(id_phone) references Phone(id), " +
+                    "money FLOAT, " +
+                    "username TEXT" +
+                    ");",
+            this.service.createTable(kclass = User::class)
+        )
     }
 }
