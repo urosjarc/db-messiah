@@ -1,18 +1,18 @@
 package com.urosjarc.dbjesus.mariadb
 
-import com.urosjarc.dbjesus.SqlGenerator
-import com.urosjarc.dbjesus.domain.SqlMapper
-import com.urosjarc.dbjesus.domain.SqlMappingException
+import com.urosjarc.dbjesus.SqlMapper
+import com.urosjarc.dbjesus.SqlSerializer
+import com.urosjarc.dbjesus.exceptions.SqlMappingException
 import com.urosjarc.dbjesus.extend.capitalized
-import com.urosjarc.dbjesus.extend.fields
+import com.urosjarc.dbjesus.extend.properties
 import kotlin.reflect.KClass
 
 
-class MariaSqlGenerator(override val sqlMapper: SqlMapper) : SqlGenerator<Int> {
-    override fun <T : Any> createTable(kclass: KClass<T>): String {
+class MariaSerializer(override val mapper: SqlMapper) : SqlSerializer<Int> {
+    override fun <T : Any> createSqlStr(kclass: KClass<T>): String {
         val col = mutableListOf<String>()
 
-        kclass.fields.forEach {
+        kclass.properties.forEach {
             val isNull = if (it.canBeNull) "" else "NOT NULL"
             if (it.name == "id") {
                 col.add("${it.name} INT AUTO_INCREMENT")
@@ -22,7 +22,7 @@ class MariaSqlGenerator(override val sqlMapper: SqlMapper) : SqlGenerator<Int> {
                 col.add("${it.name} INT $isNull")
                 col.add("constraint fk_type foreign key(${it.name}) references $foreignTable(id)")
             } else {
-                val type = this.sqlMapper.getDbType(it.kclass)
+                val type = this.mapper.getDbType(it.kclass)
                 col.add("${it.name} $type")
             }
         }
@@ -31,32 +31,32 @@ class MariaSqlGenerator(override val sqlMapper: SqlMapper) : SqlGenerator<Int> {
         return "CREATE OR REPLACE TABLE ${kclass.simpleName} ($columns);"
     }
 
-    override fun <T : Any> select(kclass: KClass<T>, where: String): String {
+    override fun <T : Any> selectSql(kclass: KClass<T>, where: String): String {
         return "SELECT * FROM ${kclass.simpleName} WHERE $where"
     }
 
-    override fun <T : Any> selectOne(kclass: KClass<T>, id: Int): String {
+    override fun <T : Any> selectOneQuery(kclass: KClass<T>, id: Int): String {
         return "SELECT * FROM ${kclass.simpleName} WHERE id = $id"
     }
 
-    override fun insert(obj: Any): String {
-        val objFields = this.sqlMapper.encode(obj=obj, valueOnNull = "NULL")
+    override fun insertQuery(obj: Any): String {
+        val objFields = this.mapper.encode(obj = obj, valueOnNull = "NULL")
 
         val columns = objFields.map { it.name }
-        val encodedValues = objFields.map { it.encodedValue }
+        val encodedValues = objFields.map { it.value }
 
         return "INSERT INTO ${obj::class.simpleName} ($columns) VALUES ($encodedValues)"
     }
 
-    override fun update(obj: Any): String {
+    override fun updateQuery(obj: Any): String {
 
         var id: String? = null
-        val updates = this.sqlMapper.encode(obj=obj, valueOnNull = "NULL").map {
-            if(it.name == "id") id = it.encodedValue
-            "${it.name} = ${it.encodedValue}"
+        val updates = this.mapper.encode(obj = obj, valueOnNull = "NULL").map {
+            if (it.name == "id") id = it.value
+            "${it.name} = ${it.value}"
         }.joinToString(", ")
 
-        if(id == null) throw SqlMappingException("Primary key is missing: $obj")
+        if (id == null) throw SqlMappingException("Primary key is missing: $obj")
 
         return "UPDATE ${obj::class.simpleName} SET $updates WHERE id=$id"
     }

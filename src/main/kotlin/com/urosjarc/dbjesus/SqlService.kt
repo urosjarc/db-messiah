@@ -1,12 +1,15 @@
 package com.urosjarc.dbjesus
 
-import com.zaxxer.hikari.HikariConfig
+import com.urosjarc.dbjesus.sqlite.SqliteEngine
 import kotlin.reflect.KClass
 
-abstract class SqlService(config: HikariConfig) : SqlEngine(config = config) {
-    abstract fun <T : Any> createTable(kclass: KClass<T>): String
-    abstract fun <T : Any> selectTable(cls: KClass<T>): MutableList<T>
-    abstract fun insertTable(obj: Any)
-    abstract fun updateTable(obj: Any)
-    abstract fun <T : Any> selectTable(cls: KClass<T>, sql: String): MutableList<T>
+interface SqlService<ID> {
+    val serializer: SqlSerializer<ID>
+    val engine: SqliteEngine
+    fun createTable(kclass: KClass<Any>): Int
+    fun <T : Any> selectTable(kclass: KClass<T>): List<T>
+    fun insertTable(obj: Any): Int
+    fun updateTable(obj: Any): Int
+    fun queryMany(sql: String, vararg kClass: KClass<Any>): List<Any>
+    fun <T : Any> query(sql: String, kClass: KClass<T>): List<T>
 }

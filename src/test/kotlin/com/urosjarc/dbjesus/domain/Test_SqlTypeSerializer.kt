@@ -2,9 +2,10 @@ package com.urosjarc.dbjesus.domain
 
 import com.mockrunner.jdbc.BasicJDBCTestCaseAdapter
 import com.mockrunner.mock.jdbc.MockResultSet
-import com.urosjarc.dbjesus.mappings.baseMappings
-import com.urosjarc.dbjesus.mappings.floatMapping
-import com.urosjarc.dbjesus.mappings.stringMapping
+import com.urosjarc.dbjesus.SqlSerializer
+import com.urosjarc.dbjesus.mariadb.baseMappings
+import com.urosjarc.dbjesus.mariadb.floatMapping
+import com.urosjarc.dbjesus.mariadb.stringMapping
 import org.junit.jupiter.api.TestInstance
 import java.sql.ResultSetMetaData
 import java.util.HashMap
@@ -12,9 +13,9 @@ import kotlin.test.*
 
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_SqlMapper : BasicJDBCTestCaseAdapter() {
+class Test_SqlTypeSerializer : BasicJDBCTestCaseAdapter() {
 
-    val sqlMapper = SqlMapper(sqlMappings = baseMappings)
+    val sqlMapper = SqlSerializer(sqlTypeSerializers = baseMappings)
 
     data class Entity(
         val string: String = "String",

@@ -1,4 +1,4 @@
 package com.urosjarc.dbjesus.mariadb
 
-class MariaSqlService {
+class MariaService {
 }
