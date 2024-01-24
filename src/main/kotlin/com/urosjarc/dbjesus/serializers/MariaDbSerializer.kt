@@ -1,17 +1,20 @@
-package com.urosjarc.dbjesus.mariadb
+package com.urosjarc.dbjesus.serializers
 
-import com.urosjarc.dbjesus.SqlMapper
-import com.urosjarc.dbjesus.SqlSerializer
+import com.urosjarc.dbjesus.DbMapper
+import com.urosjarc.dbjesus.DbSerializer
+import com.urosjarc.dbjesus.impl.basicDbTypeSerializers
+import com.urosjarc.dbjesus.domain.Encoders
 import com.urosjarc.dbjesus.domain.InsertQuery
+import com.urosjarc.dbjesus.domain.Page
 import com.urosjarc.dbjesus.domain.Query
 import com.urosjarc.dbjesus.extend.capitalized
 import com.urosjarc.dbjesus.extend.properties
 import kotlin.reflect.KClass
 
 
-class SqliteSerializer : SqlSerializer<Int> {
+class MariaDbSerializer : DbSerializer<Int> {
 
-    override val mapper = SqlMapper(sqlTypeSerializers = baseMappings)
+    override val mapper = DbMapper(dbTypeSerializers = basicDbTypeSerializers)
 
     override fun createQuery(kclass: KClass<Any>): Query {
         val col = mutableListOf<String>()
@@ -35,15 +38,16 @@ class SqliteSerializer : SqlSerializer<Int> {
         return Query(sql = "CREATE OR REPLACE TABLE ${kclass.simpleName} ($columns);")
     }
 
-    override fun selectAllQuery(kclass: KClass<Any>): Query {
+    override fun <T : Any> selectAllQuery(kclass: KClass<T>): Query {
         return Query(sql = "SELECT * FROM ${kclass.simpleName}")
     }
 
+    override fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query {
+        return Query(sql = "SELECT * FROM ${kclass.simpleName} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
+    }
+
     override fun selectOneQuery(kclass: KClass<Any>, id: Int): Query {
-        return Query(
-            sql = "SELECT * FROM ${kclass.simpleName} WHERE id=?", encoders = listOf(
-            )
-        )
+        return Query(sql = "SELECT * FROM ${kclass.simpleName} WHERE id=$id")
     }
 
     override fun insertQuery(obj: Any): InsertQuery {
@@ -56,9 +60,10 @@ class SqliteSerializer : SqlSerializer<Int> {
 
     override fun updateQuery(obj: Any): Query {
         val op = this.mapper.getObjProperties(obj = obj, primaryKey = "id")
-        return Query(
-            sql = "UPDATE ${obj::class.simpleName} SET ${op.sqlUpdate()} WHERE id=${op.primaryKey.value}",
-            encoders = op.encoders.apply { add(op.primaryKey.encoder) }
-        )
+        return Query(sql = "UPDATE ${obj::class.simpleName} SET ${op.sqlUpdate()} WHERE id=${op.primaryKey.value}", encoders = op.encoders)
+    }
+    override fun query(getEscapedQuery: (encoders: Encoders) -> Query): Query {
+        val encoders = Encoders(this.mapper)
+        return getEscapedQuery(encoders)
     }
 }

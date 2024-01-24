@@ -1,22 +1,18 @@
-package com.urosjarc.dbjesus.sqlite
+package com.urosjarc.dbjesus.impl
 
-import com.urosjarc.dbjesus.SqlEngine
-import com.urosjarc.dbjesus.domain.*
-import com.urosjarc.dbjesus.exceptions.SqlEngineException
+import com.urosjarc.dbjesus.DbEngine
+import com.urosjarc.dbjesus.domain.InsertQuery
+import com.urosjarc.dbjesus.domain.PreparedInsertQuery
+import com.urosjarc.dbjesus.domain.PreparedQuery
+import com.urosjarc.dbjesus.domain.Query
+import com.urosjarc.dbjesus.exceptions.DbEngineException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
 
 
-/**
- *     ResultSet executeQuery(String sql) throws SQLException
- *     int executeUpdate(String sql) throws SQLException
- *     boolean execute(String sql) throws SQLException
- */
-class SqliteEngine(config: HikariConfig): SqlEngine {
+class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
 
-    val log = this.logger()
     val dataSource = HikariDataSource(config)
 
     init {
@@ -26,24 +22,24 @@ class SqliteEngine(config: HikariConfig): SqlEngine {
     }
 
     private val conn
-        get(): Connection? {
+        get(): Connection {
             try {
                 return this.dataSource.connection
             } catch (e: SQLException) {
-                throw SqlEngineException(msg = "Could not get connection!", cause = e)
+                throw DbEngineException(msg = "Could not get connection!", cause = e)
             }
         }
 
-    override fun prepareInsertQuery(sqlQuery: InsertQuery): PreparedInsertQuery {
-        val preparedInsertQuery = PreparedInsertQuery(preparedStatement = this.conn!!.prepareStatement(sqlQuery.sql, Statement.RETURN_GENERATED_KEYS))
-        sqlQuery.preparingFuns.forEach { it(preparedInsertQuery.preparedStatement) }
-        return preparedInsertQuery
+    override fun prepareInsertQuery(query: InsertQuery): PreparedInsertQuery {
+        val pQuery = PreparedInsertQuery(preparedStatement = this.conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS))
+        query.encoders.forEachIndexed { i, encoder -> encoder(pQuery.preparedStatement, i) }
+        return pQuery
     }
 
     override fun prepareQuery(query: Query): PreparedQuery {
-        val preparedQuery = PreparedQuery(preparedStatement = this.conn!!.prepareStatement(query.sql))
-        query.encoders.forEach { it(preparedQuery.preparedStatement) }
-        return preparedQuery
+        val pQuery = PreparedQuery(preparedStatement = this.conn.prepareStatement(query.sql))
+        query.encoders.forEachIndexed { i, encoder -> encoder(pQuery.preparedStatement, i) }
+        return pQuery
     }
 
     override fun <T> executeQuery(pQuery: PreparedQuery, decodeResultSet: (rs: ResultSet) -> T): List<T> {
@@ -55,7 +51,7 @@ class SqliteEngine(config: HikariConfig): SqlEngine {
                 objs.add(decodeResultSet(rs))
             }
         } catch (e: SQLException) {
-            throw SqlEngineException(msg = "Could not execute select statement!", cause = e)
+            throw DbEngineException(msg = "Could not execute select statement!", cause = e)
         }
         return objs
     }
@@ -65,22 +61,22 @@ class SqliteEngine(config: HikariConfig): SqlEngine {
         try {
             return pstmnt.executeUpdate()
         } catch (e: SQLException) {
-            throw SqlEngineException(msg = "Could not execute update statement!", cause = e)
+            throw DbEngineException(msg = "Could not execute update statement!", cause = e)
         }
     }
 
-    override fun executeUpdate(pQuery: PreparedInsertQuery): List<Long> {
+    override fun executeInsert(pQuery: PreparedInsertQuery, decodeIdResultSet: ((rs: ResultSet, i: Int) -> ID_TYPE)): List<ID_TYPE> {
         val pstmnt = pQuery.preparedStatement
-        val ids = mutableListOf<Long>()
+        val ids = mutableListOf<ID_TYPE>()
         try {
             val numUpdates = pstmnt.executeUpdate()
             if (numUpdates == 0) return ids
             val resultSet = pstmnt.generatedKeys
             while (resultSet.next()) {
-                ids.add(resultSet.getLong(1))
+                ids.add(decodeIdResultSet(resultSet, 1))
             }
         } catch (e: SQLException) {
-            throw SqlEngineException(msg = "Could not execute insert statement!", cause = e)
+            throw DbEngineException(msg = "Could not execute insert statement!", cause = e)
         }
         return ids
     }
@@ -101,7 +97,7 @@ class SqliteEngine(config: HikariConfig): SqlEngine {
             }
 
         } catch (e: SQLException) {
-            throw SqlEngineException(msg = "Could not execute statement!", cause = e)
+            throw DbEngineException(msg = "Could not execute statement!", cause = e)
         }
     }
 

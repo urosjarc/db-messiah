@@ -1,7 +1,5 @@
 package com.urosjarc.dbjesus.domain
 
-import java.sql.PreparedStatement
-
 class ObjProperties(
     val primaryKey: ObjProperty,
     val list: MutableList<ObjProperty> = mutableListOf(),
@@ -12,11 +10,11 @@ class ObjProperties(
     fun sqlInsertColumns(escaper: String = "'", separator: String = ", "): String =
         this.list.joinToString(separator = separator) { "$escaper${it.name}$escaper" }
 
-    fun sqlInsertValues(separator: String = ", ", questionMark: String = "?"): String =
-        this.list.joinToString(separator = separator) { questionMark }
+    fun sqlInsertValues(separator: String = ", "): String =
+        this.list.joinToString(separator = separator) { "?" }
 
-    fun sqlUpdate(escaper: String = "'", separator: String = ", ", zipper: String = " = ", questionMark: String = "?"): String =
-        this.list.joinToString(separator = separator) { "$escaper${it.name}$escaper$zipper$questionMark" }
+    fun sqlUpdate(escaper: String = "'", separator: String = ", ", zipper: String = " = "): String =
+        this.list.joinToString(separator = separator) { "$escaper${it.name}$escaper$zipper?" }
 
-    val encoders: MutableList<(ps: PreparedStatement, i: Int, x: Any, eInfo: EncodeInfo) -> Unit> get() = list.map { it.encoder }.toMutableList()
+    val encoders: MutableList<Encoder<Any>> get() = list.map { it.encoder }.toMutableList()
 }

@@ -5,10 +5,10 @@ import com.urosjarc.dbjesus.domain.Encoder
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
-class SqlTypeSerializer<T : Any>(
+class DbTypeSerializer<T : Any>(
     val kclass: KClass<T>,
     val dbType: String,
     val jdbcType: JDBCType,
     val decoder: Decoder<T>,
-    val encoder: Encoder<T>
+    val encoder: Encoder
 )
