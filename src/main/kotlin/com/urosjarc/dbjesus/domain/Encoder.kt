@@ -2,4 +2,4 @@ package com.urosjarc.dbjesus.domain
 
 import java.sql.PreparedStatement
 
-typealias Encoder = (ps: PreparedStatement, i: Int) -> Unit
+typealias Encoder<T> = (ps: PreparedStatement, i: Int, x: T) -> Unit

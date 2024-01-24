@@ -1,5 +1,7 @@
 package com.urosjarc.dbjesus.domain
 
+import java.sql.JDBCType
+
 class ObjProperties(
     val primaryKey: ObjProperty,
     val list: MutableList<ObjProperty> = mutableListOf(),
@@ -15,6 +17,9 @@ class ObjProperties(
 
     fun sqlUpdate(escaper: String = "'", separator: String = ", ", zipper: String = " = "): String =
         this.list.joinToString(separator = separator) { "$escaper${it.name}$escaper$zipper?" }
+
+    val values: MutableList<Any?> get() = this.list.map { it.value }.toMutableList()
+    val jdbcTypes: MutableList<JDBCType> get() = this.list.map { it.jdbcType }.toMutableList()
 
     val encoders: MutableList<Encoder<Any>> get() = list.map { it.encoder }.toMutableList()
 }

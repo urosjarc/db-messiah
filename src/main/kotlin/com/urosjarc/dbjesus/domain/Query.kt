@@ -1,6 +1,10 @@
 package com.urosjarc.dbjesus.domain
 
+import java.sql.JDBCType
+
 class Query(
-    val sql: String,
-    val encoders: List<Encoder> = listOf()
-)
+    override val sql: String,
+    override val encoders: MutableList<Encoder<Any>> = mutableListOf(),
+    override val values: MutableList<Any?> = mutableListOf(),
+    override val jdbcTypes: MutableList<JDBCType> = mutableListOf()
+) : Unsafe

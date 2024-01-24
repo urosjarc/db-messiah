@@ -2,13 +2,13 @@ package com.urosjarc.dbjesus.serializers
 
 import com.urosjarc.dbjesus.DbMapper
 import com.urosjarc.dbjesus.DbSerializer
-import com.urosjarc.dbjesus.impl.basicDbTypeSerializers
 import com.urosjarc.dbjesus.domain.Encoders
 import com.urosjarc.dbjesus.domain.InsertQuery
 import com.urosjarc.dbjesus.domain.Page
 import com.urosjarc.dbjesus.domain.Query
 import com.urosjarc.dbjesus.extend.capitalized
 import com.urosjarc.dbjesus.extend.properties
+import com.urosjarc.dbjesus.impl.basicDbTypeSerializers
 import kotlin.reflect.KClass
 
 
@@ -54,14 +54,18 @@ class MariaDbSerializer : DbSerializer<Int> {
         val op = this.mapper.getObjProperties(obj = obj, primaryKey = "id")
         return InsertQuery(
             sql = "INSERT INTO ${obj::class.simpleName} (${op.sqlInsertColumns()}) VALUES (${op.sqlInsertValues()})",
-            encoders = op.encoders
+            encoders = op.encoders, values = op.values, jdbcTypes = op.jdbcTypes
         )
     }
 
     override fun updateQuery(obj: Any): Query {
         val op = this.mapper.getObjProperties(obj = obj, primaryKey = "id")
-        return Query(sql = "UPDATE ${obj::class.simpleName} SET ${op.sqlUpdate()} WHERE id=${op.primaryKey.value}", encoders = op.encoders)
+        return Query(
+            sql = "UPDATE ${obj::class.simpleName} SET ${op.sqlUpdate()} WHERE id=${op.primaryKey.value}",
+            encoders = op.encoders, values = op.values
+        )
     }
+
     override fun query(getEscapedQuery: (encoders: Encoders) -> Query): Query {
         val encoders = Encoders(this.mapper)
         return getEscapedQuery(encoders)

@@ -2,6 +2,7 @@ package com.urosjarc.dbjesus.domain
 
 import com.urosjarc.dbjesus.DbTypeSerializer
 import com.urosjarc.dbjesus.extend.kclass
+import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 class ObjProperty(
@@ -12,4 +13,6 @@ class ObjProperty(
 ) {
     val encoder get() = this.serializer.encoder
     val kclass get() = this.property.kclass
+
+    val jdbcType get() = this.serializer.jdbcType
 }

@@ -10,5 +10,10 @@ class DbTypeSerializer<T : Any>(
     val dbType: String,
     val jdbcType: JDBCType,
     val decoder: Decoder<T>,
-    val encoder: Encoder
-)
+    val encoder: Encoder<T>
+) {
+    override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
+    override fun hashCode(): Int = kclass.hashCode()
+
+    override fun toString(): String = "${this.kclass.simpleName}(kclass=${kclass.simpleName}, dbType=${dbType}, jdbcType=${jdbcType})"
+}

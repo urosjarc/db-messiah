@@ -18,7 +18,9 @@ class DbMapper(val dbTypeSerializers: List<DbTypeSerializer<*>>) {
 
     fun getDbTypeSerializer(kclass: KClass<Any>): DbTypeSerializer<Any> {
         val serializer = this.dbTypeSerializers.firstOrNull { it.kclass == kclass }
-        if (serializer == null) throw DbMappingException("Serializer missing for: KClass<${kclass}>")
+        if (serializer == null) throw DbMappingException("Serializer missing for class: ${kclass.simpleName}")
+
+        @Suppress("UNCHECKED_CAST")
         return serializer as DbTypeSerializer<Any>
     }
 
@@ -29,14 +31,21 @@ class DbMapper(val dbTypeSerializers: List<DbTypeSerializer<*>>) {
         val objProps = mutableListOf<ObjProperty>()
         var primaryKeyProp: ObjProperty? = null
         for (kp in obj::class.declaredMemberProperties) {
+
+            @Suppress("UNCHECKED_CAST")
             val prop = (kp as KProperty1<Any, *>)
+
             val serializer = this.dbTypeSerializers.firstOrNull { prop.kclass == it.kclass }
-            if (serializer == null) throw DbMappingException("Serializer missing for: KClass<${prop.kclass}")
+            if (serializer == null) throw DbMappingException("Serializer missing for class: ${prop.kclass.simpleName}")
+
+            @Suppress("UNCHECKED_CAST")
+            serializer as DbTypeSerializer<Any>
+
             val objProp = ObjProperty(
                 name = kp.name,
                 value = prop.get(obj),
                 property = prop,
-                serializer = serializer as DbTypeSerializer<Any>
+                serializer = serializer,
             )
             if (kp.name == primaryKey) {
                 primaryKeyProp = objProp
@@ -76,7 +85,7 @@ class DbMapper(val dbTypeSerializers: List<DbTypeSerializer<*>>) {
         try {
             return constructor.callBy(args = args)
         } catch (e: Throwable) {
-            throw DbMappingException("KClass<$kclass> can't be constructed with arguments: $args", e)
+            throw DbMappingException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
         }
     }
 }
