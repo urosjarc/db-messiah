@@ -1,11 +1,10 @@
 package com.urosjarc.dbjesus.domain
 
-import com.urosjarc.dbjesus.DbTypeSerializer
 import com.urosjarc.dbjesus.extend.kclass
-import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
-class ObjProperty(
+
+data class ObjProperty(
     val name: String,
     val value: Any?,
     val property: KProperty1<Any, *>,

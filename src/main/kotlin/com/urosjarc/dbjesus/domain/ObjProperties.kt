@@ -2,7 +2,8 @@ package com.urosjarc.dbjesus.domain
 
 import java.sql.JDBCType
 
-class ObjProperties(
+
+data class ObjProperties(
     val primaryKey: ObjProperty,
     val list: MutableList<ObjProperty> = mutableListOf(),
 ) {

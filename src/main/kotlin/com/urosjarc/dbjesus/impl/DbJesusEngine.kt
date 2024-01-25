@@ -3,6 +3,7 @@ package com.urosjarc.dbjesus.impl
 import com.urosjarc.dbjesus.DbEngine
 import com.urosjarc.dbjesus.domain.*
 import com.urosjarc.dbjesus.exceptions.DbEngineException
+import com.urosjarc.dbjesus.exceptions.QueryException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.sql.*
@@ -42,6 +43,11 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
     }
 
     private fun setPreparedStatement(query: Unsafe, ps: PreparedStatement) {
+        //Check query validness!!!
+        val sizes = listOf(query.values, query.encoders, query.jdbcTypes)
+        if(sizes.toSet().size > 1) throw QueryException("Query does not have equal number of (values, encoders, jdbcTypes): $sizes")
+
+        //Apply values to prepared statements!!!
         query.encoders.forEachIndexed { i, encoder ->
             val value = query.values[i]
             val jdbcType = query.jdbcTypes[i]

@@ -2,7 +2,7 @@ package com.urosjarc.dbjesus.domain
 
 import java.sql.JDBCType
 
-class InsertQuery(
+data class InsertQuery(
     override val sql: String,
     override val encoders: MutableList<Encoder<Any>>,
     override val values: MutableList<Any?>,

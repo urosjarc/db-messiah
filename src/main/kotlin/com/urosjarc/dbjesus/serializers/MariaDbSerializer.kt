@@ -8,7 +8,6 @@ import com.urosjarc.dbjesus.domain.Page
 import com.urosjarc.dbjesus.domain.Query
 import com.urosjarc.dbjesus.extend.capitalized
 import com.urosjarc.dbjesus.extend.properties
-import com.urosjarc.dbjesus.impl.basicDbTypeSerializers
 import kotlin.reflect.KClass
 
 
@@ -16,7 +15,7 @@ class MariaDbSerializer : DbSerializer<Int> {
 
     override val mapper = DbMapper(dbTypeSerializers = basicDbTypeSerializers)
 
-    override fun createQuery(kclass: KClass<Any>): Query {
+    override fun <T: Any> createQuery(kclass: KClass<T>): Query {
         val col = mutableListOf<String>()
 
         kclass.properties.forEach {
@@ -46,14 +45,14 @@ class MariaDbSerializer : DbSerializer<Int> {
         return Query(sql = "SELECT * FROM ${kclass.simpleName} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
-    override fun selectOneQuery(kclass: KClass<Any>, id: Int): Query {
+    override fun <T: Any> selectOneQuery(kclass: KClass<T>, id: Int): Query {
         return Query(sql = "SELECT * FROM ${kclass.simpleName} WHERE id=$id")
     }
 
     override fun insertQuery(obj: Any): InsertQuery {
         val op = this.mapper.getObjProperties(obj = obj, primaryKey = "id")
         return InsertQuery(
-            sql = "INSERT INTO ${obj::class.simpleName} (${op.sqlInsertColumns()}) VALUES (${op.sqlInsertValues()})",
+            sql = "INSERT INTO ${obj::class.simpleName} (${op.sqlInsertColumns()}) VALUES (${op.sqlInsertValues()});",
             encoders = op.encoders, values = op.values, jdbcTypes = op.jdbcTypes
         )
     }
@@ -62,7 +61,7 @@ class MariaDbSerializer : DbSerializer<Int> {
         val op = this.mapper.getObjProperties(obj = obj, primaryKey = "id")
         return Query(
             sql = "UPDATE ${obj::class.simpleName} SET ${op.sqlUpdate()} WHERE id=${op.primaryKey.value}",
-            encoders = op.encoders, values = op.values
+            encoders = op.encoders, values = op.values, jdbcTypes = op.jdbcTypes
         )
     }
 

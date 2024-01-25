@@ -1,7 +1,5 @@
-package com.urosjarc.dbjesus
+package com.urosjarc.dbjesus.domain
 
-import com.urosjarc.dbjesus.domain.Decoder
-import com.urosjarc.dbjesus.domain.Encoder
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
@@ -14,6 +12,5 @@ class DbTypeSerializer<T : Any>(
 ) {
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
     override fun hashCode(): Int = kclass.hashCode()
-
     override fun toString(): String = "${this.kclass.simpleName}(kclass=${kclass.simpleName}, dbType=${dbType}, jdbcType=${jdbcType})"
 }
