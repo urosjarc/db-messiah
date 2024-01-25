@@ -4,10 +4,10 @@ import java.sql.JDBCType
 
 
 data class ObjProperties(
-    val primaryKey: ObjProperty,
-    val list: MutableList<ObjProperty> = mutableListOf(),
+    val primaryKey: ObjProperty<*>?,
+    val list: MutableList<ObjProperty<*>> = mutableListOf(),
 ) {
-    fun find(name: String): ObjProperty? =
+    fun find(name: String): ObjProperty<*>? =
         this.list.firstOrNull { it.name == name }
 
     fun sqlInsertColumns(escaper: String = "'", separator: String = ", "): String =
@@ -22,5 +22,5 @@ data class ObjProperties(
     val values: MutableList<Any?> get() = this.list.map { it.value }.toMutableList()
     val jdbcTypes: MutableList<JDBCType> get() = this.list.map { it.jdbcType }.toMutableList()
 
-    val encoders: MutableList<Encoder<Any>> get() = list.map { it.encoder }.toMutableList()
+    val encoders: MutableList<Encoder<*>> get() = list.map { it.encoder }.toMutableList()
 }

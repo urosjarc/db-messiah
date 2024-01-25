@@ -1,6 +1,6 @@
 package com.urosjarc.dbjesus.domain
 
-import com.urosjarc.dbjesus.extend.kclass
+import com.urosjarc.dbjesus.extend.ext_kclass
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
@@ -10,7 +10,7 @@ class DecodeInfo(
 ) {
     override fun toString(): String {
         val pName = "name='${this.kparam.name}'"
-        val pKclass = "kclass=KClass<${this.kparam.kclass.simpleName}>"
+        val pKclass = "kclass=KClass<${this.kparam.ext_kclass.simpleName}>"
 
         val kclass = "kclass=KClass<${kclass.simpleName}>"
         val kparam = "kparam=KParameter($pName, $pKclass)"

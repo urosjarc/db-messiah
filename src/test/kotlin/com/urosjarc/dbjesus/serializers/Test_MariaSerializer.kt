@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 
 @Suppress("UNCHECKED_CAST")
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_MariaDbSerializer {
+class Test_MariaSerializer {
 
     val seri = MariaDbSerializer()
 
@@ -20,6 +20,16 @@ class Test_MariaDbSerializer {
     )
 
     data class Entity(
+        val id: Int = 32,
+        val string: String = "String",
+        val int: Int = 123,
+        val float: Float = 123.123f,
+        val double: Double? = null,
+        val boolean: Boolean = true,
+        val char: Char = 'C',
+    ) : EntityParent()
+
+    data class Output(
         val id: Int = 32,
         val string: String = "String",
         val int: Int = 123,
@@ -40,6 +50,7 @@ class Test_MariaDbSerializer {
         )
         assertEquals(actual = actual, expected = expected)
     }
+
     @Test
     fun `test selectAllQuery`() {
         val actual = this.seri.selectAllQuery(kclass = Entity::class)
@@ -54,7 +65,7 @@ class Test_MariaDbSerializer {
 
     @Test
     fun `test selectPageQuery`() {
-        val actual = this.seri.selectPageQuery(kclass = Entity::class, page= Page(number = 3, orderBy = Entity::parentField, limit = 11, sort = Page.Sort.ASC))
+        val actual = this.seri.selectPageQuery(kclass = Entity::class, page = Page(number = 3, orderBy = Entity::parentField, limit = 11, sort = Page.Sort.ASC))
         val expected = Query(
             sql = "SELECT * FROM Entity ORDER BY parentField ASC LIMIT 11 OFFSET 33",
             encoders = mutableListOf(),
@@ -66,7 +77,7 @@ class Test_MariaDbSerializer {
 
     @Test
     fun `test selectOneQuery`() {
-        val actual = this.seri.selectOneQuery(kclass = Entity::class, id=123)
+        val actual = this.seri.selectOneQuery(kclass = Entity::class, id = 123)
         val expected = Query(
             sql = "SELECT * FROM Entity WHERE id=123",
             encoders = mutableListOf(),
@@ -148,6 +159,17 @@ class Test_MariaDbSerializer {
             )
         )
         assertEquals(actual = actual, expected = expected)
+    }
+
+    @Test
+    fun `test query`() {
+        val obj = Entity()
+
+        val actual: Query = this.seri.query {
+            """
+                select * from Employee;
+            """
+        }
     }
 }
 //val expected = Query(

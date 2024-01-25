@@ -1,15 +1,15 @@
 package com.urosjarc.dbjesus.impl
 
-import com.urosjarc.dbjesus.DbEngine
+import com.urosjarc.dbjesus.Engine
 import com.urosjarc.dbjesus.domain.*
-import com.urosjarc.dbjesus.exceptions.DbEngineException
+import com.urosjarc.dbjesus.exceptions.EngineException
 import com.urosjarc.dbjesus.exceptions.QueryException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.sql.*
 
 
-class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
+class DbJesusEngine(config: HikariConfig) : Engine {
 
     val dataSource = HikariDataSource(config)
 
@@ -24,7 +24,7 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
             try {
                 return this.dataSource.connection
             } catch (e: SQLException) {
-                throw DbEngineException(msg = "Could not get connection!", cause = e)
+                throw EngineException(msg = "Could not get connection!", cause = e)
             }
         }
 
@@ -45,14 +45,15 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
     private fun setPreparedStatement(query: Unsafe, ps: PreparedStatement) {
         //Check query validness!!!
         val sizes = listOf(query.values, query.encoders, query.jdbcTypes)
-        if(sizes.toSet().size > 1) throw QueryException("Query does not have equal number of (values, encoders, jdbcTypes): $sizes")
+        if (sizes.toSet().size > 1) throw QueryException("Query does not have equal number of (values, encoders, jdbcTypes): $sizes")
 
         //Apply values to prepared statements!!!
-        query.encoders.forEachIndexed { i, encoder ->
+        (query.encoders).forEachIndexed { i, encoder ->
+            encoder as Encoder<Any> // Encoder is acctualy any value that accept only real values
             val value = query.values[i]
             val jdbcType = query.jdbcTypes[i]
-            if (value == null) ps.setNull(i, jdbcType.ordinal)
-            else encoder(ps, i, value)
+            if (value == null) ps.setNull(i, jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
+            else encoder(ps, i, value) //If value is not null encoding is done over user defined encoder !!!
         }
     }
 
@@ -64,7 +65,7 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
                 objs.add(decodeResultSet(rs))
             }
         } catch (e: SQLException) {
-            throw DbEngineException(msg = "Could not execute select statement!", cause = e)
+            throw EngineException(msg = "Could not execute select statement!", cause = e)
         }
         return objs
     }
@@ -73,13 +74,13 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
         try {
             return pQuery.ps.executeUpdate()
         } catch (e: SQLException) {
-            throw DbEngineException(msg = "Could not execute update statement!", cause = e)
+            throw EngineException(msg = "Could not execute update statement!", cause = e)
         }
     }
 
-    override fun executeInsert(pQuery: PreparedInsertQuery, decodeIdResultSet: ((rs: ResultSet, i: Int) -> ID_TYPE)): List<ID_TYPE> {
+    override fun <T> executeInsert(pQuery: PreparedInsertQuery, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): List<T> {
         val pstmnt = pQuery.ps
-        val ids = mutableListOf<ID_TYPE>()
+        val ids = mutableListOf<T>()
         try {
             val numUpdates = pstmnt.executeUpdate()
             if (numUpdates == 0) return ids
@@ -88,7 +89,7 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
                 ids.add(decodeIdResultSet(resultSet, 1))
             }
         } catch (e: SQLException) {
-            throw DbEngineException(msg = "Could not execute insert statement!", cause = e)
+            throw EngineException(msg = "Could not execute insert statement!", cause = e)
         }
         return ids
     }
@@ -109,7 +110,7 @@ class DbJesusEngine<ID_TYPE>(config: HikariConfig) : DbEngine<ID_TYPE> {
             }
 
         } catch (e: SQLException) {
-            throw DbEngineException(msg = "Could not execute statement!", cause = e)
+            throw EngineException(msg = "Could not execute statement!", cause = e)
         }
     }
 

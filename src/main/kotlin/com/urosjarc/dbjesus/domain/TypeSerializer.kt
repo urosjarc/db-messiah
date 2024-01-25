@@ -3,12 +3,12 @@ package com.urosjarc.dbjesus.domain
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
-class DbTypeSerializer<T : Any>(
+class TypeSerializer<T : Any>(
     val kclass: KClass<T>,
     val dbType: String,
     val jdbcType: JDBCType,
-    val decoder: Decoder<T>,
-    val encoder: Encoder<T>
+    val decoder: Decoder<T?>, //At decoding you can accept null values
+    val encoder: Encoder<T> //When converting to db value you must handle null values differently in JDBC!!!
 ) {
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
     override fun hashCode(): Int = kclass.hashCode()

@@ -7,15 +7,16 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
-val KProperty1<Any, *>.kclass get() = (this.returnType.classifier as KClass<Any>)
-val KParameter.kclass get(): KClass<*> = this.type.classifier as KClass<*>
-val KClass<out Any>.javaFields get() = this.memberProperties.filter { it.javaField != null }
+val Any.ext_kclass get(): KClass<*> = this::class
+val KProperty1<*, *>.ext_kclass get() = this.returnType.classifier as KClass<*>
+val KParameter.ext_kclass get(): KClass<*> = this.type.classifier as KClass<*>
+val KClass<*>.ext_javaFields get() = this.memberProperties.filter { it.javaField != null } as Collection<KProperty1<Any, *>>
 
-val KClass<out Any>.properties
-    get(): List<KClassProperty> = this.javaFields.map {
+val KClass<*>.ext_properties
+    get(): List<KClassProperty> = this.ext_javaFields.map {
         KClassProperty(
             name = it.name,
             canBeNull = it.returnType.isMarkedNullable,
-            kProperty1 = (it as KProperty1<Any, *>)
+            kProperty1 = it
         )
     }
