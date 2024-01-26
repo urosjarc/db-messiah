@@ -1,6 +1,6 @@
 package com.urosjarc.dbjesus.serializers
 
-import com.urosjarc.dbjesus.domain.TypeSerializer
+import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
 import java.sql.JDBCType
 
 fun stringSerializer(dbType: String = "TEXT") = TypeSerializer(

@@ -1,8 +1,8 @@
 package com.urosjarc.dbjesus
 
-import com.urosjarc.dbjesus.domain.Page
-import com.urosjarc.dbjesus.domain.Query
-import com.urosjarc.dbjesus.domain.QueryBuilder
+import com.urosjarc.dbjesus.domain.queries.Page
+import com.urosjarc.dbjesus.domain.queries.Query
+import com.urosjarc.dbjesus.domain.queries.QueryBuilder
 import kotlin.reflect.KClass
 
 interface Service<PK : Any> {

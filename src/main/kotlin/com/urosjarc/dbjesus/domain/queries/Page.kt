@@ -1,4 +1,4 @@
-package com.urosjarc.dbjesus.domain
+package com.urosjarc.dbjesus.domain.queries
 
 import kotlin.reflect.KProperty1
 

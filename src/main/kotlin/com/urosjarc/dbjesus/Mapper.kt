@@ -1,7 +1,13 @@
 package com.urosjarc.dbjesus
 
 import com.urosjarc.dbjesus.domain.*
+import com.urosjarc.dbjesus.domain.serialization.DecodeInfo
+import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
+import com.urosjarc.dbjesus.domain.table.Column
+import com.urosjarc.dbjesus.domain.table.Table
+import com.urosjarc.dbjesus.domain.table.TableInfo
 import com.urosjarc.dbjesus.exceptions.MapperException
+import com.urosjarc.dbjesus.exceptions.SerializerException
 import com.urosjarc.dbjesus.extend.ext_javaFields
 import com.urosjarc.dbjesus.extend.ext_kclass
 import com.urosjarc.dbjesus.extend.ext_properties
@@ -20,6 +26,7 @@ class Mapper(
 
     private fun test() {
         for (table in this.tables) {
+            //Check if all tables have serializer
             for (prop in table.kClass.ext_properties) {
                 this.getSerializer(
                     tableKClass = table.kClass,
@@ -29,9 +36,38 @@ class Mapper(
         }
     }
 
-    private fun getTable(obj: Any): Table? = this.getTable(tableKClass = obj::class)
+    fun getColumns(kclass: KClass<*>): List<Column> {
+        val table = this.getTableNotNull(kclass = kclass)
+        return kclass.ext_javaFields.map {
+            val otherTableKClass = table.foreignKeys[it]?.let { this.getTable(it) }
+            val serializer = this.getSerializer(tableKClass = table.kClass, propKClass = it.ext_kclass)
+            Column(
+                name = it.name,
+                canBeNull = it.returnType.isMarkedNullable,
+                jdbcType = serializer.jdbcType,
+                dbType = serializer.dbType,
+                table = table,
+                foreignTable = otherTableKClass,
+                kProperty1 = it,
+            )
+        }
+    }
 
-    private fun getTable(tableKClass: KClass<*>): Table? = this.tables.firstOrNull { it.kClass == tableKClass }
+    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class)
+
+    fun getTableInfo(kclass: KClass<*>): TableInfo =
+        TableInfo(
+            table = this.getTableNotNull(kclass = kclass),
+            columns = this.getColumns(kclass = kclass)
+        )
+
+    fun getTableNotNull(obj: Any): Table = this.getTableNotNull(kclass = obj::class)
+    fun getTableNotNull(kclass: KClass<*>): Table =
+        this.tables.firstOrNull { it.kClass == kclass }
+            ?: throw SerializerException("Table for type '${kclass.simpleName}' is not registered")
+
+    fun getTable(obj: Any): Table? = this.getTable(tableKClass = obj::class)
+    fun getTable(tableKClass: KClass<*>): Table? = this.tables.firstOrNull { it.kClass == tableKClass }
 
 
     private fun decode(resultSet: ResultSet, columnInt: Int, decodeInfo: DecodeInfo): Any? {
@@ -43,7 +79,7 @@ class Mapper(
             }
         }
 
-        throw MapperException("Serializer missing for: $decodeInfo")
+        throw SerializerException("Serializer missing for: $decodeInfo")
     }
 
     /**
@@ -56,16 +92,16 @@ class Mapper(
 
         //If serializer is not found in table nor global serializers then something must be wrong!
         return (tableSerializers + this.globalSerializers)
-            .firstOrNull { it.kclass == propKClass } ?: throw MapperException("Serializer for type '${propKClass.simpleName}' not found in '${tableKClass.simpleName}' nor in global serializers")
+            .firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in '${tableKClass.simpleName}' nor in global serializers")
     }
 
     fun getSerializer(propKClass: KClass<*>): TypeSerializer<*> =
-        this.globalSerializers.firstOrNull { it.kclass == propKClass } ?: throw MapperException("Serializer for type '${propKClass.simpleName}' not found in global serializers")
+        this.globalSerializers.firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in global serializers")
 
     /**
      * Be carefull not to put primary key to list of obj properties!!!!!!!!
      */
-    fun <T : Any> getObjProperties(obj: T): ObjProperties {
+    private fun <T : Any> getObjProperties(obj: T): ObjProperties {
         //If table is not found then this obj is used as input obj for query
         val table = this.getTable(obj)
 

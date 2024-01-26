@@ -1,5 +1,6 @@
-package com.urosjarc.dbjesus.domain
+package com.urosjarc.dbjesus.domain.queries
 
+import com.urosjarc.dbjesus.domain.serialization.Encoder
 import java.sql.JDBCType
 
 data class Query(

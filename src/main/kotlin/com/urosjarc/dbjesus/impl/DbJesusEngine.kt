@@ -1,7 +1,8 @@
 package com.urosjarc.dbjesus.impl
 
 import com.urosjarc.dbjesus.Engine
-import com.urosjarc.dbjesus.domain.*
+import com.urosjarc.dbjesus.domain.queries.*
+import com.urosjarc.dbjesus.domain.serialization.Encoder
 import com.urosjarc.dbjesus.exceptions.EngineException
 import com.urosjarc.dbjesus.exceptions.QueryException
 import com.zaxxer.hikari.HikariConfig

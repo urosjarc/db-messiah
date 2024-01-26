@@ -1,8 +1,6 @@
 package com.urosjarc.dbjesus
 
-import com.urosjarc.dbjesus.domain.TypeSerializer
-import com.urosjarc.dbjesus.domain.ObjProperties
-import com.urosjarc.dbjesus.domain.ObjProperty
+import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
 import com.urosjarc.dbjesus.exceptions.MapperException
 import com.urosjarc.dbjesus.serializers.*
 import org.junit.jupiter.api.Assertions.assertTrue

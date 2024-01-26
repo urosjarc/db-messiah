@@ -3,8 +3,12 @@ package com.urosjarc.dbjesus.serializers
 import com.urosjarc.dbjesus.Mapper
 import com.urosjarc.dbjesus.Serializer
 import com.urosjarc.dbjesus.domain.*
-import com.urosjarc.dbjesus.extend.capitalized
-import com.urosjarc.dbjesus.extend.ext_properties
+import com.urosjarc.dbjesus.domain.queries.InsertQuery
+import com.urosjarc.dbjesus.domain.queries.Page
+import com.urosjarc.dbjesus.domain.queries.Query
+import com.urosjarc.dbjesus.domain.queries.QueryBuilder
+import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
+import com.urosjarc.dbjesus.domain.table.Table
 import kotlin.reflect.KClass
 
 
@@ -18,42 +22,56 @@ class MariaDbSerializer(
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val col = mutableListOf<String>()
+        val ti = this.mapper.getTableInfo(kclass = kclass)
 
-        kclass.ext_properties.forEach {
+        ti.columns.forEach {
+
+            //Informations about class property
             val isNull = if (it.canBeNull) "" else "NOT NULL"
-            if (it.name == "id") {
-                col.add("${it.name} INTEGER PRIMARY KEY AUTOINCREMENT")
-                col.add("PRIMARY KEY(${it.name})")
-            } else if (it.name.startsWith("id_")) {
-                val foreignTable = it.name.split("_").last().capitalized
-                col.add("${it.name} INT $isNull")
-                col.add("CONSTRAINT fk_${kclass.simpleName}_${foreignTable} FOREIGN KEY(${it.name}) REFERENCES $foreignTable(id)")
-            } else {
-                val type = this.mapper.getDbType(tableKClass = kclass, propKClass = it.kclass)
-                col.add("${it.name} $type")
+            val autoIncrement = if (it.table.autoIncrement) "AUTOINCREMENT" else ""
+            val nameAndType = "${it.name} ${it.dbType}"
+
+            //Specific logic for type of class property
+            when (it.type) {
+                PType.PRIMARY_KEY -> {
+                    col.add("$nameAndType PRIMARY KEY ${autoIncrement}")
+                    col.add("PRIMARY KEY(${it.name})")
+                }
+
+                PType.FOREIGN_KEY -> {
+                    col.add("$nameAndType $isNull")
+                    col.add("CONSTRAINT fk_${it.name}_${it.foreignTable?.name} FOREIGN KEY(${it.name}) REFERENCES ${it.foreignTable?.name}(${it.foreignTable?.primaryKey})")
+                }
+
+                PType.OTHER -> {
+                    col.add("$nameAndType ")
+                }
             }
         }
 
         val columns = col.joinToString(", ")
-        return Query(sql = "CREATE OR REPLACE TABLE ${kclass.simpleName} ($columns);")
+        return Query(sql = "CREATE OR REPLACE TABLE ${ti.table.name} ($columns);")
     }
 
     override fun <T : Any> selectAllQuery(kclass: KClass<T>): Query {
-        return Query(sql = "SELECT * FROM ${kclass.simpleName}")
+        val ti = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${ti.table.name}")
     }
 
     override fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query {
-        return Query(sql = "SELECT * FROM ${kclass.simpleName} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
+        val ti = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${ti.table.name} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
-    override fun <T : Any, K: Any> selectOneQuery(kclass: KClass<T>, id: K): Query {
-        return Query(sql = "SELECT * FROM ${kclass.simpleName} WHERE id=$id")
+    override fun <T : Any, K : Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query {
+        val ti = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${ti.table.name} WHERE ${ti.table.primaryKey.name}=$pkValue")
     }
 
     override fun insertQuery(obj: Any): InsertQuery {
-        val op = this.mapper.getObjProperties(obj = obj)
+        val ti = this.mapper.getTableInfo(obj = obj)
         return InsertQuery(
-            sql = "INSERT INTO ${obj::class.simpleName} (${op.sqlInsertColumns()}) VALUES (${op.sqlInsertValues()});",
+            sql = "INSERT INTO ${ti.table.name} (${ti.table.sqlInsertColumns()}) VALUES (${op.sqlInsertValues()});",
             encoders = op.encoders, values = op.values, jdbcTypes = op.jdbcTypes
         )
     }

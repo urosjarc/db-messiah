@@ -3,9 +3,9 @@ package com.urosjarc.dbjesus.impl
 import com.urosjarc.dbjesus.Engine
 import com.urosjarc.dbjesus.Serializer
 import com.urosjarc.dbjesus.Service
-import com.urosjarc.dbjesus.domain.Page
-import com.urosjarc.dbjesus.domain.Query
-import com.urosjarc.dbjesus.domain.QueryBuilder
+import com.urosjarc.dbjesus.domain.queries.Page
+import com.urosjarc.dbjesus.domain.queries.Query
+import com.urosjarc.dbjesus.domain.queries.QueryBuilder
 import kotlin.reflect.KClass
 
 class DbJesusService(

@@ -1,4 +1,4 @@
-package com.urosjarc.dbjesus.domain
+package com.urosjarc.dbjesus.domain.serialization
 
 import com.urosjarc.dbjesus.extend.ext_kclass
 import kotlin.reflect.KClass

@@ -1,6 +1,6 @@
 package com.urosjarc.dbjesus
 
-import com.urosjarc.dbjesus.domain.Table
+import com.urosjarc.dbjesus.domain.table.Table
 import com.urosjarc.dbjesus.impl.DbJesusEngine
 import com.urosjarc.dbjesus.impl.DbJesusService
 import com.urosjarc.dbjesus.serializers.MariaDbSerializer
@@ -33,8 +33,12 @@ fun main() {
     val serializer = MariaDbSerializer(
         globalSerializers = basicDbTypeSerializers,
         tables = listOf(
-            Table(primaryKey = Entity::id),
-            Table(primaryKey = Entity2::id)
+            Table(primaryKey = Entity::id, foreignKeys = mapOf(
+                Entity::name to Entity::id
+            )),
+            Table(primaryKey = Entity2::id, foreignKeys = mapOf(
+                Entity::age to Entity::username
+            ))
         )
     )
 

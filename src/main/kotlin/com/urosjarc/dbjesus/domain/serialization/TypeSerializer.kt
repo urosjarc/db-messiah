@@ -1,4 +1,4 @@
-package com.urosjarc.dbjesus.domain
+package com.urosjarc.dbjesus.domain.serialization
 
 import java.sql.JDBCType
 import kotlin.reflect.KClass

@@ -1,9 +1,9 @@
 package com.urosjarc.dbjesus.serializers
 
-import com.urosjarc.dbjesus.domain.Encoder
-import com.urosjarc.dbjesus.domain.InsertQuery
-import com.urosjarc.dbjesus.domain.Page
-import com.urosjarc.dbjesus.domain.Query
+import com.urosjarc.dbjesus.domain.serialization.Encoder
+import com.urosjarc.dbjesus.domain.queries.InsertQuery
+import com.urosjarc.dbjesus.domain.queries.Page
+import com.urosjarc.dbjesus.domain.queries.Query
 import org.junit.jupiter.api.TestInstance
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,7 +77,7 @@ class Test_MariaSerializer {
 
     @Test
     fun `test selectOneQuery`() {
-        val actual = this.seri.selectOneQuery(kclass = Entity::class, id = 123)
+        val actual = this.seri.selectOneQuery(kclass = Entity::class, pkValue = 123)
         val expected = Query(
             sql = "SELECT * FROM Entity WHERE id=123",
             encoders = mutableListOf(),

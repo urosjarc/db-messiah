@@ -1,9 +1,9 @@
 package com.urosjarc.dbjesus
 
-import com.urosjarc.dbjesus.domain.InsertQuery
-import com.urosjarc.dbjesus.domain.PreparedInsertQuery
-import com.urosjarc.dbjesus.domain.PreparedQuery
-import com.urosjarc.dbjesus.domain.Query
+import com.urosjarc.dbjesus.domain.queries.InsertQuery
+import com.urosjarc.dbjesus.domain.queries.PreparedInsertQuery
+import com.urosjarc.dbjesus.domain.queries.PreparedQuery
+import com.urosjarc.dbjesus.domain.queries.Query
 import java.sql.ResultSet
 
 interface Engine {
