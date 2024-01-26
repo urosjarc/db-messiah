@@ -6,21 +6,21 @@ import com.urosjarc.dbjesus.domain.queries.InsertQuery
 import com.urosjarc.dbjesus.domain.queries.Page
 import com.urosjarc.dbjesus.domain.queries.Query
 import com.urosjarc.dbjesus.domain.queries.QueryBuilder
+import com.urosjarc.dbjesus.domain.schema.Schema
 import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
-import com.urosjarc.dbjesus.domain.table.Table
 import com.urosjarc.dbjesus.exceptions.SerializerException
 import kotlin.reflect.KClass
 
 
 class SqliteSerializer(
-    tables: List<Table<*>>,
-    globalSerializers: List<TypeSerializer<*>>
+    globalSerializers: List<TypeSerializer<*>>,
+    vararg schemas: Schema
 ) : Serializer {
 
-    override val mapper = Mapper(tables = tables, globalSerializers = globalSerializers)
+    override val mapper = Mapper(schemas = schemas.toList(), globalSerializers = globalSerializers)
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "DROP TABLE ${T.name};")
+        return Query(sql = "DROP TABLE ${T.path};")
     }
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
@@ -39,7 +39,7 @@ class SqliteSerializer(
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
             col.add("${it.name} ${it.dbType} $isNull")
-            col.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable?.name} (${it.foreignTable?.primaryKey?.name}) ")
+            col.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable?.path} (${it.foreignTable?.primaryKey?.name}) ")
         }
 
         //Other columns
@@ -52,29 +52,29 @@ class SqliteSerializer(
         val columns = col.joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
 
     override fun <T : Any> selectAllQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.name}")
+        return Query(sql = "SELECT * FROM ${T.path}")
     }
 
     override fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.name} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
     override fun <T : Any, K : Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        if(T.primaryKey == null) throw SerializerException("Table '${T.name}' does not have registered primary key, but you want to search for specific row by it!")
-        return Query(sql = "SELECT * FROM ${T.name} WHERE ${T.primaryKey.name}=$pkValue")
+        if(T.primaryKey == null) throw SerializerException("Table '${T.path}' does not have registered primary key, but you want to search for specific row by it!")
+        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.name}=$pkValue")
     }
 
     override fun insertQuery(obj: Any): InsertQuery {
         val T = this.mapper.getTableInfo(obj = obj)
         return InsertQuery(
-            sql = "INSERT INTO ${T.name} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
+            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
             encoders = T.encoders, values = T.values, jdbcTypes = T.jdbcTypes
         )
     }
@@ -82,7 +82,7 @@ class SqliteSerializer(
     override fun updateQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "UPDATE ${T.name} SET ${T.sqlUpdateColumns()} WHERE id=${T.primaryKey?.value}",
+            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE id=${T.primaryKey?.value}",
             encoders = T.encoders, values = T.values, jdbcTypes = T.jdbcTypes
         )
     }

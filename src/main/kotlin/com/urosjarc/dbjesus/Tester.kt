@@ -7,8 +7,8 @@ import com.urosjarc.dbjesus.extend.ext_notUnique
 
 class Tester(val tables: List<Table<*>>, val tableInfos: List<TableInfo>) {
 
-    fun test_0_if_all_tables_has_unique_names() {
-        val notUnique = this.tableInfos.map { it.name }.ext_notUnique
+    fun test_0_if_all_tables_has_unique_paths() {
+        val notUnique = this.tableInfos.map { it.path }.ext_notUnique
         if (notUnique.isNotEmpty()) throw TesterException("Following table names are registered multiple times: ${notUnique.keys}")
     }
 
@@ -21,7 +21,7 @@ class Tester(val tables: List<Table<*>>, val tableInfos: List<TableInfo>) {
         this.tableInfos.forEach {
             if (it.primaryKey != null) {
                 it.foreignKeys.forEach { col ->
-                    if (it.primaryKey.kprop == col.kprop) throw TesterException("Table '${it.name}' has primary key registered in foreign keys!")
+                    if (it.primaryKey.kprop == col.kprop) throw TesterException("Table '${it.path}' has primary key registered in foreign keys!")
                 }
             }
         }
@@ -39,7 +39,7 @@ class Tester(val tables: List<Table<*>>, val tableInfos: List<TableInfo>) {
     fun test_4_if_foreign_key_registered_multiple_times() {
         this.tableInfos.forEach {
             val uniqueFks = it.foreignKeys.map { it.kprop }.toSet()
-            if (uniqueFks.size != it.foreignKeys.size) throw TesterException("Table '${it.name}' does not have unique foreign keys!")
+            if (uniqueFks.size != it.foreignKeys.size) throw TesterException("Table '${it.path}' does not have unique foreign keys!")
         }
     }
 

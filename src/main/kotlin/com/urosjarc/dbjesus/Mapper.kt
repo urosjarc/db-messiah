@@ -4,6 +4,7 @@ import com.urosjarc.dbjesus.domain.columns.C
 import com.urosjarc.dbjesus.domain.columns.ForeignColumn
 import com.urosjarc.dbjesus.domain.columns.OtherColumn
 import com.urosjarc.dbjesus.domain.columns.PrimaryColumn
+import com.urosjarc.dbjesus.domain.schema.Schema
 import com.urosjarc.dbjesus.domain.serialization.DecodeInfo
 import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
 import com.urosjarc.dbjesus.domain.table.Table
@@ -13,16 +14,22 @@ import com.urosjarc.dbjesus.exceptions.SerializerException
 import com.urosjarc.dbjesus.extend.ext_canBeNull
 import com.urosjarc.dbjesus.extend.ext_javaFields
 import com.urosjarc.dbjesus.extend.ext_kclass
+import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 class Mapper(
-    private val tables: List<Table<*>>,
+    private val schemas: List<Schema>,
     private val globalSerializers: List<TypeSerializer<*>>
 ) {
     private val tableInfos = mutableListOf<TableInfo>()
+
+    private val tableKClass_to_SchemaMap = mutableMapOf<KClass<*>, Schema>()
+    private val tableKClass_to_tableInfo = mutableMapOf<KClass<*>, TableInfo>()
+
+    val log = this.logger()
 
     init {
         this.init()
@@ -31,34 +38,44 @@ class Mapper(
     private fun init() {
 
         //Register tables
-        this.tables.forEach { this.register(table = it) }
+        this.schemas.forEach { schema ->
+            schema.tables.forEach { table ->
+                val tableInfo = this.register(schema = schema, table = table)
+                this.tableKClass_to_SchemaMap[table.kclass] = schema
+                this.tableKClass_to_tableInfo[table.kclass] = tableInfo
+            }
+        }
 
         //Fill parent foreign table fields after all tables are registered!
         for (tableInfo in this.tableInfos) {
+            this.log.info("Registering: ${tableInfo.path}")
             for (column in tableInfo.foreignKeys) {
+                this.log.info("\t- ${column.name}: ${column.kclass.simpleName} ${column.dbType}")
                 val ftInfo = this.tableInfos.firstOrNull { it.kclass == column.foreignTableKClass }
                 column.foreignTable = ftInfo
             }
         }
 
         //Test registered tables
-        Tester(tables = this.tables, tableInfos = this.tableInfos).also {
-            it.test_0_if_all_tables_has_unique_names()
-            it.test_1_if_table_registered_multiple_times()
-            it.test_2_if_primary_key_in_foreign_keys()
-            it.test_3_if_foreign_key_points_to_registered_table()
-            it.test_4_if_foreign_key_registered_multiple_times()
-            it.test_5_if_constraints_registered_multiple_times()
+        this.schemas.forEach {
+            Tester(tables = it.tables, tableInfos = this.tableInfos).also {
+                it.test_0_if_all_tables_has_unique_paths()
+                it.test_1_if_table_registered_multiple_times()
+                it.test_2_if_primary_key_in_foreign_keys()
+                it.test_3_if_foreign_key_points_to_registered_table()
+                it.test_4_if_foreign_key_registered_multiple_times()
+                it.test_5_if_constraints_registered_multiple_times()
+            }
         }
 
     }
 
-    private fun register(table: Table<*>) {
+    private fun register(schema: Schema, table: Table<*>): TableInfo {
         //All pk and fk properties
         val pkFkProperties = mutableSetOf(table.primaryKey)
 
         //Primary columns
-        val pkSerializer = this.getSerializer(tableKClass = table.kclass, propKClass = table.primaryKey.ext_kclass)
+        val pkSerializer = this.getSerializer(schema = schema, table = table, propKClass = table.primaryKey.ext_kclass)
         val pkcons = table.primaryKeyConstraints
         val pkColumn = PrimaryColumn(
             name = table.primaryKey.name, value = null,
@@ -70,7 +87,7 @@ class Mapper(
         //Foreign columns
         val fkColumns = mutableListOf<ForeignColumn>()
         for ((fromProp, toKClass) in table.foreignKeys) {
-            val serializer = this.getSerializer(tableKClass = table.kclass, propKClass = fromProp.ext_kclass)
+            val serializer = this.getSerializer(schema = schema, table = table, propKClass = fromProp.ext_kclass)
             val fkcons = table.constraintsFor(kprop = fromProp)
             val column = ForeignColumn(
                 name = fromProp.name, value = null, notNull = fromProp.ext_canBeNull,
@@ -85,7 +102,7 @@ class Mapper(
         //Other columns
         val otherColumns = mutableListOf<OtherColumn>()
         table.kclass.ext_javaFields.filter { !pkFkProperties.contains(it) }.forEach {
-            val serializer = this.getSerializer(tableKClass = table.kclass, propKClass = it.ext_kclass)
+            val serializer = this.getSerializer(schema = schema, table = table, propKClass = it.ext_kclass)
             val otcons = table.constraintsFor(kprop = it)
             val column = OtherColumn(
                 name = it.name, value = null, notNull = it.ext_canBeNull,
@@ -95,12 +112,15 @@ class Mapper(
             otherColumns.add(column)
         }
 
-        this.tableInfos.add(
-            TableInfo(
-                name = table.name, kclass = table.kclass,
-                primaryKey = pkColumn, foreignKeys = fkColumns, otherColumns = otherColumns
-            )
+        val tableInfo = TableInfo(
+            schema = schema.name, kclass = table.kclass,
+            primaryKey = pkColumn, foreignKeys = fkColumns, otherColumns = otherColumns,
+            serializers = table.serializers
         )
+
+        this.tableInfos.add(tableInfo)
+
+        return tableInfo
     }
 
     private fun decode(resultSet: ResultSet, columnInt: Int, decodeInfo: DecodeInfo): Any? {
@@ -117,16 +137,17 @@ class Mapper(
 
     fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class as KClass<*>)
     fun getTableInfo(kclass: KClass<*>) = this.tableInfos.firstOrNull { it.kclass == kclass } ?: throw SerializerException("Table '${kclass.simpleName}' missing in registered tables")
-    fun getSerializer(tableKClass: KClass<*>, propKClass: KClass<*>): TypeSerializer<*> {
-        val tableSerializers = this.tables.firstOrNull { it.kclass == tableKClass }?.tableSerializers ?: listOf()
-
-        //If serializer is not found in table nor global serializers then something must be wrong!
-        return (tableSerializers + this.globalSerializers)
-            .firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in '${tableKClass.simpleName}' nor in global serializers")
+    private fun getSerializer(schema: Schema, table: Table<*>, propKClass: KClass<*>): TypeSerializer<*> {
+        return (table.serializers + schema.serializers + this.globalSerializers)
+            .firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in schema '${schema.name}' nor in table '${table.name}")
     }
 
-    fun getSerializer(propKClass: KClass<*>): TypeSerializer<*> =
-        this.globalSerializers.firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in global serializers")
+    fun getSerializer(tableKClass: KClass<*>, propKClass: KClass<*>): TypeSerializer<*> {
+        val schemaSerializers = this.tableKClass_to_SchemaMap[tableKClass]?.serializers ?: listOf()
+        val tableInfoSerializers = this.tableKClass_to_tableInfo[tableKClass]?.serializers ?: listOf()
+        return (tableInfoSerializers + schemaSerializers + this.globalSerializers).firstOrNull { it.kclass == propKClass }
+            ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in global serializers")
+    }
 
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
         val constructor = kclass.primaryConstructor!!
