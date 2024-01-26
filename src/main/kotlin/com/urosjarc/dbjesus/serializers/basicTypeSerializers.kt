@@ -12,7 +12,7 @@ fun stringSerializer(dbType: String = "TEXT") = TypeSerializer(
 
 val intSerializer = TypeSerializer(
     kclass = Int::class,
-    dbType = "INT",
+    dbType = "INTEGER",
     jdbcType = JDBCType.INTEGER,
     decoder = { rs, i, dInfo -> rs.getInt(i) },
     encoder = { ps, i, x -> ps.setInt(i, x) })

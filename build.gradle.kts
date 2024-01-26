@@ -13,12 +13,24 @@ repositories {
 dependencies {
     implementation(kotlin("reflect"))
 
-    this.implementation("com.zaxxer:HikariCP:5.1.0")
-    this.implementation("org.apache.logging.log4j:log4j-api:2.17.2")
-    this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.2.0")
+    //Drivers
+    this.runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
+    this.runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
+    this.runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
+    this.runtimeOnly("org.postgresql:postgresql:42.7.1")
 
-    this.testImplementation("com.mockrunner:mockrunner-core:2.0.7")
-    this.testImplementation("com.mockrunner:mockrunner-jdbc:2.0.7")
+    //Pool connection
+    this.implementation("com.zaxxer:HikariCP:5.1.0")
+
+    //Logging api
+    this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
+
+    //TODO For testing
+    this.implementation("org.apache.logging.log4j:log4j-core:2.17.1") //TODO: Remove me on production
+    this.implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+    this.implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+
+    //Testing
     this.testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 

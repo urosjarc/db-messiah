@@ -1,78 +1,107 @@
 package com.urosjarc.dbjesus
 
-import com.urosjarc.dbjesus.domain.*
+import com.urosjarc.dbjesus.domain.columns.C
+import com.urosjarc.dbjesus.domain.columns.ForeignColumn
+import com.urosjarc.dbjesus.domain.columns.OtherColumn
+import com.urosjarc.dbjesus.domain.columns.PrimaryColumn
 import com.urosjarc.dbjesus.domain.serialization.DecodeInfo
 import com.urosjarc.dbjesus.domain.serialization.TypeSerializer
-import com.urosjarc.dbjesus.domain.table.Column
 import com.urosjarc.dbjesus.domain.table.Table
 import com.urosjarc.dbjesus.domain.table.TableInfo
 import com.urosjarc.dbjesus.exceptions.MapperException
 import com.urosjarc.dbjesus.exceptions.SerializerException
+import com.urosjarc.dbjesus.extend.ext_canBeNull
 import com.urosjarc.dbjesus.extend.ext_javaFields
 import com.urosjarc.dbjesus.extend.ext_kclass
-import com.urosjarc.dbjesus.extend.ext_properties
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 class Mapper(
-    private val tables: List<Table>,
+    private val tables: List<Table<*>>,
     private val globalSerializers: List<TypeSerializer<*>>
 ) {
-    TODO("When mapper is inited, build for every table table info for fast quering")
-    TODO("After all table infos are built make simple interface for applying values to table info columns")
-    TODO("And then remove this shit down...")
+    private val tableInfos = mutableListOf<TableInfo>()
 
     init {
-        this.test()
+        this.init()
     }
 
-    private fun test() {
-        for (table in this.tables) {
-            //Check if all tables have serializer
-            for (prop in table.kClass.ext_properties) {
-                this.getSerializer(
-                    tableKClass = table.kClass,
-                    propKClass = prop.kclass
-                )
+    private fun init() {
+
+        //Register tables
+        this.tables.forEach { this.register(table = it) }
+
+        //Fill parent foreign table fields after all tables are registered!
+        for (tableInfo in this.tableInfos) {
+            for (column in tableInfo.foreignKeys) {
+                val ftInfo = this.tableInfos.firstOrNull { it.kclass == column.foreignTableKClass }
+                column.foreignTable = ftInfo
             }
         }
-    }
 
-    fun getColumns(kclass: KClass<*>): List<Column> {
-        val table = this.getTableNotNull(kclass = kclass)
-        return kclass.ext_javaFields.map {
-            val otherTableKClass = table.foreignKeys[it]?.let { this.getTable(it) }
-            val serializer = this.getSerializer(tableKClass = table.kClass, propKClass = it.ext_kclass)
-            Column(
-                name = it.name,
-                canBeNull = it.returnType.isMarkedNullable,
-                jdbcType = serializer.jdbcType,
-                dbType = serializer.dbType,
-                table = table,
-                foreignTable = otherTableKClass,
-                kProperty1 = it,
-            )
+        //Test registered tables
+        Tester(tables = this.tables, tableInfos = this.tableInfos).also {
+            it.test_0_if_all_tables_has_unique_names()
+            it.test_1_if_table_registered_multiple_times()
+            it.test_2_if_primary_key_in_foreign_keys()
+            it.test_3_if_foreign_key_points_to_registered_table()
+            it.test_4_if_foreign_key_registered_multiple_times()
+            it.test_5_if_constraints_registered_multiple_times()
         }
+
     }
 
-    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class)
+    private fun register(table: Table<*>) {
+        //All pk and fk properties
+        val pkFkProperties = mutableSetOf(table.primaryKey)
 
-    fun getTableInfo(kclass: KClass<*>): TableInfo =
-        TableInfo(
-            table = this.getTableNotNull(kclass = kclass),
-            columns = this.getColumns(kclass = kclass)
+        //Primary columns
+        val pkSerializer = this.getSerializer(tableKClass = table.kclass, propKClass = table.primaryKey.ext_kclass)
+        val pkcons = table.primaryKeyConstraints
+        val pkColumn = PrimaryColumn(
+            name = table.primaryKey.name, value = null,
+            notNull = !table.primaryKey.ext_canBeNull, autoIncrement = pkcons.contains(C.AUTO_INC), unique = pkcons.contains(C.UNIQUE),
+            kprop = table.primaryKey, kclass = table.primaryKey.ext_kclass, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
+            encoder = pkSerializer.encoder, decoder = pkSerializer.decoder,
         )
 
-    fun getTableNotNull(obj: Any): Table = this.getTableNotNull(kclass = obj::class)
-    fun getTableNotNull(kclass: KClass<*>): Table =
-        this.tables.firstOrNull { it.kClass == kclass }
-            ?: throw SerializerException("Table for type '${kclass.simpleName}' is not registered")
+        //Foreign columns
+        val fkColumns = mutableListOf<ForeignColumn>()
+        for ((fromProp, toKClass) in table.foreignKeys) {
+            val serializer = this.getSerializer(tableKClass = table.kclass, propKClass = fromProp.ext_kclass)
+            val fkcons = table.constraintsFor(kprop = fromProp)
+            val column = ForeignColumn(
+                name = fromProp.name, value = null, notNull = fromProp.ext_canBeNull,
+                kprop = fromProp, kclass = fromProp.ext_kclass, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                foreignTable = null, foreignTableKClass = toKClass,
+                encoder = serializer.encoder, decoder = serializer.decoder, unique = fkcons.contains(C.UNIQUE)
+            )
+            fkColumns.add(column)
+            pkFkProperties.add(fromProp)
+        }
 
-    fun getTable(obj: Any): Table? = this.getTable(tableKClass = obj::class)
-    fun getTable(tableKClass: KClass<*>): Table? = this.tables.firstOrNull { it.kClass == tableKClass }
+        //Other columns
+        val otherColumns = mutableListOf<OtherColumn>()
+        table.kclass.ext_javaFields.filter { !pkFkProperties.contains(it) }.forEach {
+            val serializer = this.getSerializer(tableKClass = table.kclass, propKClass = it.ext_kclass)
+            val otcons = table.constraintsFor(kprop = it)
+            val column = OtherColumn(
+                name = it.name, value = null, notNull = it.ext_canBeNull,
+                kprop = it, kclass = it.ext_kclass, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                encoder = serializer.encoder, decoder = serializer.decoder, unique = otcons.contains(C.UNIQUE)
+            )
+            otherColumns.add(column)
+        }
 
+        this.tableInfos.add(
+            TableInfo(
+                name = table.name, kclass = table.kclass,
+                primaryKey = pkColumn, foreignKeys = fkColumns, otherColumns = otherColumns
+            )
+        )
+    }
 
     private fun decode(resultSet: ResultSet, columnInt: Int, decodeInfo: DecodeInfo): Any? {
         val jdbcType = resultSet.metaData.getColumnType(columnInt)
@@ -86,13 +115,10 @@ class Mapper(
         throw SerializerException("Serializer missing for: $decodeInfo")
     }
 
-    /**
-     * For every table property check if serializer is registered!!!!
-     */
-    fun getDbType(tableKClass: KClass<*>, propKClass: KClass<*>): String = this.getSerializer(tableKClass = tableKClass, propKClass = propKClass).dbType
-
+    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class as KClass<*>)
+    fun getTableInfo(kclass: KClass<*>) = this.tableInfos.firstOrNull { it.kclass == kclass } ?: throw SerializerException("Table '${kclass.simpleName}' missing in registered tables")
     fun getSerializer(tableKClass: KClass<*>, propKClass: KClass<*>): TypeSerializer<*> {
-        val tableSerializers = this.getTable(tableKClass = tableKClass)?.tableSerializers ?: listOf()
+        val tableSerializers = this.tables.firstOrNull { it.kclass == tableKClass }?.tableSerializers ?: listOf()
 
         //If serializer is not found in table nor global serializers then something must be wrong!
         return (tableSerializers + this.globalSerializers)
@@ -101,41 +127,6 @@ class Mapper(
 
     fun getSerializer(propKClass: KClass<*>): TypeSerializer<*> =
         this.globalSerializers.firstOrNull { it.kclass == propKClass } ?: throw SerializerException("Serializer for type '${propKClass.simpleName}' not found in global serializers")
-
-    /**
-     * Be carefull not to put primary key to list of obj properties!!!!!!!!
-     */
-    private fun <T : Any> getObjProperties(obj: T): ObjProperties {
-        //If table is not found then this obj is used as input obj for query
-        val table = this.getTable(obj)
-
-        //What are we searching for?
-        val objProps = mutableListOf<ObjProperty<*>>()
-        var primaryKeyProp: ObjProperty<*>? = null
-
-        //Searching domain
-        for (prop in obj::class.ext_javaFields) {
-
-            //Search for serializer in table and global serializers
-            val serializer = this.getSerializer(tableKClass = obj::class, propKClass = prop.ext_kclass) as TypeSerializer<Any>
-
-            //Build obj property wrapper
-            val objProp: ObjProperty<Any> = ObjProperty(
-                name = prop.name, value = prop.get(obj),
-                property = prop, serializer = serializer
-            )
-
-            //If table is found and prop matches with primary key then we found the guy.
-            //Primary key should be saved separatly from other properties
-            if (table?.primaryKey != null && prop.name == table.primaryKey.name) {
-                primaryKeyProp = objProp
-                continue //BECASE YOU DONT WANT TO HAVE PRIMARY KEY IN OBJPROPS
-            } else objProps.add(objProp)
-
-        }
-
-        return ObjProperties(primaryKey = primaryKeyProp, list = objProps)
-    }
 
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
         val constructor = kclass.primaryConstructor!!

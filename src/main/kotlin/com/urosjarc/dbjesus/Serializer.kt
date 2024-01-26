@@ -10,6 +10,7 @@ interface Serializer {
 
     val mapper: Mapper
 
+    fun <T: Any> dropQuery(kclass: KClass<T>): Query
     fun <T : Any> createQuery(kclass: KClass<T>): Query
     fun <T : Any> selectAllQuery(kclass: KClass<T>): Query
     fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query

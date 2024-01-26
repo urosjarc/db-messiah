@@ -7,12 +7,15 @@ import com.urosjarc.dbjesus.exceptions.EngineException
 import com.urosjarc.dbjesus.exceptions.QueryException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
+import kotlin.jvm.Throws
 
 
 class DbJesusEngine(config: HikariConfig) : Engine {
 
     val dataSource = HikariDataSource(config)
+    val log = this.logger()
 
     init {
         if (this.dataSource.isClosed && !this.dataSource.isRunning) {
@@ -30,6 +33,7 @@ class DbJesusEngine(config: HikariConfig) : Engine {
         }
 
     override fun prepareInsertQuery(query: InsertQuery): PreparedInsertQuery {
+        this.log.info("Preparing insert query: \n\n${query.sql}\n\n")
         val ps = this.conn.prepareStatement(query.sql)
         val pQuery = PreparedInsertQuery(query = query, ps = this.conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS))
         this.setPreparedStatement(query = query, ps = ps)
@@ -37,6 +41,7 @@ class DbJesusEngine(config: HikariConfig) : Engine {
     }
 
     override fun prepareQuery(query: Query): PreparedQuery {
+        this.log.info("Preparing query: \n\n${query.sql}\n\n")
         val ps = this.conn.prepareStatement(query.sql)
         val pQuery = PreparedQuery(query = query, ps = ps)
         this.setPreparedStatement(query = query, ps = ps)

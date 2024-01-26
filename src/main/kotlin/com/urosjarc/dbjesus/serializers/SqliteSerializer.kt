@@ -12,7 +12,7 @@ import com.urosjarc.dbjesus.exceptions.SerializerException
 import kotlin.reflect.KClass
 
 
-class MariaDbSerializer(
+class SqliteSerializer(
     tables: List<Table<*>>,
     globalSerializers: List<TypeSerializer<*>>
 ) : Serializer {
@@ -23,7 +23,6 @@ class MariaDbSerializer(
         return Query(sql = "DROP TABLE ${T.name};")
     }
 
-
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
 
@@ -32,15 +31,15 @@ class MariaDbSerializer(
         //Primary key
         if(T.primaryKey != null) {
             val autoIncrement = if (T.primaryKey.autoIncrement) "AUTOINCREMENT" else ""
-            col.add("${T.primaryKey.name} PRIMARY KEY ${autoIncrement}")
-            col.add("PRIMARY KEY(${T.primaryKey.name})")
+            col.add("${T.primaryKey.name} ${T.primaryKey.dbType}  PRIMARY KEY ${autoIncrement}")
+            col.add("PRIMARY KEY (${T.primaryKey.name})")
         }
 
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
             col.add("${it.name} ${it.dbType} $isNull")
-            col.add("CONSTRAINT fk_${it.name}_${it.foreignTable?.name} FOREIGN KEY(${it.name}) REFERENCES ${it.foreignTable?.name}(${it.foreignTable?.primaryKey})")
+            col.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable?.name} (${it.foreignTable?.primaryKey?.name}) ")
         }
 
         //Other columns
@@ -53,7 +52,7 @@ class MariaDbSerializer(
         val columns = col.joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE OR REPLACE TABLE ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
     }
 
     override fun <T : Any> selectAllQuery(kclass: KClass<T>): Query {
