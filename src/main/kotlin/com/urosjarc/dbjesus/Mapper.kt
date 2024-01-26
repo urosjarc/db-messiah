@@ -20,6 +20,10 @@ class Mapper(
     private val tables: List<Table>,
     private val globalSerializers: List<TypeSerializer<*>>
 ) {
+    TODO("When mapper is inited, build for every table table info for fast quering")
+    TODO("After all table infos are built make simple interface for applying values to table info columns")
+    TODO("And then remove this shit down...")
+
     init {
         this.test()
     }
