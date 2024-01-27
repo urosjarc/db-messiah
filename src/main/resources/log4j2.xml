@@ -34,7 +34,7 @@
 
     <Loggers>
         <Root includeLocation="true" level="trace">
-            <AppenderRef level="info" ref="Async-Console"/>
+            <AppenderRef level="trace" ref="Async-Console"/>
             <AppenderRef level="trace" ref="Async-File"/>
         </Root>
     </Loggers>
