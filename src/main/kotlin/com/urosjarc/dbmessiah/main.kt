@@ -5,8 +5,8 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.impl.DbMessiahEngine
 import com.urosjarc.dbmessiah.impl.DbMessiahService
-import com.urosjarc.dbmessiah.impl.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.basicDbTypeSerializers
+import com.urosjarc.dbmessiah.sqlite.SqliteSerializer
 import com.zaxxer.hikari.HikariConfig
 
 data class Entity2(
@@ -57,7 +57,8 @@ fun main() {
         eng = DbMessiahEngine(config = config),
         ser = serializer
     )
-    val e = Entity(id_entity = null, name="Uros", username = "urosjarc", age=31, money = 0f)
+    val e = Entity(id_entity = null, name = "Uros", username = "urosjarc", age = 31, money = 0f)
+    service.dropTable(kclass = Entity::class)
     service.createTable(kclass = Entity::class)
     println(service.insertTable(e))
 }

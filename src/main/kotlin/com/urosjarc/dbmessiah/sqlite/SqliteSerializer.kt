@@ -1,8 +1,7 @@
-package com.urosjarc.dbmessiah.impl
+package com.urosjarc.dbmessiah.sqlite
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.queries.InsertQuery
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
@@ -71,7 +70,7 @@ class SqliteSerializer(
     override fun insertQuery(obj: Any): InsertQuery {
         val T = this.mapper.getTableInfo(obj = obj)
         return InsertQuery(
-            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
+            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
             values = T.values(obj = obj),
         )
     }

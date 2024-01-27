@@ -1,6 +1,19 @@
 package com.urosjarc.dbmessiah.domain.queries
 
 class Query(
-    sql: String,
-    values: List<QueryValue> = listOf()
-) : Unsafe(sql = sql, values = values)
+    val sql: String,
+    val values: List<QueryValue> = listOf(),
+    val in
+) {
+    override fun toString(): String {
+        var index = 1
+        val values = if (values.isEmpty()) "" else "\n" + values.joinToString(separator = "")  {
+            val value = when(it.value){
+                is String -> "'${it.value}'"
+                else -> it.value.toString()
+            }
+            "\t${index++}) ${it.name}: ${it.jdbcType} = ${value}\n"
+        }
+        return "$sql\n${values}"
+    }
+}

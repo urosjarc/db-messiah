@@ -10,6 +10,7 @@ interface Service<PK : Any> {
     val ser: Serializer
     val eng: Engine
 
+    fun <T : Any> dropTable(kclass: KClass<T>): Int
     fun <T : Any> createTable(kclass: KClass<T>): Int
     fun <T : Any> selectTable(kclass: KClass<T>): List<T>
     fun <T : Any> selectTablePage(kclass: KClass<T>, page: Page<T>): List<T>

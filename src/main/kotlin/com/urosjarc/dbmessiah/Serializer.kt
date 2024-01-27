@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.InsertQuery
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
@@ -20,8 +19,8 @@ interface Serializer {
     fun <T : Any> selectAllQuery(kclass: KClass<T>): Query
     fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query
     fun <T : Any, K: Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query
-    fun insertQuery(obj: Any): InsertQuery
+    fun insertQuery(obj: Any): Query
     fun updateQuery(obj: Any): Query
-    fun <T : Any> query(sourceObj: T, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query
+    fun <T : Any> query(sourceObj: T?, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query
 
 }
