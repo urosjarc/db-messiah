@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.impl.DbMessiahEngine
 import com.urosjarc.dbmessiah.impl.DbMessiahService
-import com.urosjarc.dbmessiah.serializers.SqliteSerializer
+import com.urosjarc.dbmessiah.impl.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.basicDbTypeSerializers
 import com.zaxxer.hikari.HikariConfig
 
@@ -38,14 +38,11 @@ fun main() {
         globalSerializers = basicDbTypeSerializers,
         schemas = listOf(
             Schema(
-                name = "main", serializers = listOf(),
+                name = "main",
                 tables = listOf(
                     Table(primaryKey = Entity::id_entity),
                     Table(
                         primaryKey = Entity2::id_entity2,
-                        foreignKeys = listOf(
-                            Entity2::age to String::class
-                        ),
                         constraints = listOf(
                             Entity2::age to listOf(C.UNIQUE, C.AUTO_INC),
                             Entity2::name to listOf(C.UNIQUE, C.AUTO_INC)

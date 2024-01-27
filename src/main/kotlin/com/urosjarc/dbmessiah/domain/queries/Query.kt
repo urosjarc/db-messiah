@@ -1,8 +1,6 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.domain.columns.Column
-
-data class Query(
-    override val sql: String,
-    override val values: List<QueryValue> = listOf()
-) : Unsafe
+class Query(
+    sql: String,
+    values: List<QueryValue> = listOf()
+) : Unsafe(sql = sql, values = values)

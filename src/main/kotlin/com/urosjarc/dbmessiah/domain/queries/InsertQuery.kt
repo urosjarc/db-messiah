@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-data class InsertQuery(
-    override val sql: String,
-    override val values: List<QueryValue>,
-) : Unsafe
+class InsertQuery(
+    sql: String,
+    values: List<QueryValue> = listOf()
+) : Unsafe(sql = sql, values = values)

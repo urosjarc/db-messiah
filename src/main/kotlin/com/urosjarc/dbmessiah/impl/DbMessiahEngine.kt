@@ -4,7 +4,6 @@ import com.urosjarc.dbmessiah.Engine
 import com.urosjarc.dbmessiah.domain.queries.*
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.exceptions.EngineException
-import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.apache.logging.log4j.kotlin.logger
@@ -32,7 +31,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         }
 
     override fun prepareInsertQuery(query: InsertQuery): PreparedInsertQuery {
-        this.log.info("Preparing insert query: \n\n${query.sql}\nWith values: ${query.values}\n")
+        this.log.info("Preparing insert query: \n\n${query}")
         val ps = this.conn.prepareStatement(query.sql)
         val pQuery = PreparedInsertQuery(query = query, ps = this.conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS))
         this.setPreparedStatement(query = query, ps = ps)
@@ -40,7 +39,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
     }
 
     override fun prepareQuery(query: Query): PreparedQuery {
-        this.log.info("Preparing query: \n\n${query.sql}\nWith values: ${query.values}\n")
+        this.log.info("Preparing query: \n\n${query}")
         val ps = this.conn.prepareStatement(query.sql)
         val pQuery = PreparedQuery(query = query, ps = ps)
         this.setPreparedStatement(query = query, ps = ps)

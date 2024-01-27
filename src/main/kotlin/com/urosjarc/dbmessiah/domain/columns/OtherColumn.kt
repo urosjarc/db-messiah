@@ -6,14 +6,22 @@ import java.sql.JDBCType
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-class OtherColumn(
-    override val name: String,
-    override val unique: Boolean,
-    override val notNull: Boolean,
-    override val kprop: KProperty1<*, *>,
-    override val kclass: KClass<*>,
-    override val dbType: String,
-    override val jdbcType: JDBCType,
-    override val encoder: Encoder<*>,
-    override val decoder: Decoder<*>
-): Column
+open class OtherColumn(
+    val unique: Boolean,
+    kprop: KProperty1<*, *>,
+    dbType: String,
+    jdbcType: JDBCType,
+    encoder: Encoder<*>,
+    decoder: Decoder<*>
+): Column(
+    kprop = kprop,
+    dbType = dbType,
+    jdbcType = jdbcType,
+    encoder = encoder,
+    decoder = decoder
+) {
+    val notNull: Boolean get() = !this.kprop.returnType.isMarkedNullable
+    override fun toString(): String {
+        return "COL(name=$name, kclass=$kclass, dbType=$dbType, jdbcType=$jdbcType unique=$unique, notNull=$notNull)"
+    }
+}

@@ -3,18 +3,24 @@ package com.urosjarc.dbmessiah.domain.columns
 import com.urosjarc.dbmessiah.domain.serialization.Decoder
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 class PrimaryColumn(
     val autoIncrement: Boolean,
-    override val name: String,
-    override val unique: Boolean,
-    override val notNull: Boolean,
-    override val kprop: KProperty1<*, *>,
-    override val kclass: KClass<*>,
-    override val dbType: String,
-    override val jdbcType: JDBCType,
-    override val encoder: Encoder<*>,
-    override val decoder: Decoder<*>,
-): Column
+    kprop: KProperty1<*, *>,
+    dbType: String,
+    jdbcType: JDBCType,
+    encoder: Encoder<*>,
+    decoder: Decoder<*>,
+) : Column(
+    kprop = kprop,
+    dbType = dbType,
+    jdbcType = jdbcType,
+    encoder = encoder,
+    decoder = decoder
+) {
+    override fun toString(): String {
+        return "PK(name=$name, kclass=$kclass, dbType=$dbType, jdbcType=$jdbcType, autoInc=$autoIncrement)"
+    }
+
+}

@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.serializers
+package com.urosjarc.dbmessiah.impl
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
@@ -8,7 +8,6 @@ import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KClass
 
 
