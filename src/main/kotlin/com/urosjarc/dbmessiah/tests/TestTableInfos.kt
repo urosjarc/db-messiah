@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.FatalMapperException
 import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_notUnique
+import kotlin.reflect.KProperty1
 
 class TestTableInfos(val tableInfos: List<TableInfo>) {
     /**
@@ -35,9 +36,9 @@ class TestTableInfos(val tableInfos: List<TableInfo>) {
     }
 
     fun `5-th Test - If all tables own columns`() {
-        this.tableInfos.forEach { T ->
+        this.tableInfos.forEach { T: TableInfo ->
             val javaFields = T.kclass.ext_javaFields
-            if (!javaFields.contains(T.primaryKey.kprop))
+            if (!javaFields.contains(T.primaryKey.kprop as KProperty1<Any, *>))
                 throw FatalMapperException("Table '${T.cleanPath}' does own primary key: ${T.primaryKey}")
             T.foreignKeys.forEach {
                 if (!javaFields.contains(it.kprop))

@@ -2,8 +2,7 @@ package com.urosjarc.dbmessiah.domain.queries
 
 class Query(
     val sql: String,
-    val values: List<QueryValue> = listOf(),
-    val in
+    val values: List<QueryValue> = listOf()
 ) {
     override fun toString(): String {
         var index = 1

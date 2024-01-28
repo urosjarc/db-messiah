@@ -17,6 +17,7 @@ import com.urosjarc.dbmessiah.tests.TestTableInfos
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -98,7 +99,7 @@ class Mapper(
 
     private fun register(schema: Schema, table: Table<*>): TableInfo {
         //All pk and fk properties
-        val pkFkProperties = mutableSetOf(table.primaryKey)
+        val pkFkProperties: MutableSet<Any> = mutableSetOf(table.primaryKey)
 
         //Primary columns
         val pkSerializer = this.getSerializer(schema = schema, table = table, propKClass = table.primaryKey.ext_kclass)
@@ -144,14 +145,11 @@ class Mapper(
     }
 
     private fun decode(resultSet: ResultSet, columnInt: Int, decodeInfo: DecodeInfo): Any? {
-        val jdbcType = resultSet.metaData.getColumnType(columnInt)
-
         for (tser in this.globalSerializers) {
-            if (tser.jdbcType.ordinal == jdbcType && decodeInfo.kparam.ext_kclass == tser.kclass) {
+            if (decodeInfo.kparam.ext_kclass == tser.kclass) {
                 return tser.decoder(resultSet, columnInt, decodeInfo)
             }
         }
-
         throw FatalMapperException("Serializer missing for: $decodeInfo")
     }
 

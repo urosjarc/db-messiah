@@ -5,6 +5,8 @@ import com.urosjarc.dbmessiah.exceptions.SchemaException
 import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import com.urosjarc.dbmessiah.extend.ext_notUnique
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty1
 
 class TestSchemas(val schemas: List<Schema>, val globalSerializers: List<TypeSerializer<*>>) {
     /**

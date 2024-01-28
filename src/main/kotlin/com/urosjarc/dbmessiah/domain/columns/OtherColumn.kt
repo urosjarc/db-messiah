@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty1
 
 open class OtherColumn(
     val unique: Boolean,
-    kprop: KProperty1<*, *>,
+    kprop: KProperty1<out Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
     encoder: Encoder<*>,

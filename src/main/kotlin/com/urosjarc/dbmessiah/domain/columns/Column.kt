@@ -7,7 +7,7 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 abstract class Column(
-    val kprop: KProperty1<*, *>,
+    open val kprop: KProperty1<out Any, Any?>,
     val dbType: String,
     val jdbcType: JDBCType,
     val encoder: Encoder<*>,

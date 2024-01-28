@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
+import java.sql.ResultSet
 import kotlin.reflect.KClass
 
 interface Serializer {
@@ -21,6 +22,5 @@ interface Serializer {
     fun <T : Any, K: Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query
     fun insertQuery(obj: Any): Query
     fun updateQuery(obj: Any): Query
-    fun <T : Any> query(sourceObj: T?, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query
 
 }

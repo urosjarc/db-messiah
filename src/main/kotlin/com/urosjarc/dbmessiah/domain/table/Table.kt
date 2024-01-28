@@ -5,11 +5,12 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
 class Table<T : Any>(
-    val primaryKey: KProperty1<T, *>,
+    val primaryKey: KMutableProperty1<out T, out Any?>,
     val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
     var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
     val serializers: List<TypeSerializer<Any>> = listOf(),
@@ -17,6 +18,7 @@ class Table<T : Any>(
 ) {
     init {
         //If user has not provided constraints for primary key, then add default ones here
+        this.primaryKey as KProperty1<T, *>
         if (!this.constraints.map { it.first }.contains(this.primaryKey)) {
             val constrs = this.constraints.toMutableList()
             constrs.add(Pair(first = this.primaryKey, second = listOf(C.AUTO_INC)))

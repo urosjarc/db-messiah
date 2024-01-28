@@ -3,11 +3,12 @@ package com.urosjarc.dbmessiah.domain.columns
 import com.urosjarc.dbmessiah.domain.serialization.Decoder
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
 class PrimaryColumn(
     val autoIncrement: Boolean,
-    kprop: KProperty1<*, *>,
+    override val kprop: KMutableProperty1<out Any, out Any?>,
     dbType: String,
     jdbcType: JDBCType,
     encoder: Encoder<*>,
@@ -21,6 +22,11 @@ class PrimaryColumn(
 ) {
     override fun toString(): String {
         return "PK(name=$name, kclass=$kclass, dbType=$dbType, jdbcType=$jdbcType, autoInc=$autoIncrement)"
+    }
+
+    fun set(obj: Any, value: Any?){
+        this.kprop as KMutableProperty1<Any, Any?>
+        this.kprop.set(receiver = obj, value = value)
     }
 
 }

@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty1
 
 class ForeignColumn(
     unique: Boolean,
-    kprop: KProperty1<*, *>,
+    kprop: KProperty1<out Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
     encoder: Encoder<*>,

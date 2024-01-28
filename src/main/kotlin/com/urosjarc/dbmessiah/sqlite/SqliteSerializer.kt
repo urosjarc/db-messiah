@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
+import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
@@ -67,10 +68,10 @@ class SqliteSerializer(
         return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.name}=$pkValue")
     }
 
-    override fun insertQuery(obj: Any): InsertQuery {
+    override fun insertQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
-        return InsertQuery(
-            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
+        return Query(
+            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
             values = T.values(obj = obj),
         )
     }
@@ -78,14 +79,9 @@ class SqliteSerializer(
     override fun updateQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE id=${T.primaryKey.value(obj = obj)}",
+            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE '${T.primaryKey.name}' = ${T.primaryKey.value(obj = obj)};",
             values = T.values(obj = obj)
         )
     }
 
-    override fun <T : Any> query(sourceObj: T, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query {
-        val queryBuilder = QueryBuilder(sourceObj = sourceObj, mapper = this.mapper)
-        val sql = getSql(queryBuilder)
-        return queryBuilder.build(sql = sql)
-    }
 }
