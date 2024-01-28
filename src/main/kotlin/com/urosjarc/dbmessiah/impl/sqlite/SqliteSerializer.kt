@@ -1,22 +1,24 @@
-package com.urosjarc.dbmessiah.sqlite
+package com.urosjarc.dbmessiah.impl.sqlite
 
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
+import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 
 class SqliteSerializer(
+    override val testCRUD: Boolean,
     override val schemas: List<Schema>,
     override val globalSerializers: List<TypeSerializer<*>>,
     override val globalInputs: List<KClass<*>>
 ) : Serializer {
 
     override val mapper = Mapper(
+        testCRUD = testCRUD,
         escaper = Escaper(
             type = Escaper.Type.DOUBLE_QUOTES,
             joinStr = "."
@@ -35,6 +37,7 @@ class SqliteSerializer(
         val T = this.mapper.getTableInfo(kclass = kclass)
 
         val col = mutableListOf<String>()
+        val constraints = mutableListOf<String>()
 
         //Primary key
         val autoIncrement = if (T.primaryKey.autoIncrement) "AUTOINCREMENT" else ""
@@ -43,9 +46,8 @@ class SqliteSerializer(
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
-            val column =
-                col.add("${it.name} ${it.dbType} $isNull")
-            col.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.path})")
+            val column = col.add("${it.name} ${it.dbType} $isNull")
+            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})")
         }
 
         //Other columns
@@ -55,25 +57,25 @@ class SqliteSerializer(
         }
 
         //Connect all column definitions to one string
-        val columns = col.joinToString(", ")
+        val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
     }
 
-    override fun <T : Any> selectAllQuery(kclass: KClass<T>): Query {
+    override fun <T : Any> selectQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "SELECT * FROM ${T.path}")
     }
 
-    override fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query {
+    override fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY [${page.orderBy.name}] ${page.sort} LIMIT ${page.limit} OFFSET ${page.offset}")
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY [${page.orderBy.name}] ASC LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
-    override fun <T : Any, K : Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query {
+    override fun <T : Any, K : Any> selectQuery(kclass: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pkValue")
+        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
     }
 
 

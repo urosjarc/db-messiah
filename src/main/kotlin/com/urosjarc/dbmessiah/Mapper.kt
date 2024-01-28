@@ -16,6 +16,8 @@ import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import com.urosjarc.dbmessiah.tests.TestMapper
 import com.urosjarc.dbmessiah.tests.TestSerializer
+import com.urosjarc.dbmessiah.tests.TestTable
+import com.urosjarc.dbmessiah.tests.TestTableParent
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
@@ -25,6 +27,7 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.primaryConstructor
 
 class Mapper(
+    private val testCRUD: Boolean,
     private val escaper: Escaper,
     private val schemas: List<Schema>,
     private val globalSerializers: List<TypeSerializer<*>>,
@@ -43,6 +46,17 @@ class Mapper(
     }
 
     private fun init() {
+        //If user activated crud testing then 2 new tables for testing are injected to first schema
+        if (this.testCRUD) {
+            val testTableParent = Table(primaryKey = TestTableParent::id)
+            val testTable = Table(
+                primaryKey = TestTable::id,
+                foreignKeys = listOf(
+                    TestTable::parent_id to TestTableParent::class
+                )
+            )
+            schemas[0].tables += listOf(testTableParent, testTable)
+        }
 
         TestSerializer(schemas = this.schemas, globalSerializers = this.globalSerializers, this.globalInputs).also {
             //Test emptiness
@@ -61,6 +75,7 @@ class Mapper(
             //Test serializability
             it.`10-th Test - If schemas objects have appropriate serializer`()
             it.`11-th Test - If all input classes properties have appropriate serializer`()
+            it.`12-th Test - If all primary keys that are autoincrement have integer dbType`()
         }
 
         /**
@@ -99,8 +114,9 @@ class Mapper(
             //Test validity
             it.`5-th Test - If all tables own their own columns`()
             it.`6-th Test - If all foreign columns are connected to registered table`()
+            it.`7-th Test - If all columns have been inited and connected with parent table`()
+            it.`8-th Test - If all primary keys that have auto inc are of type integer`()
         }
-
     }
 
     private fun register(schema: Schema, table: Table<*>): TableInfo {

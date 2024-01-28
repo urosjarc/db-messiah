@@ -23,7 +23,7 @@ abstract class Column(
     val path: String get() = this.table.escaper.wrapJoin(this.table.schema, this.table.name, this.kprop.name)
     open val inited get() = this::table.isInitialized
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
-    override fun hashCode(): Int = "$name${kclass.simpleName}".hashCode()
+    override fun hashCode(): Int = "${this.kprop.name}${kclass.simpleName}".hashCode()
 
     override fun toString(): String {
         return "Column(name=${this.name}, dbType=${this.dbType}, jdbcType=${this.jdbcType.name}"

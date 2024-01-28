@@ -5,6 +5,6 @@ import com.urosjarc.dbmessiah.domain.table.Table
 
 class Schema(
     val name: String,
-    val serializers: List<TypeSerializer<Any>> = listOf(),
-    val tables: List<Table<*>>,
+    val serializers: List<TypeSerializer<out Any>> = listOf(),
+    var tables: List<Table<*>>,
 )

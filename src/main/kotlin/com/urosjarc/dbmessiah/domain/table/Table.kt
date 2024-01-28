@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_kclass
+import com.urosjarc.dbmessiah.extend.ext_receiver
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -26,7 +27,7 @@ class Table<T : Any>(
         }
     }
 
-    val name: String = primaryKey.ext_kclass.simpleName.toString()
+    val name: String = primaryKey.ext_receiver.simpleName.toString()
     val kclass: KClass<*> = (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializerException("Could not found enclosing class for primary key"))
     val primaryKeyConstraints get() = this.constraintsFor(kprop = this.primaryKey)
     fun constraintsFor(kprop: KProperty1<*, *>) = this.constraints.firstOrNull { it.first == kprop }?.second ?: listOf()

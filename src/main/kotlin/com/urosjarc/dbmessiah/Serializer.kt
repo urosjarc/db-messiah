@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 interface Serializer {
-
+    val testCRUD: Boolean
     val mapper: Mapper
     val schemas: List<Schema>
     val globalSerializers: List<TypeSerializer<*>>
@@ -31,9 +31,13 @@ interface Serializer {
     /**
      * SELECTS
      */
-    fun <T : Any> selectAllQuery(kclass: KClass<T>): Query
-    fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query
-    fun <T : Any, K : Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query
+    fun <T : Any> selectQuery(kclass: KClass<T>): Query
+    fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query
+    fun <T : Any, K : Any> selectQuery(kclass: KClass<T>, pk: K): Query
+
+    /**
+     * Generic queries
+     */
     fun <T : Any> selectQuery(obj: T, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query {
         val queryBuilder = QueryBuilder(sourceObj = obj, mapper = this.mapper)
         return queryBuilder.build(sql = getSql(queryBuilder))

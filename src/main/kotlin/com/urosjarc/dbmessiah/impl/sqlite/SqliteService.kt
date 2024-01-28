@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.sqlite
+package com.urosjarc.dbmessiah.impl.sqlite
 
 import com.urosjarc.dbmessiah.Engine
 import com.urosjarc.dbmessiah.Serializer
@@ -9,6 +9,9 @@ class SqliteService(
     ser: Serializer,
 ) : DbMessiahService(eng = eng, ser = ser) {
 
+    /**
+     * Because sqlite C driver does not support auto generated keys :)
+     */
     override fun <T : Any> insert(obj: T): Boolean {
         //Prepare insert query
         val T = this.ser.mapper.getTableInfo(obj = obj)

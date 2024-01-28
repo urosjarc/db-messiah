@@ -12,28 +12,36 @@ open class DbMessiahService(
     override val eng: Engine,
     override val ser: Serializer,
 ) : Service {
-    override fun <T : Any> drop(kclass: KClass<T>): Int {
+    override fun <T : Any> drop(kclass: KClass<T>): Boolean {
         val query = this.ser.dropQuery(kclass = kclass)
         val pQuery = this.eng.prepareQuery(query = query)
-        return this.eng.executeUpdate(pQuery = pQuery)
+        return this.eng.executeUpdate(pQuery = pQuery) == 0
     }
 
-    override fun <T : Any> create(kclass: KClass<T>): Int {
+    override fun <T : Any> create(kclass: KClass<T>): Boolean {
         val query = this.ser.createQuery(kclass = kclass)
         val pQuery = this.eng.prepareQuery(query = query)
-        return this.eng.executeUpdate(pQuery = pQuery)
+        return this.eng.executeUpdate(pQuery = pQuery) == 0
     }
 
     override fun <T : Any> select(kclass: KClass<T>): List<T> {
-        val query = this.ser.selectAllQuery(kclass = kclass)
+        val query = this.ser.selectQuery(kclass = kclass)
         val pQuery = this.eng.prepareQuery(query = query)
         return this.eng.executeQuery(pQuery = pQuery) {
             this.ser.mapper.decode(kclass = kclass, resultSet = it)
         }
     }
 
-    override fun <T : Any> selectPage(kclass: KClass<T>, page: Page<T>): List<T> {
-        val query = this.ser.selectPageQuery(kclass = kclass, page = page)
+    override fun <T : Any, K : Any> select(kclass: KClass<T>, pk: K): T? {
+        val query = this.ser.selectQuery(kclass = kclass, pk = pk)
+        val pQuery = this.eng.prepareQuery(query = query)
+        return this.eng.executeQuery(pQuery = pQuery) {
+            this.ser.mapper.decode(kclass = kclass, resultSet = it)
+        }.firstOrNull()
+    }
+
+    override fun <T : Any> select(kclass: KClass<T>, page: Page<T>): List<T> {
+        val query = this.ser.selectQuery(kclass = kclass, page = page)
         val pQuery = this.eng.prepareQuery(query = query)
         return this.eng.executeQuery(pQuery = pQuery) {
             this.ser.mapper.decode(kclass = kclass, resultSet = it)
@@ -52,7 +60,7 @@ open class DbMessiahService(
     override fun <T : Any> update(obj: T): Boolean {
         val query = this.ser.updateQuery(obj = obj)
         val pQuery = this.eng.prepareQuery(query = query)
-        return this.eng.executeUpdate(pQuery = pQuery) == 1
+        return this.eng.executeUpdate(pQuery = pQuery) == 0
     }
 
     override fun <T : Any> delete(obj: T): Boolean {

@@ -4,11 +4,11 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.impl.DbMessiahEngine
-import com.urosjarc.dbmessiah.impl.basicDbTypeSerializers
-import com.urosjarc.dbmessiah.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.sqlite.SqliteService
+import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
+import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
+import com.urosjarc.dbmessiah.tests.TestService
+import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
-import kotlin.reflect.KMutableProperty1
 
 data class Entity2(
     var id_entity2: Int,
@@ -28,18 +28,14 @@ data class Entity(
 
 fun main() {
 
-    val config = HikariConfig().also {
-        it.jdbcUrl = "jdbc:sqlite:/home/urosjarc/vcs/db-jesus/src/test/resources/chinook.sqlite"
-        it.username = null
-        it.password = null
-    }
+    val engine = DbMessiahEngine(config = HikariConfig().apply {
+        jdbcUrl = "jdbc:sqlite:/home/urosjarc/vcs/db-jesus/src/test/resources/chinook.sqlite"
+        username = null; password = null
+    })
 
-    val test: List<KMutableProperty1<out Any, out Int?>> = listOf(
-        Entity::id_entity,
-        Entity2::id_entity2
-    )
     val serializer = SqliteSerializer(
-        globalSerializers = basicDbTypeSerializers,
+        testCRUD = true,
+        globalSerializers = AllTS.basic,
         schemas = listOf(
             Schema(
                 name = "main",
@@ -58,28 +54,10 @@ fun main() {
         globalInputs = listOf()
     )
 
-    val service = SqliteService(
-        eng = DbMessiahEngine(config = config),
-        ser = serializer
-    )
-    val e = Entity(id_entity = null, name = "Uros", username = "urosjarc", age = 31, money = 0f)
-    val e2 = e.copy(name = "asdfasdfasdfsdf")
-    service.drop(kclass = Entity::class)
-    service.create(kclass = Entity::class)
-    service.insert(e)
-    service.insert(e2)
-    e.username = "asdfasdf"
-    service.update(e)
-    println(e2)
-    println(service.delete(e2))
-    println(service.select(kclass = Entity::class))
+    val service = SqliteService(eng = engine, ser = serializer)
 
-
-    val ele = service.query(input = e, output = Entity::class) {
-        """
-            select * from Entity
-            where id_entity = ${it.add(Entity::id_entity)}
-        """.trimIndent()
+    TestService(service = service).apply {
+        this.test_crud_cycle()
     }
-    println(ele)
+
 }

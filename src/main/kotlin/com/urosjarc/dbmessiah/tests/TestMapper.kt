@@ -2,9 +2,9 @@ package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.FatalMapperException
+import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_notUnique
-import kotlin.reflect.KProperty1
 
 class TestMapper(val tableInfos: List<TableInfo>) {
     /**
@@ -75,4 +75,15 @@ class TestMapper(val tableInfos: List<TableInfo>) {
         }
     }
 
+    fun `8-th Test - If all primary keys that have auto inc are of type integer`() {
+        nextTable@ for (T in this.tableInfos) {
+            if (T.primaryKey.autoIncrement) {
+                for (it in listOf("INT", "INTEGER")) {
+                    val dbType = T.primaryKey.dbType.split("(").first()
+                    if (dbType == it) continue@nextTable
+                }
+                throw SerializerException("Primary key ${T.primaryKey.path} of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
+            }
+        }
+    }
 }
