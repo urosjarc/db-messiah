@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah
+package com.urosjarc.dbmessiah.domain.table
 
 data class Escaper(private val type: Type, private val joinStr: String) {
     enum class Type {

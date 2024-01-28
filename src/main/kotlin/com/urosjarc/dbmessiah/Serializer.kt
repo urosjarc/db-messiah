@@ -5,7 +5,6 @@ import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import java.sql.ResultSet
 import kotlin.reflect.KClass
 
 interface Serializer {
@@ -13,12 +12,13 @@ interface Serializer {
     val mapper: Mapper
     val schemas: List<Schema>
     val globalSerializers: List<TypeSerializer<*>>
+    val globalInputs: List<KClass<*>>
 
     /**
      * MANAGING TABLES
      */
 
-    fun <T: Any> dropQuery(kclass: KClass<T>): Query
+    fun <T : Any> dropQuery(kclass: KClass<T>): Query
     fun <T : Any> createQuery(kclass: KClass<T>): Query
 
     /**
@@ -33,5 +33,10 @@ interface Serializer {
      */
     fun <T : Any> selectAllQuery(kclass: KClass<T>): Query
     fun <T : Any> selectPageQuery(kclass: KClass<T>, page: Page<T>): Query
-    fun <T : Any, K: Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query
+    fun <T : Any, K : Any> selectOneQuery(kclass: KClass<T>, pkValue: K): Query
+    fun <T : Any> selectQuery(obj: T, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query {
+        val queryBuilder = QueryBuilder(sourceObj = obj, mapper = this.mapper)
+        return queryBuilder.build(sql = getSql(queryBuilder))
+    }
+
 }

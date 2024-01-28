@@ -48,7 +48,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         val pQuery = PreparedQuery(query = query, ps = ps)
 
         //Apply values to prepared statement
-        (query.values).forEachIndexed { i, queryValue: QueryValue ->
+        (query.queryValues).forEachIndexed { i, queryValue: QueryValue ->
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             else (queryValue.encoder as Encoder<Any>)(ps, i + 1, queryValue.value) //If value is not null encoding is done over user defined encoder !!!
         }

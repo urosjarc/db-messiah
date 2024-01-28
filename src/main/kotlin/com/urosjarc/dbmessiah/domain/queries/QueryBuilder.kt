@@ -8,11 +8,8 @@ class QueryBuilder<T: Any>(val sourceObj: T, val mapper: Mapper) {
 
     val queryValues: MutableList<QueryValue> = mutableListOf()
 
-    fun add(kp: KProperty1<T, *>) {
-        val ser = this.mapper.getSerializer(
-            tableKClass = sourceObj::class,
-            propKClass = kp.ext_kclass
-        )
+    fun add(kp: KProperty1<T, *>): String {
+        val ser = this.mapper.getGlobalSerializer(kclass = kp.ext_kclass)
 
         val qv = QueryValue(
             name = kp.name,
@@ -22,7 +19,8 @@ class QueryBuilder<T: Any>(val sourceObj: T, val mapper: Mapper) {
         )
 
         this.queryValues.add(qv)
+        return "?"
     }
 
-    fun build(sql: String) = Query(sql = sql, values = queryValues.toTypedArray())
+    fun build(sql: String) = Query(sql = sql, queryValues = queryValues.toTypedArray())
 }

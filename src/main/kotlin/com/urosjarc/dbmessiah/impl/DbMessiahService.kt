@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.Engine
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.queries.Page
+import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import kotlin.reflect.KClass
 
@@ -54,18 +55,26 @@ open class DbMessiahService(
         return this.eng.executeUpdate(pQuery = pQuery) == 1
     }
 
-    fun <T : Any> delete(obj: T): Boolean {
+    override fun <T : Any> delete(obj: T): Boolean {
         val query = this.ser.deleteQuery(obj = obj)
         val pQuery = this.eng.prepareQuery(query = query)
         return this.eng.executeUpdate(pQuery = pQuery) == 1
     }
 
-    override fun <T : Any> query(kclass: KClass<T>, getSql: (queryBuilder: QueryBuilder<T>) -> String): List<T> {
-//        val query = this.ser.query(sourceObj = obj, getSql = getSql)
-//        val pQuery = this.eng.prepareQuery(query = query)
-//        return this.eng.executeQuery(pQuery = pQuery) {
-//            this.ser.mapper.decode(resultSet = it, kclass = obj::class as KClass)
-//        }
-        return listOf()
+    override fun <T : Any> query(output: KClass<T>, getSql: () -> String): List<T> {
+        val query = Query(sql = getSql())
+        val pQuery = this.eng.prepareQuery(query = query)
+        return this.eng.executeQuery(pQuery = pQuery) {
+            this.ser.mapper.decode(resultSet = it, output)
+        }
     }
+
+    override fun <T : Any> query(input: T, output: KClass<T>, getSql: (queryBuilder: QueryBuilder<T>) -> String): List<T> {
+        val query = this.ser.selectQuery(obj = input, getSql = getSql)
+        val pQuery = this.eng.prepareQuery(query = query)
+        return this.eng.executeQuery(pQuery = pQuery) {
+            this.ser.mapper.decode(resultSet = it, output)
+        }
+    }
+
 }

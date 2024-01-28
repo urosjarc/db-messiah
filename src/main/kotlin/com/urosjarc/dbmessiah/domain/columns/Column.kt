@@ -31,8 +31,13 @@ abstract class Column(
 
     fun setValue(obj: Any, value: Any?) {
         try {
-            (this.kprop as KMutableProperty1<Any, Any?>).set(receiver = obj, value = value)
-        } catch (e: Throwable) {
+            val kp = this.kprop as KMutableProperty1<Any, Any?>
+            try {
+                kp.set(receiver = obj, value = value)
+            } catch (e: ClassCastException) {
+                throw ColumnException("Trying to set column $path value to '$value' but receiving object is missing matching property: $obj", e)
+            }
+        } catch (e: ClassCastException) {
             throw ColumnException("Trying to set column $path value to '$value' but the column is immutable!", e)
         }
 

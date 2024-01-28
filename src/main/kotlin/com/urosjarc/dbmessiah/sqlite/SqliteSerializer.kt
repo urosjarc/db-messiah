@@ -1,30 +1,29 @@
 package com.urosjarc.dbmessiah.sqlite
 
-import com.urosjarc.dbmessiah.Escaper
+import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KClass
 
 
 class SqliteSerializer(
     override val schemas: List<Schema>,
-    override val globalSerializers: List<TypeSerializer<*>>
+    override val globalSerializers: List<TypeSerializer<*>>,
+    override val globalInputs: List<KClass<*>>
 ) : Serializer {
 
     override val mapper = Mapper(
         escaper = Escaper(
-            type=Escaper.Type.DOUBLE_QUOTES,
+            type = Escaper.Type.DOUBLE_QUOTES,
             joinStr = "."
         ),
         schemas = schemas.toList(),
-        globalSerializers = globalSerializers
+        globalSerializers = globalSerializers,
+        globalInputs = globalInputs
     )
 
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {
@@ -45,7 +44,7 @@ class SqliteSerializer(
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
             val column =
-            col.add("${it.name} ${it.dbType} $isNull")
+                col.add("${it.name} ${it.dbType} $isNull")
             col.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.path})")
         }
 
@@ -77,6 +76,7 @@ class SqliteSerializer(
         return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pkValue")
     }
 
+
     override fun insertQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
@@ -96,9 +96,10 @@ class SqliteSerializer(
 
     override fun deleteQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
-        val id = T.primaryKey.getValue(obj = obj) ?: throw SerializerException("Could not retrieve primary key from object: $obj")
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;", )
+            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;",
+            T.primaryKey.queryValue(obj)
+        )
     }
 
 }

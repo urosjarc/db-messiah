@@ -8,8 +8,9 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import com.urosjarc.dbmessiah.extend.ext_notUnique
+import kotlin.reflect.KClass
 
-class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<TypeSerializer<*>>) {
+class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<TypeSerializer<*>>, val inputs: List<KClass<*>>) {
     /**
      * CHECK FOR EMPTYNESS
      */
@@ -139,6 +140,18 @@ class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<Type
                     if (!allSerializers.contains(it.ext_kclass))
                         throw SerializerException("Property '${schema.name}.${table.name}.${it.name}' of type '${it.ext_kclass.simpleName} does not have appropriate serializer")
                 }
+            }
+        }
+    }
+
+    /**
+     * Every input objects has registered serializers
+     */
+    fun `11-th Test - If all input classes properties have appropriate serializer`() {
+        this.inputs.forEach { ik ->
+            ik.ext_javaFields.forEach { ip ->
+                this.globalSerializers.firstOrNull { it.kclass == ip.ext_kclass }
+                    ?: throw SerializerException("Input property '${ik.simpleName}.${ip.name}' with type '${ip.ext_kclass}' does not have appropriate serializer")
             }
         }
     }

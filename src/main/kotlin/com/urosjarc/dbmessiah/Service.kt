@@ -15,5 +15,7 @@ interface Service {
     fun <T : Any> selectPage(kclass: KClass<T>, page: Page<T>): List<T>
     fun <T : Any> insert(obj: T): Boolean
     fun <T : Any> update(obj: T): Boolean
-    fun <T : Any> query(kclass: KClass<T>, getSql: (queryBuilder: QueryBuilder<T>) -> String): List<T>
+    fun <T : Any> delete(obj: T): Boolean
+    fun <T : Any> query(output: KClass<T>, getSql: () -> String): List<T>
+    fun <T : Any> query(input: T, output: KClass<T>, getSql: (queryBuilder: QueryBuilder<T>) -> String): List<T>
 }

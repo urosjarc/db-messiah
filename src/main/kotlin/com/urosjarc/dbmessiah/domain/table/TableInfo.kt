@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.domain.table
 
-import com.urosjarc.dbmessiah.Escaper
 import com.urosjarc.dbmessiah.domain.columns.Column
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn

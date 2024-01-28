@@ -54,7 +54,8 @@ fun main() {
                     )
                 )
             )
-        )
+        ),
+        globalInputs = listOf()
     )
 
     val service = SqliteService(
@@ -72,4 +73,13 @@ fun main() {
     println(e2)
     println(service.delete(e2))
     println(service.select(kclass = Entity::class))
+
+
+    val ele = service.query(input = e, output = Entity::class) {
+        """
+            select * from Entity
+            where id_entity = ${it.add(Entity::id_entity)}
+        """.trimIndent()
+    }
+    println(ele)
 }
