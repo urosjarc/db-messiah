@@ -24,5 +24,5 @@ class QueryBuilder<T: Any>(val sourceObj: T, val mapper: Mapper) {
         this.queryValues.add(qv)
     }
 
-    fun build(sql: String) = Query(sql = sql, values = queryValues)
+    fun build(sql: String) = Query(sql = sql, values = queryValues.toTypedArray())
 }

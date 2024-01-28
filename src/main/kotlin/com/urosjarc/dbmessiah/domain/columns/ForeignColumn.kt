@@ -2,17 +2,18 @@ package com.urosjarc.dbmessiah.domain.columns
 
 import com.urosjarc.dbmessiah.domain.serialization.Decoder
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
+import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 class ForeignColumn(
     unique: Boolean,
-    kprop: KProperty1<out Any, Any?>,
+    kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
     encoder: Encoder<*>,
-    decoder: Decoder<*>,
+    decoder: Decoder<*>
 ) : OtherColumn(
     unique = unique,
     kprop = kprop,
@@ -21,10 +22,7 @@ class ForeignColumn(
     encoder = encoder,
     decoder = decoder
 ) {
-    val inited get() = this::foreignTable.isInitialized
+    override val inited get() = this::foreignTable.isInitialized
 
     lateinit var foreignTable: TableInfo
-    override fun toString(): String {
-        return "FK(name=$name, kclass=$kclass, dbType=$dbType, jdbcType=$jdbcType unique=$unique, notNull=$notNull)"
-    }
 }

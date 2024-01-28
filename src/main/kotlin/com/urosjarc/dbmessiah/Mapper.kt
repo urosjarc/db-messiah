@@ -12,17 +12,18 @@ import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.FatalMapperException
 import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
-import com.urosjarc.dbmessiah.tests.TestSchemas
-import com.urosjarc.dbmessiah.tests.TestTableInfos
+import com.urosjarc.dbmessiah.tests.TestSerializer
+import com.urosjarc.dbmessiah.tests.TestMapper
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.primaryConstructor
 
 class Mapper(
-    private val escaper: String,
+    private val escaper: Escaper,
     private val schemas: List<Schema>,
     private val globalSerializers: List<TypeSerializer<*>>
 ) {
@@ -33,14 +34,13 @@ class Mapper(
     private val fkColumn_to_tableKClass = mutableMapOf<ForeignColumn, KClass<*>>()
 
     val log = this.logger()
-
     init {
         this.init()
     }
 
     private fun init() {
 
-        TestSchemas(schemas = this.schemas, globalSerializers = this.globalSerializers).also {
+        TestSerializer(schemas = this.schemas, globalSerializers = this.globalSerializers).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
             //Test uniqueness
@@ -82,7 +82,7 @@ class Mapper(
         }
 
         //Test registered tables
-        TestTableInfos(tableInfos = this.tableInfos).also {
+        TestMapper(tableInfos = this.tableInfos).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
             //Test consistency
@@ -91,8 +91,8 @@ class Mapper(
             it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
             it.`4-th Test - If all columns are unique`()
             //Test validity
-            it.`5-th Test - If all tables own columns`()
-            it.`6-th Test - If all foreign columns are valid`()
+            it.`5-th Test - If all tables own their own columns`()
+            it.`6-th Test - If all foreign columns are connected to registered table`()
         }
 
     }
@@ -106,8 +106,8 @@ class Mapper(
         val pkcons = table.primaryKeyConstraints
         val pkColumn = PrimaryColumn(
             autoIncrement = pkcons.contains(C.AUTO_INC),
-            kprop = table.primaryKey, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
-            encoder = pkSerializer.encoder, decoder = pkSerializer.decoder,
+            kprop = table.primaryKey as KMutableProperty1<Any, Any?>, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
+            encoder = pkSerializer.encoder, decoder = pkSerializer.decoder
         )
 
         //Foreign columns
@@ -116,7 +116,7 @@ class Mapper(
             val serializer = this.getSerializer(schema = schema, table = table, propKClass = fromProp.ext_kclass)
             val fkcons = table.constraintsFor(kprop = fromProp)
             val column = ForeignColumn(
-                kprop = fromProp, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                kprop = fromProp as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
                 encoder = serializer.encoder, decoder = serializer.decoder, unique = fkcons.contains(C.UNIQUE)
             )
             this.fkColumn_to_tableKClass[column] = toKClass
@@ -130,7 +130,7 @@ class Mapper(
             val serializer = this.getSerializer(schema = schema, table = table, propKClass = it.ext_kclass)
             val otcons = table.constraintsFor(kprop = it)
             val column = OtherColumn(
-                kprop = it, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                kprop = it as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
                 encoder = serializer.encoder, decoder = serializer.decoder, unique = otcons.contains(C.UNIQUE)
             )
             otherColumns.add(column)
@@ -153,7 +153,7 @@ class Mapper(
         throw FatalMapperException("Serializer missing for: $decodeInfo")
     }
 
-    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class as KClass<*>)
+    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class)
     fun getTableInfo(kclass: KClass<*>) = this.tableInfos.firstOrNull { it.kclass == kclass } ?: throw FatalMapperException("Table '${kclass.simpleName}' missing in registered tables")
     private fun getSerializer(schema: Schema, table: Table<*>, propKClass: KClass<*>): TypeSerializer<*> {
         val propSerializers = table.columnSerializers.filter { it.first == propKClass }.map { it.second }

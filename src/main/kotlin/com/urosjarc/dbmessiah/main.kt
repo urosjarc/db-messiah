@@ -4,7 +4,6 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.impl.DbMessiahEngine
-import com.urosjarc.dbmessiah.impl.DbMessiahService
 import com.urosjarc.dbmessiah.impl.basicDbTypeSerializers
 import com.urosjarc.dbmessiah.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.sqlite.SqliteService
@@ -40,7 +39,6 @@ fun main() {
         Entity2::id_entity2
     )
     val serializer = SqliteSerializer(
-        escaper = "'",
         globalSerializers = basicDbTypeSerializers,
         schemas = listOf(
             Schema(
@@ -65,12 +63,13 @@ fun main() {
     )
     val e = Entity(id_entity = null, name = "Uros", username = "urosjarc", age = 31, money = 0f)
     val e2 = e.copy(name = "asdfasdfasdfsdf")
-    service.dropTable(kclass = Entity::class)
-    service.createTable(kclass = Entity::class)
-    service.insertTable(e)
-    service.insertTable(e2)
+    service.drop(kclass = Entity::class)
+    service.create(kclass = Entity::class)
+    service.insert(e)
+    service.insert(e2)
     e.username = "asdfasdf"
-    println(service.updateTable(e))
-
-    println(service.selectTable(kclass = Entity::class))
+    service.update(e)
+    println(e2)
+    println(service.delete(e2))
+    println(service.select(kclass = Entity::class))
 }
