@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import com.codahale.metrics.MetricRegistry
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
@@ -33,6 +34,7 @@ fun main() {
     val engine = DbMessiahEngine(config = HikariConfig().apply {
         jdbcUrl = "jdbc:sqlite:/home/urosjarc/vcs/db-jesus/src/test/resources/chinook.sqlite"
         username = null; password = null
+        metricRegistry = MetricRegistry()
     })
 
     val serializer = SqliteSerializer(
@@ -64,7 +66,7 @@ fun main() {
     val service = SqliteService(eng = engine, ser = serializer)
 
     TestService(service = service).apply {
-        this.test_crud_cycle()
+        this.test_crud_cycle(1000)
     }
 
 }

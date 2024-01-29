@@ -14,8 +14,8 @@ interface Service {
     /**
      * Table manipulation
      */
-    fun <T : Any> drop(kclass: KClass<T>): Boolean
-    fun <T : Any> create(kclass: KClass<T>): Boolean
+    fun <T : Any> drop(kclass: KClass<T>): Int
+    fun <T : Any> create(kclass: KClass<T>): Int
 
 
     /**

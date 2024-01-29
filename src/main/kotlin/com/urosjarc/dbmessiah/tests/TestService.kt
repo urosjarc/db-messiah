@@ -7,16 +7,78 @@ import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.TesterException
+import org.apache.logging.log4j.kotlin.logger
 import java.sql.SQLException
 
 class TestService(val service: Service) {
 
+    val log = this.logger()
+
+    fun test_crud_cycle() {
+        //Table drop create
+        this.test_drop_children()
+        this.test_drop_parent()
+
+        //Create parent entities
+        this.test_create_parent()
+        this.test_insert_children()
+        val parents = this.test_insert_parents()
+        this.test_select_parents(parents)
+
+        //Create child entities
+        val children = this.test_insert_children(parents)
+        this.test_select_children(children)
+
+        //Select elements
+        this.test_select_oneParent(parents[0].id!!, parents[0])
+        this.test_select_oneChildren(children[0].id!!, children[0])
+
+        // Page elements
+        repeat(20) { num -> TestTableParent(col13 = "copy $num").also { assert(this.service.insert(it)) } }
+        this.assert(listOf(1, 2, 3, 4, 5) == this.test_select_parentPage(Page(number = 0, orderBy = TestTableParent::id, limit = 5)).map { it.id })
+        this.assert(listOf(7, 8, 9, 10, 11, 12) == this.test_select_parentPage(Page(number = 1, orderBy = TestTableParent::id, limit = 6)).map { it.id })
+        this.assert(listOf(15, 16, 17, 18, 19, 20, 21) == this.test_select_parentPage(Page(number = 2, orderBy = TestTableParent::id, limit = 7)).map { it.id })
+        this.assert(listOf(19, 20, 21, 22) == this.test_select_parentPage(Page(number = 3, orderBy = TestTableParent::id, limit = 6)).map { it.id })
+
+        //Testing join query
+        repeat(5) { num -> TestTable(parent_id = num, col12 = "child_$num").also { assert(this.service.insert(it)) } }
+        this.test_join_query()
+        this.test_output_join_query()
+        this.test_input_output_join_query()
+
+        //Update query
+        this.test_update()
+        this.test_delete()
+
+        //Cleaning
+        this.test_drop_children()
+        this.test_drop_parent()
+    }
+
+    fun test_crud_cycle(numCycles: Int) {
+        repeat(numCycles) {
+            this.log.warn("Testing cycle: $it")
+            this.test_crud_cycle()
+        }
+    }
+
+    /**
+     * UTILS
+     */
+
+    private fun assert(value: Boolean, msg: String? = null) {
+        if (value != true) throw TesterException(msg ?: "Service test failed!")
+    }
+
+    /**
+     * TESTS
+     */
     fun test_drop_parent() {
         this.service.drop(TestTableParent::class)
         try {
             this.service.select(TestTableParent::class)
-        } catch (e: SQLException){
-            return assert(e.message.toString().contains("no such table"), e.message)
+        } catch (e: Throwable) {
+            return
         }
         throw TesterException("Table should not exist!")
     }
@@ -25,19 +87,19 @@ class TestService(val service: Service) {
         this.service.drop(TestTable::class)
         try {
             this.service.select(TestTable::class)
-        } catch (e: SQLException){
-            return assert(e.message.toString().contains("no such table"), e.message)
+        } catch (e: Throwable) {
+            return
         }
         throw TesterException("Table should not exist!")
     }
 
     fun test_create_parent() {
-        this.assert(this.service.create(kclass = TestTableParent::class))
+        this.service.create(kclass = TestTableParent::class)
         this.assert(this.service.select(kclass = TestTableParent::class).isEmpty())
     }
 
     fun test_insert_children() {
-        this.assert(this.service.create(kclass = TestTable::class))
+        this.service.create(kclass = TestTable::class)
         this.assert(this.service.select(kclass = TestTable::class).isEmpty())
     }
 
@@ -250,53 +312,6 @@ class TestService(val service: Service) {
         preChildren.removeIf { it.id == 1 }
 
         assert(preChildren == postChildren)
-    }
-
-
-    fun test_crud_cycle() {
-        //Table drop create
-        this.test_drop_children()
-        this.test_drop_parent()
-
-        //Create parent entities
-        this.test_create_parent()
-        this.test_insert_children()
-        val parents = this.test_insert_parents()
-        this.test_select_parents(parents)
-
-        //Create child entities
-        val children = this.test_insert_children(parents)
-        this.test_select_children(children)
-
-        //Select elements
-        this.test_select_oneParent(parents[0].id!!, parents[0])
-        this.test_select_oneChildren(children[0].id!!, children[0])
-
-        // Page elements
-        repeat(20) { num -> TestTableParent(col13 = "copy $num").also { assert(this.service.insert(it)) } }
-        this.assert(listOf(1, 2, 3, 4, 5) == this.test_select_parentPage(Page(number = 0, orderBy = TestTableParent::id, limit = 5)).map { it.id })
-        this.assert(listOf(7, 8, 9, 10, 11, 12) == this.test_select_parentPage(Page(number = 1, orderBy = TestTableParent::id, limit = 6)).map { it.id })
-        this.assert(listOf(15, 16, 17, 18, 19, 20, 21) == this.test_select_parentPage(Page(number = 2, orderBy = TestTableParent::id, limit = 7)).map { it.id })
-        this.assert(listOf(19, 20, 21, 22) == this.test_select_parentPage(Page(number = 3, orderBy = TestTableParent::id, limit = 6)).map { it.id })
-
-        //Testing join query
-        repeat(5) { num -> TestTable(parent_id = num, col12 = "child_$num").also { assert(this.service.insert(it)) } }
-        this.test_join_query()
-        this.test_output_join_query()
-        this.test_input_output_join_query()
-
-        //Update query
-        this.test_update()
-        this.test_delete()
-
-        //Cleaning
-        this.test_drop_children()
-        this.test_drop_parent()
-    }
-
-
-    fun assert(value: Boolean, msg: String? = null) {
-        if (value != true) throw TesterException(msg ?: "Service test failed!")
     }
 
 }

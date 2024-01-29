@@ -22,6 +22,9 @@ dependencies {
     //Pool connection
     this.implementation("com.zaxxer:HikariCP:5.1.0")
 
+    //Tracking metrics
+    this.implementation("io.dropwizard.metrics:metrics-core:4.2.25")
+
     //Logging api
     this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
 
