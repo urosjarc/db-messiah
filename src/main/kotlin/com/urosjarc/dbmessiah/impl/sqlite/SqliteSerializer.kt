@@ -19,7 +19,7 @@ class SqliteSerializer(
 ) : Serializer {
 
     override val mapper = Mapper(
-        testCRUD = testCRUD,
+        test = testCRUD,
         escaper = Escaper(
             type = Escaper.Type.DOUBLE_QUOTES,
             joinStr = "."

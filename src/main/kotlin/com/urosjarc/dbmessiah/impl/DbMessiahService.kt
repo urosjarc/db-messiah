@@ -25,21 +25,21 @@ open class DbMessiahService(
     override fun <T : Any> select(kclass: KClass<T>): List<T> {
         val query = this.ser.selectQuery(kclass = kclass)
         return this.eng.executeQuery(query = query) {
-            this.ser.mapper.decode(kclass = kclass, resultSet = it)
+            this.ser.mapper.decode(resultSet = it, kclass = kclass)
         }
     }
 
     override fun <T : Any, K : Any> select(kclass: KClass<T>, pk: K): T? {
         val query = this.ser.selectQuery(kclass = kclass, pk = pk)
         return this.eng.executeQuery(query = query) {
-            this.ser.mapper.decode(kclass = kclass, resultSet = it)
+            this.ser.mapper.decode(resultSet = it, kclass = kclass)
         }.firstOrNull()
     }
 
     override fun <T : Any> select(kclass: KClass<T>, page: Page<T>): List<T> {
         val query = this.ser.selectQuery(kclass = kclass, page = page)
         return this.eng.executeQuery(query = query) {
-            this.ser.mapper.decode(kclass = kclass, resultSet = it)
+            this.ser.mapper.decode(resultSet = it, kclass = kclass)
         }
     }
 
@@ -67,14 +67,14 @@ open class DbMessiahService(
     override fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): List<OUT> {
         val query = this.ser.selectQuery(output = output, getSql = getSql)
         return this.eng.executeQuery(query = query) {
-            this.ser.mapper.decode(resultSet = it, output)
+            this.ser.mapper.decode(resultSet = it, kclass = output)
         }
     }
 
     override fun <IN : Any, OUT : Any> query(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): List<OUT> {
         val query = this.ser.selectQuery(input = input, output = output, getSql = getSql)
         return this.eng.executeQuery(query = query) {
-            this.ser.mapper.decode(resultSet = it, output)
+            this.ser.mapper.decode(resultSet = it, kclass = output)
         }
     }
 

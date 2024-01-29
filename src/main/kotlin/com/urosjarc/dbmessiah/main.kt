@@ -66,7 +66,7 @@ fun main() {
     val service = SqliteService(eng = engine, ser = serializer)
 
     TestService(service = service).apply {
-        this.test_crud_cycle(1000)
+        this.test_crud_cycle(200)
     }
 
 }

@@ -1,11 +1,11 @@
 package com.urosjarc.dbmessiah.domain.queries
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.extend.ext_kclass
+import com.urosjarc.dbmessiah.exceptions.FatalMapperException
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-class QueryBuilderInOut<IN : Any, OUT: Any>(
+class QueryBuilderInOut<IN : Any, OUT : Any>(
     input: IN,
     output: KClass<OUT>,
     mapper: Mapper
@@ -16,7 +16,7 @@ class QueryBuilderInOut<IN : Any, OUT: Any>(
     }
 
     fun inp(kp: KProperty1<IN, *>): String {
-        val ser = this.mapper.getGlobalSerializer(kclass = kp.ext_kclass)
+        val ser = this.mapper.getSerializer(kp)
 
         val qv = QueryValue(
             name = kp.name,

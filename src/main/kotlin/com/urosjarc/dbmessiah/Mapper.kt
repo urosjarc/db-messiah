@@ -10,45 +10,92 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
-import com.urosjarc.dbmessiah.exceptions.FatalMapperException
-import com.urosjarc.dbmessiah.exceptions.SerializerException
-import com.urosjarc.dbmessiah.extend.ext_javaFields
-import com.urosjarc.dbmessiah.extend.ext_kclass
-import com.urosjarc.dbmessiah.tests.TestMapper
-import com.urosjarc.dbmessiah.tests.TestSerializer
 import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
+import com.urosjarc.dbmessiah.exceptions.FatalMapperException
+import com.urosjarc.dbmessiah.tests.TestConfiguration
+import com.urosjarc.dbmessiah.tests.TestMapper
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KParameter
-import kotlin.reflect.KProperty1
+import kotlin.reflect.*
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.javaField
+
 
 class Mapper(
-    private val testCRUD: Boolean,
+    private val test: Boolean,
     val escaper: Escaper,
-    private val schemas: List<Schema>,
-    private val globalSerializers: List<TypeSerializer<*>>,
+    val schemas: List<Schema>,
+    val globalSerializers: List<TypeSerializer<*>>,
     val globalInputs: List<KClass<*>>,
     val globalOutputs: List<KClass<*>>
 ) {
-    private var tableInfos = listOf<TableInfo>()
-
-    private val tableKClass_to_SchemaMap = mutableMapOf<KClass<*>, Schema>()
-    private val tableKClass_to_tableInfo = mutableMapOf<KClass<*>, TableInfo>()
-    private val fkColumn_to_tableKClass = mutableMapOf<ForeignColumn, KClass<*>>()
-
     val log = this.logger()
 
+    //All table informations
+    var tableInfos = listOf<TableInfo>()
+
+    /**
+     * LINKED LISTS
+     */
+
+    //Link table to schema
+    private val tableKClass_to_SchemaMap = mutableMapOf<KClass<*>, Schema>()
+
+    //Link table to table info
+    private val tableKClass_to_tableInfo = mutableMapOf<KClass<*>, TableInfo>()
+
+    //Link foreign column to foreign table
+    private val fkColumn_to_tableKClass = mutableMapOf<ForeignColumn, KClass<*>>()
+
+    /**
+     * MAPPERS
+     */
+
+    //Link table kclass to primary constructor
+    private val kclass_to_constructor = mutableMapOf<KClass<*>, KFunction<Any>?>()
+
+    //Link table kclass to list of constructor parameters
+    private val kclass_to_constructorParameters = mutableMapOf<KClass<*>, List<KParameter>>()
+
+    //Link table kclass to internal fields
+    private val kclass_to_kprops = mutableMapOf<KClass<*>, List<KProperty1<out Any, *>>>()
+
+    //Link table constructor parameter to serializer
+    private val kparam_to_serializer = mutableMapOf<KParameter, TypeSerializer<out Any>>()
+
+    //Link table property to serializer
+    private val kprop_to_serializer = mutableMapOf<KProperty1<out Any, Any?>, TypeSerializer<out Any>>()
+
+    /**
+     * GETTERS
+     */
+    fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, out Any?>> =
+        this.kclass_to_kprops[kclass] ?: throw FatalMapperException("Could not find properties of class '${kclass.simpleName}'")
+
+    fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
+        this.kparam_to_serializer[kparam] ?: throw FatalMapperException("Could not find serializer of parameter '${kparam.name}'")
+
+    fun getSerializer(kprop: KProperty1<out Any, out Any?>): TypeSerializer<out Any> =
+        this.kprop_to_serializer[kprop] ?: throw FatalMapperException("Could not find serializer of property '${kprop.name}'")
+
+    fun getConstructor(kclass: KClass<*>): KFunction<Any> =
+        this.kclass_to_constructor[kclass] ?: throw FatalMapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+
+    fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
+        this.kclass_to_constructorParameters[kclass] ?: throw FatalMapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+
     init {
-        this.init()
+        this.injectTestTables()
+        this.createAssociationMaps()
+        this.testSerializer()
+        this.createTablesInfos()
+        this.testMapper()
     }
 
-    private fun init() {
-        //If user activated crud testing then 2 new tables for testing are injected to first schema
-        if (this.testCRUD) {
+    private fun injectTestTables() {
+        if (this.test) {
             val testTableParent = Table(primaryKey = TestTableParent::id)
             val testTable = Table(
                 primaryKey = TestTable::id,
@@ -58,8 +105,39 @@ class Mapper(
             )
             schemas[0].tables += listOf(testTableParent, testTable)
         }
+    }
 
-        TestSerializer(schemas = this.schemas, globalSerializers = this.globalSerializers, this.globalInputs, this.globalOutputs).also {
+    private fun createAssociationMaps(kclass: KClass<*>, serializers: List<TypeSerializer<*>>) {
+        val kparams = kclass.primaryConstructor?.parameters ?: throw FatalMapperException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+        val kprops = kclass.memberProperties.filter { it.javaField != null }
+
+        this.kclass_to_constructor[kclass] = kclass.primaryConstructor
+        this.kclass_to_constructorParameters[kclass] = kparams
+        this.kclass_to_kprops[kclass] = kprops
+
+        kparams.forEach { p ->
+            kparam_to_serializer[p] = serializers.firstOrNull { it.kclass == p.type.classifier }
+                ?: throw FatalMapperException("Could not find serializer for parameter '${kclass.simpleName}.${p.name}'")
+        }
+        kprops.forEach { p ->
+            kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
+                ?: throw FatalMapperException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
+        }
+    }
+
+    private fun createAssociationMaps() {
+        this.schemas.forEach { s ->
+            s.tables.forEach { t ->
+                this.createAssociationMaps(kclass = t.kclass, serializers = (t.serializers + s.serializers + this.globalSerializers))
+            }
+        }
+        (this.globalInputs + this.globalOutputs).forEach {
+            this.createAssociationMaps(kclass = it, serializers = this.globalSerializers)
+        }
+    }
+
+    private fun testSerializer() {
+        TestConfiguration(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
             //Test uniqueness
@@ -81,9 +159,9 @@ class Mapper(
             it.`14-th Test - If all output classes have no default values`()
         }
 
-        /**
-         * CREATE TABLE INFOS
-         */
+    }
+
+    private fun createTablesInfos() {
         val registeredTableInfos = mutableListOf<TableInfo>()
         this.schemas.forEach { schema ->
             schema.tables.forEach { table ->
@@ -104,9 +182,11 @@ class Mapper(
                 column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw FatalMapperException("Could not find link between foreign table and table info")
             }
         }
+    }
 
+    private fun testMapper() {
         //Test registered tables
-        TestMapper(tableInfos = this.tableInfos).also {
+        TestMapper(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
             //Test consistency
@@ -127,7 +207,7 @@ class Mapper(
         val pkFkProperties: MutableSet<Any> = mutableSetOf(table.primaryKey)
 
         //Primary columns
-        val pkSerializer = this.getAnySerializer(schema = schema, table = table, propKClass = table.primaryKey.ext_kclass)
+        val pkSerializer = getSerializer(table.primaryKey)
         val pkcons = table.primaryKeyConstraints
         val pkColumn = PrimaryColumn(
             autoIncrement = pkcons.contains(C.AUTO_INC),
@@ -138,7 +218,7 @@ class Mapper(
         //Foreign columns
         val fkColumns = mutableListOf<ForeignColumn>()
         for ((fromProp, toKClass) in table.foreignKeys) {
-            val serializer = this.getAnySerializer(schema = schema, table = table, propKClass = fromProp.ext_kclass)
+            val serializer = this.getSerializer(fromProp)
             val fkcons = table.constraintsFor(kprop = fromProp)
             val column = ForeignColumn(
                 kprop = fromProp as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
@@ -151,12 +231,13 @@ class Mapper(
 
         //Other columns
         val otherColumns = mutableListOf<OtherColumn>()
-        table.kclass.ext_javaFields.filter { !pkFkProperties.contains(it) }.forEach {
-            val serializer = this.getAnySerializer(schema = schema, table = table, propKClass = it.ext_kclass)
-            val otcons = table.constraintsFor(kprop = it)
+        val javaFields = this.getKProps(kclass = table.kclass)
+        javaFields.filter { !pkFkProperties.contains(it) }.forEach {
+            val serializer = this.getSerializer(it)
+            val constraints = table.constraintsFor(kprop = it)
             val column = OtherColumn(
                 kprop = it as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
-                encoder = serializer.encoder, decoder = serializer.decoder, unique = otcons.contains(C.UNIQUE)
+                encoder = serializer.encoder, decoder = serializer.decoder, unique = constraints.contains(C.UNIQUE)
             )
             otherColumns.add(column)
         }
@@ -169,45 +250,30 @@ class Mapper(
         )
     }
 
-    private fun decode(resultSet: ResultSet, columnInt: Int, decodeInfo: DecodeInfo): Any? {
-        for (tser in this.globalSerializers) {
-            if (decodeInfo.kparam.ext_kclass == tser.kclass) {
-                return tser.decoder(resultSet, columnInt, decodeInfo)
-            }
-        }
-        throw FatalMapperException("Serializer missing for: $decodeInfo")
-    }
-
-    fun getTableInfo(obj: Any): TableInfo = this.getTableInfo(obj::class)
-    fun getTableInfo(kclass: KClass<*>) = this.tableInfos.firstOrNull { it.kclass == kclass } ?: throw FatalMapperException("Table '${kclass.simpleName}' missing in registered tables")
-    private fun getAnySerializer(schema: Schema, table: Table<*>, propKClass: KClass<*>): TypeSerializer<*> {
-        val propSerializers = table.columnSerializers.filter { it.first == propKClass }.map { it.second }
-
-        return (propSerializers + schema.serializers + this.globalSerializers)
-            .firstOrNull { it.kclass == propKClass } ?: throw FatalMapperException("Serializer for type '${propKClass.simpleName}' not found in schema '${schema.name}' nor in table '${table.name}'")
-    }
-
-    fun getGlobalSerializer(kclass: KClass<*>): TypeSerializer<*> =
-        this.globalSerializers.firstOrNull { it.kclass == kclass } ?: throw SerializerException("Serializer for type '${kclass.simpleName}' not found in global serializers")
-
+    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw FatalMapperException("Could not find table info for table '${kclass.simpleName}'")
+    fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
-        val constructor = kclass.primaryConstructor!!
-        val args = mutableMapOf<KParameter, Any?>()
 
-        for (kparam in constructor.parameters) {
+        val constructor = this.getConstructor(kclass = kclass)
+        val constructorParameters = this.getConstructorParameters(kclass = kclass)
+
+        val args = mutableMapOf<KParameter, Any?>()
+        for (kparam in constructorParameters) {
             try {
-                val columnInt = resultSet.findColumn(kparam.name)
+                val i = resultSet.findColumn(kparam.name)
                 val decodeInfo = DecodeInfo(kclass = kclass, kparam = kparam)
-                args[kparam] = this.decode(resultSet = resultSet, columnInt = columnInt, decodeInfo = decodeInfo)
+                val decoder = this.getSerializer(kparam).decoder
+                args[kparam] = decoder(resultSet, i, decodeInfo)
             } catch (e: Throwable) {
                 throw FatalMapperException("Decoding error", cause = e)
             }
         }
 
         try {
-            return constructor.callBy(args = args)
+            return constructor.callBy(args = args) as T
         } catch (e: Throwable) {
             throw FatalMapperException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
         }
     }
+
 }

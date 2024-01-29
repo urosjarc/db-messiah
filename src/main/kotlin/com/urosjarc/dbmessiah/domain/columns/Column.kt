@@ -5,30 +5,30 @@ import com.urosjarc.dbmessiah.domain.serialization.Decoder
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.ColumnException
-import com.urosjarc.dbmessiah.extend.ext_kclass
 import java.sql.JDBCType
+import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
 abstract class Column(
-    open val kprop: KProperty1<Any, Any?>,
+    val kprop: KProperty1<Any, Any?>,
     val dbType: String,
     val jdbcType: JDBCType,
     val encoder: Encoder<*>,
     val decoder: Decoder<*>,
 ) {
     lateinit var table: TableInfo
-    val kclass get() = this.kprop.ext_kclass
-    val name get() = this.table.escaper.wrap(this.kprop.name)
+
+    val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
+    val name: String get() = this.table.escaper.wrap(this.kprop.name)
     val path: String get() = this.table.escaper.wrapJoin(this.table.schema, this.table.name, this.kprop.name)
+
+    val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
     open val inited get() = this::table.isInitialized
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
-    override fun hashCode(): Int = "${this.kprop.name}${kclass.simpleName}".hashCode()
-
-    override fun toString(): String {
-        return "Column(name=${this.name}, dbType=${this.dbType}, jdbcType=${this.jdbcType.name}"
-    }
-
+    override fun hashCode(): Int = this.hash
+    override fun toString(): String = "Column(name=${this.name}, dbType=${this.dbType}, jdbcType=${this.jdbcType.name})"
+    fun queryValue(obj: Any): QueryValue = QueryValue(name = this.name, value = this.getValue(obj = obj), jdbcType = this.jdbcType, encoder = this.encoder)
     fun setValue(obj: Any, value: Any?) {
         try {
             val kp = this.kprop as KMutableProperty1<Any, Any?>
@@ -51,6 +51,4 @@ abstract class Column(
         }
 
     }
-
-    fun queryValue(obj: Any): QueryValue = QueryValue(name = this.kprop.name, value = this.getValue(obj = obj), jdbcType = this.jdbcType, encoder = this.encoder)
 }
