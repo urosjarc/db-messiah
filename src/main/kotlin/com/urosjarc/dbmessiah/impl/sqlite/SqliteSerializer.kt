@@ -14,7 +14,8 @@ class SqliteSerializer(
     override val testCRUD: Boolean,
     override val schemas: List<Schema>,
     override val globalSerializers: List<TypeSerializer<*>>,
-    override val globalInputs: List<KClass<*>>
+    override val globalInputs: List<KClass<*>>,
+    override val globalOutputs: List<KClass<*>>
 ) : Serializer {
 
     override val mapper = Mapper(
@@ -25,7 +26,8 @@ class SqliteSerializer(
         ),
         schemas = schemas.toList(),
         globalSerializers = globalSerializers,
-        globalInputs = globalInputs
+        globalInputs = globalInputs,
+        globalOutputs = globalOutputs
     )
 
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {

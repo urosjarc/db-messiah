@@ -9,9 +9,9 @@ import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
+import kotlin.reflect.full.primaryConstructor
 
-class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<TypeSerializer<*>>, val inputs: List<KClass<*>>) {
+class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<TypeSerializer<*>>, val inputs: List<KClass<*>>, val outputs: List<KClass<*>>) {
     /**
      * CHECK FOR EMPTYNESS
      */
@@ -170,6 +170,24 @@ class TestSerializer(val schemas: List<Schema>, val globalSerializers: List<Type
                 }
 
             }
+        }
+    }
+
+    fun `13-th Test - If all input classes have imutable and not null properties`() {
+        this.inputs.forEach { input ->
+            input.ext_javaFields.forEach { kp ->
+                if (kp.returnType.isMarkedNullable) {
+                    throw SerializerException("Input property '${input.simpleName}.${kp.name}' can be null which is not allowed on any input class!")
+                }
+            }
+        }
+    }
+
+    fun `14-th Test - If all output classes have no default values`() {
+        this.outputs.forEach { input ->
+            val conParams = (input.primaryConstructor?.parameters ?: emptyList()).filter { p -> p.isOptional }.map { it.name }
+            if (conParams.isNotEmpty())
+                throw SerializerException("Output class '${input.simpleName}' have primary constructor with optional arguments $conParams, which is not allowed on any output class!")
         }
     }
 

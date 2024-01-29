@@ -1,7 +1,9 @@
 package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.queries.Page
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
+import com.urosjarc.dbmessiah.domain.queries.Query
+import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
+import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
 import kotlin.reflect.KClass
 
 interface Service {
@@ -27,12 +29,13 @@ interface Service {
      * Selects
      */
     fun <T : Any> select(kclass: KClass<T>): List<T>
-    fun <T : Any, K: Any> select(kclass: KClass<T>, pk: K): T?
+    fun <T: Any, K: Any> select(kclass: KClass<T>, pk: K): T?
     fun <T : Any> select(kclass: KClass<T>, page: Page<T>): List<T>
 
     /**
      * Generic queries
      */
-    fun <T : Any> query(output: KClass<T>, getSql: () -> String): List<T>
-    fun <T : Any> query(input: T, output: KClass<T>, getSql: (queryBuilder: QueryBuilder<T>) -> String): List<T>
+    fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): List<OUT>
+
+    fun <IN : Any, OUT: Any> query(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): List<OUT>
 }

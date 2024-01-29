@@ -2,7 +2,8 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
+import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
+import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
@@ -13,6 +14,7 @@ interface Serializer {
     val schemas: List<Schema>
     val globalSerializers: List<TypeSerializer<*>>
     val globalInputs: List<KClass<*>>
+    val globalOutputs: List<KClass<*>>
 
     /**
      * MANAGING TABLES
@@ -38,8 +40,13 @@ interface Serializer {
     /**
      * Generic queries
      */
-    fun <T : Any> selectQuery(obj: T, getSql: (queryBuilder: QueryBuilder<T>) -> String): Query {
-        val queryBuilder = QueryBuilder(sourceObj = obj, mapper = this.mapper)
+    fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): Query {
+        val queryBuilder = QueryBuilderOut(input = Unit, output = output, mapper = this.mapper)
+        return queryBuilder.build(sql = getSql(queryBuilder))
+    }
+
+    fun <IN : Any, OUT : Any> selectQuery(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): Query {
+        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.mapper)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 

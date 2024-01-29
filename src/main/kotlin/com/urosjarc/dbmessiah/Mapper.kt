@@ -16,8 +16,8 @@ import com.urosjarc.dbmessiah.extend.ext_javaFields
 import com.urosjarc.dbmessiah.extend.ext_kclass
 import com.urosjarc.dbmessiah.tests.TestMapper
 import com.urosjarc.dbmessiah.tests.TestSerializer
-import com.urosjarc.dbmessiah.tests.TestTable
-import com.urosjarc.dbmessiah.tests.TestTableParent
+import com.urosjarc.dbmessiah.domain.test.TestTable
+import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.KClass
@@ -28,10 +28,11 @@ import kotlin.reflect.full.primaryConstructor
 
 class Mapper(
     private val testCRUD: Boolean,
-    private val escaper: Escaper,
+    val escaper: Escaper,
     private val schemas: List<Schema>,
     private val globalSerializers: List<TypeSerializer<*>>,
-    private val globalInputs: List<KClass<*>>
+    val globalInputs: List<KClass<*>>,
+    val globalOutputs: List<KClass<*>>
 ) {
     private var tableInfos = listOf<TableInfo>()
 
@@ -58,7 +59,7 @@ class Mapper(
             schemas[0].tables += listOf(testTableParent, testTable)
         }
 
-        TestSerializer(schemas = this.schemas, globalSerializers = this.globalSerializers, this.globalInputs).also {
+        TestSerializer(schemas = this.schemas, globalSerializers = this.globalSerializers, this.globalInputs, this.globalOutputs).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
             //Test uniqueness
@@ -76,6 +77,8 @@ class Mapper(
             it.`10-th Test - If schemas objects have appropriate serializer`()
             it.`11-th Test - If all input classes properties have appropriate serializer`()
             it.`12-th Test - If all primary keys that are autoincrement have integer dbType`()
+            it.`13-th Test - If all input classes have imutable and not null properties`()
+            it.`14-th Test - If all output classes have no default values`()
         }
 
         /**

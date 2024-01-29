@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.tests
+package com.urosjarc.dbmessiah.domain.test
 
 data class TestTable(
     var id: Int? = null,
@@ -27,10 +27,5 @@ data class TestTable(
     val col11: Char = 'a',
 
     //String
-    val col12: String = "12"
-)
-
-data class TestTableParent(
-    var id: Int? = null,
-    val col13: String = "12"
+    var col12: String = "12"
 )

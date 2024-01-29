@@ -1,26 +1,16 @@
 package com.urosjarc.dbmessiah.domain.queries
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.extend.ext_kclass
-import kotlin.reflect.KProperty1
+import org.apache.logging.log4j.kotlin.logger
 
-class QueryBuilder<T: Any>(val sourceObj: T, val mapper: Mapper) {
+open class QueryBuilder<IN>(
+    open val input: IN,
+    val mapper: Mapper,
+) {
 
+    val log = this.logger()
     val queryValues: MutableList<QueryValue> = mutableListOf()
 
-    fun add(kp: KProperty1<T, *>): String {
-        val ser = this.mapper.getGlobalSerializer(kclass = kp.ext_kclass)
+    fun build(sql: String) = Query(sql = sql, queryValues = this.queryValues.toTypedArray())
 
-        val qv = QueryValue(
-            name = kp.name,
-            jdbcType = ser.jdbcType,
-            encoder = ser.encoder,
-            value = kp.get(receiver = sourceObj)
-        )
-
-        this.queryValues.add(qv)
-        return "?"
-    }
-
-    fun build(sql: String) = Query(sql = sql, queryValues = queryValues.toTypedArray())
 }
