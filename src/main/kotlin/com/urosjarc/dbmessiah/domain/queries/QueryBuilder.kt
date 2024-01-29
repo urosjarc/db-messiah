@@ -11,6 +11,6 @@ open class QueryBuilder<IN>(
     val log = this.logger()
     val queryValues: MutableList<QueryValue> = mutableListOf()
 
-    fun build(sql: String) = Query(sql = sql, queryValues = this.queryValues.toTypedArray())
+    fun build(sql: String) = Query(sql = sql, values = this.queryValues.toTypedArray())
 
 }

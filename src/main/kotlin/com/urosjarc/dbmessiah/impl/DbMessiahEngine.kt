@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.impl
 
 import com.urosjarc.dbmessiah.Engine
+import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
@@ -8,10 +9,7 @@ import com.urosjarc.dbmessiah.exceptions.EngineException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.apache.logging.log4j.kotlin.logger
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLException
+import java.sql.*
 import kotlin.reflect.KProperty1
 
 
@@ -25,6 +23,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             throw Exception("Database source is closed or not running!")
         }
     }
+
     private val connection
         get(): Connection {
             try {
@@ -34,9 +33,10 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             }
         }
 
-    private fun prepareQuery(ps: PreparedStatement, query: Query) {
+    private fun prepareQuery(ps: PreparedStatement, queryValues: Array<out QueryValue>) {
         //Apply values to prepared statement
-        (query.queryValues).forEachIndexed { i, queryValue: QueryValue ->
+        (queryValues).forEachIndexed { i, queryValue: QueryValue ->
+            println(queryValue)
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             else (queryValue.encoder as Encoder<Any>)(ps, i + 1, queryValue.value) //If value is not null encoding is done over user defined encoder !!!
         }
@@ -68,7 +68,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         try {
             //Prepare statement and query
             val ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, query = query)
+            this.prepareQuery(ps = ps, queryValues = query.values)
 
             //Define results
             val objs = mutableListOf<T>()
@@ -94,6 +94,46 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         }
     }
 
+    override fun executeBatch(batchQuery: BatchQuery): Int {
+        val conn = this.connection
+        var ps: PreparedStatement? = null
+        var numUpdates = 0
+
+        try {
+            if(batchQuery.sql.contains("UPDATE")){
+                println(batchQuery.sql)
+
+            }
+            //Prepare statement and query
+            val ps = conn.prepareStatement(batchQuery.sql)
+
+            var i = 0
+            for (values in batchQuery.valueMatrix) {
+                this.prepareQuery(ps = ps, queryValues = values.toTypedArray())
+                ps.addBatch()
+                if (++i % 1_000 == 0) {
+                    numUpdates += ps.executeBatch().sum()
+                    ps.clearParameters()
+                    i = 0
+                }
+            }
+            if (i > 0) numUpdates += ps.executeBatch().sum()
+
+            //Close everything
+            this.closeAll(conn = conn, ps = ps)
+
+            //Return result
+            return numUpdates
+
+        } catch (e: SQLException) {
+            this.closeAll(conn = conn, ps = ps)
+            throw EngineException(msg = "Could not batch query statement!", cause = e)
+        } catch (e: Throwable) {
+            this.closeAll(conn = conn, ps = ps)
+            throw EngineException(msg = "Unknown exception", cause = e)
+        }
+    }
+
     override fun executeUpdate(query: Query): Int {
         val conn = this.connection
         var ps: PreparedStatement? = null
@@ -101,7 +141,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         try {
             //Prepare statement
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, query = query)
+            this.prepareQuery(ps = ps, queryValues = query.values)
 
             //Get info
             val count: Int = ps.executeUpdate()
@@ -130,7 +170,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         try {
             //Prepare statement
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, query = query)
+            this.prepareQuery(ps = ps, queryValues = query.values)
 
             //Get info
             val numUpdates = ps.executeUpdate()
@@ -197,7 +237,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
 
         try {
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, query = query)
+            this.prepareQuery(ps = ps, queryValues = query.values)
             var isResultSet = ps.execute()
 
             var count = 0

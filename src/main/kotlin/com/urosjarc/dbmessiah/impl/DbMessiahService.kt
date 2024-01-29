@@ -3,6 +3,7 @@ package com.urosjarc.dbmessiah.impl
 import com.urosjarc.dbmessiah.Engine
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
+import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
@@ -49,6 +50,19 @@ open class DbMessiahService(
         val id = this.eng.executeInsert(query = query, primaryKey = T.primaryKey.kprop) { rs, i -> rs.getInt(i) }
         T.primaryKey.setValue(obj = obj, value = id)
         return true
+    }
+
+    override fun <T : Any> insertBatch(vararg objs: T): Int {
+        val T = this.ser.mapper.getTableInfo(obj = objs[0])
+        val query = this.ser.insertQuery(obj = objs[0])
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = objs.map { T.values(obj = it).toList() })
+        return this.eng.executeBatch(batchQuery = batchQuery)
+    }
+    override fun <T : Any> updateBatch(vararg objs: T): Int {
+        val T = this.ser.mapper.getTableInfo(obj = objs[0])
+        val query = this.ser.updateQuery(obj = objs[0])
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = objs.map { T.values(obj = it).toList() })
+        return this.eng.executeBatch(batchQuery = batchQuery)
     }
 
     override fun <T : Any> update(obj: T): Boolean {

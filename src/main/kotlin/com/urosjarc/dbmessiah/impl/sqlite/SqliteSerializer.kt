@@ -48,7 +48,7 @@ class SqliteSerializer(
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
-            val column = col.add("${it.name} ${it.dbType} $isNull")
+            col.add("${it.name} ${it.dbType} $isNull")
             constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})")
         }
 

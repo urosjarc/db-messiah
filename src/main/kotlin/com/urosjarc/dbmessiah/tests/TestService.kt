@@ -8,7 +8,6 @@ import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.TesterException
 import org.apache.logging.log4j.kotlin.logger
-import java.sql.SQLException
 
 class TestService(val service: Service) {
 
@@ -33,15 +32,19 @@ class TestService(val service: Service) {
         this.test_select_oneParent(parents[0].id!!, parents[0])
         this.test_select_oneChildren(children[0].id!!, children[0])
 
+        //Test batch insert on parents
+        this.test_parent_batch_insert()
+
         // Page elements
-        repeat(20) { num -> TestTableParent(col13 = "copy $num").also { assert(this.service.insert(it)) } }
         this.assert(listOf(1, 2, 3, 4, 5) == this.test_select_parentPage(Page(number = 0, orderBy = TestTableParent::id, limit = 5)).map { it.id })
         this.assert(listOf(7, 8, 9, 10, 11, 12) == this.test_select_parentPage(Page(number = 1, orderBy = TestTableParent::id, limit = 6)).map { it.id })
         this.assert(listOf(15, 16, 17, 18, 19, 20, 21) == this.test_select_parentPage(Page(number = 2, orderBy = TestTableParent::id, limit = 7)).map { it.id })
         this.assert(listOf(19, 20, 21, 22) == this.test_select_parentPage(Page(number = 3, orderBy = TestTableParent::id, limit = 6)).map { it.id })
 
+        //Test batch insert on children
+        this.test_child_batch_insert()
+
         //Testing join query
-        repeat(5) { num -> TestTable(parent_id = num, col12 = "child_$num").also { assert(this.service.insert(it)) } }
         this.test_join_query()
         this.test_output_join_query()
         this.test_input_output_join_query()
@@ -50,9 +53,40 @@ class TestService(val service: Service) {
         this.test_update()
         this.test_delete()
 
+        //Batch update
+        this.test_batch_update()
+
+
         //Cleaning
         this.test_drop_children()
         this.test_drop_parent()
+    }
+
+    private fun test_batch_update() {
+        val preAll = this.service.select(TestTable::class)
+        preAll.forEachIndexed { i, it ->
+            it.col12 = "BATCH UPDATE"
+        }
+        assert(preAll.size > 0)
+        val count = this.service.updateBatch(*preAll.toTypedArray())
+        assert(preAll.count() == count, count.toString())
+
+        val postAll = this.service.select(TestTable::class)
+        assert(preAll == postAll)
+    }
+
+    fun test_child_batch_insert() {
+        val batch = mutableListOf<TestTable>()
+        repeat(5) { num -> batch.add(TestTable(parent_id = num, col12 = "child_$num")) }
+        val count = this.service.insertBatch(*batch.toTypedArray())
+        assert(5 == count, count.toString())
+    }
+
+    fun test_parent_batch_insert() {
+        val batch = mutableListOf<TestTableParent>()
+        repeat(20) { num -> batch.add(TestTableParent(col13 = "copy $num")) }
+        val count = this.service.insertBatch(*batch.toTypedArray())
+        assert(20 == count, count.toString())
     }
 
     fun test_crud_cycle(numCycles: Int) {
