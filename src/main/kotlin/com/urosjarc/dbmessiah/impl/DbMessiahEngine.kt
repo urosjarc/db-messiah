@@ -19,13 +19,20 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
 
     val dataSource = HikariDataSource(config)
     val log = this.logger()
-    val history = mutableListOf<Connection>()
 
     init {
         if (this.dataSource.isClosed && !this.dataSource.isRunning) {
             throw Exception("Database source is closed or not running!")
         }
     }
+    private val connection
+        get(): Connection {
+            try {
+                return this.dataSource.connection
+            } catch (e: SQLException) {
+                throw EngineException(msg = "Could not get connection!", cause = e)
+            }
+        }
 
     private fun prepareQuery(ps: PreparedStatement, query: Query) {
         //Apply values to prepared statement
@@ -54,7 +61,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
     }
 
     override fun <T> executeQuery(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
-        val conn = this.dataSource.connection
+        val conn = this.connection
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 
@@ -88,7 +95,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
     }
 
     override fun executeUpdate(query: Query): Int {
-        val conn = this.dataSource.connection
+        val conn = this.connection
         var ps: PreparedStatement? = null
 
         try {
@@ -114,7 +121,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
     }
 
     override fun <T> executeInsert(query: Query, primaryKey: KProperty1<T, *>, onGeneratedKeysFail: String?, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
-        val conn = this.dataSource.connection
+        val conn = this.connection
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -184,7 +191,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
     }
 
     override fun executeQueries(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
-        val conn = this.dataSource.connection
+        val conn = this.connection
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 
