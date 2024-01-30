@@ -75,6 +75,9 @@ class TestService(val service: DbMessiahService) {
         this.test_transaction_rollback()
         this.test_transaction_savepoint()
 
+        //Delete in batch
+        this.test_delete_batch()
+
         //Delete all table
         this.test_delete_all_children()
         this.test_delete_all_parents()
@@ -83,6 +86,18 @@ class TestService(val service: DbMessiahService) {
         this.test_drop_children()
         this.test_drop_parent()
     }
+
+    private fun test_delete_batch() = service.query {
+        val preAll = it.select(TestTable::class)
+        assert(preAll.size == 7, preAll.size.toString())
+
+        val count = it.deleteBatch(preAll[0], preAll[1], preAll[2])
+        assert(count == 3, count.toString())
+
+        val postAll = it.select(TestTable::class)
+        assert(postAll.size == 4, postAll.size.toString())
+    }
+
 
     private fun test_query() = service.query{
         val preAll = it.select(TestTableParent::class)
@@ -113,9 +128,9 @@ class TestService(val service: DbMessiahService) {
 
     private fun test_delete_all_children() = service.query {
         val preAll = it.select(kclass = TestTable::class)
-        assert(preAll.size == 7, preAll.size.toString())
+        assert(preAll.size == 4, preAll.size.toString())
         val count = it.delete(TestTable::class)
-        assert(count == 7, count.toString())
+        assert(count == 4, count.toString())
         val postAll = it.select(kclass = TestTable::class)
         assert(postAll.size == 0)
     }
