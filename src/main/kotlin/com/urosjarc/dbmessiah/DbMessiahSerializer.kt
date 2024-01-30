@@ -1,9 +1,6 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.Page
-import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
+import com.urosjarc.dbmessiah.domain.queries.*
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
@@ -24,7 +21,7 @@ interface DbMessiahSerializer {
 
     fun <T : Any> dropQuery(kclass: KClass<T>): Query
     fun <T : Any> createQuery(kclass: KClass<T>): Query
-    fun <T: Any> deleteQuery(kclass: KClass<T>): Query
+    fun <T : Any> deleteQuery(kclass: KClass<T>): Query
 
     /**
      * MANAGING ROWS
@@ -32,6 +29,7 @@ interface DbMessiahSerializer {
     fun insertQuery(obj: Any): Query
     fun updateQuery(obj: Any): Query
     fun deleteQuery(obj: Any): Query
+
     /**
      * SELECTS
      */
@@ -51,5 +49,15 @@ interface DbMessiahSerializer {
         val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
+
+    fun selectQuery(getSql: (queryBuilder: QueryBuilder) -> String): Query {
+        val queryBuilder = QueryBuilder(mapper = this.repo)
+        return queryBuilder.build(sql = getSql(queryBuilder))
+    }
+
+    /**
+     * Call procedure
+     */
+    fun <IN : Any> callQuery(input: IN): Query
 
 }

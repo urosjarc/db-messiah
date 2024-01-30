@@ -59,6 +59,7 @@ class TestService(val service: DbMessiahService) {
         this.test_child_batch_insert()
 
         //Testing join query
+        this.test_query()
         this.test_join_query()
         this.test_output_join_query()
         this.test_input_output_join_query()
@@ -81,6 +82,24 @@ class TestService(val service: DbMessiahService) {
         //Cleaning
         this.test_drop_children()
         this.test_drop_parent()
+    }
+
+    private fun test_query() = service.query{
+        val preAll = it.select(TestTableParent::class)
+        val count = it.query {
+            """
+                insert into TestTableParent (col13) values ('QUERY');
+            """.trimIndent()
+        }
+        assert(count == 1)
+        val postAll = it.select(TestTableParent::class)
+
+        assert(postAll.size == preAll.size + 1)
+        val obj = postAll.first { it.col13 == "QUERY" }
+        it.delete(obj)
+
+        val postAll2 = it.select(TestTableParent::class)
+        assert(postAll2 == preAll)
     }
 
     private fun test_delete_all_parents() = service.transaction {

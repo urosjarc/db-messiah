@@ -1,9 +1,6 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.BatchQuery
-import com.urosjarc.dbmessiah.domain.queries.Page
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
+import com.urosjarc.dbmessiah.domain.queries.*
 import java.sql.Connection
 import kotlin.reflect.KClass
 
@@ -84,6 +81,18 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
         return this.exe.update(query = query)
     }
 
+    fun <T : Any> deleteBatch(vararg objs: T): Int {
+        val T = this.ser.repo.getTableInfo(obj = objs[0])
+        val query = this.ser.deleteQuery(obj = objs[0])
+        val valueMatrix = objs.map { listOf(T.primaryKey.queryValue(obj = it)) }
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
+        return this.exe.batch(batchQuery = batchQuery)
+    }
+    fun query(getSql: (queryBuilder: QueryBuilder) -> String): Int {
+        val query = this.ser.selectQuery(getSql = getSql)
+        return this.exe.update(query = query)
+    }
+
     fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): List<OUT> {
         val query = this.ser.selectQuery(output = output, getSql = getSql)
         return this.exe.query(query = query) {
@@ -98,4 +107,10 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
         }
     }
 
+    fun <IN : Any, OUT : Any> call(input: IN, output: KClass<OUT>): List<OUT> {
+        val query = this.ser.callQuery(input = input)
+        return this.exe.query(query = query) {
+            this.ser.repo.decode(resultSet = it, kclass = output)
+        }
+    }
 }

@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 class QueryBuilderInOut<IN : Any, OUT : Any>(
-    input: IN,
+    val input: IN,
     output: KClass<OUT>,
     mapper: DbMessiahRepository
 ) : QueryBuilderOut<IN, OUT>(input = input, mapper = mapper, output = output) {

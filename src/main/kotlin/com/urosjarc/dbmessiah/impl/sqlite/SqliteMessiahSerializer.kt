@@ -113,4 +113,8 @@ class SqliteMessiahSerializer(
         return Query(sql = "DELETE FROM ${T.path};")
     }
 
+    override fun <IN : Any> callQuery(input: IN): Query {
+        val T = this.repo.getTableInfo(obj = input)
+        return Query(sql = "{CALL ${input::class.simpleName}(${T.sqlInsertQuestions()})")
+    }
 }

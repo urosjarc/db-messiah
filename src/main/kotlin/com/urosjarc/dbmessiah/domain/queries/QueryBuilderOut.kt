@@ -9,7 +9,7 @@ open class QueryBuilderOut<IN: Any, OUT: Any>(
     input: IN,
     output: KClass<OUT>,
     mapper: DbMessiahRepository,
-) : QueryBuilder<IN>(input = input, mapper = mapper) {
+) : QueryBuilder(mapper = mapper) {
     init {
         if (!mapper.globalOutputs.contains(output))
             log.warn("Output class '${output.simpleName}' is not registered in serializers global outputs!")
