@@ -1,34 +1,26 @@
 package com.urosjarc.dbmessiah.impl.sqlite
 
-import com.urosjarc.dbmessiah.DbMessiahRepository
 import com.urosjarc.dbmessiah.DbMessiahSerializer
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 
 class SqliteMessiahSerializer(
-    schemas: List<Schema>,
+    schemas: List<Schema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     injectTestElements: Boolean = false,
-) : DbMessiahSerializer {
-
-    override val repo = DbMessiahRepository(
-        injectTestElements = injectTestElements,
-        escaper = Escaper(
-            type = Escaper.Type.DOUBLE_QUOTES,
-            joinStr = "."
-        ),
-        schemas = schemas.toList(),
-        globalSerializers = globalSerializers,
-        globalInputs = globalInputs,
-        globalOutputs = globalOutputs
-    )
+) : DbMessiahSerializer(
+    schemas = schemas,
+    globalSerializers = globalSerializers,
+    globalInputs = globalInputs,
+    globalOutputs = globalOutputs,
+    injectTestElements = injectTestElements,
+) {
 
     override val onGeneratedKeysFail: String = "select last_insert_rowid();"
 
@@ -113,8 +105,5 @@ class SqliteMessiahSerializer(
         return Query(sql = "DELETE FROM ${T.path};")
     }
 
-    override fun <IN : Any> callQuery(input: IN): Query {
-        val T = this.repo.getTableInfo(obj = input)
-        return Query(sql = "{CALL ${input::class.simpleName}(${T.sqlInsertQuestions()})")
-    }
+
 }

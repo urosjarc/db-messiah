@@ -17,6 +17,7 @@ import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.tests.TestConfiguration
 import com.urosjarc.dbmessiah.tests.TestMapper
+import com.urosjarc.dbmessiah.types.AllTS
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.*
@@ -28,8 +29,8 @@ import kotlin.reflect.jvm.javaField
 class DbMessiahRepository(
     private val injectTestElements: Boolean,
     val escaper: Escaper,
-    val schemas: List<Schema>,
-    val globalSerializers: List<TypeSerializer<*>>,
+    var schemas: List<Schema>,
+    var globalSerializers: List<TypeSerializer<*>>,
     var globalInputs: List<KClass<*>>,
     var globalOutputs: List<KClass<*>>
 ) {
@@ -89,15 +90,16 @@ class DbMessiahRepository(
         this.kclass_to_constructorParameters[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     init {
-        this.injectTestTables()
+        this.injectTestElements()
         this.createAssociationMaps()
         this.testSerializer()
         this.createTablesInfos()
         this.testMapper()
     }
 
-    private fun injectTestTables() {
+    private fun injectTestElements() {
         if (this.injectTestElements) {
+            //Create test elements
             val testTableParent = Table(primaryKey = TestTableParent::id)
             val testTable = Table(
                 primaryKey = TestTable::id,
@@ -105,9 +107,16 @@ class DbMessiahRepository(
                     TestTable::parent_id to TestTableParent::class
                 )
             )
-            schemas[0].tables += listOf(testTableParent, testTable)
-            globalInputs += listOf(TestInput::class)
-            globalOutputs += listOf(TestOutput::class)
+
+            //Inject schema
+            if (this.schemas.size == 0)
+                this.schemas = listOf(Schema(name = "main", tables = listOf()))
+
+            // Inject test elements
+            this.schemas[0].tables += listOf(testTableParent, testTable)
+            this.globalSerializers += AllTS.basic
+            this.globalInputs += listOf(TestInput::class)
+            this.globalOutputs += listOf(TestOutput::class)
         }
     }
 

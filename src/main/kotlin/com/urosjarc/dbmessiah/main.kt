@@ -5,24 +5,10 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteMessiahSerializer
+import com.urosjarc.dbmessiah.tests.TestService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 
-data class Entity2(
-    var id_entity2: Int,
-    val name: String,
-    val username: String,
-    var age: Int,
-    val money: Float
-)
-
-data class Entity(
-    var id_entity: Int?,
-    val name: String,
-    var username: String,
-    val age: Int,
-    val money: Float
-)
 
 fun main() {
 
@@ -33,28 +19,16 @@ fun main() {
     }
 
     val serializer = SqliteMessiahSerializer(
-        testCycles = 300,
-        globalSerializers = AllTS.basic,
-        schemas = listOf(
-            Schema(
-                name = "main",
-                tables = listOf(
-                    Table(primaryKey = Entity::id_entity),
-                    Table(
-                        primaryKey = Entity2::id_entity2,
-                        constraints = listOf(
-                            Entity2::age to listOf(C.UNIQUE, C.AUTO_INC),
-                            Entity2::name to listOf(C.UNIQUE, C.AUTO_INC)
-                        )
-                    )
-                )
-            )
-        )
+        injectTestElements = true,
     )
 
-    DbMessiahService(
+    val service = DbMessiahService(
         config = config,
         serializer = serializer
     )
+
+    TestService(service = service).apply {
+        this.test_crud_cycle(200)
+    }
 
 }
