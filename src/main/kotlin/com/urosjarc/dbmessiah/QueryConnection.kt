@@ -79,6 +79,11 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
         return deleted
     }
 
+    fun <T : Any> delete(kclass: KClass<T>): Int {
+        val query = this.ser.deleteQuery(kclass = kclass)
+        return this.exe.update(query = query)
+    }
+
     fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): List<OUT> {
         val query = this.ser.selectQuery(output = output, getSql = getSql)
         return this.exe.query(query = query) {

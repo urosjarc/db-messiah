@@ -13,29 +13,43 @@ class TestService(val service: DbMessiahService) {
 
     val log = this.logger()
 
+    /**
+     * TESTING
+     */
+
     fun test_crud_cycle() {
-        //Table drop create
+        /**
+         * DROP
+         */
         this.test_drop_children()
         this.test_drop_parent()
 
-        //Create parent entities
+        /**
+         * CREATE
+         */
         this.test_create_parent()
-        this.test_insert_children()
+        this.test_create_children()
+
+        /**
+         * INSERT
+         */
         val parents = this.test_insert_parents()
         this.test_select_parents(parents)
 
-        //Create child entities
         val children = this.test_insert_children(parents)
         this.test_select_children(children)
 
-        //Select elements
+        /**
+         * SELECT
+         */
+        //ONE
         this.test_select_oneParent(parents[0].id!!, parents[0])
         this.test_select_oneChildren(children[0].id!!, children[0])
 
-        //Test batch insert on parents
+        //batch insert
         this.test_parent_batch_insert()
 
-        // Page elements
+        //select page
         this.assert(listOf(1, 2, 3, 4, 5) == this.test_select_parentPage(Page(number = 0, orderBy = TestTableParent::id, limit = 5)).map { it.id })
         this.assert(listOf(7, 8, 9, 10, 11, 12) == this.test_select_parentPage(Page(number = 1, orderBy = TestTableParent::id, limit = 6)).map { it.id })
         this.assert(listOf(15, 16, 17, 18, 19, 20, 21) == this.test_select_parentPage(Page(number = 2, orderBy = TestTableParent::id, limit = 7)).map { it.id })
@@ -51,44 +65,42 @@ class TestService(val service: DbMessiahService) {
 
         //Update query
         this.test_update()
-        this.test_delete()
+        this.test_delete_children()
 
         //Batch update
         this.test_batch_update()
 
+        //Transaction update
+        this.test_transaction_rollback()
+        this.test_transaction_savepoint()
+
+        //Delete all table
+        this.test_delete_all_children()
+        this.test_delete_all_parents()
 
         //Cleaning
         this.test_drop_children()
         this.test_drop_parent()
     }
 
-    private fun test_batch_update() = service.query {
-        val preAll = it.select(TestTable::class)
-        preAll.forEachIndexed { i, it ->
-            assert(it.id != null)
-            it.col12 = "BATCH UPDATE"
-        }
-        assert(preAll.size > 0)
-        val count = it.updateBatch(*preAll.toTypedArray())
-        assert(preAll.count() == count, count.toString())
-
-        val postAll = it.select(TestTable::class)
-        assert(preAll == postAll)
+    private fun test_delete_all_parents() = service.transaction {
+        val preAll = it.select(kclass = TestTableParent::class)
+        assert(preAll.size == 21)
+        val count = it.delete(TestTableParent::class)
+        assert(count == 21)
+        val postAll = it.select(kclass = TestTableParent::class)
+        assert(postAll.size == 0)
     }
 
-    fun test_child_batch_insert() = service.query {
-        val batch = mutableListOf<TestTable>()
-        repeat(5) { num -> batch.add(TestTable(parent_id = num, col12 = "child_$num")) }
-        val count = it.insertBatch(*batch.toTypedArray())
-        assert(5 == count, count.toString())
+    private fun test_delete_all_children() = service.query {
+        val preAll = it.select(kclass = TestTable::class)
+        assert(preAll.size == 7, preAll.size.toString())
+        val count = it.delete(TestTable::class)
+        assert(count == 7, count.toString())
+        val postAll = it.select(kclass = TestTable::class)
+        assert(postAll.size == 0)
     }
 
-    fun test_parent_batch_insert() = service.query {
-        val batch = mutableListOf<TestTableParent>()
-        repeat(20) { num -> batch.add(TestTableParent(col13 = "copy $num")) }
-        val count = it.insertBatch(*batch.toTypedArray())
-        assert(20 == count, count.toString())
-    }
 
     fun test_crud_cycle(numCycles: Int) {
         repeat(numCycles) {
@@ -97,16 +109,12 @@ class TestService(val service: DbMessiahService) {
         }
     }
 
-    /**
-     * UTILS
-     */
-
     private fun assert(value: Boolean, msg: String? = null) {
         if (value != true) throw TesterException(msg ?: "Service test failed!")
     }
 
     /**
-     * TESTS
+     * DROP
      */
     fun test_drop_parent() = service.query {
         it.drop(TestTableParent::class)
@@ -118,26 +126,32 @@ class TestService(val service: DbMessiahService) {
         throw TesterException("Table should not exist!")
     }
 
-    fun test_drop_children() = service.query {
+    fun test_drop_children() = service.transaction {
         it.drop(TestTable::class)
         try {
             it.select(TestTable::class)
         } catch (e: Throwable) {
-            return@query
+            return@transaction
         }
         throw TesterException("Table should not exist!")
     }
 
-    fun test_create_parent() = service.query {
+    /**
+     * CREATE
+     */
+    fun test_create_parent() = service.transaction {
         it.create(kclass = TestTableParent::class)
         this.assert(it.select(kclass = TestTableParent::class).isEmpty())
     }
 
-    fun test_insert_children() = service.query {
+    fun test_create_children() = service.query {
         it.create(kclass = TestTable::class)
         this.assert(it.select(kclass = TestTable::class).isEmpty())
     }
 
+    /**
+     * INSERT
+     */
     fun test_insert_parents(): List<TestTableParent> = service.query {
         val par0 = TestTableParent()
         val par1 = par0.copy(col13 = "XXX")
@@ -161,23 +175,7 @@ class TestService(val service: DbMessiahService) {
         return@query listOf(par0, par1)
     }
 
-    fun test_select_parents(list: List<TestTableParent>): List<TestTableParent> = service.query {
-        val parents = it.select(kclass = TestTableParent::class)
-        this.assert(parents == list)
-        return@query parents
-    }
-
-    fun test_select_oneParent(id: Int, expected: TestTableParent) = service.query {
-        val actual = it.select(kclass = TestTableParent::class, pk = id)
-        this.assert(expected.id == actual!!.id)
-        this.assert(actual == expected)
-    }
-
-    fun test_select_parentPage(page: Page<TestTableParent>): List<TestTableParent> = service.query {
-        it.select(kclass = TestTableParent::class, page = page)
-    }
-
-    fun test_insert_children(list: List<TestTableParent>): List<TestTable> = service.query {
+    fun test_insert_children(list: List<TestTableParent>): List<TestTable> = service.transaction {
         val child0 = TestTable(col12 = "XXX", parent_id = list[0].id)
         val child1 = child0.copy(col12 = "YYY", parent_id = list[1].id)
         val child2 = child0.copy(col12 = "ZZZ", parent_id = list[1].id)
@@ -201,7 +199,100 @@ class TestService(val service: DbMessiahService) {
         this.assert(child1.id == 2 && child1_copy == child1)
         this.assert(child2.id == 3 && child2_copy == child2)
 
-        return@query listOf(child0, child1, child2)
+        return@transaction listOf(child0, child1, child2)
+    }
+
+    fun test_child_batch_insert() = service.query {
+        val batch = mutableListOf<TestTable>()
+        repeat(5) { num -> batch.add(TestTable(parent_id = num, col12 = "child_$num")) }
+        val count = it.insertBatch(*batch.toTypedArray())
+        assert(5 == count, count.toString())
+    }
+
+    fun test_parent_batch_insert() = service.transaction {
+        val batch = mutableListOf<TestTableParent>()
+        repeat(20) { num -> batch.add(TestTableParent(col13 = "copy $num")) }
+        val count = it.insertBatch(*batch.toTypedArray())
+        assert(20 == count, count.toString())
+    }
+
+    /**
+     * UPDATE
+     */
+    fun test_update() = service.query {
+        val preChildren = it.select(TestTable::class).toMutableList()
+
+        //Test child
+        val preChild = it.select(TestTable::class, pk = 1) ?: throw TesterException("Selected child should not be null")
+        val preChildSnapshot = preChild.copy()
+        assert(preChildren.contains(preChild))
+        assert(preChild.col12 == "XXX", msg = preChild.col12)
+        preChild.col12 = "xxx"
+
+        val futureChild = preChild.copy(col12 = "xxx")
+
+        //Update child
+        it.update(obj = preChild)
+
+        val afterUpdateChildren = it.select(TestTable::class)
+
+        //Test child
+        val postChildren = it.select(TestTable::class).toMutableList()
+        val postChild = it.select(TestTable::class, pk = 1) ?: throw TesterException("Selected child should not be null")
+        assert(postChild == preChild)
+        assert(postChild == futureChild)
+        assert(postChildren.contains(postChild))
+
+        //Test if no other children has changed
+        postChildren.remove(postChild)
+        preChildren.remove(preChildSnapshot)
+        assert(postChildren == preChildren)
+    }
+
+    private fun test_batch_update() = service.transaction {
+        val preAll = it.select(TestTable::class)
+        preAll.forEachIndexed { i, it ->
+            assert(it.id != null)
+            it.col12 = "BATCH UPDATE"
+        }
+        assert(preAll.size > 0)
+        val count = it.updateBatch(*preAll.toTypedArray())
+        assert(preAll.count() == count, count.toString())
+
+        val postAll = it.select(TestTable::class)
+        assert(preAll == postAll)
+    }
+
+    /**
+     * DELETE
+     */
+    fun test_delete_children() = service.query {
+        val preChildren = it.select(TestTable::class).toMutableList()
+        val preChild = it.select(TestTable::class, 1) ?: throw TesterException("Selected child should not be null")
+        assert(preChildren.contains(preChild))
+
+        assert(preChild.id != null)
+        it.delete(preChild)
+        assert(preChild.id == null)
+
+        val postChildren = it.select(TestTable::class)
+        val postChild = it.select(TestTable::class, 1)
+
+        assert(postChild == null)
+        assert(!postChildren.contains(postChild))
+
+        preChildren.removeIf { it.id == 1 }
+
+        assert(preChildren == postChildren)
+    }
+
+    /**
+     * SELECT
+     */
+    fun test_select_parents(list: List<TestTableParent>): List<TestTableParent> = service.transaction {
+        val parents = it.select(kclass = TestTableParent::class)
+        this.assert(parents == list)
+        return@transaction parents
     }
 
     fun test_select_children(list: List<TestTable>) = service.query {
@@ -209,13 +300,23 @@ class TestService(val service: DbMessiahService) {
         return@query
     }
 
-    fun test_select_oneChildren(id: Int, expected: TestTable) = service.query {
+    fun test_select_oneParent(id: Int, expected: TestTableParent) = service.query {
+        val actual = it.select(kclass = TestTableParent::class, pk = id)
+        this.assert(expected.id == actual!!.id)
+        this.assert(actual == expected)
+    }
+
+    fun test_select_oneChildren(id: Int, expected: TestTable) = service.transaction {
         val actual = it.select(kclass = TestTable::class, pk = id)
         this.assert(expected.id == actual!!.id)
         this.assert(actual == expected)
     }
 
-    fun test_join_query() = service.query {
+    fun test_select_parentPage(page: Page<TestTableParent>): List<TestTableParent> = service.query {
+        it.select(kclass = TestTableParent::class, page = page)
+    }
+
+    fun test_join_query() = service.transaction {
         //Query elements with join
 
         val actual = it.query(output = TestOutput::class) {
@@ -273,7 +374,7 @@ class TestService(val service: DbMessiahService) {
         )
     }
 
-    fun test_input_output_join_query()  = service.query {
+    fun test_input_output_join_query() = service.transaction {
         //Query elements with join
         val input = TestInput(parent_search = "copy %", child_search = "child_%")
         val actual = it.query(input = input, output = TestOutput::class) {
@@ -302,54 +403,59 @@ class TestService(val service: DbMessiahService) {
         )
     }
 
-    fun test_update() = service.query {
-        val preChildren = it.select(TestTable::class).toMutableList()
+    /**
+     * TRANSACTION
+     */
+    private fun test_transaction_rollback() {
+        try {
+            service.transaction {
+                val allPre = it.select(kclass = TestTableParent::class)
+                assert(22 == allPre.size)
+                it.drop(TestTableParent::class)
+                val allPost = it.select(kclass = TestTableParent::class)
+                assert(0 == allPost.size)
 
-        //Test child
-        val preChild = it.select(TestTable::class, pk = 1) ?: throw TesterException("Selected child should not be null")
-        val preChildSnapshot = preChild.copy()
-        assert(preChildren.contains(preChild))
-        assert(preChild.col12 == "XXX", msg = preChild.col12)
-        preChild.col12 = "xxx"
+                throw Throwable("Failed transaction")
 
-        val futureChild = preChild.copy(col12 = "xxx")
-
-        //Update child
-        it.update(obj = preChild)
-
-        val afterUpdateChildren = it.select(TestTable::class)
-
-        //Test child
-        val postChildren = it.select(TestTable::class).toMutableList()
-        val postChild = it.select(TestTable::class, pk = 1) ?: throw TesterException("Selected child should not be null")
-        assert(postChild == preChild)
-        assert(postChild == futureChild)
-        assert(postChildren.contains(postChild))
-
-        //Test if no other children has changed
-        postChildren.remove(postChild)
-        preChildren.remove(preChildSnapshot)
-        assert(postChildren == preChildren)
+            }
+        } catch (e: Throwable) {
+            val count = service.query { it.select(TestTableParent::class) }
+            assert(22 == count.size)
+        }
     }
 
-    fun test_delete() = service.query {
-        val preChildren = it.select(TestTable::class).toMutableList()
-        val preChild = it.select(TestTable::class, 1) ?: throw TesterException("Selected child should not be null")
-        assert(preChildren.contains(preChild))
+    private fun test_transaction_savepoint() {
+        try {
+            service.transaction {
+                //GET PRE ALL
+                val allPre = it.select(kclass = TestTableParent::class)
+                assert(22 == allPre.size)
 
-        assert(preChild.id != null)
-        it.delete(preChild)
-        assert(preChild.id == null)
+                //DELETE ONE
+                it.delete(allPre[0])
 
-        val postChildren = it.select(TestTable::class)
-        val postChild = it.select(TestTable::class, 1)
+                val savepoint1 = it.savePoint()
 
-        assert(postChild == null)
-        assert(!postChildren.contains(postChild))
+                //GET POST ALL
+                val allPost = it.select(kclass = TestTableParent::class)
+                assert(21 == allPost.size)
 
-        preChildren.removeIf { it.id == 1 }
+                //DROP ALL
+                val count = it.delete(TestTableParent::class)
+                assert(count == 21)
 
-        assert(preChildren == postChildren)
+                val allPost2 = it.select(kclass = TestTableParent::class)
+                assert(0 == allPost2.size)
+
+                it.rollbackTo(savePoint = savepoint1)
+
+                val allPost3 = it.select(kclass = TestTableParent::class)
+                assert(21 == allPost3.size)
+
+            }
+        } catch (e: Throwable) {
+            val count = service.query { it.select(TestTableParent::class) }
+            assert(21 == count.size, count.size.toString())
+        }
     }
-
 }

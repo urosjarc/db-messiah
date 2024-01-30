@@ -24,6 +24,7 @@ interface DbMessiahSerializer {
 
     fun <T : Any> dropQuery(kclass: KClass<T>): Query
     fun <T : Any> createQuery(kclass: KClass<T>): Query
+    fun <T: Any> deleteQuery(kclass: KClass<T>): Query
 
     /**
      * MANAGING ROWS
@@ -31,7 +32,6 @@ interface DbMessiahSerializer {
     fun insertQuery(obj: Any): Query
     fun updateQuery(obj: Any): Query
     fun deleteQuery(obj: Any): Query
-
     /**
      * SELECTS
      */

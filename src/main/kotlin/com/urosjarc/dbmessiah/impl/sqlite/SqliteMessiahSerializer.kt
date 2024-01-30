@@ -108,4 +108,9 @@ class SqliteMessiahSerializer(
         )
     }
 
+    override fun <T: Any> deleteQuery(kclass: KClass<T>): Query {
+        val T = this.repo.getTableInfo(kclass = kclass)
+        return Query(sql = "DELETE FROM ${T.path};")
+    }
+
 }
