@@ -107,7 +107,11 @@ class DbMessiahRepository(
         }
     }
 
-    private fun createAssociationMaps(kclass: KClass<*>, serializers: List<TypeSerializer<*>>) {
+    private fun createAssociationMaps(table: Table<*>, serializers: List<TypeSerializer<*>>) {
+        this.createAssociationMaps(kclass = table.kclass, serializers = serializers, columnSerializers = table.columnSerializers)
+    }
+
+    private fun <T : Any> createAssociationMaps(kclass: KClass<*>, columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<Any>>> = listOf(), serializers: List<TypeSerializer<*>>) {
         val kparams = kclass.primaryConstructor?.parameters ?: throw MapperException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
         val kprops = kclass.memberProperties.filter { it.javaField != null }
 
@@ -120,19 +124,28 @@ class DbMessiahRepository(
                 ?: throw MapperException("Could not find serializer for parameter '${kclass.simpleName}.${p.name}'")
         }
         kprops.forEach { p ->
-            kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
-                ?: throw MapperException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
+
+            //Priority is on column serializers
+            val serializer = columnSerializers.firstOrNull { it.first == p }?.second
+
+            //If exists first set this guy
+            if (serializer != null)
+                kprop_to_serializer[p] = serializer
+            //If not search for serializer in other table, schema, global serializers.
+            else
+                kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
+                    ?: throw MapperException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
         }
     }
 
     private fun createAssociationMaps() {
         this.schemas.forEach { s ->
             s.tables.forEach { t ->
-                this.createAssociationMaps(kclass = t.kclass, serializers = (t.serializers + s.serializers + this.globalSerializers))
+                this.createAssociationMaps(table = t, serializers = (t.serializers + s.serializers + this.globalSerializers))
             }
         }
         (this.globalInputs + this.globalOutputs).forEach {
-            this.createAssociationMaps(kclass = it, serializers = this.globalSerializers)
+            this.createAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers)
         }
     }
 
