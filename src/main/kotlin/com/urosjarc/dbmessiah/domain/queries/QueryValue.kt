@@ -10,11 +10,14 @@ data class QueryValue(
     val encoder: Encoder<*>
 ) {
     override fun toString(): String {
-        val strVal = when(this.value){
+        return "$name: ($jdbcType,$escapped)"
+    }
+
+    val escapped
+        get() = when (this.value) {
             is String -> "'$value'"
             is Char -> "'$value'"
-            else -> this.value
+            else -> this.value.toString()
         }
-        return "$name: ($jdbcType,$strVal)"
-    }
+
 }

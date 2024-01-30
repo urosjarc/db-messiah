@@ -61,7 +61,8 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
     fun <T : Any> updateBatch(vararg objs: T): Int {
         val T = this.ser.repo.getTableInfo(obj = objs[0])
         val query = this.ser.updateQuery(obj = objs[0])
-        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = objs.map { T.values(obj = it).toList() })
+        val valueMatrix = objs.map { listOf(*T.values(obj = it), T.primaryKey.queryValue(obj = it)) }
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
         return this.exe.batch(batchQuery = batchQuery)
     }
 

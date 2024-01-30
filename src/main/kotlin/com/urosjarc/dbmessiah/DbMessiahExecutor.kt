@@ -14,13 +14,15 @@ import java.sql.SQLException
 open class DbMessiahExecutor(private val conn: Connection) {
     private val log = this.logger()
 
-    private fun prepareQuery(ps: PreparedStatement, queryValues: Array<out QueryValue>) {
+    private fun prepareQuery(ps: PreparedStatement, query: Query) {
+        var rawSql = query.sql
         //Apply values to prepared statement
-        (queryValues).forEachIndexed { i, queryValue: QueryValue ->
-            println(queryValue)
+        (query.values).forEachIndexed { i, queryValue: QueryValue ->
+            rawSql = rawSql.replaceFirst("?", queryValue.escapped)
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             else (queryValue.encoder as Encoder<Any>)(ps, i + 1, queryValue.value) //If value is not null encoding is done over user defined encoder !!!
         }
+        this.log.info("Prepare query: $rawSql")
     }
 
     private fun closeAll(ps: PreparedStatement? = null, rs: ResultSet? = null) {
@@ -43,7 +45,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
         try {
             //Prepare statement and query
             val ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, queryValues = query.values)
+            this.prepareQuery(ps = ps, query = query)
 
             //Define results
             val objs = mutableListOf<T>()
@@ -74,24 +76,24 @@ open class DbMessiahExecutor(private val conn: Connection) {
         var numUpdates = 0
 
         try {
-            if (batchQuery.sql.contains("UPDATE")) {
-                println(batchQuery.sql)
-
-            }
             //Prepare statement and query
             val ps = conn.prepareStatement(batchQuery.sql)
 
             var i = 0
             for (values in batchQuery.valueMatrix) {
-                this.prepareQuery(ps = ps, queryValues = values.toTypedArray())
+                this.prepareQuery(ps = ps, query = Query(sql = batchQuery.sql, values = values.toTypedArray()))
                 ps.addBatch()
                 if (++i % 1_000 == 0) {
-                    numUpdates += ps.executeBatch().sum()
+                    val exeCount = ps.executeBatch()
+                    numUpdates += exeCount.sum()
                     ps.clearParameters()
                     i = 0
                 }
             }
-            if (i > 0) numUpdates += ps.executeBatch().sum()
+            if (i > 0) {
+                val exeCount = ps.executeBatch()
+                numUpdates += exeCount.sum()
+            }
 
             //Close everything
             this.closeAll(ps = ps)
@@ -114,7 +116,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
         try {
             //Prepare statement
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, queryValues = query.values)
+            this.prepareQuery(ps = ps, query = query)
 
             //Get info
             val count: Int = ps.executeUpdate()
@@ -142,7 +144,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
         try {
             //Prepare statement
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, queryValues = query.values)
+            this.prepareQuery(ps = ps, query = query)
 
             //Get info
             val numUpdates = ps.executeUpdate()
@@ -208,7 +210,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
 
         try {
             ps = conn.prepareStatement(query.sql)
-            this.prepareQuery(ps = ps, queryValues = query.values)
+            this.prepareQuery(ps = ps, query = query)
             var isResultSet = ps.execute()
 
             var count = 0

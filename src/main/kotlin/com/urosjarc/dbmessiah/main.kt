@@ -6,8 +6,8 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput
-import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteMessiahSerializer
+import com.urosjarc.dbmessiah.tests.TestService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 
@@ -61,27 +61,13 @@ fun main() {
         ),
     )
 
-    val db = DbMessiahService(
+    val service = DbMessiahService(
         config = config,
         serializer = serializer
     )
 
-    val obj = TestTableParent()
-//    db.transaction {
-//        it.drop(TestTableParent::class)
-//        it.create(TestTableParent::class)
-//        it.insert(obj = obj)
-//        it.insert(obj = obj.copy(col13 = "Uros Jarc"))
-//    }
-    db.query {
-        it.drop(TestTableParent::class)
-        it.create(TestTableParent::class)
-        it.insert(obj = obj)
-        it.insert(obj = obj.copy(id=null, col13 = "ASDFASDF"))
+    TestService(service = service).apply {
+        this.test_crud_cycle(200)
     }
-
-//    TestService(service = service).apply {
-//        this.test_crud_cycle(200)
-//    }
 
 }
