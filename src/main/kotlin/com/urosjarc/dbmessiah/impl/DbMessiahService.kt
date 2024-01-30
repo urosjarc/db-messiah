@@ -7,6 +7,7 @@ import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilderInOut
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilderOut
+import java.sql.Connection
 import kotlin.reflect.KClass
 
 open class DbMessiahService(
@@ -90,6 +91,9 @@ open class DbMessiahService(
         return this.eng.executeQuery(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = output)
         }
+    }
+
+    fun transaction(cb: (conn: Connection) -> Unit){
     }
 
 }
