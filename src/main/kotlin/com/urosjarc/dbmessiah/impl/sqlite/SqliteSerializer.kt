@@ -30,6 +30,8 @@ class SqliteSerializer(
         globalOutputs = globalOutputs
     )
 
+    override val onGeneratedKeysFail: String = "select last_insert_rowid();"
+
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "DROP TABLE IF EXISTS ${T.path};")

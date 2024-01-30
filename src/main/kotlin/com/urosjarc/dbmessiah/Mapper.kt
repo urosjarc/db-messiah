@@ -12,7 +12,7 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
-import com.urosjarc.dbmessiah.exceptions.FatalMapperException
+import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.tests.TestConfiguration
 import com.urosjarc.dbmessiah.tests.TestMapper
 import org.apache.logging.log4j.kotlin.logger
@@ -72,19 +72,19 @@ class Mapper(
      * GETTERS
      */
     fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, out Any?>> =
-        this.kclass_to_kprops[kclass] ?: throw FatalMapperException("Could not find properties of class '${kclass.simpleName}'")
+        this.kclass_to_kprops[kclass] ?: throw MapperException("Could not find properties of class '${kclass.simpleName}'")
 
     fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
-        this.kparam_to_serializer[kparam] ?: throw FatalMapperException("Could not find serializer of parameter '${kparam.name}'")
+        this.kparam_to_serializer[kparam] ?: throw MapperException("Could not find serializer of parameter '${kparam.name}'")
 
     fun getSerializer(kprop: KProperty1<out Any, out Any?>): TypeSerializer<out Any> =
-        this.kprop_to_serializer[kprop] ?: throw FatalMapperException("Could not find serializer of property '${kprop.name}'")
+        this.kprop_to_serializer[kprop] ?: throw MapperException("Could not find serializer of property '${kprop.name}'")
 
     fun getConstructor(kclass: KClass<*>): KFunction<Any> =
-        this.kclass_to_constructor[kclass] ?: throw FatalMapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+        this.kclass_to_constructor[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
-        this.kclass_to_constructorParameters[kclass] ?: throw FatalMapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+        this.kclass_to_constructorParameters[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     init {
         this.injectTestTables()
@@ -108,7 +108,7 @@ class Mapper(
     }
 
     private fun createAssociationMaps(kclass: KClass<*>, serializers: List<TypeSerializer<*>>) {
-        val kparams = kclass.primaryConstructor?.parameters ?: throw FatalMapperException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+        val kparams = kclass.primaryConstructor?.parameters ?: throw MapperException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
         val kprops = kclass.memberProperties.filter { it.javaField != null }
 
         this.kclass_to_constructor[kclass] = kclass.primaryConstructor
@@ -117,11 +117,11 @@ class Mapper(
 
         kparams.forEach { p ->
             kparam_to_serializer[p] = serializers.firstOrNull { it.kclass == p.type.classifier }
-                ?: throw FatalMapperException("Could not find serializer for parameter '${kclass.simpleName}.${p.name}'")
+                ?: throw MapperException("Could not find serializer for parameter '${kclass.simpleName}.${p.name}'")
         }
         kprops.forEach { p ->
             kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
-                ?: throw FatalMapperException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
+                ?: throw MapperException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
         }
     }
 
@@ -178,8 +178,8 @@ class Mapper(
          */
         for (tableInfo in this.tableInfos) {
             for (column in tableInfo.foreignKeys) {
-                val foreignTableKClass = this.fkColumn_to_tableKClass[column] ?: throw FatalMapperException("Could not find link between foreign key and table kclass")
-                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw FatalMapperException("Could not find link between foreign table and table info")
+                val foreignTableKClass = this.fkColumn_to_tableKClass[column] ?: throw MapperException("Could not find link between foreign key and table kclass")
+                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw MapperException("Could not find link between foreign table and table info")
             }
         }
     }
@@ -250,7 +250,7 @@ class Mapper(
         )
     }
 
-    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw FatalMapperException("Could not find table info for table '${kclass.simpleName}'")
+    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw MapperException("Could not find table info for table '${kclass.simpleName}'")
     fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
 
@@ -265,14 +265,14 @@ class Mapper(
                 val decoder = this.getSerializer(kparam).decoder
                 args[kparam] = decoder(resultSet, i, decodeInfo)
             } catch (e: Throwable) {
-                throw FatalMapperException("Decoding error", cause = e)
+                throw MapperException("Decoding error", cause = e)
             }
         }
 
         try {
             return constructor.callBy(args = args) as T
         } catch (e: Throwable) {
-            throw FatalMapperException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
+            throw MapperException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
         }
     }
 

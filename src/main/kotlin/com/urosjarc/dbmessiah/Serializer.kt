@@ -20,6 +20,8 @@ interface Serializer {
      * MANAGING TABLES
      */
 
+    val onGeneratedKeysFail: String
+
     fun <T : Any> dropQuery(kclass: KClass<T>): Query
     fun <T : Any> createQuery(kclass: KClass<T>): Query
 

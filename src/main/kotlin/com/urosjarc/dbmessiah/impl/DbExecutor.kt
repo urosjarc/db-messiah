@@ -1,37 +1,18 @@
 package com.urosjarc.dbmessiah.impl
 
-import com.urosjarc.dbmessiah.Engine
 import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
-import com.urosjarc.dbmessiah.exceptions.EngineException
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
+import com.urosjarc.dbmessiah.exceptions.ExecutorException
 import org.apache.logging.log4j.kotlin.logger
-import java.sql.*
-import kotlin.reflect.KProperty1
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.SQLException
 
-
-class DbMessiahEngine(config: HikariConfig) : Engine {
-
-    val dataSource = HikariDataSource(config)
-    val log = this.logger()
-
-    init {
-        if (this.dataSource.isClosed && !this.dataSource.isRunning) {
-            throw Exception("Database source is closed or not running!")
-        }
-    }
-
-    private val connection
-        get(): Connection {
-            try {
-                return this.dataSource.connection
-            } catch (e: SQLException) {
-                throw EngineException(msg = "Could not get connection!", cause = e)
-            }
-        }
+open class DbExecutor(private val conn: Connection) {
+    private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, queryValues: Array<out QueryValue>) {
         //Apply values to prepared statement
@@ -42,26 +23,20 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
         }
     }
 
-    fun closeAll(conn: Connection, ps: PreparedStatement? = null, rs: ResultSet? = null) {
-        try {
-            conn.close()
-        } catch (e: Throwable) {
-            this.log.error("Unknown exception", e)
-        }
+    private fun closeAll(ps: PreparedStatement? = null, rs: ResultSet? = null) {
         try {
             ps?.close()
         } catch (e: Throwable) {
-            this.log.error("Unknown exception", e)
+            this.log.error("Closing prepared statement failed", e)
         }
         try {
             rs?.close()
         } catch (e: Throwable) {
-            this.log.error("Unknown exception", e)
+            this.log.error("Closing resultSet failed", e)
         }
     }
 
-    override fun <T> executeQuery(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
-        val conn = this.connection
+    fun <T> query(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 
@@ -80,27 +55,26 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             }
 
             //Close everything
-            this.closeAll(conn = conn, ps = ps, rs = rs)
+            this.closeAll(ps = ps, rs = rs)
 
             //Return objects
             return objs
 
         } catch (e: SQLException) {
-            this.closeAll(conn = conn, ps = ps, rs = rs)
-            throw EngineException(msg = "Could not execute select statement!", cause = e)
+            this.closeAll(ps = ps, rs = rs)
+            throw ExecutorException(msg = "Could not execute select statement!", cause = e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps, rs = rs)
-            throw EngineException(msg = "Unknown exception", cause = e)
+            this.closeAll(ps = ps, rs = rs)
+            throw ExecutorException(msg = "Unknown exception", cause = e)
         }
     }
 
-    override fun executeBatch(batchQuery: BatchQuery): Int {
-        val conn = this.connection
+    fun batch(batchQuery: BatchQuery): Int {
         var ps: PreparedStatement? = null
         var numUpdates = 0
 
         try {
-            if(batchQuery.sql.contains("UPDATE")){
+            if (batchQuery.sql.contains("UPDATE")) {
                 println(batchQuery.sql)
 
             }
@@ -120,22 +94,21 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             if (i > 0) numUpdates += ps.executeBatch().sum()
 
             //Close everything
-            this.closeAll(conn = conn, ps = ps)
+            this.closeAll(ps = ps)
 
             //Return result
             return numUpdates
 
         } catch (e: SQLException) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Could not batch query statement!", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Could not batch query statement!", cause = e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Unknown exception", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Unknown exception", cause = e)
         }
     }
 
-    override fun executeUpdate(query: Query): Int {
-        val conn = this.connection
+    fun update(query: Query): Int {
         var ps: PreparedStatement? = null
 
         try {
@@ -147,21 +120,20 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             val count: Int = ps.executeUpdate()
 
             //Close all
-            this.closeAll(conn = conn, ps = ps)
+            this.closeAll(ps = ps)
 
             //Return count
             return count
         } catch (e: SQLException) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Could not execute update statement!", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Could not execute update statement!", cause = e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Unknown exception", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Unknown exception", cause = e)
         }
     }
 
-    override fun <T> executeInsert(query: Query, primaryKey: KProperty1<T, *>, onGeneratedKeysFail: String?, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
-        val conn = this.connection
+    fun <T> insert(query: Query, onGeneratedKeysFail: String? = null, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -177,16 +149,16 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
 
             //If no updates happend close all
             if (numUpdates == 0) {
-                this.closeAll(conn = conn, ps = ps)
+                this.closeAll(ps = ps)
                 return null
             }
             //Continue with getting ids for inserts
         } catch (e: SQLException) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Could not execute insert statement!", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Could not execute insert statement!", cause = e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps)
-            throw EngineException(msg = "Unknown exception", cause = e)
+            this.closeAll(ps = ps)
+            throw ExecutorException(msg = "Unknown exception", cause = e)
         }
 
         //Try fetching ids normaly
@@ -194,7 +166,7 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             rs = ps.generatedKeys
             if (rs.next()) {
                 val data = decodeIdResultSet(rs, 1)
-                this.closeAll(conn = conn, ps = ps, rs = rs)
+                this.closeAll(ps = ps, rs = rs)
                 return data
             }
         } catch (e: SQLException) {
@@ -203,8 +175,8 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             rs?.close()
             this.log.warn(e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps, rs = rs)
-            throw EngineException(msg = "Unknown exception", cause = e)
+            this.closeAll(ps = ps, rs = rs)
+            throw ExecutorException(msg = "Unknown exception", cause = e)
         }
 
         //Try fetching ids with force
@@ -213,25 +185,24 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
                 rs2 = ps.connection.prepareStatement(onGeneratedKeysFail).executeQuery()
                 if (rs2.next()) {
                     val data = decodeIdResultSet(rs2, 1)
-                    this.closeAll(conn = conn, ps = ps, rs = rs2)
+                    this.closeAll(ps = ps, rs = rs2)
                     return data
                 }
             } catch (e: SQLException) {
-                this.closeAll(conn = conn, ps = ps, rs = rs2)
-                throw EngineException(msg = "Could not execute on generated keys fail sql", cause = e)
+                this.closeAll(ps = ps, rs = rs2)
+                throw ExecutorException(msg = "Could not execute on generated keys fail sql", cause = e)
             } catch (e: Throwable) {
-                this.closeAll(conn = conn, ps = ps, rs = rs2)
-                throw EngineException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
+                this.closeAll(ps = ps, rs = rs2)
+                throw ExecutorException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
             } finally {
-                this.closeAll(conn = conn, ps = ps, rs = rs2)
+                this.closeAll(ps = ps, rs = rs2)
             }
         }
 
-        throw EngineException(msg = "Could not retrieve inserted id normally nor with force!")
+        throw ExecutorException(msg = "Could not retrieve inserted id normally nor with force!")
     }
 
-    override fun executeQueries(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
-        val conn = this.connection
+    fun queries(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 
@@ -252,12 +223,11 @@ class DbMessiahEngine(config: HikariConfig) : Engine {
             }
 
         } catch (e: SQLException) {
-            this.closeAll(conn = conn, ps = ps, rs = rs)
-            throw EngineException(msg = "Could not execute statement!", cause = e)
+            this.closeAll(ps = ps, rs = rs)
+            throw ExecutorException(msg = "Could not execute statement!", cause = e)
         } catch (e: Throwable) {
-            this.closeAll(conn = conn, ps = ps, rs = rs)
-            throw EngineException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
+            this.closeAll(ps = ps, rs = rs)
+            throw ExecutorException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
         }
     }
-
 }

@@ -6,9 +6,8 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput
-import com.urosjarc.dbmessiah.impl.DbMessiahEngine
+import com.urosjarc.dbmessiah.impl.DbService
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.tests.TestService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
@@ -31,11 +30,11 @@ data class Entity(
 
 fun main() {
 
-    val engine = DbMessiahEngine(config = HikariConfig().apply {
+    val config = HikariConfig().apply {
         jdbcUrl = "jdbc:sqlite:/home/urosjarc/vcs/db-jesus/src/test/resources/chinook.sqlite"
         username = null; password = null
         metricRegistry = MetricRegistry()
-    })
+    }
 
     val serializer = SqliteSerializer(
         testCRUD = true,
@@ -63,7 +62,10 @@ fun main() {
         ),
     )
 
-    val service = SqliteService(eng = engine, ser = serializer)
+    val service = DbService(
+        config = config,
+        serializer = serializer
+    )
 
     TestService(service = service).apply {
         this.test_crud_cycle(200)
