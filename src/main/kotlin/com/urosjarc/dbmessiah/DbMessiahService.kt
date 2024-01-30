@@ -1,6 +1,5 @@
-package com.urosjarc.dbmessiah.impl
+package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.ServiceException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -8,9 +7,9 @@ import com.zaxxer.hikari.util.IsolationLevel
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 
-class DbService(
+class DbMessiahService(
     val config: HikariConfig,
-    val serializer: Serializer,
+    val serializer: DbMessiahSerializer,
 ) {
 
     val log = this.logger()
@@ -32,21 +31,31 @@ class DbService(
         }
     }
 
-    fun exe(readOnly: Boolean = false, body: (conn: DbConnection) -> Unit) {
+    fun <T> query(readOnly: Boolean = false, body: (conn: QueryConnection) -> T): T {
         var conn: Connection? = null
         try {
+            //Getting connection
             conn = db.connection
-            val connWrapper = DbConnection(conn = conn, ser = serializer)
-            body(connWrapper)
 
+            //Will connection be read only
+            conn.isReadOnly = readOnly
+
+            //Execute query body and get user result
+            val qc = QueryConnection(conn = conn, ser = serializer)
+            val returned = body(qc)
+
+            //Close connection
             this.close(conn = conn)
+
+            //Return value
+            return returned
         } catch (e: Throwable) {
             this.close(conn = conn)
             throw ServiceException("Unknown execution error", e)
         }
     }
 
-    fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: DbTransaction) -> Boolean?) {
+    fun <T> transaction(isolationLevel: IsolationLevel? = null, body: (tr: TransactionConnection) -> T): T {
         var conn: Connection? = null
         try {
             //Getting connection
@@ -56,18 +65,19 @@ class DbService(
             conn.autoCommit = false
 
             //Set user defined isolation level
+            this.log.info("Transaction type: ${conn.transactionIsolation}")
             if (isolationLevel != null) conn.transactionIsolation = isolationLevel.ordinal
 
-            //Execute transaction body and get user result if service can commit changes
-            val tr = DbTransaction(conn = conn, ser = serializer)
-            val canCommit = body(tr)
+            //Execute transaction body and get user result
+            val tr = TransactionConnection(conn = conn, ser = serializer)
+            val returned = body(tr)
 
-            //If user returns nothing or true you can commit otherwise rollback to previous state.
-            if (canCommit != false) conn.commit()
-            else conn.rollback()
-
-            //Finaly close the connection
+            //Commit changes and close connection
+            conn.commit()
             conn.close()
+
+            //Return value
+            return returned
         } catch (e: Throwable) {
             //If any error occurse that is not user handled then rollback, close and raise exception
             this.rollback(conn = conn)

@@ -23,7 +23,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 
-class Mapper(
+class DbMessiahRepository(
     private val test: Boolean,
     val escaper: Escaper,
     val schemas: List<Schema>,

@@ -1,11 +1,10 @@
-package com.urosjarc.dbmessiah.impl
+package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.Serializer
 import java.sql.Connection
 import java.sql.Savepoint
 
 
-class DbTransaction(private val conn: Connection, ser: Serializer) : DbConnection(conn = conn, ser = ser) {
+class TransactionConnection(private val conn: Connection, ser: DbMessiahSerializer) : QueryConnection(conn = conn, ser = ser) {
     fun rollbackAll() = this.conn.rollback()
     fun rollbackTo(savePoint: Savepoint) = this.conn.rollback(savePoint)
     fun savePoint() = this.conn.setSavepoint()

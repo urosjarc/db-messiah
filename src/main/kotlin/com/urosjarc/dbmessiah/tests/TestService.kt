@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput

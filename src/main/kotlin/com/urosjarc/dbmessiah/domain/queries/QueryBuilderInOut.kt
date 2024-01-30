@@ -1,13 +1,13 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.Mapper
+import com.urosjarc.dbmessiah.DbMessiahRepository
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 class QueryBuilderInOut<IN : Any, OUT : Any>(
     input: IN,
     output: KClass<OUT>,
-    mapper: Mapper
+    mapper: DbMessiahRepository
 ) : QueryBuilderOut<IN, OUT>(input = input, mapper = mapper, output = output) {
     init {
         if (!mapper.globalInputs.contains(input::class))

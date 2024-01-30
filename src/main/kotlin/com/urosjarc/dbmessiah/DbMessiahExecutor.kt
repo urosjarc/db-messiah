@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.impl
+package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Query
@@ -11,7 +11,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
-open class DbExecutor(private val conn: Connection) {
+open class DbMessiahExecutor(private val conn: Connection) {
     private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, queryValues: Array<out QueryValue>) {

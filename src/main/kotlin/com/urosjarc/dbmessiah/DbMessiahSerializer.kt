@@ -8,9 +8,9 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
-interface Serializer {
+interface DbMessiahSerializer {
     val testCRUD: Boolean
-    val mapper: Mapper
+    val repo: DbMessiahRepository
     val schemas: List<Schema>
     val globalSerializers: List<TypeSerializer<*>>
     val globalInputs: List<KClass<*>>
@@ -43,12 +43,12 @@ interface Serializer {
      * Generic queries
      */
     fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderOut(input = Unit, output = output, mapper = this.mapper)
+        val queryBuilder = QueryBuilderOut(input = Unit, output = output, mapper = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
     fun <IN : Any, OUT : Any> selectQuery(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.mapper)
+        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 

@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.Mapper
+import com.urosjarc.dbmessiah.DbMessiahRepository
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
-class TestConfiguration(val mapper: Mapper) {
+class TestConfiguration(val mapper: DbMessiahRepository) {
     /**
      * CHECK FOR EMPTYNESS
      */

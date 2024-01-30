@@ -1,12 +1,12 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.Mapper
+import com.urosjarc.dbmessiah.DbMessiahRepository
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
-class TestMapper(val mapper: Mapper) {
+class TestMapper(val mapper: DbMessiahRepository) {
     /**
      * Check for emptyness
      */
