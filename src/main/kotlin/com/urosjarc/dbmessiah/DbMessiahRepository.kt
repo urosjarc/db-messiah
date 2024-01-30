@@ -10,6 +10,8 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
+import com.urosjarc.dbmessiah.domain.test.TestInput
+import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.MapperException
@@ -24,12 +26,12 @@ import kotlin.reflect.jvm.javaField
 
 
 class DbMessiahRepository(
-    private val test: Boolean,
+    private val injectTestElements: Boolean,
     val escaper: Escaper,
     val schemas: List<Schema>,
     val globalSerializers: List<TypeSerializer<*>>,
-    val globalInputs: List<KClass<*>>,
-    val globalOutputs: List<KClass<*>>
+    var globalInputs: List<KClass<*>>,
+    var globalOutputs: List<KClass<*>>
 ) {
     val log = this.logger()
 
@@ -95,7 +97,7 @@ class DbMessiahRepository(
     }
 
     private fun injectTestTables() {
-        if (this.test) {
+        if (this.injectTestElements) {
             val testTableParent = Table(primaryKey = TestTableParent::id)
             val testTable = Table(
                 primaryKey = TestTable::id,
@@ -104,6 +106,8 @@ class DbMessiahRepository(
                 )
             )
             schemas[0].tables += listOf(testTableParent, testTable)
+            globalInputs += listOf(TestInput::class)
+            globalOutputs += listOf(TestOutput::class)
         }
     }
 

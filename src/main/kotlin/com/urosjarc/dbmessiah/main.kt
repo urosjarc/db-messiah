@@ -4,10 +4,7 @@ import com.codahale.metrics.MetricRegistry
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
-import com.urosjarc.dbmessiah.domain.test.TestInput
-import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteMessiahSerializer
-import com.urosjarc.dbmessiah.tests.TestService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 
@@ -36,7 +33,7 @@ fun main() {
     }
 
     val serializer = SqliteMessiahSerializer(
-        testCRUD = true,
+        testCycles = 300,
         globalSerializers = AllTS.basic,
         schemas = listOf(
             Schema(
@@ -52,22 +49,12 @@ fun main() {
                     )
                 )
             )
-        ),
-        globalInputs = listOf(
-            TestInput::class
-        ),
-        globalOutputs = listOf(
-            TestOutput::class
-        ),
+        )
     )
 
-    val service = DbMessiahService(
+    DbMessiahService(
         config = config,
         serializer = serializer
     )
-
-    TestService(service = service).apply {
-        this.test_crud_cycle(200)
-    }
 
 }

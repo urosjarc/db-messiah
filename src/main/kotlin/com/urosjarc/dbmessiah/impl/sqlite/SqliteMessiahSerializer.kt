@@ -11,15 +11,15 @@ import kotlin.reflect.KClass
 
 
 class SqliteMessiahSerializer(
-    override val testCRUD: Boolean,
-    override val schemas: List<Schema>,
-    override val globalSerializers: List<TypeSerializer<*>>,
-    override val globalInputs: List<KClass<*>>,
-    override val globalOutputs: List<KClass<*>>
+    schemas: List<Schema>,
+    globalSerializers: List<TypeSerializer<*>> = listOf(),
+    globalInputs: List<KClass<*>> = listOf(),
+    globalOutputs: List<KClass<*>> = listOf(),
+    injectTestElements: Boolean = false,
 ) : DbMessiahSerializer {
 
     override val repo = DbMessiahRepository(
-        test = testCRUD,
+        injectTestElements = injectTestElements,
         escaper = Escaper(
             type = Escaper.Type.DOUBLE_QUOTES,
             joinStr = "."
@@ -108,7 +108,7 @@ class SqliteMessiahSerializer(
         )
     }
 
-    override fun <T: Any> deleteQuery(kclass: KClass<T>): Query {
+    override fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
         val T = this.repo.getTableInfo(kclass = kclass)
         return Query(sql = "DELETE FROM ${T.path};")
     }

@@ -6,12 +6,12 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 interface DbMessiahSerializer {
-    val testCRUD: Boolean
     val repo: DbMessiahRepository
     val schemas: List<Schema>
     val globalSerializers: List<TypeSerializer<*>>
     val globalInputs: List<KClass<*>>
     val globalOutputs: List<KClass<*>>
+    val injectTestElements: Boolean
 
     /**
      * MANAGING TABLES
