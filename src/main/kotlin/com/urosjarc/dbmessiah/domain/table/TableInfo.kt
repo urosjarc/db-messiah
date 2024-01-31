@@ -21,6 +21,7 @@ data class TableInfo(
 ) {
     val name = this.kclass.simpleName!!
     val path = this.escaper.wrapJoin(this.schema, this.name)
+    val hash = this.path.hashCode()
 
     init {
         //Init late init parent connection
@@ -36,17 +37,12 @@ data class TableInfo(
             return columns
         }
 
-    override fun hashCode(): Int {
-        return this.path.hashCode()
-    }
+    override fun hashCode(): Int = this.hash
 
-    override fun equals(other: Any?): Boolean {
-        return this.hashCode() == other.hashCode()
-    }
+    override fun equals(other: Any?): Boolean =
+        this.hashCode() == other.hashCode()
 
-    override fun toString(): String {
-        return this.path
-    }
+    override fun toString(): String = this.path
 
     fun sqlInsertColumns(separator: String = ", "): String =
         this.userControlledColumns.joinToString(separator = separator) { it.name }
@@ -59,7 +55,7 @@ data class TableInfo(
 
     val jdbcTypes: MutableList<JDBCType> get() = this.userControlledColumns.map { it.jdbcType }.toMutableList()
     val encoders: MutableList<Encoder<*>> get() = userControlledColumns.map { it.encoder }.toMutableList()
-    fun values(obj: Any): Array<out QueryValue> = this.userControlledColumns
+    fun queryValues(obj: Any): Array<out QueryValue> = this.userControlledColumns
         .map { QueryValue(name = it.name, value = it.getValue(obj = obj), jdbcType = it.jdbcType, encoder = it.encoder) }
         .toTypedArray()
 

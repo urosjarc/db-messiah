@@ -1,3 +1,5 @@
 package com.urosjarc.dbmessiah.exceptions
 
-class SerializerException(msg: String, cause: Throwable? = null): Throwable(msg, cause)
+import com.urosjarc.dbmessiah.exceptions.base.UserWarning
+
+class SerializerException(msg: String, cause: Throwable? = null) : UserWarning(msg = msg, cause = cause)

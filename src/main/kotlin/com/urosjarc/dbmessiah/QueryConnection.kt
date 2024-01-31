@@ -51,14 +51,14 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
     fun <T : Any> insertBatch(vararg objs: T): Int {
         val T = this.ser.repo.getTableInfo(obj = objs[0])
         val query = this.ser.insertQuery(obj = objs[0])
-        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = objs.map { T.values(obj = it).toList() })
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = objs.map { T.queryValues(obj = it).toList() })
         return this.exe.batch(batchQuery = batchQuery)
     }
 
     fun <T : Any> updateBatch(vararg objs: T): Int {
         val T = this.ser.repo.getTableInfo(obj = objs[0])
         val query = this.ser.updateQuery(obj = objs[0])
-        val valueMatrix = objs.map { listOf(*T.values(obj = it), T.primaryKey.queryValue(obj = it)) }
+        val valueMatrix = objs.map { listOf(*T.queryValues(obj = it), T.primaryKey.queryValue(obj = it)) }
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
         return this.exe.batch(batchQuery = batchQuery)
     }
@@ -94,7 +94,7 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
         return this.exe.update(query = query)
     }
 
-    fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): List<OUT> {
+    fun <OUT : Any> query(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<OUT>) -> String): List<OUT> {
         val query = this.ser.selectQuery(output = output, getSql = getSql)
         return this.exe.query(query = query) {
             this.ser.repo.decode(resultSet = it, kclass = output)

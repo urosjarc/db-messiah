@@ -61,18 +61,18 @@ abstract class DbMessiahSerializer(
     /**
      * Generic queries
      */
-    fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<Unit, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderOut(input = Unit, output = output, mapper = this.repo)
+    fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<OUT>) -> String): Query {
+        val queryBuilder = QueryBuilderOut(output = output, repo = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
     fun <IN : Any, OUT : Any> selectQuery(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.repo)
+        val queryBuilder = QueryBuilderInOut(input = input, output = output, repo = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
     fun selectQuery(getSql: (queryBuilder: QueryBuilder) -> String): Query {
-        val queryBuilder = QueryBuilder(mapper = this.repo)
+        val queryBuilder = QueryBuilder(repo = this.repo)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 

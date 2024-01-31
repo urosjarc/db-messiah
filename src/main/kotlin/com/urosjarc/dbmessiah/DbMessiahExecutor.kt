@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.exceptions.ExecutorException
+import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -67,7 +68,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             throw ExecutorException(msg = "Could not execute select statement!", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ExecutorException(msg = "Unknown exception", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
     }
 
@@ -106,7 +107,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             throw ExecutorException(msg = "Could not batch query statement!", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Unknown exception", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
     }
 
@@ -131,7 +132,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             throw ExecutorException(msg = "Could not execute update statement!", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Unknown exception", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
     }
 
@@ -160,7 +161,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             throw ExecutorException(msg = "Could not execute insert statement!", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Unknown exception", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
 
         //Try fetching ids normaly
@@ -178,7 +179,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             this.log.warn(e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ExecutorException(msg = "Unknown exception", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
 
         //Try fetching ids with force
@@ -192,16 +193,16 @@ open class DbMessiahExecutor(private val conn: Connection) {
                 }
             } catch (e: SQLException) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw ExecutorException(msg = "Could not execute on generated keys fail sql", cause = e)
+                throw ExecutorException(msg = "Could not execute on generated keys fail sql: '$onGeneratedKeysFail'", cause = e)
             } catch (e: Throwable) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw ExecutorException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
+                throw ReportIssue(msg = "Unknown executor exception", cause = e)
             } finally {
                 this.closeAll(ps = ps, rs = rs2)
             }
         }
 
-        throw ExecutorException(msg = "Could not retrieve inserted id normally nor with force!")
+        throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force!")
     }
 
     fun queries(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
@@ -229,7 +230,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
             throw ExecutorException(msg = "Could not execute statement!", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ExecutorException(msg = "Unknown fatal error occurred, please report this issue!", cause = e)
+            throw ReportIssue(msg = "Unknown executor exception", cause = e)
         }
     }
 }

@@ -9,8 +9,17 @@ data class QueryValue(
     val jdbcType: JDBCType,
     val encoder: Encoder<*>
 ) {
+
+    val hash = this.toString().hashCode()
+
     override fun toString(): String {
-        return "$name: ($jdbcType,$escapped) -> $encoder"
+        return "$name: ($jdbcType,$escapped)"
+    }
+
+    override fun hashCode(): Int = this.hash
+
+    override fun equals(other: Any?): Boolean {
+        return this.hashCode() == other.hashCode()
     }
 
     val escapped

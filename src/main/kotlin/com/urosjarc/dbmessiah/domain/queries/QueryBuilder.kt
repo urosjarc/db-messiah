@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.DbMessiahRepository
 import org.apache.logging.log4j.kotlin.logger
 
 open class QueryBuilder(
-    val mapper: DbMessiahRepository
+    val repo: DbMessiahRepository
 ) {
 
     val log = this.logger()

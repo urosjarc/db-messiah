@@ -79,7 +79,7 @@ class SqliteMessiahSerializer(
         val T = this.repo.getTableInfo(obj = obj)
         return Query(
             sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
-            *T.values(obj = obj),
+            *T.queryValues(obj = obj),
         )
     }
 
@@ -87,7 +87,7 @@ class SqliteMessiahSerializer(
         val T = this.repo.getTableInfo(obj = obj)
         return Query(
             sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?;",
-            *T.values(obj = obj),
+            *T.queryValues(obj = obj),
             T.primaryKey.queryValue(obj = obj)
         )
     }

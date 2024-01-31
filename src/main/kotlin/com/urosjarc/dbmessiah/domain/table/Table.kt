@@ -14,7 +14,7 @@ class Table<T : Any>(
     val primaryKey: KMutableProperty1<out T, out Any?>,
     val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
     var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
-    val serializers: List<TypeSerializer<Any>> = listOf(),
+    val serializers: List<TypeSerializer<*>> = listOf(),
     val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<Any>>> = listOf()
 ) {
     init {
@@ -31,5 +31,14 @@ class Table<T : Any>(
 
     val kclass: KClass<*> = (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializerException("Could not found enclosing class for primary key"))
     val primaryKeyConstraints get() = this.constraintsFor(kprop = this.primaryKey)
+
+    val hash = this.name.hashCode()
+    override fun hashCode(): Int = this.hash
+
+    override fun equals(other: Any?): Boolean {
+        return this.hashCode() == other.hashCode()
+    }
+    override fun toString(): String = "'${this.name}'"
+
     fun constraintsFor(kprop: KProperty1<*, *>) = this.constraints.firstOrNull { it.first == kprop }?.second ?: listOf()
 }

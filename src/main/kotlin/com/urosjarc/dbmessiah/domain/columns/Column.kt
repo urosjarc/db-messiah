@@ -18,13 +18,13 @@ abstract class Column(
     val decoder: Decoder<*>,
 ) {
     lateinit var table: TableInfo
+    open val inited get() = this::table.isInitialized
 
     val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
     val name: String get() = this.table.escaper.wrap(this.kprop.name)
     val path: String get() = this.table.escaper.wrapJoin(this.table.schema, this.table.name, this.kprop.name)
 
     val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
-    open val inited get() = this::table.isInitialized
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
     override fun hashCode(): Int = this.hash
     override fun toString(): String = "Column(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
