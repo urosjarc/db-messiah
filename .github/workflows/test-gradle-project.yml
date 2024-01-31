@@ -22,14 +22,14 @@ jobs:
     services:
       maria-db:
         image: mariadb
-        environment:
+        env:
           MARIADB_ROOT_PASSWORD: root
         ports:
           - 3306:3306
 
       db-postgres:
         image: postgres
-        environment:
+        env:
           POSTGRES_PASSWORD: root
           POSTGRES_USER: root
         ports:
@@ -37,16 +37,15 @@ jobs:
 
       db-mysql:
         image: mysql
-        environment:
+        env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_TCP_PORT: 3307
         ports:
           - 3307:3307
 
       db-mssql:
-        container_name: mssql
         image: mcr.microsoft.com/mssql/server:2017-latest
-        environment:
+        env:
           ACCEPT_EULA: Y
           MSSQL_SA_PASSWORD: Root_root1
 
@@ -54,9 +53,8 @@ jobs:
           - 1433:1433
 
       db-db2:
-        container_name: db2
         image: icr.io/db2_community/db2
-        environment:
+        env:
           LICENSE: accept
           DB2INSTANCE: root
           DB2INST1_PASSWORD: root
