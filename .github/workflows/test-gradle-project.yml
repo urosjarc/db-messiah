@@ -1,4 +1,4 @@
-name: Build Gradle project
+name: Tests for db-messiah
 
 on:
   push:
@@ -12,4 +12,4 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
-        run: ./gradlew test
+        run: ./gradlew clean test --no-build-cache

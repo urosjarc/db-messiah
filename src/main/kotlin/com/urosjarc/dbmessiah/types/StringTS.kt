@@ -8,7 +8,7 @@ object StringTS {
         kclass = String::class,
         dbType = "VARCHAR($size)",
         jdbcType = JDBCType.VARCHAR,
-        decoder = { rs, i, dInfo -> rs.getString(i) },
+        decoder = { rs, i, _-> rs.getString(i) },
         encoder = { ps, i, x -> ps.setString(i, x) })
 
     val all = listOf(

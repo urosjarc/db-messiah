@@ -6,7 +6,7 @@ object BooleanTS {
         kclass = Boolean::class,
         dbType = "BOOL",
         jdbcType = JDBCType.BOOLEAN,
-        decoder = { rs, i, dInfo -> rs.getBoolean(i) },
+        decoder = { rs, i, _ -> rs.getBoolean(i) },
         encoder = { ps, i, x -> ps.setBoolean(i, x) })
 
     val all = listOf(

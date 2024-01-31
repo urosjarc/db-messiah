@@ -7,14 +7,14 @@ object FloatTS {
         kclass = Float::class,
         dbType = "FLOAT",
         jdbcType = JDBCType.FLOAT,
-        decoder = { rs, i, dInfo -> rs.getFloat(i) },
+        decoder = { rs, i, _ -> rs.getFloat(i) },
         encoder = { ps, i, x -> ps.setFloat(i, x) })
 
     val Double = TypeSerializer(
         kclass = Double::class,
         dbType = "DOUBLE",
         jdbcType = JDBCType.DOUBLE,
-        decoder = { rs, i, dInfo -> rs.getDouble(i) },
+        decoder = { rs, i, _ -> rs.getDouble(i) },
         encoder = { ps, i, x -> ps.setDouble(i, x) })
 
     val all = listOf(

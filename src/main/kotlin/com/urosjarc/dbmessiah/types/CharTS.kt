@@ -8,7 +8,7 @@ object CharTS {
         kclass = Char::class,
         dbType = "CHAR",
         jdbcType = JDBCType.CHAR,
-        decoder = { rs, i, dInfo -> rs.getString(i).first() },
+        decoder = { rs, i, _ -> rs.getString(i).first() },
         encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     val all = listOf(
