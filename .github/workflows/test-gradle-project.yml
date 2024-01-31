@@ -9,7 +9,56 @@ jobs:
     steps:
       - name: Checkout project sources
         uses: actions/checkout@v3
+
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Run build with Gradle Wrapper
-        run: ./gradlew clean test --no-build-cache
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Run e2e tests
+        run: ./gradlew e2e
+
+    services:
+      maria-db:
+        image: mariadb
+        environment:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+
+      db-postgres:
+        image: postgres
+        environment:
+          POSTGRES_PASSWORD: root
+          POSTGRES_USER: root
+        ports:
+          - 5432:5432
+
+      db-mysql:
+        image: mysql
+        environment:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_TCP_PORT: 3307
+        ports:
+          - 3307:3307
+
+      db-mssql:
+        container_name: mssql
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        environment:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: Root_root1
+
+        ports:
+          - 1433:1433
+
+      db-db2:
+        container_name: db2
+        image: icr.io/db2_community/db2
+        environment:
+          LICENSE: accept
+          DB2INSTANCE: root
+          DB2INST1_PASSWORD: root
+        ports:
+          - 50000:50000

@@ -2,6 +2,7 @@ plugins {
     `java-library`
     kotlin("jvm") version "1.9.22"
     id("com.adarshr.test-logger") version "4.0.0"
+    `jvm-test-suite`
 }
 
 group = "com.urosjarc"
@@ -9,6 +10,10 @@ version = "0.1.0"
 
 repositories {
     mavenCentral()
+}
+
+kotlin {
+    jvmToolchain(19)
 }
 
 dependencies {
@@ -34,16 +39,46 @@ dependencies {
     this.implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
     this.implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
 
-    //Testing
-    this.testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
-tasks.test {
-    useJUnitPlatform()
+
+
+testing {
+    suites {
+
+        /**
+         * Chared configuration
+         */
+        configureEach {
+            if (this is JvmTestSuite) {
+                useJUnitJupiter()
+                dependencies {
+                    implementation("org.jetbrains.kotlin:kotlin-test")
+                }
+            }
+        }
+
+        /**
+         * Unit tests
+         */
+        val test by getting(JvmTestSuite::class) {}
+
+        /**
+         * E2E tests
+         */
+        register<JvmTestSuite>("e2e") {
+            dependencies { implementation(project()) }
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+    }
 }
-kotlin {
-    jvmToolchain(19)
-}
+
 testlogger {
     this.setTheme("mocha")
 }

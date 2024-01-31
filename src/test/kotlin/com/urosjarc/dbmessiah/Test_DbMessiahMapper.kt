@@ -21,7 +21,6 @@ import java.sql.JDBCType
 import java.time.LocalDate
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty1
 import kotlin.reflect.full.primaryConstructor
 import kotlin.test.Test
 import kotlin.test.assertContains
