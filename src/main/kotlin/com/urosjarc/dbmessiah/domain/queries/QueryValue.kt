@@ -10,7 +10,7 @@ data class QueryValue(
     val encoder: Encoder<*>
 ) {
     override fun toString(): String {
-        return "$name: ($jdbcType,$escapped)"
+        return "$name: ($jdbcType,$escapped) -> $encoder"
     }
 
     val escapped

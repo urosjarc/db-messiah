@@ -27,7 +27,7 @@ abstract class Column(
     open val inited get() = this::table.isInitialized
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
     override fun hashCode(): Int = this.hash
-    override fun toString(): String = "Column(name=${this.name}, dbType=${this.dbType}, jdbcType=${this.jdbcType.name})"
+    override fun toString(): String = "Column(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
     fun queryValue(obj: Any): QueryValue = QueryValue(name = this.name, value = this.getValue(obj = obj), jdbcType = this.jdbcType, encoder = this.encoder)
     fun setValue(obj: Any, value: Any?) {
         try {
@@ -35,7 +35,7 @@ abstract class Column(
             try {
                 kp.set(receiver = obj, value = value)
             } catch (e: ClassCastException) {
-                throw ColumnException("Trying to set column $path value to '$value' but receiving object is missing matching property: $obj", e)
+                throw ColumnException("Trying to set column $path value to '$value' but failed! Probably because incompatible types or receiving object is missing matching property: $obj", e)
             }
         } catch (e: ClassCastException) {
             throw ColumnException("Trying to set column $path value to '$value' but the column is immutable!", e)
@@ -47,7 +47,7 @@ abstract class Column(
         try {
             return this.kprop.get(receiver = obj)
         } catch (e: Throwable) {
-            throw ColumnException("Trying to get object value $path but failed, probably because property does not exists inside object: $obj", e)
+            throw ColumnException("Trying to get object value $path but failed, probably because property '${this.kprop.name}' does not exists inside '${obj::class.simpleName}' object: $obj", e)
         }
 
     }

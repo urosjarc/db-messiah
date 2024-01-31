@@ -23,7 +23,7 @@ class ForeignColumn(
     encoder = encoder,
     decoder = decoder
 ) {
-    override val inited get() = this::foreignTable.isInitialized
+    override val inited get() = super.inited && this::foreignTable.isInitialized
 
     lateinit var foreignTable: TableInfo
 }
