@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.DbMessiahRepository
+import com.urosjarc.dbmessiah.DbMessiahMapper
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
@@ -8,31 +8,31 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
-class TestUserConfiguration(val repo: DbMessiahRepository) {
+class TestUserConfiguration(val mapper: DbMessiahMapper) {
     /**
      * CHECK FOR EMPTYNESS
      */
     fun `1-th Test - If at least one table exist`() {
-        this.repo.schemas.getOrNull(0)?.tables?.getOrNull(0) ?: throw SerializerException("Missing schema or it has no registered table")
+        this.mapper.schemas.getOrNull(0)?.tables?.getOrNull(0) ?: throw SerializerException("Missing schema or it has no registered table")
     }
 
     /**
      * SCHEMA OBJECTS REGISTERING MULTIPLE TIMES
      */
     fun `2-th Test - If schema registered multiple times`() {
-        val notUnique = this.repo.schemas.ext_notUnique
+        val notUnique = this.mapper.schemas.ext_notUnique
         if (notUnique.isNotEmpty()) throw SerializerException("Schemas registered multiple times: ${notUnique.keys}")
     }
 
     fun `3-th Test - If schemas table registered multiple times`() {
-        this.repo.schemas.forEach {
+        this.mapper.schemas.forEach {
             val notUnique = it.tables.ext_notUnique
             if (notUnique.isNotEmpty()) throw SerializerException("Schema $it has tables ${notUnique.keys} registered multiple times")
         }
     }
 
     fun `4-th Test - If schemas table foreign key registered multiple times`() {
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 val notUnique = table.foreignKeys.map { "'${it.first.name}'" }.ext_notUnique
                 if (notUnique.isNotEmpty()) throw SerializerException("Table ${schema}.${table} has foreign keys ${notUnique.keys} registered multiple times")
@@ -41,7 +41,7 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
     }
 
     fun `5-th Test - If schemas table constraints registered multiple times`() {
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 val notUnique = table.constraints.map { "'${it.first.name}'" }.ext_notUnique
                 if (notUnique.isNotEmpty()) throw SerializerException("Table ${schema}.${table} has constraints ${notUnique.keys} registered multiple times")
@@ -53,14 +53,14 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
      * SERIALIZERS REGISTERED MULTIPLE TIMES
      */
     fun `6-th Test - If schema serializers registered multiple times`() {
-        this.repo.schemas.forEach {
+        this.mapper.schemas.forEach {
             val notUnique = it.serializers.ext_notUnique
             if (notUnique.isNotEmpty()) throw SerializerException("Schema ${it} has serializers ${notUnique.keys} registered multiple times")
         }
     }
 
     fun `7-th Test - If schemas table serializers registered multiple times`() {
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 val notUnique = table.serializers.ext_notUnique
                 if (notUnique.isNotEmpty()) throw SerializerException("Table ${schema}.${table} has serializers ${notUnique.keys} registered multiple times")
@@ -74,12 +74,12 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
     fun `8-th Test - If schemas table foreign keys are pointing to wrong table`() {
         val schemas_tables = mutableListOf<Pair<Schema, Table<*>>>()
 
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 schemas_tables.add(Pair(first = schema, second = table))
             }
         }
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 table.foreignKeys.forEach { fk ->
 
@@ -98,7 +98,7 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
     }
 
     fun `9-th Test - If schemas table constraints are valid`() {
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 table.constraints.forEach { prop_const ->
 
@@ -133,7 +133,7 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
      * Every input objects has registered serializers
      */
     fun `10-th Test - If all primary keys that are autoincrement have integer dbType`() {
-        this.repo.schemas.forEach { schema ->
+        this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 if (table.primaryKeyConstraints.contains(C.AUTO_INC)) {
                     val pkKClass = table.primaryKey.returnType.classifier as KClass<*>
@@ -147,8 +147,8 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
     }
 
     fun `11-th Test - If all input classes have imutable and not null properties`() {
-        this.repo.globalInputs.forEach { input ->
-            this.repo.getKProps(kclass = input).forEach { kp ->
+        this.mapper.globalInputs.forEach { input ->
+            this.mapper.getKProps(kclass = input).forEach { kp ->
                 if (kp.returnType.isMarkedNullable) {
                     throw SerializerException("Input property '${input.simpleName}'.'${kp.name}' can be null which is not allowed on any input class!")
                 }
@@ -157,8 +157,8 @@ class TestUserConfiguration(val repo: DbMessiahRepository) {
     }
 
     fun `12-th Test - If all output classes have no default values`() {
-        this.repo.globalOutputs.forEach { input ->
-            val constructor = this.repo.getConstructor(kclass = input)
+        this.mapper.globalOutputs.forEach { input ->
+            val constructor = this.mapper.getConstructor(kclass = input)
             val defaultParams = constructor.parameters.filter { p -> p.isOptional }.map { "'${it.name}'" }
             if (defaultParams.isNotEmpty())
                 throw SerializerException("Output class '${input.simpleName}' have primary constructor with optional arguments $defaultParams, which is not allowed on any output class!")

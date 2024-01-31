@@ -99,7 +99,7 @@ class TestService(val service: DbMessiahService) {
     }
 
 
-    private fun test_query() = service.query{
+    private fun test_query() = service.query {
         val preAll = it.select(TestTableParent::class)
         val count = it.query {
             """
@@ -269,6 +269,7 @@ class TestService(val service: DbMessiahService) {
         it.update(obj = preChild)
 
         val afterUpdateChildren = it.select(TestTable::class)
+        assert(afterUpdateChildren.contains(preChild))
 
         //Test child
         val postChildren = it.select(TestTable::class).toMutableList()
@@ -285,9 +286,9 @@ class TestService(val service: DbMessiahService) {
 
     private fun test_batch_update() = service.transaction {
         val preAll = it.select(TestTable::class)
-        preAll.forEachIndexed { i, it ->
-            assert(it.id != null)
-            it.col12 = "BATCH UPDATE"
+        preAll.forEach { tt ->
+            assert(tt.id != null)
+            tt.col12 = "BATCH UPDATE"
         }
         assert(preAll.size > 0)
         val count = it.updateBatch(*preAll.toTypedArray())

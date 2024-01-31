@@ -14,10 +14,10 @@ import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.domain.test.TestTable
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
-import com.urosjarc.dbmessiah.exceptions.RepositoryException
+import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.tests.TestMapper
 import com.urosjarc.dbmessiah.tests.TestUserConfiguration
-import com.urosjarc.dbmessiah.tests.TestRepository
 import com.urosjarc.dbmessiah.types.AllTS
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
@@ -27,7 +27,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 
-class DbMessiahRepository(
+class DbMessiahMapper(
     private val injectTestElements: Boolean,
     val escaper: Escaper,
     var schemas: List<Schema>,
@@ -75,23 +75,20 @@ class DbMessiahRepository(
     /**
      * GETTERS
      */
-    fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, out Any?>>{
-        val kprops = this.kclass_to_kprops[kclass] ?: throw RepositoryException("Could not find properties of class '${kclass.simpleName}'")
-        if(kprops.isEmpty()) throw RepositoryException("Class '${kclass.simpleName}' has no properties")
-        return kprops
-    }
+    fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, Any?>> =
+        this.kclass_to_kprops[kclass] ?: throw MapperException("Could not find properties of class '${kclass.simpleName}'")
 
-    fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
-        this.kparam_to_serializer[kparam] ?: throw RepositoryException("Could not find serializer of parameter '${kparam.name}'")
+    private fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
+        this.kparam_to_serializer[kparam] ?: throw MapperException("Could not find serializer of parameter '${kparam.name}'")
 
-    fun getSerializer(kprop: KProperty1<out Any, out Any?>): TypeSerializer<out Any> =
-        this.kprop_to_serializer[kprop] ?: throw RepositoryException("Could not find serializer of property '${kprop.name}'")
+    fun getSerializer(kprop: KProperty1<out Any, Any?>): TypeSerializer<out Any> =
+        this.kprop_to_serializer[kprop] ?: throw MapperException("Could not find serializer of property '${kprop.name}'")
 
     fun getConstructor(kclass: KClass<*>): KFunction<Any> =
-        this.kclass_to_constructor[kclass] ?: throw RepositoryException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+        this.kclass_to_constructor[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
-    fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
-        this.kclass_to_constructorParameters[kclass] ?: throw RepositoryException("Could not find primary constructor of kclass '${kclass.simpleName}'")
+    private fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
+        this.kclass_to_constructorParameters[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     init {
         this.injectTestElements()
@@ -129,8 +126,11 @@ class DbMessiahRepository(
     }
 
     private fun <T : Any> createAssociationMaps(kclass: KClass<*>, columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<Any>>> = listOf(), serializers: List<TypeSerializer<*>>) {
-        val kparams = kclass.primaryConstructor?.parameters ?: throw SerializerException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+        val kparams = kclass.primaryConstructor?.parameters?.filter { it.kind == KParameter.Kind.VALUE } // Kind { INSTANCE, EXTENSION_RECEIVER, VALUE }
         val kprops = kclass.memberProperties.filter { it.javaField != null }
+
+        kparams ?: throw SerializerException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+        if(kparams.isEmpty()) throw SerializerException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
 
         this.kclass_to_constructor[kclass] = kclass.primaryConstructor
         this.kclass_to_constructorParameters[kclass] = kparams
@@ -138,7 +138,7 @@ class DbMessiahRepository(
 
         kparams.forEach { p ->
             kparam_to_serializer[p] = serializers.firstOrNull { it.kclass == p.type.classifier }
-                ?: throw SerializerException("Could not find serializer for primary constructor parameter '${kclass.simpleName}.${p.name}'")
+                ?: throw SerializerException("Could not find serializer for primary constructor parameter '${kclass.simpleName}'.'${p.name}'")
         }
         kprops.forEach { p ->
 
@@ -167,7 +167,7 @@ class DbMessiahRepository(
     }
 
     private fun testSerializer() {
-        TestUserConfiguration(repo = this).also {
+        TestUserConfiguration(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
             //Test uniqueness
@@ -206,15 +206,15 @@ class DbMessiahRepository(
          */
         for (tableInfo in this.tableInfos) {
             for (column in tableInfo.foreignKeys) {
-                val foreignTableKClass = this.fkColumn_to_tableKClass[column] ?: throw RepositoryException("Could not find link between foreign key and table kclass")
-                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw RepositoryException("Could not find link between foreign table and table info")
+                val foreignTableKClass = this.fkColumn_to_tableKClass[column] ?: throw MapperException("Could not find link between foreign key and table kclass")
+                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw MapperException("Could not find link between foreign table and table info")
             }
         }
     }
 
     fun testMapper() {
         //Test registered tables
-        TestRepository(repo = this).also {
+        TestMapper(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
             //Test consistency
@@ -278,7 +278,7 @@ class DbMessiahRepository(
         )
     }
 
-    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw RepositoryException("Could not find table info for table '${kclass.simpleName}'")
+    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw SerializerException("Could not find table info for table '${kclass.simpleName}'")
     fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
 
@@ -293,14 +293,14 @@ class DbMessiahRepository(
                 val decoder = this.getSerializer(kparam).decoder
                 args[kparam] = decoder(resultSet, i, decodeInfo)
             } catch (e: Throwable) {
-                throw RepositoryException("Decoding error", cause = e)
+                throw MapperException("Decoding error", cause = e)
             }
         }
 
         try {
             return constructor.callBy(args = args) as T
         } catch (e: Throwable) {
-            throw RepositoryException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
+            throw MapperException("Class ${kclass.simpleName} can't be constructed with arguments: $args", e)
         }
     }
 

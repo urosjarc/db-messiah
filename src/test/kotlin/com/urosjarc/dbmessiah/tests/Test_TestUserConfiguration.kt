@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.tests
 
 import NumberTS
-import com.urosjarc.dbmessiah.DbMessiahRepository
+import com.urosjarc.dbmessiah.DbMessiahMapper
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Escaper
@@ -24,7 +24,7 @@ class Test_TestUserConfiguration {
     fun `test 1-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(), globalSerializers = listOf(),
@@ -37,7 +37,7 @@ class Test_TestUserConfiguration {
 
         val e2 = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(Schema(name = "Schema0", tables = listOf())), globalSerializers = listOf(),
@@ -53,7 +53,7 @@ class Test_TestUserConfiguration {
     fun `test 2-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -73,7 +73,7 @@ class Test_TestUserConfiguration {
     fun `test 3-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -95,7 +95,7 @@ class Test_TestUserConfiguration {
     fun `test 4-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -121,7 +121,7 @@ class Test_TestUserConfiguration {
     fun `test 5-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -151,7 +151,7 @@ class Test_TestUserConfiguration {
     fun `test 6-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -174,7 +174,7 @@ class Test_TestUserConfiguration {
     fun `test 7-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -199,7 +199,7 @@ class Test_TestUserConfiguration {
     fun `test 8-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -223,7 +223,7 @@ class Test_TestUserConfiguration {
 
         val e2 = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -255,7 +255,7 @@ class Test_TestUserConfiguration {
     fun `test 9-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -283,7 +283,7 @@ class Test_TestUserConfiguration {
 
         val e2 = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -310,7 +310,7 @@ class Test_TestUserConfiguration {
     fun `test 10-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -329,7 +329,7 @@ class Test_TestUserConfiguration {
     fun `test 11-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(
@@ -348,7 +348,7 @@ class Test_TestUserConfiguration {
     fun `test 12-th()`() {
         val e = assertThrows<SerializerException> {
             TestUserConfiguration(
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = false,
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(

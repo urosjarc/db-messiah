@@ -1,10 +1,10 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.DbMessiahRepository
+import com.urosjarc.dbmessiah.DbMessiahMapper
 import org.apache.logging.log4j.kotlin.logger
 
 open class QueryBuilder(
-    val repo: DbMessiahRepository
+    val mapper: DbMessiahMapper
 ) {
 
     val log = this.logger()

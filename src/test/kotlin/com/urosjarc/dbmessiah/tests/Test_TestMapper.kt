@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.DbMessiahRepository
+import com.urosjarc.dbmessiah.DbMessiahMapper
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
-import com.urosjarc.dbmessiah.exceptions.RepositoryException
+import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -20,13 +20,13 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_TestRepository {
+class Test_TestMapper {
 
     private lateinit var primaryColumnBad: PrimaryColumn
     private lateinit var foreignColumn2: ForeignColumn
     private lateinit var otherColumn2: OtherColumn
     private lateinit var primaryColumn2: PrimaryColumn
-    private lateinit var repo: DbMessiahRepository
+    private lateinit var repo: DbMessiahMapper
     private lateinit var primaryColumn: PrimaryColumn
     private lateinit var foreignColumn: ForeignColumn
     private lateinit var otherColumn: OtherColumn
@@ -40,7 +40,7 @@ class Test_TestRepository {
     fun init() {
         escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
 
-        repo = DbMessiahRepository(
+        repo = DbMessiahMapper(
             injectTestElements = true,
             escaper = escaper,
             schemas = listOf(
@@ -125,7 +125,7 @@ class Test_TestRepository {
     @Test
     fun `test 1-th()`() {
         repo.tableInfos = listOf()
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e.message.toString(), other = "No table info was created", message = e.toString())
@@ -153,7 +153,7 @@ class Test_TestRepository {
                 serializers = listOf()
             )
         )
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e.message.toString(), other = "Found first inconsistent escaper Escaper(type=SINGLE_QUOTES, joinStr=x) on table 'Schema'x'Entity2'", message = e.toString())
@@ -182,7 +182,7 @@ class Test_TestRepository {
                 serializers = listOf()
             )
         )
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e.message.toString(), other = "Following tables have been created multiple times: ['Schema'.'Entity']", message = e.toString())
@@ -201,7 +201,7 @@ class Test_TestRepository {
                 serializers = listOf()
             )
         )
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(
@@ -239,7 +239,7 @@ class Test_TestRepository {
 
         repo.tableInfos[0].foreignKeys[0].foreignTable = repo.tableInfos[1]
 
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e.message.toString(), other = "Table 'Schema'.'Entity2' does own primary key: Column(name='pk', dbType='INT', jdbcType='INTEGER')", message = e.toString())
@@ -272,7 +272,7 @@ class Test_TestRepository {
 
         repo.tableInfos[0].foreignKeys[0].foreignTable = repo.tableInfos[1]
 
-        val e2 = assertThrows<RepositoryException> {
+        val e2 = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e2.message.toString(), other = "Table 'Schema'.'Entity' does own foreign key: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')", message = e2.toString())
@@ -293,7 +293,7 @@ class Test_TestRepository {
             )
         )
 
-        val e3 = assertThrows<RepositoryException> {
+        val e3 = assertThrows<MapperException> {
             repo.testMapper()
         }
         assertContains(charSequence = e3.message.toString(), other = "Table 'Schema'.'Entity' does own column: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')", message = e3.toString())
@@ -317,7 +317,7 @@ class Test_TestRepository {
             )
         )
 
-        val e2 = assertThrows<RepositoryException> {
+        val e2 = assertThrows<MapperException> {
             repo.testMapper()
         }
 
@@ -346,7 +346,7 @@ class Test_TestRepository {
             foreignKeys = listOf(), otherColumns = listOf(), serializers = listOf()
         )
 
-        val e = assertThrows<RepositoryException> {
+        val e = assertThrows<MapperException> {
             repo.testMapper()
         }
 
@@ -371,7 +371,7 @@ class Test_TestRepository {
          * Primary key
          */
         repo.tableInfos[0].primaryKey.table = otherTable
-        val e = assertThrows<RepositoryException> { repo.testMapper() }
+        val e = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e.message.toString(),
             other = "Column 'Schema'.'String'.'pk' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",
@@ -394,7 +394,7 @@ class Test_TestRepository {
         )
         repo.tableInfos[0].foreignKeys[0].foreignTable = repo.tableInfos[0]
         repo.tableInfos[0].foreignKeys[0].table = otherTable
-        val e2 = assertThrows<RepositoryException> { repo.testMapper() }
+        val e2 = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e2.message.toString(),
             other = "Column 'Schema'.'String'.'fk' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",
@@ -408,7 +408,7 @@ class Test_TestRepository {
             TableInfo(escaper = escaper, schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn, foreignKeys = listOf(), otherColumns = listOf(otherColumn), serializers = listOf())
         )
         repo.tableInfos[0].otherColumns[0].table = otherTable
-        val e3 = assertThrows<RepositoryException> { repo.testMapper() }
+        val e3 = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e3.message.toString(),
             other = "Column 'Schema'.'String'.'col' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",

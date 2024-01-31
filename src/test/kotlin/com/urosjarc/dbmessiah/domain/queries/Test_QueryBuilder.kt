@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.DbMessiahRepository
+import com.urosjarc.dbmessiah.DbMessiahMapper
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
@@ -30,7 +30,7 @@ class Test_QueryBuilder() {
         this.queryBuilderInOut = QueryBuilderInOut(
             output = Output::class,
             input = input,
-            repo = DbMessiahRepository(
+            mapper = DbMessiahMapper(
                 injectTestElements = true, escaper = escaper,
                 schemas = listOf(), globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
@@ -38,7 +38,7 @@ class Test_QueryBuilder() {
         )
         this.queryBuilderOut = QueryBuilderOut(
             output = Output::class,
-            repo = DbMessiahRepository(
+            mapper = DbMessiahMapper(
                 injectTestElements = true, escaper = escaper,
                 schemas = listOf(), globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
@@ -51,7 +51,7 @@ class Test_QueryBuilder() {
             QueryBuilderInOut(
                 output = Output::class,
                 input = input,
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = true, escaper = escaper,
                     schemas = listOf(), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class), globalInputs = listOf()
@@ -64,7 +64,7 @@ class Test_QueryBuilder() {
             QueryBuilderInOut(
                 output = Output::class,
                 input = input,
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = true, escaper = escaper,
                     schemas = listOf(), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf(Input::class)
@@ -76,7 +76,7 @@ class Test_QueryBuilder() {
         val e2 = assertThrows<SerializerException> {
             QueryBuilderOut(
                 output = Output::class,
-                repo = DbMessiahRepository(
+                mapper = DbMessiahMapper(
                     injectTestElements = true, escaper = escaper,
                     schemas = listOf(), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf()

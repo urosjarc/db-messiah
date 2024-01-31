@@ -12,7 +12,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
-open class DbMessiahExecutor(private val conn: Connection) {
+open class DbMessiahEngine(private val conn: Connection) {
     private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, query: Query) {
@@ -45,7 +45,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
 
         try {
             //Prepare statement and query
-            val ps = conn.prepareStatement(query.sql)
+            ps = conn.prepareStatement(query.sql)
             this.prepareQuery(ps = ps, query = query)
 
             //Define results
@@ -78,7 +78,7 @@ open class DbMessiahExecutor(private val conn: Connection) {
 
         try {
             //Prepare statement and query
-            val ps = conn.prepareStatement(batchQuery.sql)
+            ps = conn.prepareStatement(batchQuery.sql)
 
             var i = 0
             for (values in batchQuery.valueMatrix) {

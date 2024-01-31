@@ -14,7 +14,7 @@ abstract class DbMessiahSerializer(
     injectTestElements: Boolean = false,
 ) {
 
-    val repo = DbMessiahRepository(
+    val mapper = DbMessiahMapper(
         injectTestElements = injectTestElements,
         escaper = Escaper(
             type = Escaper.Type.DOUBLE_QUOTES,
@@ -54,25 +54,28 @@ abstract class DbMessiahSerializer(
      * Call procedure
      */
     fun <IN : Any> callQuery(input: IN): Query {
-        val T = this.repo.getTableInfo(obj = input)
-        return Query(sql = "{CALL ${input::class.simpleName}(${T.sqlInsertQuestions()})")
+        val T = this.mapper.getTableInfo(obj = input)
+        return Query(
+            sql = "{CALL ${input::class.simpleName}(${T.sqlInsertQuestions()})}",
+            *T.queryValues(obj = input)
+        )
     }
 
     /**
      * Generic queries
      */
     fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderOut(output = output, repo = this.repo)
+        val queryBuilder = QueryBuilderOut(output = output, mapper = this.mapper)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
     fun <IN : Any, OUT : Any> selectQuery(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderInOut(input = input, output = output, repo = this.repo)
+        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.mapper)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
     fun selectQuery(getSql: (queryBuilder: QueryBuilder) -> String): Query {
-        val queryBuilder = QueryBuilder(repo = this.repo)
+        val queryBuilder = QueryBuilder(mapper = this.mapper)
         return queryBuilder.build(sql = getSql(queryBuilder))
     }
 
