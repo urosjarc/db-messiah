@@ -8,6 +8,7 @@ import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -87,7 +88,19 @@ class Test_DbMessiahSerializer {
     }
 
     @Test
-    fun `test selectQuery()`() {
+    fun `test selectQuery(0)`() {
+        val query = this.seri.selectQuery(output = TestOutput::class) { "SELECT * FROM xxx" }
+        assertEquals(expected = 0, actual = query.values.size)
+        assertEquals(actual = query.sql, expected = "SELECT * FROM xxx")
+
+        val e = assertThrows<SerializerException> {
+            this.seri.selectQuery(output = String::class) { " ${it.out(String::length)} " }
+        }
+        assertContains(charSequence = e.message.toString(), other = " Output class 'String' is not registered in serializers global outputs!", message = e.toString())
+    }
+
+    @Test
+    fun `test selectQuery(1)`() {
         val query = this.seri.selectQuery(output = TestOutput::class) {
             """
                 SELECT
@@ -111,25 +124,29 @@ class Test_DbMessiahSerializer {
     }
 
     @Test
-    fun `test selectQuery()`() {
-        val query = this.seri.selectQuery(input = TestInput(parent_search = "parent", child_search = "child"), output = TestOutput::class) {
+    fun `test selectQuery(2)`() {
+        val input = TestInput(parent_search = "parent", child_search = "child")
+        val query = this.seri.selectQuery(input = input, output = TestOutput::class) {
             """
                 SELECT
                     col0 as ${it.out(TestOutput::child_id)}
                     col1 as ${it.out(TestOutput::parent_id)}
-                FROM xxx
+                FROM xxx WHERE ${it.inp(TestInput::parent_search)} > col0 AND ${it.inp(TestInput::child_search)} < col1 OR ${it.inp(TestInput::child_search)}
             """.trimIndent()
         }
-        assertEquals(expected = 0, actual = query.values.size)
+        assertEquals(expected = 3, actual = query.values.size)
         assertEquals(
             actual = query.sql, expected = "SELECT\n" +
                     "    col0 as \"child_id\"\n" +
                     "    col1 as \"parent_id\"\n" +
-                    "FROM xxx"
+                    "FROM xxx WHERE ? > col0 AND ? < col1 OR ?"
         )
+        assertEquals(actual = query.values[0], expected = QueryValue(name = "parent_search", value = "parent", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder))
+        assertEquals(actual = query.values[1], expected = QueryValue(name = "child_search", value = "child", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder))
+        assertEquals(actual = query.values[2], expected = QueryValue(name = "child_search", value = "child", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder))
 
         val e = assertThrows<SerializerException> {
-            this.seri.selectQuery(output = String::class) { " ${it.out(String::length)} " }
+            this.seri.selectQuery(output = String::class, input = input) { " ${it.out(String::length)} " }
         }
         assertContains(charSequence = e.message.toString(), other = " Output class 'String' is not registered in serializers global outputs!", message = e.toString())
     }
