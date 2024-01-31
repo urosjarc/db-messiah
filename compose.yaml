@@ -1,0 +1,58 @@
+services:
+  lib:
+    build: .
+
+  maria-db:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+
+  db-postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+    ports:
+      - 5432:5432
+
+  db-mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_TCP_PORT: 3307
+    ports:
+      - 3307:3307
+
+  db-mssql:
+    container_name: mssql
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: Root_root1
+
+    ports:
+      - 1433:1433
+
+  db-db2:
+    container_name: db2
+    image: icr.io/db2_community/db2
+    environment:
+      LICENSE: accept
+      DB2INSTANCE: root
+      DB2INST1_PASSWORD: root
+    ports:
+      - 50000:50000
+
+  db-oracle:
+      shm_size: '8gb'
+      container_name: oracle
+      ports:
+        - 9445:9445
+      image: container-registry.oracle.com/database/standard
+      environment:
+        DB_SID: OraDoc
+        DB_PASSWD: MyPasswd123
+        DB_DOMAIN: my.domain.com
+        DB_BUNDLE: basic
