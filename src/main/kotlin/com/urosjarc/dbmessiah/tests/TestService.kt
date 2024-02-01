@@ -103,7 +103,7 @@ class TestService(val service: DbMessiahService) {
         val preAll = it.select(TestTableParent::class)
         val count = it.query {
             """
-                insert into TestTableParent (col13) values ('QUERY');
+                insert into main.TestTableParent (col13) values ('QUERY');
             """.trimIndent()
         }
         assert(count == 1)
@@ -362,7 +362,7 @@ class TestService(val service: DbMessiahService) {
                     P.id as parent_id,
                     C.col12 as child_col12,
                     P.col13 as parent_col13
-                FROM TestTable as C
+                FROM main.TestTable as C
                     JOIN main.TestTableParent P on P.id = C.id
                     WHERE P.col13 LIKE 'copy %'
                         AND C.col12 LIKE 'child_%'
@@ -391,7 +391,7 @@ class TestService(val service: DbMessiahService) {
                     P.id as ${it.out(TestOutput::parent_id)},
                     C.col12 as ${it.out(TestOutput::child_col12)},
                     P.col13 as ${it.out(TestOutput::parent_col13)}
-                FROM TestTable as C
+                FROM main.TestTable as C
                     JOIN main.TestTableParent P on P.id = C.id
                     WHERE P.col13 LIKE 'copy %'
                         AND C.col12 LIKE 'child_%'
@@ -420,7 +420,7 @@ class TestService(val service: DbMessiahService) {
                     P.id as ${it.out(TestOutput::parent_id)},
                     C.col12 as ${it.out(TestOutput::child_col12)},
                     P.col13 as ${it.out(TestOutput::parent_col13)}
-                FROM TestTable as C
+                FROM main.TestTable as C
                     JOIN main.TestTableParent P on P.id = C.id
                     WHERE P.col13 LIKE ${it.inp(TestInput::parent_search)}
                         AND C.col12 LIKE ${it.inp(TestInput::child_search)}
@@ -446,9 +446,9 @@ class TestService(val service: DbMessiahService) {
             service.transaction {
                 val allPre = it.select(kclass = TestTableParent::class)
                 assert(22 == allPre.size)
-                it.drop(TestTableParent::class)
+                assert(it.delete(allPre[0]))
                 val allPost = it.select(kclass = TestTableParent::class)
-                assert(0 == allPost.size)
+                assert(21 == allPost.size)
 
                 throw Throwable("Failed transaction")
 

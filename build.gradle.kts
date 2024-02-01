@@ -18,13 +18,6 @@ kotlin {
 
 dependencies {
     implementation(kotlin("reflect"))
-
-    //Drivers
-    this.runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
-    this.runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
-    this.runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-    this.runtimeOnly("org.postgresql:postgresql:42.7.1")
-
     //Pool connection
     this.implementation("com.zaxxer:HikariCP:5.1.0")
 
@@ -54,6 +47,7 @@ testing {
                 useJUnitJupiter()
                 dependencies {
                     //Drivers
+                    this.implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
                     this.runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
                     this.runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
                     this.runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")

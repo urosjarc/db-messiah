@@ -9,7 +9,7 @@ import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 
-class SqliteMessiahSerializer(
+class MariaMessiahSerializer(
     schemas: List<Schema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
@@ -22,10 +22,10 @@ class SqliteMessiahSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
     injectTestElements = injectTestElements,
-    escaper = escaper ?: Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
+    escaper = escaper ?: Escaper(type = Escaper.Type.GRAVE_ACCENT, joinStr = ".")
 ) {
 
-    override val onGeneratedKeysFail: String = "select last_insert_rowid();"
+    override val onGeneratedKeysFail: String = "select LAST_INSERT_ID();"
 
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -39,7 +39,7 @@ class SqliteMessiahSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTOINCREMENT" else ""
+        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTO_INCREMENT" else ""
         col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
 
         //Foreign keys
@@ -59,7 +59,7 @@ class SqliteMessiahSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
 
     override fun <T : Any> selectQuery(kclass: KClass<T>): Query {
@@ -69,7 +69,7 @@ class SqliteMessiahSerializer(
 
     override fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY [${page.orderBy.name}] ASC LIMIT ${page.limit} OFFSET ${page.offset}")
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY `${page.orderBy.name}` ASC LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
     override fun <T : Any, K : Any> selectQuery(kclass: KClass<T>, pk: K): Query {
