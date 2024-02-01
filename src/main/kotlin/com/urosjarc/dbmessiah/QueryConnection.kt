@@ -88,7 +88,10 @@ open class QueryConnection(conn: Connection, private val ser: DbMessiahSerialize
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
         return this.engine.batch(batchQuery = batchQuery)
     }
-
+    fun execute(getSql: (queryBuilder: QueryBuilder) -> String) {
+        val query = this.ser.selectQuery(getSql = getSql)
+        this.engine.execute(query = query) {i, rs -> }
+    }
     fun query(getSql: (queryBuilder: QueryBuilder) -> String): Int {
         val query = this.ser.selectQuery(getSql = getSql)
         return this.engine.update(query = query)

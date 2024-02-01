@@ -205,7 +205,7 @@ open class DbMessiahEngine(private val conn: Connection) {
         throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force!")
     }
 
-    fun queries(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
+    fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> Unit) {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 

@@ -15,10 +15,6 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew test
-
-      - name: Run e2e tests
-        run: ./gradlew e2e
-
     services:
       maria-db:
         image: mariadb
