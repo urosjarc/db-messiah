@@ -176,7 +176,6 @@ open class DbMessiahEngine(private val conn: Connection) {
             //Auto reurn id is probably not supported
             //Continue with execution
             rs?.close()
-            this.log.warn(e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
             throw ReportIssue(msg = "Unknown executor exception", cause = e)

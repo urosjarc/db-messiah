@@ -1,6 +1,4 @@
 services:
-  lib:
-    build: .
 
   maria-db:
     image: mariadb

@@ -1,10 +1,5 @@
 package com.urosjarc.dbmessiah.types
 
-import BooleanTS
-import FloatTS
-import NumberTS
-import UNumber
-
 object AllTS {
 
     val basic = listOf(

@@ -1,3 +1,5 @@
+package com.urosjarc.dbmessiah.types
+
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import java.sql.JDBCType
 

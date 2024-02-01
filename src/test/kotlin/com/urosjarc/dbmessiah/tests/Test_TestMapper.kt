@@ -10,6 +10,7 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.types.AllTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -33,15 +34,16 @@ class Test_TestMapper {
     private lateinit var entity: Entity
     private lateinit var escaper: Escaper
 
-    data class Entity(var pk: Int, val fk: Int, val col: Float)
-    data class Entity2(var pk: Int, var text: String?)
+    private data class Entity(var pk: Int, val fk: Int, val col: Float)
+    private data class Entity2(var pk: Int, var text: String?)
+    private data class Input(val value: String)
+    private data class Output(val value: Int)
 
     @BeforeEach
     fun init() {
         escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
 
         repo = DbMessiahMapper(
-            injectTestElements = true,
             escaper = escaper,
             schemas = listOf(
                 Schema(
@@ -56,9 +58,9 @@ class Test_TestMapper {
                     )
                 )
             ),
-            globalInputs = listOf(),
-            globalOutputs = listOf(),
-            globalSerializers = listOf(),
+            globalInputs = listOf(Input::class),
+            globalOutputs = listOf(Output::class),
+            globalSerializers = AllTS.basic,
         )
 
         entity = Entity(pk = 23, fk = 12, col = 2.34f)

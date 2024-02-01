@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.exceptions.ServiceException
-import com.urosjarc.dbmessiah.tests.TestService
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel

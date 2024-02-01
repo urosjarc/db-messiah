@@ -1,9 +1,12 @@
 package com.urosjarc.dbmessiah.domain.queries
 
 import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Escaper
+import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
+import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -14,9 +17,26 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_QueryBuilder() {
-    data class Input(var id: Int, val property: String)
-    data class Output(var text: String?)
+class Test_QueryBuilder {
+    private data class Parent(
+        var pk: Int? = null,
+    )
+    private data class Child(
+        var pk: Int? = null,
+        var fk: Int? = null,
+    )
+    private data class Input(var id: Int, val property: String)
+    private data class Output(var text: String?)
+    private val testSchema = Schema(
+        name = "main", tables = listOf(
+            Table(primaryKey = Parent::pk),
+            Table(
+                primaryKey = Child::pk, foreignKeys = listOf(
+                    Child::fk to Parent::class
+                )
+            )
+        )
+    )
 
     private lateinit var queryBuilderOut: QueryBuilderOut<Output>
     private lateinit var input: Input
@@ -31,20 +51,21 @@ class Test_QueryBuilder() {
             output = Output::class,
             input = input,
             mapper = DbMessiahMapper(
-                injectTestElements = true, escaper = escaper,
-                schemas = listOf(), globalSerializers = AllTS.basic,
+                escaper = escaper,
+                schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
             )
         )
         this.queryBuilderOut = QueryBuilderOut(
             output = Output::class,
             mapper = DbMessiahMapper(
-                injectTestElements = true, escaper = escaper,
-                schemas = listOf(), globalSerializers = AllTS.basic,
+                escaper = escaper,
+                schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
             )
         )
     }
+
     @Test
     fun `test init {}`() {
         val e0 = assertThrows<SerializerException> {
@@ -52,8 +73,8 @@ class Test_QueryBuilder() {
                 output = Output::class,
                 input = input,
                 mapper = DbMessiahMapper(
-                    injectTestElements = true, escaper = escaper,
-                    schemas = listOf(), globalSerializers = AllTS.basic,
+                    escaper = escaper,
+                    schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class), globalInputs = listOf()
                 )
             )
@@ -65,8 +86,8 @@ class Test_QueryBuilder() {
                 output = Output::class,
                 input = input,
                 mapper = DbMessiahMapper(
-                    injectTestElements = true, escaper = escaper,
-                    schemas = listOf(), globalSerializers = AllTS.basic,
+                    escaper = escaper,
+                    schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf(Input::class)
                 )
             )
@@ -77,8 +98,8 @@ class Test_QueryBuilder() {
             QueryBuilderOut(
                 output = Output::class,
                 mapper = DbMessiahMapper(
-                    injectTestElements = true, escaper = escaper,
-                    schemas = listOf(), globalSerializers = AllTS.basic,
+                    escaper = escaper,
+                    schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf()
                 )
             )
@@ -91,7 +112,7 @@ class Test_QueryBuilder() {
         assertEquals(expected = "?", actual = queryBuilderInOut.inp(Input::id))
         assertEquals(expected = "?", actual = queryBuilderInOut.inp(Input::property))
         val sql = "SELECT * FROM Input"
-        val actual : Query = queryBuilderInOut.build(sql = sql)
+        val actual: Query = queryBuilderInOut.build(sql = sql)
         val expected = Query(
             sql = sql,
             QueryValue(name = "id", value = input.id, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder),

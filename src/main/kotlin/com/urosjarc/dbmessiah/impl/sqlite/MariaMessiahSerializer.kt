@@ -14,14 +14,12 @@ class MariaMessiahSerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-    injectTestElements: Boolean = false,
     escaper: Escaper? = null
 ) : DbMessiahSerializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
-    injectTestElements = injectTestElements,
     escaper = escaper ?: Escaper(type = Escaper.Type.GRAVE_ACCENT, joinStr = ".")
 ) {
 

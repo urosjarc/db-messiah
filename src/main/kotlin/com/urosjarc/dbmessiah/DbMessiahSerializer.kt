@@ -11,13 +11,11 @@ abstract class DbMessiahSerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-    injectTestElements: Boolean = false,
     escaper: Escaper,
 ) {
 
     val mapper = DbMessiahMapper(
         escaper = escaper,
-        injectTestElements = injectTestElements,
         schemas = schemas.toList(),
         globalSerializers = globalSerializers,
         globalInputs = globalInputs,

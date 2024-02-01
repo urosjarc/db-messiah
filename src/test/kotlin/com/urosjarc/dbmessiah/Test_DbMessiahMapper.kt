@@ -1,18 +1,14 @@
 package com.urosjarc.dbmessiah
 
-import NumberTS
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
-import com.urosjarc.dbmessiah.domain.test.TestInput
-import com.urosjarc.dbmessiah.domain.test.TestOutput
-import com.urosjarc.dbmessiah.domain.test.TestTable
-import com.urosjarc.dbmessiah.domain.test.TestTableParent
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
+import com.urosjarc.dbmessiah.types.NumberTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.TestInstance
@@ -30,27 +26,21 @@ import kotlin.test.assertEquals
 class Test_DbMessiahMapper {
 
     private lateinit var mapper: DbMessiahMapper
+    private data class Child(var pk: Int)
+    private data class Parent(var pk: Int, val col: String)
 
-    data class Child(var pk: Int, val fk: String, val col: Float)
-    data class Parent(var pk: Int, val col: String)
-
-    open class Complex(open var pk: Int, name: Int, username: Int) {
+    private open class Complex(open var pk: Int, name: Int, username: Int) {
         val realName = "$name"
         val realUsername = "$username"
     }
 
-    class Empty {
+    private class Empty {
         var pk: Int = 23
     }
 
-    data class Exotic(var pk: Int = 23, val localDate: LocalDate)
+    private data class Exotic(var pk: Int = 23, val localDate: LocalDate)
 
-    data class ExoticWithProp(var pk: Int = 23, val localDate: LocalDate) {
-        val test = localDate
-    }
-
-    @Nested
-    inner class Inherited(
+    private inner class Inherited(
         override var pk: Int,
         var test: Float,
     ) : Complex(pk = pk, name = 1, username = 2) {
@@ -60,7 +50,6 @@ class Test_DbMessiahMapper {
     @BeforeEach
     fun init() {
         this.mapper = DbMessiahMapper(
-            injectTestElements = false,
             escaper = Escaper(),
             schemas = listOf(
                 Schema(
@@ -119,31 +108,10 @@ class Test_DbMessiahMapper {
     }
 
     @Test
-    fun `test injectTestElements()`() {
-        val mapper = DbMessiahMapper(
-            injectTestElements = true,
-            escaper = Escaper(),
-            schemas = listOf(),
-            globalOutputs = listOf(),
-            globalInputs = listOf(),
-            globalSerializers = listOf()
-        )
-        assertEquals(actual = mapper.tableInfos.size, expected = 2)
-        assertEquals(actual = mapper.tableInfos[0].kclass, expected = TestTableParent::class)
-        assertEquals(actual = mapper.tableInfos[0].schema, expected = "main")
-        assertEquals(actual = mapper.tableInfos[1].kclass, expected = TestTable::class)
-        assertEquals(actual = mapper.tableInfos[1].schema, expected = "main")
-        assertEquals(actual = mapper.globalSerializers, expected = AllTS.basic)
-        assertEquals(actual = mapper.globalInputs, expected = listOf(TestInput::class))
-        assertEquals(actual = mapper.globalOutputs, expected = listOf(TestOutput::class))
-    }
-
-    @Test
     fun `test createAssociationMaps()`() {
 
         val e0 = assertThrows<SerializerException> {
             this.mapper = DbMessiahMapper(
-                injectTestElements = false,
                 escaper = Escaper(),
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Empty::pk)))),
                 globalOutputs = listOf(),
@@ -155,7 +123,6 @@ class Test_DbMessiahMapper {
 
         val e1 = assertThrows<SerializerException> {
             this.mapper = DbMessiahMapper(
-                injectTestElements = false,
                 escaper = Escaper(),
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Exotic::pk)))),
                 globalOutputs = listOf(),
@@ -169,41 +136,45 @@ class Test_DbMessiahMapper {
 
     @Test
     fun `test getTableInfo()`() {
-        val ti0 = this.mapper.getTableInfo(obj = Parent(pk = 1, col="asdf"))
-        assertEquals(actual = ti0, expected = TableInfo(
-            escaper = Escaper(),
-            schema = "main",
-            kclass = Parent::class,
-            primaryKey = PrimaryColumn(
-                autoIncrement = true,
-                kprop = Parent::pk as KMutableProperty1<Any, Any?>,
-                dbType = "INT",
-                jdbcType = JDBCType.INTEGER,
-                encoder = NumberTS.Int.encoder,
-                decoder = NumberTS.Int.decoder
-            ),
-            foreignKeys = listOf(),
-            otherColumns = listOf(),
-            serializers = listOf()
-        ))
+        val ti0 = this.mapper.getTableInfo(obj = Parent(pk = 1, col = "asdf"))
+        assertEquals(
+            actual = ti0, expected = TableInfo(
+                escaper = Escaper(),
+                schema = "main",
+                kclass = Parent::class,
+                primaryKey = PrimaryColumn(
+                    autoIncrement = true,
+                    kprop = Parent::pk as KMutableProperty1<Any, Any?>,
+                    dbType = "INT",
+                    jdbcType = JDBCType.INTEGER,
+                    encoder = NumberTS.Int.encoder,
+                    decoder = NumberTS.Int.decoder
+                ),
+                foreignKeys = listOf(),
+                otherColumns = listOf(),
+                serializers = listOf()
+            )
+        )
 
         val ti1 = this.mapper.getTableInfo(kclass = Parent::class)
-        assertEquals(actual = ti1, expected = TableInfo(
-            escaper = Escaper(),
-            schema = "main",
-            kclass = Parent::class,
-            primaryKey = PrimaryColumn(
-                autoIncrement = true,
-                kprop = Parent::pk as KMutableProperty1<Any, Any?>,
-                dbType = "INT",
-                jdbcType = JDBCType.INTEGER,
-                encoder = NumberTS.Int.encoder,
-                decoder = NumberTS.Int.decoder
-            ),
-            foreignKeys = listOf(),
-            otherColumns = listOf(),
-            serializers = listOf()
-        ))
+        assertEquals(
+            actual = ti1, expected = TableInfo(
+                escaper = Escaper(),
+                schema = "main",
+                kclass = Parent::class,
+                primaryKey = PrimaryColumn(
+                    autoIncrement = true,
+                    kprop = Parent::pk as KMutableProperty1<Any, Any?>,
+                    dbType = "INT",
+                    jdbcType = JDBCType.INTEGER,
+                    encoder = NumberTS.Int.encoder,
+                    decoder = NumberTS.Int.decoder
+                ),
+                foreignKeys = listOf(),
+                otherColumns = listOf(),
+                serializers = listOf()
+            )
+        )
         val e = assertThrows<SerializerException> {
             this.mapper.getTableInfo(kclass = String::class)
         }

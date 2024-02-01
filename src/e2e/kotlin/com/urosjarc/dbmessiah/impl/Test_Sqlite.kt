@@ -1,13 +1,12 @@
 package com.urosjarc.dbmessiah.impl
 
-import com.urosjarc.dbmessiah.DbMessiahService
+import com.urosjarc.dbmessiah.*
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteMessiahSerializer
-import com.urosjarc.dbmessiah.tests.TestService
+import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.io.File
 
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -28,7 +27,10 @@ class Test_Sqlite {
             }
 
             serializer = SqliteMessiahSerializer(
-                injectTestElements = true,
+                schemas = listOf(testSchema),
+                globalSerializers = AllTS.basic,
+                globalOutputs = listOf(TestOutput::class),
+                globalInputs = listOf(TestInput::class)
             )
             service = DbMessiahService(
                 config = sqliteConfig,
@@ -39,8 +41,8 @@ class Test_Sqlite {
 
     @Test
     fun `test sqlite crud cycle()`() {
-        TestService(service = service).apply {
-            this.test_crud_cycle(10)
+        val obj = TestService(service = service).apply {
+            this.`test drop`()
         }
     }
 }

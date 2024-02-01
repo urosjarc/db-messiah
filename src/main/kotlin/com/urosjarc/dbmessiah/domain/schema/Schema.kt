@@ -5,8 +5,8 @@ import com.urosjarc.dbmessiah.domain.table.Table
 
 class Schema(
     val name: String,
-    val serializers: List<TypeSerializer<out Any>> = listOf(),
     var tables: List<Table<*>>,
+    val serializers: List<TypeSerializer<out Any>> = listOf(),
 ) {
     val hash = this.name.hashCode()
     override fun hashCode(): Int = this.hash
