@@ -17,7 +17,7 @@ class Test_Table {
 
     @BeforeEach
     @Suppress("UNCHECKED_CAST")
-    fun init_table() {
+    fun init() {
         this.table = Table(
             primaryKey = Child::pk,
             foreignKeys = listOf(Child::fk to Parent::pk) as List<Pair<KProperty1<Any, *>, KClass<*>>>,

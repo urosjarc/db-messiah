@@ -44,7 +44,7 @@ class Test_QueryBuilder {
     private lateinit var escaper: Escaper
 
     @BeforeEach
-    fun init_table() {
+    fun init() {
         this.input = Input(id = 123, property = "property1")
         this.escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
         this.queryBuilderInOut = QueryBuilderInOut(

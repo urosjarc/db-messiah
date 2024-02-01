@@ -26,7 +26,7 @@ class Test_TableInfo {
 
     @Suppress("UNCHECKED_CAST")
     @BeforeEach
-    fun init_table() {
+    fun init() {
         this.escaper = Escaper(
             type = Escaper.Type.SINGLE_QUOTES,
             joinStr = "."

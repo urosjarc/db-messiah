@@ -29,7 +29,7 @@ class Test_Column {
 
     @BeforeEach
     @Suppress("UNCHECKED_CAST")
-    fun init_table() {
+    fun init() {
         entity = Entity(id = 23, property = "Property")
 
         otherColumn = OtherColumn(
