@@ -21,7 +21,7 @@ class Test_Maria {
         @BeforeAll
         fun init() {
             sqliteConfig = HikariConfig().apply {
-                jdbcUrl = "jdbc:mariadb://0.0.0.0:3306"
+                jdbcUrl = "jdbc:mariadb://localhost:3306"
                 username = "root"
                 password = "root"
             }
