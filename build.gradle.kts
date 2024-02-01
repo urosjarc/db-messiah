@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     kotlin("jvm") version "1.9.22"
-    id("com.adarshr.test-logger") version "4.0.0"
+//    id("com.adarshr.test-logger") version "4.0.0"
     `jvm-test-suite`
 }
 
@@ -53,7 +53,13 @@ testing {
             if (this is JvmTestSuite) {
                 useJUnitJupiter()
                 dependencies {
-                    implementation("org.jetbrains.kotlin:kotlin-test")
+                    //Drivers
+                    this.runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
+                    this.runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
+                    this.runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
+                    this.runtimeOnly("org.postgresql:postgresql:42.7.1")
+                    this.implementation("com.zaxxer:HikariCP:5.1.0")
+                    this.implementation("org.jetbrains.kotlin:kotlin-test")
                 }
             }
         }
@@ -79,6 +85,6 @@ testing {
     }
 }
 
-testlogger {
-    this.setTheme("mocha")
-}
+//testlogger {
+//    this.setTheme("mocha")
+//}
