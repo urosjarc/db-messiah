@@ -1,32 +1,32 @@
-package com.urosjarc.dbmessiah
+package com.urosjarc.dbmessiah.impl
 
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteMessiahSerializer
+import com.urosjarc.dbmessiah.DbMessiahService
+import com.urosjarc.dbmessiah.impl.sqlite.MariaMessiahSerializer
 import com.urosjarc.dbmessiah.tests.TestService
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.io.File
+import kotlin.test.Test
 
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class Test_Sqlite {
+class Test_Maria {
 
     companion object {
         private lateinit var service: DbMessiahService
-        private lateinit var serializer: SqliteMessiahSerializer
+        private lateinit var serializer: MariaMessiahSerializer
         private lateinit var sqliteConfig: HikariConfig
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            this.sqliteConfig = HikariConfig().apply {
-                jdbcUrl = "jdbc:sqlite:${File("src/e2e/resources/chinook.sqlite").absolutePath}"
-                username = null
-                password = null
+            sqliteConfig = HikariConfig().apply {
+                jdbcUrl = "jdbc:mariadb://0.0.0.0:3306"
+                username = "root"
+                password = "root"
             }
 
-            this.serializer = SqliteMessiahSerializer(
+            serializer = MariaMessiahSerializer(
                 injectTestElements = true,
             )
             service = DbMessiahService(
@@ -37,9 +37,9 @@ class Test_Sqlite {
     }
 
     @Test
-    fun `test sqlite crud cycle()`() {
+    fun `test maria crud cycle()`() {
         TestService(service = service).apply {
-            this.test_crud_cycle(10)
+            this.test_crud_cycle(3)
         }
     }
 }

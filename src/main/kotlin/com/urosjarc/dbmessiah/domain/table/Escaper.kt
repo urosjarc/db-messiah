@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.table
 
-data class Escaper(private val type: Type = Type.SINGLE_QUOTES, private val joinStr: String = ".") {
+data class Escaper(private val type: Type = Type.DOUBLE_QUOTES, private val joinStr: String = ".") {
     enum class Type {
         SINGLE_QUOTES, DOUBLE_QUOTES, SQUARE_BRACKETS, GRAVE_ACCENT
     }

@@ -7,12 +7,12 @@ import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 abstract class DbMessiahSerializer(
-    escaper: Escaper,
     schemas: List<Schema>,
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     injectTestElements: Boolean = false,
+    escaper: Escaper,
 ) {
 
     val mapper = DbMessiahMapper(

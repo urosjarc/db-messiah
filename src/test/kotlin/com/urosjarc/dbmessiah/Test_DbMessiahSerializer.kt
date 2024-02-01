@@ -4,6 +4,7 @@ import NumberTS
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.test.TestInput
 import com.urosjarc.dbmessiah.domain.test.TestOutput
 import com.urosjarc.dbmessiah.domain.test.TestTableParent
@@ -17,10 +18,18 @@ import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.expect
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_DbMessiahSerializer {
-    class TestSerializer : DbMessiahSerializer(schemas = listOf(), globalSerializers = listOf(), globalInputs = listOf(), globalOutputs = listOf(), injectTestElements = true) {
+    class TestSerializer : DbMessiahSerializer(
+        schemas = listOf(),
+        globalSerializers = listOf(),
+        globalInputs = listOf(),
+        globalOutputs = listOf(),
+        injectTestElements = true,
+        escaper = Escaper()
+    ) {
         override val onGeneratedKeysFail: String
             get() = TODO("Not yet implemented")
 
