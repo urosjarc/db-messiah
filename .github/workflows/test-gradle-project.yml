@@ -17,7 +17,7 @@ jobs:
         run: ./gradlew test
 
       - name: Run e2e tests
-        run: ./gradlew test
+        run: ./gradlew e2e
 
     services:
       maria-db:
