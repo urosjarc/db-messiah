@@ -13,7 +13,6 @@ import kotlin.reflect.KProperty1
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_TableInfo {
 
     private lateinit var primaryColumn: PrimaryColumn

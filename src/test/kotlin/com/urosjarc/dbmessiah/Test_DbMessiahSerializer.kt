@@ -11,7 +11,6 @@ import com.urosjarc.dbmessiah.types.AllTS
 import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
 import kotlin.reflect.KClass
@@ -19,7 +18,6 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_DbMessiahSerializer {
 
     private lateinit var seri: TestSerializer
@@ -28,6 +26,7 @@ class Test_DbMessiahSerializer {
         var pk: Int? = null,
         val col: String = "12"
     )
+
     private data class Child(
         var pk: Int? = null,
         var fk: Int? = null,

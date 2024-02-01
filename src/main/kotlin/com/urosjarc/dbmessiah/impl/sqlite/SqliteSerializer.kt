@@ -9,7 +9,7 @@ import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 
-class SqliteMessiahSerializer(
+open class SqliteSerializer(
     schemas: List<Schema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),

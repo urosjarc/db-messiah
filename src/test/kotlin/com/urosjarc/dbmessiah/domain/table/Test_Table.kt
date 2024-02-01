@@ -7,7 +7,6 @@ import kotlin.reflect.KProperty1
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_Table {
 
     data class Child(var pk: Int, val fk: String, val col: Float)

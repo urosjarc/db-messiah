@@ -13,7 +13,6 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_TestUserConfiguration {
 
     private data class Child(var pk: Int, val fk: String, val col: Float)

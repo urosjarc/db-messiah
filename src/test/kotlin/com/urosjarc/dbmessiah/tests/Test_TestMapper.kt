@@ -12,7 +12,6 @@ import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
 import kotlin.reflect.KMutableProperty1
@@ -20,7 +19,6 @@ import kotlin.reflect.KProperty1
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_TestMapper {
 
     private lateinit var primaryColumnBad: PrimaryColumn

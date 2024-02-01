@@ -1,19 +1,16 @@
-package com.urosjarc.dbmessiah.impl
+package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.DbMessiahService
-import com.urosjarc.dbmessiah.impl.sqlite.MariaMessiahSerializer
+import com.urosjarc.dbmessiah.impl.sqlite.MariaSerializer
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_Maria {
 
     companion object {
         private lateinit var service: DbMessiahService
-        private lateinit var serializer: MariaMessiahSerializer
+        private lateinit var serializer: MariaSerializer
         private lateinit var sqliteConfig: HikariConfig
 
         @JvmStatic
@@ -25,7 +22,7 @@ class Test_Maria {
                 password = "root"
             }
 
-            serializer = MariaMessiahSerializer(
+            serializer = MariaSerializer(
             )
             service = DbMessiahService(
                 config = sqliteConfig,

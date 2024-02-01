@@ -12,7 +12,6 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.test.*
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_Column {
 
     private lateinit var foreignColumnCanBeNull: ForeignColumn

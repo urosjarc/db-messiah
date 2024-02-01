@@ -16,7 +16,6 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_QueryBuilder {
     private data class Parent(
         var pk: Int? = null,

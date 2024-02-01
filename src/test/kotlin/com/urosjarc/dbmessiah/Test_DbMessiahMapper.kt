@@ -22,7 +22,6 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class Test_DbMessiahMapper {
 
     private lateinit var mapper: DbMessiahMapper
