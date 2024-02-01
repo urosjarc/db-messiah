@@ -39,6 +39,7 @@ class Test_Maria {
     @Test
     fun `test maria crud cycle()`() {
         service.query {
+            it.query { "CREATE SCHEMA IF NOT EXISTS main" }
             it.query { "SET GLOBAL FOREIGN_KEY_CHECKS=0;" }
             it.query { "SET GLOBAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;" }
         }
