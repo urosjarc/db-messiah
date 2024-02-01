@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
-import com.urosjarc.dbmessiah.exceptions.ExecutorException
+import com.urosjarc.dbmessiah.exceptions.EngineException
 import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
@@ -65,7 +65,7 @@ open class DbMessiahEngine(private val conn: Connection) {
 
         } catch (e: SQLException) {
             this.closeAll(ps = ps, rs = rs)
-            throw ExecutorException(msg = "Could not execute select statement: ${e.message}", cause = e)
+            throw EngineException(msg = "Could not execute select statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
             throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
@@ -104,7 +104,7 @@ open class DbMessiahEngine(private val conn: Connection) {
 
         } catch (e: SQLException) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Could not batch query statement: ${e.message}", cause = e)
+            throw EngineException(msg = "Could not batch query statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
             throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
@@ -129,7 +129,7 @@ open class DbMessiahEngine(private val conn: Connection) {
             return count
         } catch (e: SQLException) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Could not execute update statement: ${e.message}", cause = e)
+            throw EngineException(msg = "Could not execute update statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
             throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
@@ -158,7 +158,7 @@ open class DbMessiahEngine(private val conn: Connection) {
             //Continue with getting ids for inserts
         } catch (e: SQLException) {
             this.closeAll(ps = ps)
-            throw ExecutorException(msg = "Could not execute insert statement: ${e.message}", cause = e)
+            throw EngineException(msg = "Could not execute insert statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
             throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
@@ -192,7 +192,7 @@ open class DbMessiahEngine(private val conn: Connection) {
                 }
             } catch (e: SQLException) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw ExecutorException(msg = "Could not execute on generated keys fail sql: '$onGeneratedKeysFail'", cause = e)
+                throw EngineException(msg = "Could not execute on generated keys fail sql: '$onGeneratedKeysFail'", cause = e)
             } catch (e: Throwable) {
                 this.closeAll(ps = ps, rs = rs2)
                 throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
@@ -226,7 +226,7 @@ open class DbMessiahEngine(private val conn: Connection) {
 
         } catch (e: SQLException) {
             this.closeAll(ps = ps, rs = rs)
-            throw ExecutorException(msg = "Could not execute statement: ${e.message}", cause = e)
+            throw EngineException(msg = "Could not execute statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
             throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)

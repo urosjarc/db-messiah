@@ -35,7 +35,7 @@ data class Child(
 
 data class Parent(
     var pk: Int? = null,
-    val col: String
+    var col: String
 ) {
     companion object {
         fun get(pk: Int? = null, seed: Int): Parent {
