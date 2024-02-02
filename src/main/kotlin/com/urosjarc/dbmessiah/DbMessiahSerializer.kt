@@ -1,6 +1,8 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.*
+import com.urosjarc.dbmessiah.domain.queries.Page
+import com.urosjarc.dbmessiah.domain.queries.Query
+import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.domain.table.Escaper
@@ -11,6 +13,7 @@ abstract class DbMessiahSerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
+    globalProcedures: List<KClass<*>> = listOf(),
     escaper: Escaper,
 ) {
 
@@ -19,7 +22,8 @@ abstract class DbMessiahSerializer(
         schemas = schemas.toList(),
         globalSerializers = globalSerializers,
         globalInputs = globalInputs,
-        globalOutputs = globalOutputs
+        globalOutputs = globalOutputs,
+        globalProcedures = globalProcedures
     )
 
     /**
@@ -42,36 +46,22 @@ abstract class DbMessiahSerializer(
     /**
      * SELECTS
      */
-    abstract fun <T : Any> selectQuery(kclass: KClass<T>): Query
-    abstract fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query
-    abstract fun <T : Any, K : Any> selectQuery(kclass: KClass<T>, pk: K): Query
+    abstract fun <T : Any> query(kclass: KClass<T>): Query
+    abstract fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query
+    abstract fun <T : Any, K : Any> query(kclass: KClass<T>, pk: K): Query
 
     /**
      * Call procedure
      */
-    fun <IN : Any> callQuery(input: IN): Query {
-        val T = this.mapper.getTableInfo(obj = input)
-        return Query(
-            sql = "{CALL ${input::class.simpleName}(${T.sqlInsertQuestions()})}",
-            *T.queryValues(obj = input)
-        )
-    }
+    abstract fun <T : Any> callQuery(obj: T): Query
 
     /**
      * Generic queries
      */
-    fun selectQuery(getSql: (queryBuilder: QueryBuilder) -> String): Query {
-        val queryBuilder = QueryBuilder(mapper = this.mapper)
-        return queryBuilder.build(sql = getSql(queryBuilder))
-    }
-    fun <OUT : Any> selectQuery(output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderOut<OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderOut(output = output, mapper = this.mapper)
-        return queryBuilder.build(sql = getSql(queryBuilder))
-    }
-
-    fun <IN : Any, OUT : Any> selectQuery(input: IN, output: KClass<OUT>, getSql: (queryBuilder: QueryBuilderInOut<IN, OUT>) -> String): Query {
-        val queryBuilder = QueryBuilderInOut(input = input, output = output, mapper = this.mapper)
-        return queryBuilder.build(sql = getSql(queryBuilder))
+    fun query(getSql: () -> String): Query = Query(sql = getSql())
+    fun <IN : Any> query(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
+        val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
+        return qBuilder.build(sql = getSql(qBuilder))
     }
 
 }

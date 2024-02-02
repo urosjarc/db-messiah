@@ -23,13 +23,15 @@ open class SqliteSerializer(
     escaper = escaper ?: Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
 ) {
 
+    /**
+     * Managing tables
+     */
     override val onGeneratedKeysFail: String = "select last_insert_rowid();"
 
     override fun <T : Any> dropQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "DROP TABLE IF EXISTS ${T.path};")
     }
-
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
 
@@ -59,23 +61,21 @@ open class SqliteSerializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
     }
-
-    override fun <T : Any> selectQuery(kclass: KClass<T>): Query {
+    override fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path}")
+        return Query(sql = "DELETE FROM ${T.path};")
     }
 
-    override fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY [${page.orderBy.name}] ASC LIMIT ${page.limit} OFFSET ${page.offset}")
+    /**
+     * Managing rows
+     */
+    override fun deleteQuery(obj: Any): Query {
+        val T = this.mapper.getTableInfo(obj = obj)
+        return Query(
+            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;",
+            T.primaryKey.queryValue(obj)
+        )
     }
-
-    override fun <T : Any, K : Any> selectQuery(kclass: KClass<T>, pk: K): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
-    }
-
-
     override fun insertQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
@@ -83,7 +83,6 @@ open class SqliteSerializer(
             *T.queryValues(obj = obj),
         )
     }
-
     override fun updateQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
@@ -93,18 +92,30 @@ open class SqliteSerializer(
         )
     }
 
-    override fun deleteQuery(obj: Any): Query {
-        val T = this.mapper.getTableInfo(obj = obj)
+    /**
+     * Selects
+     */
+    override fun <T : Any> query(kclass: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${T.path}")
+    }
+    override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY [${page.orderBy.name}] ASC LIMIT ${page.limit} OFFSET ${page.offset}")
+    }
+    override fun <T : Any, K : Any> query(kclass: KClass<T>, pk: K): Query {
+        val T = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
+    }
+
+    /**
+     * Call procedures
+     */
+    override fun <T : Any> callQuery(obj: T): Query {
+        val P = this.mapper.getProcedure(obj = obj)
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;",
-            T.primaryKey.queryValue(obj)
+            sql = "{CALL ${P.name}(${P.sqlArguments()}",
+            *P.queryValues(obj = obj)
         )
     }
-
-    override fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "DELETE FROM ${T.path};")
-    }
-
-
 }

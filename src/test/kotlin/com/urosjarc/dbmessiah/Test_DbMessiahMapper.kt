@@ -10,8 +10,6 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
 import com.urosjarc.dbmessiah.types.NumberTS
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
 import java.time.LocalDate
@@ -25,6 +23,7 @@ import kotlin.test.assertEquals
 class Test_DbMessiahMapper {
 
     private lateinit var mapper: DbMessiahMapper
+
     private data class Child(var pk: Int)
     private data class Parent(var pk: Int, val col: String)
 
@@ -63,7 +62,8 @@ class Test_DbMessiahMapper {
             ),
             globalOutputs = listOf(),
             globalInputs = listOf(),
-            globalSerializers = AllTS.basic
+            globalSerializers = AllTS.basic,
+            globalProcedures = listOf()
         )
     }
 
@@ -115,10 +115,15 @@ class Test_DbMessiahMapper {
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Empty::pk)))),
                 globalOutputs = listOf(),
                 globalInputs = listOf(),
-                globalSerializers = AllTS.basic
+                globalSerializers = AllTS.basic,
+                globalProcedures = listOf()
             )
         }
-        assertContains(charSequence = e0.message.toString(), "Table 'Empty' have empty primary constructor, which is not allowed!", message = e0.toString())
+        assertContains(
+            charSequence = e0.message.toString(),
+            "Table 'Empty' have empty primary constructor, which is not allowed!",
+            message = e0.toString()
+        )
 
         val e1 = assertThrows<SerializerException> {
             this.mapper = DbMessiahMapper(
@@ -126,10 +131,15 @@ class Test_DbMessiahMapper {
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Exotic::pk)))),
                 globalOutputs = listOf(),
                 globalInputs = listOf(),
-                globalSerializers = AllTS.basic
+                globalSerializers = AllTS.basic,
+                globalProcedures = listOf()
             )
         }
-        assertContains(charSequence = e1.message.toString(), "Could not find serializer for primary constructor parameter 'Exotic'.'localDate'", message = e1.toString())
+        assertContains(
+            charSequence = e1.message.toString(),
+            "Could not find serializer for primary constructor parameter 'Exotic'.'localDate'",
+            message = e1.toString()
+        )
 
     }
 

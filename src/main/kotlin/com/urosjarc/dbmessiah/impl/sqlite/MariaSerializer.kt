@@ -54,7 +54,7 @@ class MariaSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
 
-    override fun <T : Any> selectQuery(kclass: KClass<T>, page: Page<T>): Query {
+    override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY `${page.orderBy.name}` ASC LIMIT ${page.limit} OFFSET ${page.offset}")
     }

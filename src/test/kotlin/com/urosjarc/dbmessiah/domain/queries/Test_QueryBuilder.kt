@@ -37,30 +37,21 @@ class Test_QueryBuilder {
         )
     )
 
-    private lateinit var queryBuilderOut: QueryBuilderOut<Output>
+    private lateinit var queryBuilder: QueryBuilder<Input>
     private lateinit var input: Input
-    private lateinit var queryBuilderInOut: QueryBuilderInOut<Input, Output>
     private lateinit var escaper: Escaper
 
     @BeforeEach
     fun init() {
         this.input = Input(id = 123, property = "property1")
         this.escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
-        this.queryBuilderInOut = QueryBuilderInOut(
-            output = Output::class,
+        this.queryBuilder = QueryBuilder(
             input = input,
             mapper = DbMessiahMapper(
                 escaper = escaper,
                 schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
-            )
-        )
-        this.queryBuilderOut = QueryBuilderOut(
-            output = Output::class,
-            mapper = DbMessiahMapper(
-                escaper = escaper,
-                schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class)
+                globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class),
+                globalProcedures = listOf()
             )
         )
     }
@@ -68,38 +59,38 @@ class Test_QueryBuilder {
     @Test
     fun `test init {}`() {
         val e0 = assertThrows<SerializerException> {
-            QueryBuilderInOut(
-                output = Output::class,
+            QueryBuilder(
                 input = input,
                 mapper = DbMessiahMapper(
                     escaper = escaper,
                     schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(Output::class), globalInputs = listOf()
+                    globalOutputs = listOf(Output::class), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
         assertContains(charSequence = e0.message.toString(), other = "not registered in serializers global inputs")
 
         val e1 = assertThrows<SerializerException> {
-            QueryBuilderInOut(
-                output = Output::class,
+            QueryBuilder(
                 input = input,
                 mapper = DbMessiahMapper(
                     escaper = escaper,
                     schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf(Input::class)
+                    globalOutputs = listOf(), globalInputs = listOf(Input::class),
+                    globalProcedures = listOf()
                 )
             )
         }
         assertContains(charSequence = e1.message.toString(), other = "not registered in serializers global outputs")
 
         val e2 = assertThrows<SerializerException> {
-            QueryBuilderOut(
-                output = Output::class,
+            QueryBuilder(
+                input = Output::class,
                 mapper = DbMessiahMapper(
                     escaper = escaper,
                     schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(), globalProcedures = listOf()
                 )
             )
         }
@@ -107,11 +98,11 @@ class Test_QueryBuilder {
     }
 
     @Test
-    fun `test inp(), build()`() {
-        assertEquals(expected = "?", actual = queryBuilderInOut.inp(Input::id))
-        assertEquals(expected = "?", actual = queryBuilderInOut.inp(Input::property))
+    fun `test get(), build()`() {
+        assertEquals(expected = "?", actual = queryBuilder.get(Input::id))
+        assertEquals(expected = "?", actual = queryBuilder.get(Input::property))
         val sql = "SELECT * FROM Input"
-        val actual: Query = queryBuilderInOut.build(sql = sql)
+        val actual: Query = queryBuilder.build(sql = sql)
         val expected = Query(
             sql = sql,
             QueryValue(name = "id", value = input.id, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder),
@@ -125,8 +116,4 @@ class Test_QueryBuilder {
         }
     }
 
-    @Test
-    fun `test out()`() {
-        assertEquals(expected = "'text'", actual = this.queryBuilderOut.out(Output::text))
-    }
 }

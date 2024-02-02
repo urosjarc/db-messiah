@@ -2,9 +2,7 @@ package com.urosjarc.dbmessiah.domain.columns
 
 import com.urosjarc.dbmessiah.domain.serialization.Decoder
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import java.sql.JDBCType
-import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 
 class PrimaryColumn(

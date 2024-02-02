@@ -59,6 +59,7 @@ class Test_TestMapper {
             globalInputs = listOf(Input::class),
             globalOutputs = listOf(Output::class),
             globalSerializers = AllTS.basic,
+            globalProcedures = listOf()
         )
 
         entity = Entity(pk = 23, fk = 12, col = 2.34f)

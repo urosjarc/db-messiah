@@ -51,7 +51,7 @@ class DbMessiahService(
             return returned
         } catch (e: Throwable) {
             this.close(conn = conn)
-            throw ServiceException("Unknown execution error", e)
+            throw ServiceException("Unknown execution error: ${e.message}", e)
         }
     }
 

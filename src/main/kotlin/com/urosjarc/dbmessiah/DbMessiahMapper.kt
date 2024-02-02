@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.call.Procedure
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
@@ -27,7 +28,8 @@ class DbMessiahMapper(
     var schemas: List<Schema>,
     var globalSerializers: List<TypeSerializer<*>>,
     var globalInputs: List<KClass<*>>,
-    var globalOutputs: List<KClass<*>>
+    var globalOutputs: List<KClass<*>>,
+    var globalProcedures: List<KClass<*>>
 ) {
     val log = this.logger()
 
@@ -46,6 +48,9 @@ class DbMessiahMapper(
 
     //Link foreign column to foreign table
     private val fkColumn_to_tableKClass = mutableMapOf<ForeignColumn, KClass<*>>()
+
+    //Link procedure kclass to procedure
+    private val procedureKClass_to_procedure = mutableMapOf<KClass<*>, Procedure>()
 
     /**
      * MAPPERS
@@ -95,12 +100,19 @@ class DbMessiahMapper(
         this.createAssociationMaps(kclass = table.kclass, serializers = serializers, columnSerializers = table.columnSerializers)
     }
 
-    private fun <T : Any> createAssociationMaps(kclass: KClass<*>, columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<Any>>> = listOf(), serializers: List<TypeSerializer<*>>) {
-        val kparams = kclass.primaryConstructor?.parameters?.filter { it.kind == KParameter.Kind.VALUE } // Kind { INSTANCE, EXTENSION_RECEIVER, VALUE }
+    private fun <T : Any> createAssociationMaps(
+        kclass: KClass<*>,
+        columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<Any>>> = listOf(),
+        serializers: List<TypeSerializer<*>>,
+        isProcedure: Boolean = false
+    ) {
+        val kparams = kclass.primaryConstructor?.parameters?.filter { it.kind == KParameter.Kind.VALUE } // { INSTANCE, EXTENSION_RECEIVER, VALUE }
         val kprops = kclass.memberProperties.filter { it.javaField != null }
 
-        kparams ?: throw SerializerException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
-        if (kparams.isEmpty()) throw SerializerException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
+        if (kparams == null)
+            throw SerializerException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+        if (kparams.isEmpty() && !isProcedure)
+            throw SerializerException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
 
         this.kclass_to_constructor[kclass] = kclass.primaryConstructor
         this.kclass_to_constructorParameters[kclass] = kparams
@@ -133,6 +145,9 @@ class DbMessiahMapper(
         }
         (this.globalInputs + this.globalOutputs).forEach {
             this.createAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers)
+        }
+        this.globalProcedures.forEach {
+            this.createAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers, isProcedure = true)
         }
     }
 
@@ -176,8 +191,10 @@ class DbMessiahMapper(
          */
         for (tableInfo in this.tableInfos) {
             for (column in tableInfo.foreignKeys) {
-                val foreignTableKClass = this.fkColumn_to_tableKClass[column] ?: throw MapperException("Could not find link between foreign key and table kclass")
-                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass] ?: throw MapperException("Could not find link between foreign table and table info")
+                val foreignTableKClass =
+                    this.fkColumn_to_tableKClass[column] ?: throw MapperException("Could not find link between foreign key and table kclass")
+                column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass]
+                    ?: throw MapperException("Could not find link between foreign table and table info")
             }
         }
     }
@@ -248,8 +265,23 @@ class DbMessiahMapper(
         )
     }
 
-    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo = this.tableKClass_to_tableInfo[kclass] ?: throw SerializerException("Could not find table info for table '${kclass.simpleName}'")
+    fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
+    fun getProcedure(kclass: KClass<*>): Procedure =
+        this.procedureKClass_to_procedure[kclass] ?: throw SerializerException("Could not find procedure for kclass: '${kclass.simpleName}'")
+
+    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
+        this.tableKClass_to_tableInfo[kclass] ?: throw SerializerException("Could not find table info for table: '${kclass.simpleName}'")
+
     fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
+    fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
+        val output = outputs.getOrNull(i)
+        if (output != null) {
+            val objs = mutableListOf<Any>()
+            while (resultSet.next()) objs.add(this.decode(resultSet, output))
+            return objs
+        } else return listOf(resultSet.getInt(1))
+    }
+
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
 
         val constructor = this.getConstructor(kclass = kclass)

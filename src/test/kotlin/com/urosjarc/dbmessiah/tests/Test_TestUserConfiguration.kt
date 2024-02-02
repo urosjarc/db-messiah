@@ -8,7 +8,6 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
 import com.urosjarc.dbmessiah.types.NumberTS
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -26,7 +25,8 @@ class Test_TestUserConfiguration {
                 mapper = DbMessiahMapper(
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(), globalSerializers = listOf(),
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
@@ -38,7 +38,8 @@ class Test_TestUserConfiguration {
                 mapper = DbMessiahMapper(
                     escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
                     schemas = listOf(Schema(name = "Schema0", tables = listOf())), globalSerializers = listOf(),
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
@@ -57,7 +58,8 @@ class Test_TestUserConfiguration {
                         Schema(name = "Schema0", tables = listOf(Table(Parent::pk))),
 
                         ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
@@ -79,11 +81,16 @@ class Test_TestUserConfiguration {
                             )
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Schema 'Schema0' has tables ['Parent'] registered multiple times", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has tables ['Parent'] registered multiple times",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -104,11 +111,16 @@ class Test_TestUserConfiguration {
                             )
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Table 'Schema0'.'Parent' has foreign keys ['col'] registered multiple times", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Table 'Schema0'.'Parent' has foreign keys ['col'] registered multiple times",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -133,11 +145,16 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Table 'Schema0'.'Parent' has constraints ['col'] registered multiple times", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Table 'Schema0'.'Parent' has constraints ['col'] registered multiple times",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -155,11 +172,16 @@ class Test_TestUserConfiguration {
                             serializers = listOf(NumberTS.Int) + listOf(NumberTS.Int),
                         ),
                     ), globalSerializers = AllTS.basic + NumberTS.Int,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -179,11 +201,16 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic + NumberTS.Int,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Table 'Schema0'.'Child' has serializers [TS<Int>] registered multiple times", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Table 'Schema0'.'Child' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -205,11 +232,16 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = " Foreign key 'Schema0'.'Child'.'col' points to unregistered class 'Parent'", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = " Foreign key 'Schema0'.'Child'.'col' points to unregistered class 'Parent'",
+            message = e.toString()
+        )
 
         val e2 = assertThrows<SerializerException> {
             TestUserConfiguration(
@@ -229,7 +261,8 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
@@ -263,11 +296,16 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Foreign key 'Schema0'.'Child'.'fk' does not need 'AUTO_INC' constraint", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Foreign key 'Schema0'.'Child'.'fk' does not need 'AUTO_INC' constraint",
+            message = e.toString()
+        )
 
         val e2 = assertThrows<SerializerException> {
             TestUserConfiguration(
@@ -286,11 +324,16 @@ class Test_TestUserConfiguration {
                             ),
                         ),
                     ), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf()
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e2.message.toString(), other = "Primary key 'Schema0'.'Child'.'pk' does not need 'UNIQUE' constraint", message = e2.toString())
+        assertContains(
+            charSequence = e2.message.toString(),
+            other = "Primary key 'Schema0'.'Child'.'pk' does not need 'UNIQUE' constraint",
+            message = e2.toString()
+        )
     }
 
     @Test
@@ -304,11 +347,16 @@ class Test_TestUserConfiguration {
                     ),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Unknown::class),
-                    globalInputs = listOf()
+                    globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Primary key 'Schema0.Unknown.pk' of type 'String' has constrain 'AUTO_INC' but then it should be of type 'Int'", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Primary key 'Schema0.Unknown.pk' of type 'String' has constrain 'AUTO_INC' but then it should be of type 'Int'",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -322,11 +370,16 @@ class Test_TestUserConfiguration {
                     ),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(),
-                    globalInputs = listOf(Unknown::class)
+                    globalInputs = listOf(Unknown::class),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Input property 'Unknown'.'pk' can be null which is not allowed on any input class!", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Input property 'Unknown'.'pk' can be null which is not allowed on any input class!",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -340,10 +393,14 @@ class Test_TestUserConfiguration {
                     ),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Unknown::class),
-                    globalInputs = listOf()
+                    globalInputs = listOf(),
+                    globalProcedures = listOf()
                 )
             )
         }
-        assertContains(charSequence = e.message.toString(), other = "Output class 'Unknown' have primary constructor with optional arguments ['pk'], which is not allowed on any output class!")
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Output class 'Unknown' have primary constructor with optional arguments ['pk'], which is not allowed on any output class!"
+        )
     }
 }

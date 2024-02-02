@@ -4,16 +4,14 @@ import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.random.Random
 
-data class TestInput(
+data class TestProcedure(
     val child_pk: Int,
     val parent_pk: Int,
 )
 
-data class TestOutput(
+data class Input(
     val child_pk: Int,
     val parent_pk: Int,
-    val child_col: String,
-    val parent_col: String
 )
 
 data class Child(

@@ -107,7 +107,7 @@ class Test_TableInfo {
     }
 
     @Test
-    fun `test values()`() {
+    fun `test queryValues()`() {
         val entity = Entity(pk = 1, fk = "2", col = "3")
         val queryValues = this.tableInfo.queryValues(entity)
         assertEquals(expected = 2, queryValues.size)
