@@ -165,4 +165,26 @@ class TestUserConfiguration(val mapper: DbMessiahMapper) {
         }
     }
 
+    /**
+     * GLOBAL OBJECTS REGISTERING MULTIPLE TIMES
+     */
+    fun `13-th Test - If global procedure registered multiple times`() {
+        val notUnique = this.mapper.globalProcedures.ext_notUnique
+        if (notUnique.isNotEmpty()) throw SerializerException("Global procedures registered multiple times: ${notUnique.keys}")
+    }
+    fun `14-th Test - If global outputs registered multiple times`() {
+        val notUnique = this.mapper.globalOutputs.ext_notUnique
+        if (notUnique.isNotEmpty()) throw SerializerException("Global outputs registered multiple times: ${notUnique.keys}")
+    }
+
+    fun `15-th Test - If global inputs registered multiple times`() {
+        val notUnique = this.mapper.globalInputs.ext_notUnique
+        if (notUnique.isNotEmpty()) throw SerializerException("Global inputs registered multiple times: ${notUnique.keys}")
+    }
+
+    fun `16-th Test - If global serializers registered multiple times`() {
+        val notUnique = this.mapper.globalInputs.ext_notUnique
+        if (notUnique.isNotEmpty()) throw SerializerException("Global serializers registered multiple times: ${notUnique.keys}")
+    }
+
 }

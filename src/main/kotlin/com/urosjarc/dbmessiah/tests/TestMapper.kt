@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.domain.call.Procedure
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
@@ -41,7 +42,7 @@ class TestMapper(val mapper: DbMessiahMapper) {
         }
     }
 
-    fun `5-th Test - If all tables own their own columns`() {
+    fun `5-th Test - If all tables own their columns`() {
         this.mapper.tableInfos.forEach { T: TableInfo ->
             val kprops = this.mapper.getKProps(kclass = T.kclass)
             if (!kprops.contains(T.primaryKey.kprop))
@@ -86,5 +87,27 @@ class TestMapper(val mapper: DbMessiahMapper) {
             }
         }
     }
+
+    /**
+     * CHECK FOR PROCEDURES
+     */
+    fun `9-th Test - If all procedures arguments have been inited and connected with its owner`(){
+        this.mapper.procedures.forEach { P ->
+            P.args.forEach {
+                if (P != it.procedure) throw MapperException("Argument ${it.path} have parent '${it.procedure}' but it should have parent: '${P}'")
+            }
+        }
+    }
+
+    fun `10-th Test - If all procedures own their arguments`() {
+        this.mapper.procedures.forEach { P: Procedure ->
+            val kprops = this.mapper.getKProps(kclass = P.kclass)
+            P.args.forEach {
+                if (!kprops.contains(it.kprop))
+                    throw MapperException("Procedure '$P' does own argument: $it")
+            }
+        }
+    }
+
 
 }

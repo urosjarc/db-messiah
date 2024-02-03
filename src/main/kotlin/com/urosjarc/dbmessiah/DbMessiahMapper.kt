@@ -36,6 +36,7 @@ class DbMessiahMapper(
 
     //All table informations
     var tableInfos = listOf<TableInfo>()
+    var procedures = listOf<Procedure>()
 
     /**
      * LINKED LISTS
@@ -93,7 +94,7 @@ class DbMessiahMapper(
 
     init {
         this.createAssociationMaps()
-        this.testSerializer()
+        this.testConfiguration()
         this.createTablesInfos()
         this.createProcedures()
         this.testMapper()
@@ -153,7 +154,7 @@ class DbMessiahMapper(
         }
     }
 
-    private fun testSerializer() {
+    private fun testConfiguration() {
         TestUserConfiguration(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
@@ -172,6 +173,11 @@ class DbMessiahMapper(
             //Test serializability
             it.`11-th Test - If all input classes have imutable and not null properties`()
             it.`12-th Test - If all output classes have no default values`()
+            //Test global object by uniqueness
+            it.`13-th Test - If global procedure registered multiple times`()
+            it.`14-th Test - If global outputs registered multiple times`()
+            it.`15-th Test - If global inputs registered multiple times`()
+            it.`16-th Test - If global serializers registered multiple times`()
         }
 
     }
@@ -186,7 +192,7 @@ class DbMessiahMapper(
                 registeredTableInfos.add(tableInfo)
             }
         }
-        this.tableInfos = registeredTableInfos.toList()
+        this.tableInfos = registeredTableInfos
 
         /**
          * CONNECT TABLE INFOS OVER FOREIGN KEYS
@@ -202,10 +208,13 @@ class DbMessiahMapper(
     }
 
     private fun createProcedures() {
+        val procedures = mutableListOf<Procedure>()
         this.globalProcedures.forEach {
             val procedure = this.registerProcedure(kclass = it)
             this.procedureKClass_to_procedure[it] = procedure
+            procedures.add(procedure)
         }
+        this.procedures = procedures
     }
 
     fun testMapper() {
@@ -219,10 +228,12 @@ class DbMessiahMapper(
             it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
             it.`4-th Test - If all columns are unique`()
             //Test validity
-            it.`5-th Test - If all tables own their own columns`()
+            it.`5-th Test - If all tables own their columns`()
             it.`6-th Test - If all foreign columns are connected to registered table`()
             it.`7-th Test - If all columns have been inited and connected with parent table`()
             it.`8-th Test - If all primary keys that have auto inc are of type integer`()
+            it.`9-th Test - If all procedures arguments have been inited and connected with its owner`()
+            it.`10-th Test - If all procedures own their arguments`()
         }
     }
 

@@ -1,6 +1,8 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.domain.call.Procedure
+import com.urosjarc.dbmessiah.domain.call.ProcedureArg
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
@@ -21,6 +23,8 @@ import kotlin.test.assertContains
 
 class Test_TestMapper {
 
+    private lateinit var otherPArg: ProcedureArg
+    private lateinit var pArg: ProcedureArg
     private lateinit var primaryColumnBad: PrimaryColumn
     private lateinit var foreignColumn2: ForeignColumn
     private lateinit var otherColumn2: OtherColumn
@@ -36,6 +40,7 @@ class Test_TestMapper {
     private data class Entity2(var pk: Int, var text: String?)
     private data class Input(val value: String)
     private data class Output(val value: Int)
+    private data class TestProcedure(val value: String)
 
     @BeforeEach
     fun init() {
@@ -59,7 +64,7 @@ class Test_TestMapper {
             globalInputs = listOf(Input::class),
             globalOutputs = listOf(Output::class),
             globalSerializers = AllTS.basic,
-            globalProcedures = listOf()
+            globalProcedures = listOf(TestProcedure::class)
         )
 
         entity = Entity(pk = 23, fk = 12, col = 2.34f)
@@ -121,6 +126,20 @@ class Test_TestMapper {
             decoder = { rs, i, _ -> rs.getString(i) },
             encoder = { ps, i, x -> ps.setString(i, x.toString()) }
         )
+        pArg = ProcedureArg(
+            kprop = TestProcedure::value as KProperty1<Any, Any?>,
+            dbType = "VARCHAR",
+            jdbcType = JDBCType.VARCHAR,
+            decoder = { rs, i, _ -> rs.getString(i) },
+            encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+        )
+        otherPArg = ProcedureArg(
+            kprop = Entity::pk as KProperty1<Any, Any?>,
+            dbType = "VARCHAR",
+            jdbcType = JDBCType.VARCHAR,
+            decoder = { rs, i, _ -> rs.getString(i) },
+            encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+        )
     }
 
     @Test
@@ -157,7 +176,11 @@ class Test_TestMapper {
         val e = assertThrows<MapperException> {
             repo.testMapper()
         }
-        assertContains(charSequence = e.message.toString(), other = "Found first inconsistent escaper Escaper(type=SINGLE_QUOTES, joinStr=x) on table 'Schema'x'Entity2'", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Found first inconsistent escaper Escaper(type=SINGLE_QUOTES, joinStr=x) on table 'Schema'x'Entity2'",
+            message = e.toString()
+        )
     }
 
 
@@ -186,7 +209,11 @@ class Test_TestMapper {
         val e = assertThrows<MapperException> {
             repo.testMapper()
         }
-        assertContains(charSequence = e.message.toString(), other = "Following tables have been created multiple times: ['Schema'.'Entity']", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Following tables have been created multiple times: ['Schema'.'Entity']",
+            message = e.toString()
+        )
     }
 
     @Test
@@ -243,7 +270,11 @@ class Test_TestMapper {
         val e = assertThrows<MapperException> {
             repo.testMapper()
         }
-        assertContains(charSequence = e.message.toString(), other = "Table 'Schema'.'Entity2' does own primary key: Column(name='pk', dbType='INT', jdbcType='INTEGER')", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Table 'Schema'.'Entity2' does own primary key: Column(name='pk', dbType='INT', jdbcType='INTEGER')",
+            message = e.toString()
+        )
 
 
         /**
@@ -276,7 +307,11 @@ class Test_TestMapper {
         val e2 = assertThrows<MapperException> {
             repo.testMapper()
         }
-        assertContains(charSequence = e2.message.toString(), other = "Table 'Schema'.'Entity' does own foreign key: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')", message = e2.toString())
+        assertContains(
+            charSequence = e2.message.toString(),
+            other = "Table 'Schema'.'Entity' does own foreign key: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
+            message = e2.toString()
+        )
 
         /**
          * OTHER KEY
@@ -297,7 +332,11 @@ class Test_TestMapper {
         val e3 = assertThrows<MapperException> {
             repo.testMapper()
         }
-        assertContains(charSequence = e3.message.toString(), other = "Table 'Schema'.'Entity' does own column: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')", message = e3.toString())
+        assertContains(
+            charSequence = e3.message.toString(),
+            other = "Table 'Schema'.'Entity' does own column: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
+            message = e3.toString()
+        )
     }
 
     @Test
@@ -365,7 +404,15 @@ class Test_TestMapper {
             foreignKeys = listOf(), otherColumns = listOf(), serializers = listOf()
         )
         repo.tableInfos = listOf(
-            TableInfo(escaper = escaper, schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn, foreignKeys = listOf(), otherColumns = listOf(otherColumn), serializers = listOf())
+            TableInfo(
+                escaper = escaper,
+                schema = "Schema",
+                kclass = Entity::class,
+                primaryKey = primaryColumn,
+                foreignKeys = listOf(),
+                otherColumns = listOf(otherColumn),
+                serializers = listOf()
+            )
         )
 
         /**
@@ -406,7 +453,15 @@ class Test_TestMapper {
          * OTHER COLUMNS
          */
         repo.tableInfos = listOf(
-            TableInfo(escaper = escaper, schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn, foreignKeys = listOf(), otherColumns = listOf(otherColumn), serializers = listOf())
+            TableInfo(
+                escaper = escaper,
+                schema = "Schema",
+                kclass = Entity::class,
+                primaryKey = primaryColumn,
+                foreignKeys = listOf(),
+                otherColumns = listOf(otherColumn),
+                serializers = listOf()
+            )
         )
         repo.tableInfos[0].otherColumns[0].table = otherTable
         val e3 = assertThrows<MapperException> { repo.testMapper() }
@@ -439,4 +494,57 @@ class Test_TestMapper {
             message = e.toString()
         )
     }
+
+    @Test
+    fun `test 9-th()`() {
+
+        /**
+         * IS INITED
+         */
+        repo.procedures = listOf(
+            Procedure(
+                escaper = escaper,
+                kclass = TestProcedure::class,
+                args = listOf(pArg)
+            )
+        )
+
+        repo.procedures[0].args[0].procedure = Procedure(escaper = escaper, kclass = TestProcedure::class, args = listOf())
+
+        val e2 = assertThrows<MapperException> {
+            repo.testMapper()
+        }
+
+        assertContains(
+            charSequence = e2.message.toString(),
+            other = " Argument 'TestProcedure'.'value' have parent 'TestProcedure()' but it should have parent: 'TestProcedure('value': String)",
+            message = e2.toString()
+        )
+    }
+
+    @Test
+    fun `test 10-th()`() {
+
+        /**
+         * IS INITED
+         */
+        repo.procedures = listOf(
+            Procedure(
+                escaper = escaper,
+                kclass = TestProcedure::class,
+                args = listOf(otherPArg)
+            )
+        )
+
+        val e2 = assertThrows<MapperException> {
+            repo.testMapper()
+        }
+
+        assertContains(
+            charSequence = e2.message.toString(),
+            other = "Procedure 'TestProcedure('pk': Int)' does own argument: Arg(name='pk', dbType='VARCHAR', jdbcType='VARCHAR')",
+            message = e2.toString()
+        )
+    }
+
 }

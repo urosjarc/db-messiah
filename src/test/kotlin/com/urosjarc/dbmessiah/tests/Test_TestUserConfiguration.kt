@@ -403,4 +403,110 @@ class Test_TestUserConfiguration {
             other = "Output class 'Unknown' have primary constructor with optional arguments ['pk'], which is not allowed on any output class!"
         )
     }
+
+    @Test
+    fun `test 13-th()`() {
+        val e = assertThrows<SerializerException> {
+            TestUserConfiguration(
+                mapper = DbMessiahMapper(
+                    escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
+                    schemas = listOf(
+                        Schema(
+                            name = "Schema0",
+                            tables = listOf(
+                                Table(Child::pk),
+                            ),
+                            serializers = listOf(NumberTS.Int),
+                        ),
+                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    globalOutputs = listOf(), globalInputs = listOf(),
+                    globalProcedures = listOf(Parent::class, Parent::class)
+                )
+            )
+        }
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
+    }
+
+    @Test
+    fun `test 14-th()`() {
+        val e = assertThrows<SerializerException> {
+            TestUserConfiguration(
+                mapper = DbMessiahMapper(
+                    escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
+                    schemas = listOf(
+                        Schema(
+                            name = "Schema0",
+                            tables = listOf(
+                                Table(Child::pk),
+                            ),
+                            serializers = listOf(NumberTS.Int),
+                        ),
+                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    globalOutputs = listOf(Parent::class, Parent::class), globalInputs = listOf(),
+                    globalProcedures = listOf()
+                )
+            )
+        }
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
+    }
+    @Test
+    fun `test 15-th()`() {
+        val e = assertThrows<SerializerException> {
+            TestUserConfiguration(
+                mapper = DbMessiahMapper(
+                    escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
+                    schemas = listOf(
+                        Schema(
+                            name = "Schema0",
+                            tables = listOf(
+                                Table(Child::pk),
+                            ),
+                            serializers = listOf(NumberTS.Int),
+                        ),
+                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),
+                    globalProcedures = listOf()
+                )
+            )
+        }
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
+    }
+    @Test
+    fun `test 16-th()`() {
+        val e = assertThrows<SerializerException> {
+            TestUserConfiguration(
+                mapper = DbMessiahMapper(
+                    escaper = Escaper(type = Escaper.Type.DOUBLE_QUOTES, joinStr = ","),
+                    schemas = listOf(
+                        Schema(
+                            name = "Schema0",
+                            tables = listOf(
+                                Table(Child::pk),
+                            ),
+                            serializers = listOf(NumberTS.Int),
+                        ),
+                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),
+                    globalProcedures = listOf()
+                )
+            )
+        }
+        assertContains(
+            charSequence = e.message.toString(),
+            other = "Schema 'Schema0' has serializers [TS<Int>] registered multiple times",
+            message = e.toString()
+        )
+    }
 }
