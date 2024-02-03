@@ -1,28 +1,19 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.domain.call.Procedure
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
-class TestMapper(val mapper: DbMessiahMapper) {
+class TestMapper(val mapper: Mapper) {
     /**
      * Check for emptyness
      */
 
     fun `1-th Test - If at least one table has been created`() {
         if (this.mapper.tableInfos.isEmpty()) throw MapperException("No table info was created")
-    }
-
-    fun `2-th Test - If table escapers are consistent`() {
-        val firstEscapedChar = this.mapper.tableInfos.first().escaper
-        this.mapper.tableInfos.forEach {
-            if (it.escaper != firstEscapedChar) {
-                throw MapperException("Found first inconsistent escaper ${it.escaper} on table ${it.path}")
-            }
-        }
     }
 
     /**

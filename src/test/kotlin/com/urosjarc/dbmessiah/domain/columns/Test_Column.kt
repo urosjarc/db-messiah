@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.domain.columns
 
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import com.urosjarc.dbmessiah.types.AllTS
@@ -19,7 +18,6 @@ class Test_Column {
     private lateinit var foreignColumn: ForeignColumn
     private lateinit var otherColumn: OtherColumn
     private lateinit var entity: Entity
-    private lateinit var escaper: Escaper
 
     data class Entity(var id: Int, val property: String)
     data class Entity2(var text: String?)
@@ -72,12 +70,7 @@ class Test_Column {
             decoder = { rs, i, _ -> rs.getString(i) },
             encoder = { ps, i, x -> ps.setString(i, x.toString()) }
         )
-        escaper = Escaper(
-            type = Escaper.Type.SINGLE_QUOTES,
-            joinStr = "."
-        )
         TableInfo(
-            escaper = escaper,
             schema = "Schema",
             kclass = Entity::class,
             primaryKey = primaryColumn,

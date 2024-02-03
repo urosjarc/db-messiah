@@ -1,15 +1,18 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.random.Random
 
 data class TestProcedure(
+    val parent_pk: Int
+)
+class TestProcedureEmpty
+
+data class Input(
     val child_pk: Int,
     val parent_pk: Int,
 )
-
-data class Input(
+data class Output(
     val child_pk: Int,
     val parent_pk: Int,
 )
@@ -44,13 +47,14 @@ data class Parent(
 }
 
 
-val testSchema = Schema(
-    name = "main", tables = listOf(
+fun testSchema(name: String) = Schema(
+    name = name, tables = listOf(
         Table(primaryKey = Parent::pk),
         Table(
             primaryKey = Child::pk, foreignKeys = listOf(
                 Child::fk to Parent::class
             )
         )
-    )
+    ),
+    procedures = listOf(TestProcedure::class, TestProcedureEmpty::class)
 )

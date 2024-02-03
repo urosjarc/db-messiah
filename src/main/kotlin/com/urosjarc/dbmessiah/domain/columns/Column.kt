@@ -22,7 +22,7 @@ open class Column(
 ) {
     lateinit var table: TableInfo
     override val inited get() = this::table.isInitialized
-    override val name: String get() = this.table.escaper.wrap(this.kprop.name)
-    override val path: String get() = this.table.escaper.wrapJoin(this.table.schema, this.table.name, this.kprop.name)
+    override val name: String get() = this.kprop.name
+    override val path: String get() = listOf(this.table.schema, this.table.name, this.kprop.name).joinToString(".")
     override fun toString(): String = "Column(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
 }

@@ -1,14 +1,14 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.domain.columns.C
-import com.urosjarc.dbmessiah.domain.schema.Schema
+import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
-class TestUserConfiguration(val mapper: DbMessiahMapper) {
+class TestUserConfiguration(val mapper: Mapper) {
     /**
      * CHECK FOR EMPTYNESS
      */
@@ -110,6 +110,8 @@ class TestUserConfiguration(val mapper: DbMessiahMapper) {
                             when (it) {
                                 C.AUTO_INC -> {}
                                 C.UNIQUE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
+                                C.CASCADE_UPDATE -> TODO()
+                                C.CASCADE_DELETE -> TODO()
                             }
                         }
                     }
@@ -120,6 +122,8 @@ class TestUserConfiguration(val mapper: DbMessiahMapper) {
                             when (it) {
                                 C.AUTO_INC -> throw SerializerException("Foreign key ${schema}.${table}.'${prop.name}' does not need '${C.AUTO_INC}' constraint")
                                 C.UNIQUE -> {}
+                                C.CASCADE_UPDATE -> TODO()
+                                C.CASCADE_DELETE -> TODO()
                             }
                         }
                     }

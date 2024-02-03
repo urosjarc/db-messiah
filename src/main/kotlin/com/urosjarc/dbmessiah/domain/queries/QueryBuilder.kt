@@ -1,13 +1,13 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KProperty1
 
 
 open class QueryBuilder<IN : Any>(
     val input: IN,
-    val mapper: DbMessiahMapper
+    val mapper: Mapper
 ) {
     val queryValues: MutableList<QueryValue> = mutableListOf()
 

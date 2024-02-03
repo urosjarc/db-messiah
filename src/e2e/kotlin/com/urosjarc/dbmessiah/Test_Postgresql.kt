@@ -2,7 +2,9 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
+import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
+import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
+import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
@@ -10,39 +12,43 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-open class Test_Sqlite {
+
+open class Test_Postgresql {
     open var children = mutableListOf<Child>()
     open var parents = mutableListOf<Parent>()
 
     companion object {
-        private lateinit var service: SqliteService
+        private lateinit var service: PgService
 
         @JvmStatic
         @BeforeAll
         fun init() {
             val conf = HikariConfig().apply {
-                this.jdbcUrl = "jdbc:sqlite::memory:"
-                this.username = null
-                this.password = null
+                this.jdbcUrl = "jdbc:postgresql://localhost:5432/public"
+                this.username = "root"
+                this.password = "root"
             }
-            val ser = SqliteSerializer(
-                tables = listOf(
-                    Table(Parent::pk),
-                    Table(Child::pk, listOf(Child::fk to Parent::class)),
+            val ser = PgSerializer(
+                schemas = listOf(
+                    PgSchema(
+                        name = "main", tables = listOf(
+                            Table(Parent::pk),
+                            Table(Child::pk, listOf(Child::fk to Parent::class)),
+                        )
+                    )
                 ),
                 globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class),
                 globalInputs = listOf(Input::class),
             )
-            service = SqliteService(conf = conf, ser)
+            service = PgService(conf = conf, ser = ser)
         }
     }
 
-    @BeforeEach
     fun seed() {
         service.query {
-            it.drop(Child::class)
-            it.drop(Parent::class)
+            it.drop(Child::class, cascade = true)
+            it.drop(Parent::class, cascade = true)
             it.create(Parent::class)
             it.create(Child::class)
         }
@@ -81,4 +87,35 @@ open class Test_Sqlite {
     fun insert() {
     }
 
+
+    @BeforeEach
+    fun setup() {
+        service.query {
+            it.query { "CREATE SCHEMA IF NOT EXISTS main;" }
+            it.query { "SET CONSTRAINTS ALL DEFERRED;" }
+        }
+        this.seed()
+        service.query {
+            it.query {
+                """
+                    CREATE OR REPLACE FUNCTION main.TestProcedure(parent_pk INT)
+                    RETURNS SETOF main.Parent AS $$
+                    BEGIN
+                      RETURN QUERY SELECT * FROM main.Parent WHERE pk = 1;
+                    END;
+                    $$ language plpgsql;
+                    """.trimIndent()
+            }
+            it.query {
+                """
+                        CREATE OR REPLACE FUNCTION main.TestProcedureEmpty()
+                        RETURNS SETOF main.Parent AS $$
+                        BEGIN
+                            RETURN QUERY SELECT * FROM main.Parent WHERE pk = 2;
+                        END;
+                        $$ language plpgsql;
+                    """.trimIndent()
+            }
+        }
+    }
 }

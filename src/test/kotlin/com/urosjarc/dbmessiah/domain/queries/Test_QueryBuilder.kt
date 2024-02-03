@@ -1,8 +1,7 @@
 package com.urosjarc.dbmessiah.domain.queries
 
-import com.urosjarc.dbmessiah.DbMessiahMapper
-import com.urosjarc.dbmessiah.domain.schema.Schema
-import com.urosjarc.dbmessiah.domain.table.Escaper
+import com.urosjarc.dbmessiah.Mapper
+import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
@@ -41,16 +40,13 @@ class Test_QueryBuilder {
 
     private lateinit var queryBuilder: QueryBuilder<Input>
     private lateinit var input: Input
-    private lateinit var escaper: Escaper
 
     @BeforeEach
     fun init() {
         this.input = Input(id = 123, property = "property1")
-        this.escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
         this.queryBuilder = QueryBuilder(
             input = input,
-            mapper = DbMessiahMapper(
-                escaper = escaper,
+            mapper = Mapper(
                 schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class), globalInputs = listOf(Input::class),
                 globalProcedures = listOf()
@@ -63,8 +59,7 @@ class Test_QueryBuilder {
         val e0 = assertThrows<SerializerException> {
             QueryBuilder(
                 input = input,
-                mapper = DbMessiahMapper(
-                    escaper = escaper,
+                mapper = Mapper(
                     schemas = listOf(testSchema), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class), globalInputs = listOf(),
                     globalProcedures = listOf()

@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.domain.table
 import com.urosjarc.dbmessiah.domain.columns.C
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.test.Test

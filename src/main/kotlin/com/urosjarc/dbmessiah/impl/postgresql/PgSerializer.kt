@@ -1,28 +1,23 @@
-package com.urosjarc.dbmessiah.impl.sqlite
+package com.urosjarc.dbmessiah.impl.postgresql
 
-import com.urosjarc.dbmessiah.domain.queries.Page
+import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 
-class MariaSerializer(
-    schemas: List<Schema> = listOf(),
+class PgSerializer(
+    schemas: List<PgSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-    escaper: Escaper? = null
-) : SqliteSerializer(
+) : Serializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
-    escaper = escaper ?: Escaper(type = Escaper.Type.GRAVE_ACCENT, joinStr = ".")
 ) {
-
-    override val onGeneratedKeysFail: String = "select LAST_INSERT_ID();"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -31,14 +26,14 @@ class MariaSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTO_INCREMENT" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
+        val serial = if (T.primaryKey.autoIncrement) "SERIAL" else ""
+        col.add("${T.primaryKey.name} $serial PRIMARY KEY")
 
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
             col.add("${it.name} ${it.dbType} $isNull")
-            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})")
+            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) ON DELETE CASCADE")
         }
 
         //Other columns
@@ -54,9 +49,21 @@ class MariaSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
 
-    override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY `${page.orderBy.name}` ASC LIMIT ${page.limit} OFFSET ${page.offset}")
+    override fun insertQuery(obj: Any, batch: Boolean): Query {
+        val T = this.mapper.getTableInfo(obj = obj)
+        var sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})"
+        sql += if (!batch) " RETURNING ${T.primaryKey.name};" else ";"
+        return Query(
+            sql = sql,
+            *T.queryValues(obj = obj),
+        )
     }
 
+    override fun <T : Any> callQuery(obj: T): Query {
+        val P = this.mapper.getProcedure(obj = obj)
+        return Query(
+            sql = "SELECT * FROM ${P.path}(${P.sqlArguments()});",
+            *P.queryValues(obj = obj)
+        )
+    }
 }

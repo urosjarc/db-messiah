@@ -6,10 +6,8 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.serialization.DecodeInfo
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
@@ -24,8 +22,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 
-class DbMessiahMapper(
-    val escaper: Escaper,
+class Mapper(
     var schemas: List<Schema>,
     var globalSerializers: List<TypeSerializer<*>>,
     var globalInputs: List<KClass<*>>,
@@ -41,9 +38,6 @@ class DbMessiahMapper(
     /**
      * LINKED LISTS
      */
-
-    //Link table to schema
-    private val tableKClass_to_SchemaMap = mutableMapOf<KClass<*>, Schema>()
 
     //Link table to table info
     private val tableKClass_to_tableInfo = mutableMapOf<KClass<*>, TableInfo>()
@@ -145,6 +139,9 @@ class DbMessiahMapper(
             s.tables.forEach { t ->
                 this.createAssociationMaps(table = t, serializers = (t.serializers + s.serializers + this.globalSerializers))
             }
+            s.procedures.forEach {
+                this.createAssociationMaps<Any>(kclass = it, serializers = s.serializers + this.globalSerializers, isProcedure = true)
+            }
         }
         (this.globalInputs + this.globalOutputs).forEach {
             this.createAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers)
@@ -187,7 +184,6 @@ class DbMessiahMapper(
         this.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 val tableInfo = this.registerTable(schema = schema, table = table)
-                this.tableKClass_to_SchemaMap[table.kclass] = schema
                 this.tableKClass_to_tableInfo[table.kclass] = tableInfo
                 registeredTableInfos.add(tableInfo)
             }
@@ -209,10 +205,17 @@ class DbMessiahMapper(
 
     private fun createProcedures() {
         val procedures = mutableListOf<Procedure>()
-        this.globalProcedures.forEach {
-            val procedure = this.registerProcedure(kclass = it)
-            this.procedureKClass_to_procedure[it] = procedure
+        this.globalProcedures.forEach { kclass ->
+            val procedure = this.registerProcedure(schema = null, kclass = kclass)
+            this.procedureKClass_to_procedure[kclass] = procedure
             procedures.add(procedure)
+        }
+        this.schemas.forEach { schema ->
+            schema.procedures.forEach { kclass ->
+                val procedure = this.registerProcedure(schema = schema, kclass = kclass)
+                this.procedureKClass_to_procedure[kclass] = procedure
+                procedures.add(procedure)
+            }
         }
         this.procedures = procedures
     }
@@ -222,8 +225,6 @@ class DbMessiahMapper(
         TestMapper(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
-            //Test consistency
-            it.`2-th Test - If table escapers are consistent`()
             //Test uniqueness
             it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
             it.`4-th Test - If all columns are unique`()
@@ -237,7 +238,7 @@ class DbMessiahMapper(
         }
     }
 
-    private fun registerProcedure(kclass: KClass<*>): Procedure {
+    private fun registerProcedure(schema: Schema?, kclass: KClass<*>): Procedure {
         val pArgs = mutableListOf<ProcedureArg>()
         val javaFields = this.getKProps(kclass = kclass)
         javaFields.forEach {
@@ -249,7 +250,7 @@ class DbMessiahMapper(
             pArgs.add(pArg)
         }
 
-        return Procedure(escaper = escaper, kclass = kclass, args = pArgs)
+        return Procedure(schema = schema?.name, kclass = kclass, args = pArgs)
     }
 
     private fun registerTable(schema: Schema, table: Table<*>): TableInfo {
@@ -293,7 +294,6 @@ class DbMessiahMapper(
         }
 
         return TableInfo(
-            escaper = escaper,
             schema = schema.name, kclass = table.kclass,
             primaryKey = pkColumn, foreignKeys = fkColumns, otherColumns = otherColumns,
             serializers = table.serializers

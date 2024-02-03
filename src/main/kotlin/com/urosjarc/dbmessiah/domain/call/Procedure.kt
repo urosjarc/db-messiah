@@ -1,11 +1,10 @@
 package com.urosjarc.dbmessiah.domain.call
 
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
 
 data class Procedure(
-    val escaper: Escaper,
+    val schema: String?,
     val kclass: KClass<*>,
     val args: List<ProcedureArg>,
 ) {
@@ -15,7 +14,11 @@ data class Procedure(
     }
 
     val name: String = kclass.simpleName.toString()
-
+    val path: String = listOf(this.schema, this.name).joinToString(".")
+    val hash = this.path.hashCode()
+    override fun hashCode(): Int = this.hash
+    override fun equals(other: Any?): Boolean =
+        this.hashCode() == other.hashCode()
 
     override fun toString(): String {
         val argsNames = this.args.joinToString(", ") { "${it.name}: ${it.kclass.simpleName}" }

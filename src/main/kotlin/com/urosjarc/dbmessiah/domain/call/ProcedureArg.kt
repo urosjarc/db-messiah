@@ -19,9 +19,9 @@ class ProcedureArg(
     encoder = encoder,
     decoder = decoder
 ) {
+    override val name: String = kprop.name
     lateinit var procedure: Procedure
     override val inited: Boolean get() = this::procedure.isInitialized
-    override val path: String get() = this.procedure.escaper.wrapJoin(this.procedure.name, this.kprop.name)
-    override val name: String get() = this.procedure.escaper.wrap(kprop.name)
+    override val path: String get() = listOf(this.procedure.name, this.kprop.name).joinToString(".")
     override fun toString(): String = "Arg(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
 }

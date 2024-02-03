@@ -1,26 +1,27 @@
-package com.urosjarc.dbmessiah.impl.sqlite
+package com.urosjarc.dbmessiah.impl.mariadb
 
-import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.reflect.KClass
 
 
-open class SqliteSerializer(
-    tables: List<Table<*>> = listOf(),
+open class MariaSerializer(
+    schemas: List<MariaSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
+    globalProcedures: List<KClass<*>> = listOf()
 ) : Serializer(
-    schemas = listOf(Schema(name = "main", tables = tables)),
+    schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
-    globalOutputs = globalOutputs
+    globalOutputs = globalOutputs,
+    globalProcedures = globalProcedures
 ) {
 
-    override val selectLastId: String = "select last_insert_rowid();"
+    override val selectLastId: String = "select LAST_INSERT_ID();"
+
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
 
@@ -28,7 +29,7 @@ open class SqliteSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTOINCREMENT" else ""
+        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTO_INCREMENT" else ""
         col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
 
         //Foreign keys
@@ -48,6 +49,7 @@ open class SqliteSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
+
 }

@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.domain.call
 
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS
@@ -16,7 +15,6 @@ import kotlin.test.assertNotEquals
 
 class Test_ProcedureArg {
 
-    private lateinit var escaper: Escaper
     private lateinit var pArg0Copy: ProcedureArg
     private lateinit var pArg0: ProcedureArg
     private lateinit var pArg1: ProcedureArg
@@ -49,12 +47,8 @@ class Test_ProcedureArg {
             encoder = NumberTS.Int.encoder,
             decoder = NumberTS.Int.decoder
         )
-        escaper = Escaper(
-            type = Escaper.Type.SINGLE_QUOTES,
-            joinStr = "."
-        )
         procedure = Procedure(
-            escaper = escaper,
+            schema = "main",
             kclass = Test_Procedure.TestProcedure::class, args = listOf(pArg0)
         )
 

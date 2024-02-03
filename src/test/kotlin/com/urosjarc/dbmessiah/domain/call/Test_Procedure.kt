@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.domain.call
 
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +34,7 @@ class Test_Procedure {
             decoder = NumberTS.Int.decoder
         )
         procedure = Procedure(
-            escaper = Escaper(Escaper.Type.SINGLE_QUOTES),
+            schema = "main",
             kclass = TestProcedure::class, args = listOf(
                 procedureArg0,
                 procedureArg1
@@ -49,7 +48,7 @@ class Test_Procedure {
 
     @Test
     fun `test getString()`() {
-        assertEquals(expected = "TestProcedure('arg0': Int, 'arg1': String)", actual = procedure.toString())
+        assertEquals(expected = "TestProcedure(arg0: Int, arg1: String)", actual = procedure.toString())
     }
 
     @Test
@@ -64,11 +63,11 @@ class Test_Procedure {
         assertEquals(expected = 2, queryValues.size)
         assertEquals(
             actual = queryValues[0],
-            expected = QueryValue(name = "'arg0'", value = 3, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
+            expected = QueryValue(name = "arg0", value = 3, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
         )
         assertEquals(
             actual = queryValues[1],
-            expected = QueryValue(name = "'arg1'", value = "pValue", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
+            expected = QueryValue(name = "arg1", value = "pValue", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
         )
     }
 }

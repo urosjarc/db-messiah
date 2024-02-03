@@ -7,15 +7,12 @@ import com.zaxxer.hikari.util.IsolationLevel
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 
-class DbMessiahService(
-    val config: HikariConfig,
-    val serializer: DbMessiahSerializer,
-) {
+class Service(val conf: HikariConfig) {
 
     val log = this.logger()
-    val db = HikariDataSource(config)
+    val db = HikariDataSource(conf)
 
-    private fun close(conn: Connection?) {
+    fun close(conn: Connection?) {
         try {
             conn?.close()
         } catch (e: Throwable) {
@@ -23,7 +20,7 @@ class DbMessiahService(
         }
     }
 
-    private fun rollback(conn: Connection?) {
+    fun rollback(conn: Connection?) {
         try {
             conn?.rollback()
         } catch (e: Throwable) {
@@ -31,7 +28,7 @@ class DbMessiahService(
         }
     }
 
-    fun <T> query(readOnly: Boolean = false, body: (conn: QueryConnection) -> T): T {
+    fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection
@@ -41,21 +38,18 @@ class DbMessiahService(
             conn.isReadOnly = readOnly
 
             //Execute query body and get user result
-            val qc = QueryConnection(conn = conn, ser = serializer)
-            val returned = body(qc)
+            body(conn)
 
             //Close connection
             this.close(conn = conn)
 
-            //Return value
-            return returned
         } catch (e: Throwable) {
             this.close(conn = conn)
             throw ServiceException("Unknown execution error: ${e.message}", e)
         }
     }
 
-    fun <T> transaction(isolationLevel: IsolationLevel? = null, body: (tr: TransactionConnection) -> T): T {
+    fun transaction(isoLevel: IsolationLevel? = null, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection
@@ -66,18 +60,14 @@ class DbMessiahService(
 
             //Set user defined isolation level
             this.log.info("Transaction type: ${conn.transactionIsolation}")
-            if (isolationLevel != null) conn.transactionIsolation = isolationLevel.ordinal
+            if (isoLevel != null) conn.transactionIsolation = isoLevel.ordinal
 
             //Execute transaction body and get user result
-            val tr = TransactionConnection(conn = conn, ser = serializer)
-            val returned = body(tr)
+            body(conn)
 
             //Commit changes and close connection
             conn.commit()
             conn.close()
-
-            //Return value
-            return returned
         } catch (e: Throwable) {
             //If any error occurse that is not user handled then rollback, close and raise exception
             this.rollback(conn = conn)

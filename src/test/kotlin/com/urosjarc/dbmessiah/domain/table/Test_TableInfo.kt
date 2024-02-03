@@ -18,7 +18,6 @@ class Test_TableInfo {
     private lateinit var primaryColumn: PrimaryColumn
     private lateinit var foreignColumn: ForeignColumn
     private lateinit var otherColumn: OtherColumn
-    private lateinit var escaper: Escaper
     private lateinit var tableInfo: TableInfo
 
     data class Entity(var pk: Int, val fk: String, val col: String)
@@ -26,10 +25,6 @@ class Test_TableInfo {
     @Suppress("UNCHECKED_CAST")
     @BeforeEach
     fun init() {
-        this.escaper = Escaper(
-            type = Escaper.Type.SINGLE_QUOTES,
-            joinStr = "."
-        )
         this.otherColumn = OtherColumn(
             unique = true,
             kprop = Entity::col as KProperty1<Any, Any?>,
@@ -56,7 +51,6 @@ class Test_TableInfo {
         )
 
         this.tableInfo = TableInfo(
-            escaper = escaper,
             schema = "Schema",
             kclass = Entity::class,
             primaryKey = primaryColumn,

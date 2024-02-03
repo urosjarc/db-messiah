@@ -7,12 +7,9 @@ import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.exceptions.EngineException
 import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.SQLException
+import java.sql.*
 
-open class DbMessiahEngine(private val conn: Connection) {
+open class Engine(private val conn: Connection) {
     private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, query: Query) {
@@ -111,7 +108,7 @@ open class DbMessiahEngine(private val conn: Connection) {
         //Execute query
         try {
             //Prepare statement
-            ps = conn.prepareStatement(query.sql)
+            ps = conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS)
             this.prepareQuery(ps = ps, query = query)
 
             //Get info

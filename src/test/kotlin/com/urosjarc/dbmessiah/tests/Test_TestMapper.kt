@@ -1,13 +1,12 @@
 package com.urosjarc.dbmessiah.tests
 
-import com.urosjarc.dbmessiah.DbMessiahMapper
+import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.domain.call.Procedure
 import com.urosjarc.dbmessiah.domain.call.ProcedureArg
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.schema.Schema
-import com.urosjarc.dbmessiah.domain.table.Escaper
+import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
@@ -29,12 +28,11 @@ class Test_TestMapper {
     private lateinit var foreignColumn2: ForeignColumn
     private lateinit var otherColumn2: OtherColumn
     private lateinit var primaryColumn2: PrimaryColumn
-    private lateinit var repo: DbMessiahMapper
+    private lateinit var repo: Mapper
     private lateinit var primaryColumn: PrimaryColumn
     private lateinit var foreignColumn: ForeignColumn
     private lateinit var otherColumn: OtherColumn
     private lateinit var entity: Entity
-    private lateinit var escaper: Escaper
 
     private data class Entity(var pk: Int, val fk: Int, val col: Float)
     private data class Entity2(var pk: Int, var text: String?)
@@ -44,10 +42,8 @@ class Test_TestMapper {
 
     @BeforeEach
     fun init() {
-        escaper = Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
 
-        repo = DbMessiahMapper(
-            escaper = escaper,
+        repo = Mapper(
             schemas = listOf(
                 Schema(
                     name = "main", tables = listOf(
@@ -155,7 +151,6 @@ class Test_TestMapper {
     fun `test 2-th()`() {
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -164,7 +159,6 @@ class Test_TestMapper {
                 serializers = listOf()
             ),
             TableInfo(
-                escaper = escaper.copy(joinStr = "x"),
                 schema = "Schema",
                 kclass = Entity2::class,
                 primaryKey = primaryColumn,
@@ -188,7 +182,6 @@ class Test_TestMapper {
     fun `test 3-th()`() {
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -197,7 +190,6 @@ class Test_TestMapper {
                 serializers = listOf()
             ),
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -220,7 +212,6 @@ class Test_TestMapper {
     fun `test 4-th()`() {
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -246,7 +237,6 @@ class Test_TestMapper {
          */
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -255,7 +245,6 @@ class Test_TestMapper {
                 serializers = listOf()
             ),
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity2::class,
                 primaryKey = primaryColumn,
@@ -283,7 +272,6 @@ class Test_TestMapper {
 
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -292,7 +280,6 @@ class Test_TestMapper {
                 serializers = listOf()
             ),
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity2::class,
                 primaryKey = primaryColumn2,
@@ -319,7 +306,6 @@ class Test_TestMapper {
 
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -347,7 +333,6 @@ class Test_TestMapper {
          */
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -371,7 +356,6 @@ class Test_TestMapper {
          */
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -382,7 +366,7 @@ class Test_TestMapper {
         )
 
         repo.tableInfos[0].foreignKeys[0].foreignTable = TableInfo(
-            escaper = escaper, schema = "Schema", kclass = String::class, primaryKey = primaryColumn,
+            schema = "Schema", kclass = String::class, primaryKey = primaryColumn,
             foreignKeys = listOf(), otherColumns = listOf(), serializers = listOf()
         )
 
@@ -400,12 +384,11 @@ class Test_TestMapper {
     @Test
     fun `test 7-th()`() {
         val otherTable = TableInfo(
-            escaper = escaper, schema = "Schema", kclass = String::class, primaryKey = primaryColumn,
+            schema = "Schema", kclass = String::class, primaryKey = primaryColumn,
             foreignKeys = listOf(), otherColumns = listOf(), serializers = listOf()
         )
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -431,7 +414,7 @@ class Test_TestMapper {
          */
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper, schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn,
+                schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn,
                 foreignKeys = listOf(
                     ForeignColumn(unique = true, kprop = Entity::fk as KProperty1<Any, Any?>, dbType = "VARCHAR", jdbcType = JDBCType.VARCHAR,
                         decoder = { rs, i, _ -> rs.getString(i) },
@@ -454,7 +437,6 @@ class Test_TestMapper {
          */
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumn,
@@ -476,7 +458,6 @@ class Test_TestMapper {
     fun `test 8-th()`() {
         repo.tableInfos = listOf(
             TableInfo(
-                escaper = escaper,
                 schema = "Schema",
                 kclass = Entity::class,
                 primaryKey = primaryColumnBad,
@@ -503,13 +484,13 @@ class Test_TestMapper {
          */
         repo.procedures = listOf(
             Procedure(
-                escaper = escaper,
+                schema = "main",
                 kclass = TestProcedure::class,
                 args = listOf(pArg)
             )
         )
 
-        repo.procedures[0].args[0].procedure = Procedure(escaper = escaper, kclass = TestProcedure::class, args = listOf())
+        repo.procedures[0].args[0].procedure = Procedure(schema = "main", kclass = TestProcedure::class, args = listOf())
 
         val e2 = assertThrows<MapperException> {
             repo.testMapper()
@@ -530,7 +511,7 @@ class Test_TestMapper {
          */
         repo.procedures = listOf(
             Procedure(
-                escaper = escaper,
+                schema = "main",
                 kclass = TestProcedure::class,
                 args = listOf(otherPArg)
             )

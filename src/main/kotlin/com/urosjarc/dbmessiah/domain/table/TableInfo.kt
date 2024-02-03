@@ -11,7 +11,6 @@ import java.sql.JDBCType
 import kotlin.reflect.KClass
 
 data class TableInfo(
-    val escaper: Escaper,
     val schema: String,
     val kclass: KClass<*>,
     val primaryKey: PrimaryColumn,
@@ -20,7 +19,7 @@ data class TableInfo(
     val serializers: List<TypeSerializer<*>>
 ) {
     val name = this.kclass.simpleName!!
-    val path = this.escaper.wrapJoin(this.schema, this.name)
+    val path = listOf(this.schema, this.name).joinToString(".")
     val hash = this.path.hashCode()
 
     init {

@@ -2,43 +2,50 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
+import com.urosjarc.dbmessiah.impl.mariadb.MariaSchema
+import com.urosjarc.dbmessiah.impl.mariadb.MariaSerializer
+import com.urosjarc.dbmessiah.impl.mariadb.MariaService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-open class Test_Sqlite {
+
+
+
+open class Test_Maria {
     open var children = mutableListOf<Child>()
     open var parents = mutableListOf<Parent>()
 
     companion object {
-        private lateinit var service: SqliteService
+        private lateinit var service: MariaService
 
         @JvmStatic
         @BeforeAll
         fun init() {
             val conf = HikariConfig().apply {
-                this.jdbcUrl = "jdbc:sqlite::memory:"
-                this.username = null
-                this.password = null
+                this.jdbcUrl = "jdbc:mariadb://localhost:3306/main"
+                this.username = "root"
+                this.password = "root"
             }
-            val ser = SqliteSerializer(
-                tables = listOf(
-                    Table(Parent::pk),
-                    Table(Child::pk, listOf(Child::fk to Parent::class)),
+            val ser = MariaSerializer(
+                schemas = listOf(
+                    MariaSchema(
+                        name = "main", tables = listOf(
+                            Table(Parent::pk),
+                            Table(Child::pk, listOf(Child::fk to Parent::class)),
+                        )
+                    )
                 ),
                 globalSerializers = AllTS.basic,
                 globalOutputs = listOf(Output::class),
                 globalInputs = listOf(Input::class),
             )
-            service = SqliteService(conf = conf, ser)
+            service = MariaService(conf = conf, ser = ser)
         }
     }
 
-    @BeforeEach
     fun seed() {
         service.query {
             it.drop(Child::class)
@@ -77,8 +84,36 @@ open class Test_Sqlite {
         }
     }
 
+
+    @BeforeEach
+    fun setup() {
+        this.seed()
+        service.query {
+            it.query { "SET FOREIGN_KEY_CHECKS=0;" }
+            it.query {
+                """
+                        CREATE OR REPLACE PROCEDURE main.TestProcedure(parent_pk INT)
+                        BEGIN
+                            SELECT * FROM main.Parent WHERE pk = 1;
+                            SELECT * FROM main.Parent WHERE pk = 1;
+                        END;
+                    """.trimIndent()
+            }
+            it.query {
+                """
+                        CREATE OR REPLACE PROCEDURE main.TestProcedureEmpty()
+                        BEGIN
+                            SELECT * FROM main.Parent WHERE pk = 2;
+                            SELECT * FROM main.Parent WHERE pk = 2;
+                        END;
+                    """.trimIndent()
+            }
+        }
+    }
+
     @Test
     fun insert() {
     }
+
 
 }

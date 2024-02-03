@@ -3,8 +3,6 @@ package com.urosjarc.dbmessiah
 import com.urosjarc.dbmessiah.domain.call.Procedure
 import com.urosjarc.dbmessiah.domain.call.ProcedureArg
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.schema.Schema
-import com.urosjarc.dbmessiah.domain.table.Escaper
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
@@ -24,9 +22,9 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class Test_DbMessiahMapper {
+class Test_Db_Mapper {
 
-    private lateinit var mapper: DbMessiahMapper
+    private lateinit var mapper: Mapper
 
     private data class Child(var pk: Int)
     private data class Parent(var pk: Int, val col: String)
@@ -58,8 +56,7 @@ class Test_DbMessiahMapper {
 
     @BeforeEach
     fun init() {
-        this.mapper = DbMessiahMapper(
-            escaper = Escaper(),
+        this.mapper = Mapper(
             schemas = listOf(
                 Schema(
                     name = "main",
@@ -165,8 +162,7 @@ class Test_DbMessiahMapper {
     fun `test createAssociationMaps()`() {
 
         val e0 = assertThrows<SerializerException> {
-            this.mapper = DbMessiahMapper(
-                escaper = Escaper(),
+            this.mapper = Mapper(
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Empty::pk)))),
                 globalOutputs = listOf(),
                 globalInputs = listOf(),
@@ -181,8 +177,7 @@ class Test_DbMessiahMapper {
         )
 
         val e1 = assertThrows<SerializerException> {
-            this.mapper = DbMessiahMapper(
-                escaper = Escaper(),
+            this.mapper = Mapper(
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Exotic::pk)))),
                 globalOutputs = listOf(),
                 globalInputs = listOf(),
@@ -203,7 +198,7 @@ class Test_DbMessiahMapper {
         val ti0 = this.mapper.getProcedure(kclass = ProcedureNotEmpty::class)
         assertEquals(
             actual = ti0, expected = Procedure(
-                escaper = this.mapper.escaper,
+                schema = "main",
                 kclass = ProcedureNotEmpty::class,
                 args = listOf(
                     ProcedureArg(
@@ -227,7 +222,7 @@ class Test_DbMessiahMapper {
         val ti1 = this.mapper.getProcedure(kclass = ProcedureEmpty::class)
         assertEquals(
             actual = ti1, expected = Procedure(
-                escaper = this.mapper.escaper,
+                schema = "main",
                 kclass = ProcedureEmpty::class,
                 args = listOf()
             )
@@ -244,7 +239,6 @@ class Test_DbMessiahMapper {
         val ti0 = this.mapper.getTableInfo(obj = Parent(pk = 1, col = "asdf"))
         assertEquals(
             actual = ti0, expected = TableInfo(
-                escaper = Escaper(),
                 schema = "main",
                 kclass = Parent::class,
                 primaryKey = PrimaryColumn(
@@ -264,7 +258,6 @@ class Test_DbMessiahMapper {
         val ti1 = this.mapper.getTableInfo(kclass = Parent::class)
         assertEquals(
             actual = ti1, expected = TableInfo(
-                escaper = Escaper(),
                 schema = "main",
                 kclass = Parent::class,
                 primaryKey = PrimaryColumn(
