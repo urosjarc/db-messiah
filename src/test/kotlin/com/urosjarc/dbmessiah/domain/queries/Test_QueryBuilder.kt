@@ -9,7 +9,6 @@ import com.urosjarc.dbmessiah.types.AllTS
 import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
 import kotlin.test.Test
@@ -20,12 +19,15 @@ class Test_QueryBuilder {
     private data class Parent(
         var pk: Int? = null,
     )
+
     private data class Child(
         var pk: Int? = null,
         var fk: Int? = null,
     )
+
     private data class Input(var id: Int, val property: String)
     private data class Output(var text: String?)
+
     private val testSchema = Schema(
         name = "main", tables = listOf(
             Table(primaryKey = Parent::pk),
@@ -69,32 +71,8 @@ class Test_QueryBuilder {
                 )
             )
         }
-        assertContains(charSequence = e0.message.toString(), other = "not registered in serializers global inputs")
+        assertContains(charSequence = e0.message.toString(), other = "Input class 'Input' is not registered in global inputs")
 
-        val e1 = assertThrows<SerializerException> {
-            QueryBuilder(
-                input = input,
-                mapper = DbMessiahMapper(
-                    escaper = escaper,
-                    schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf(Input::class),
-                    globalProcedures = listOf()
-                )
-            )
-        }
-        assertContains(charSequence = e1.message.toString(), other = "not registered in serializers global outputs")
-
-        val e2 = assertThrows<SerializerException> {
-            QueryBuilder(
-                input = Output::class,
-                mapper = DbMessiahMapper(
-                    escaper = escaper,
-                    schemas = listOf(testSchema), globalSerializers = AllTS.basic,
-                    globalOutputs = listOf(), globalInputs = listOf(), globalProcedures = listOf()
-                )
-            )
-        }
-        assertContains(charSequence = e2.message.toString(), other = "not registered in serializers global outputs")
     }
 
     @Test

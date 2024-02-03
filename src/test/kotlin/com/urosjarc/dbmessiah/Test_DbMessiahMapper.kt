@@ -1,5 +1,7 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.call.Procedure
+import com.urosjarc.dbmessiah.domain.call.ProcedureArg
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
 import com.urosjarc.dbmessiah.domain.schema.Schema
 import com.urosjarc.dbmessiah.domain.table.Escaper
@@ -9,12 +11,14 @@ import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
 import com.urosjarc.dbmessiah.types.NumberTS
+import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
 import java.time.LocalDate
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.primaryConstructor
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -45,6 +49,13 @@ class Test_DbMessiahMapper {
         val getter: String get() = "hello"
     }
 
+    class ProcedureEmpty
+    class ProcedureNotEmpty(val pk: Int, val col: String)
+    class ProcedureNotRegistered()
+
+    class Input(val pk: Int, val col: String)
+    class Output(val pk: Int, val col: String)
+
     @BeforeEach
     fun init() {
         this.mapper = DbMessiahMapper(
@@ -61,9 +72,9 @@ class Test_DbMessiahMapper {
                 )
             ),
             globalOutputs = listOf(),
-            globalInputs = listOf(),
+            globalInputs = listOf(Output::class),
             globalSerializers = AllTS.basic,
-            globalProcedures = listOf()
+            globalProcedures = listOf(ProcedureNotEmpty::class, ProcedureEmpty::class)
         )
     }
 
@@ -78,10 +89,24 @@ class Test_DbMessiahMapper {
         val kprops2 = this.mapper.getKProps(kclass = Inherited::class)
         assertEquals(actual = kprops2, expected = listOf(Inherited::pk, Inherited::test, Inherited::realName, Inherited::realUsername))
 
+        val kprops3 = this.mapper.getKProps(kclass = ProcedureNotEmpty::class)
+        assertEquals(actual = kprops3, expected = listOf(ProcedureNotEmpty::col, ProcedureNotEmpty::pk))
+
+        val kprops4 = this.mapper.getKProps(kclass = ProcedureEmpty::class)
+        assertEquals(actual = kprops4, expected = listOf())
+
+        val kprops6 = this.mapper.getKProps(kclass = Output::class)
+        assertEquals(actual = kprops6, expected = listOf(Output::col, Output::pk))
+
         val e1 = assertThrows<MapperException> {
             this.mapper.getKProps(kclass = String::class)
         }
         assertContains(charSequence = e1.message.toString(), other = "Could not find properties of class 'String'", message = e1.toString())
+
+        val e2 = assertThrows<MapperException> {
+            this.mapper.getKProps(kclass = Input::class)
+        }
+        assertContains(charSequence = e2.message.toString(), other = "Could not find properties of class 'Input'", message = e2.toString())
     }
 
     @Test
@@ -89,21 +114,51 @@ class Test_DbMessiahMapper {
         val ser0 = this.mapper.getSerializer(kprop = Parent::pk)
         assertEquals(actual = ser0, expected = NumberTS.Int)
 
-        val e = assertThrows<MapperException> {
+        val ser1 = this.mapper.getSerializer(kprop = Output::pk)
+        assertEquals(actual = ser1, expected = NumberTS.Int)
+
+        val ser2 = this.mapper.getSerializer(kprop = ProcedureNotEmpty::col)
+        assertEquals(actual = ser2, expected = StringTS.String(0))
+
+        val e0 = assertThrows<MapperException> {
             this.mapper.getSerializer(kprop = String::length)
         }
-        assertContains(charSequence = e.message.toString(), "Could not find serializer of property 'length'", message = e.toString())
+        assertContains(
+            charSequence = e0.message.toString(),
+            "Could not find serializer of property: 'val kotlin.String.length: kotlin.Int'",
+            message = e0.toString()
+        )
+
+        val e1 = assertThrows<MapperException> {
+            this.mapper.getSerializer(kprop = Input::pk)
+        }
+        assertContains(
+            charSequence = e1.message.toString(),
+            "Could not find serializer of property: 'val com.urosjarc.dbmessiah.Test_DbMessiahMapper.Input.pk: kotlin.Int'",
+            message = e1.toString()
+        )
     }
 
     @Test
     fun `test getConstructor()`() {
-        val conn: KFunction<Any> = this.mapper.getConstructor(kclass = Parent::class)
-        assertEquals(actual = conn, expected = Parent::class.primaryConstructor as KFunction<Any>)
+        val conn0: KFunction<Any> = this.mapper.getConstructor(kclass = Parent::class)
+        assertEquals(actual = conn0, expected = Parent::class.primaryConstructor as KFunction<Any>)
 
-        val e = assertThrows<MapperException> {
+        val conn1: KFunction<Any> = this.mapper.getConstructor(kclass = Output::class)
+        assertEquals(actual = conn1, expected = Output::class.primaryConstructor as KFunction<Any>)
+
+        val conn2: KFunction<Any> = this.mapper.getConstructor(kclass = ProcedureNotEmpty::class)
+        assertEquals(actual = conn2, expected = ProcedureNotEmpty::class.primaryConstructor as KFunction<Any>)
+
+        val e0 = assertThrows<MapperException> {
             this.mapper.getConstructor(kclass = String::class)
         }
-        assertContains(charSequence = e.message.toString(), "Could not find primary constructor of kclass 'String'", message = e.toString())
+        assertContains(charSequence = e0.message.toString(), "Could not find primary constructor of kclass 'String'", message = e0.toString())
+
+        val e1 = assertThrows<MapperException> {
+            this.mapper.getConstructor(kclass = Input::class)
+        }
+        assertContains(charSequence = e1.message.toString(), "Could not find primary constructor of kclass 'Input'", message = e1.toString())
     }
 
     @Test
@@ -141,6 +196,47 @@ class Test_DbMessiahMapper {
             message = e1.toString()
         )
 
+    }
+
+    @Test
+    fun `test getProcedure()`() {
+        val ti0 = this.mapper.getProcedure(kclass = ProcedureNotEmpty::class)
+        assertEquals(
+            actual = ti0, expected = Procedure(
+                escaper = this.mapper.escaper,
+                kclass = ProcedureNotEmpty::class,
+                args = listOf(
+                    ProcedureArg(
+                        kprop = ProcedureNotEmpty::col as KProperty1<Any, Any?>,
+                        dbType = "VARCHAR",
+                        jdbcType = JDBCType.VARCHAR,
+                        encoder = StringTS.String(0).encoder,
+                        decoder = StringTS.String(0).decoder
+                    ),
+                    ProcedureArg(
+                        kprop = ProcedureNotEmpty::pk as KProperty1<Any, Any?>,
+                        dbType = "INT",
+                        jdbcType = JDBCType.INTEGER,
+                        encoder = NumberTS.Int.encoder,
+                        decoder = NumberTS.Int.decoder
+                    )
+                )
+            )
+        )
+
+        val ti1 = this.mapper.getProcedure(kclass = ProcedureEmpty::class)
+        assertEquals(
+            actual = ti1, expected = Procedure(
+                escaper = this.mapper.escaper,
+                kclass = ProcedureEmpty::class,
+                args = listOf()
+            )
+        )
+
+        val e = assertThrows<SerializerException> {
+            this.mapper.getProcedure(kclass = ProcedureNotRegistered::class)
+        }
+        assertContains(charSequence = e.message.toString(), other = " Could not find procedure for kclass: 'ProcedureNotRegistered'", message = e.toString())
     }
 
     @Test
@@ -187,6 +283,6 @@ class Test_DbMessiahMapper {
         val e = assertThrows<SerializerException> {
             this.mapper.getTableInfo(kclass = String::class)
         }
-        assertContains(charSequence = e.message.toString(), other = "Could not find table info for table 'String'", message = e.toString())
+        assertContains(charSequence = e.message.toString(), other = "Could not find table info for table: 'String'", message = e.toString())
     }
 }

@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.domain.serialization
 
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
-import com.urosjarc.dbmessiah.exceptions.ColumnException
+import com.urosjarc.dbmessiah.exceptions.DbValueException
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -33,13 +33,16 @@ abstract class DbValue(
             try {
                 kp.set(receiver = obj, value = value)
             } catch (e: ClassCastException) {
-                throw ColumnException(
-                    msg = "Trying to set column $path value to '$value' but failed! Probably because incompatible types or receiving object is missing matching property: $obj",
+                throw DbValueException(
+                    msg = "Trying to set property '$kp' to '$value' but failed! " +
+                            "Probably because incompatible types " +
+                            "or receiving object is missing matching property " +
+                            "or property does not belong to the receiver: $obj",
                     cause = e
                 )
             }
         } catch (e: ClassCastException) {
-            throw ColumnException("Trying to set column $path value to '$value' but the column is immutable!", e)
+            throw DbValueException("Trying to set property '${this.kprop}' to '$value' but the property is probably immutable", e)
         }
 
     }
@@ -48,8 +51,10 @@ abstract class DbValue(
         try {
             return this.kprop.get(receiver = obj)
         } catch (e: Throwable) {
-            throw ColumnException(
-                msg = "Trying to get object value $path but failed, probably because property '${this.kprop.name}' does not exists inside '${obj::class.simpleName}' object: $obj",
+            throw DbValueException(
+                msg = "Trying to get value '${this.kprop}' but failed! " +
+                        "Probably because receiving object is missing matching property or " +
+                        "property does not belong to the receiver: $obj",
                 cause = e
             )
         }

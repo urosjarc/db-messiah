@@ -14,12 +14,14 @@ open class SqliteSerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
+    globalProcedures: List<KClass<*>> = listOf(),
     escaper: Escaper? = null
 ) : DbMessiahSerializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
+    globalProcedures = globalProcedures,
     escaper = escaper ?: Escaper(type = Escaper.Type.SINGLE_QUOTES, joinStr = ".")
 ) {
 

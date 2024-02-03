@@ -23,7 +23,7 @@ class Test_Query {
     }
 
     @Test
-    fun `test getValue()`() {
+    fun `test toString()`() {
         assertEquals(expected = """
 SELECT * FROM Table
 

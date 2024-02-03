@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.domain.call
 
-import com.urosjarc.dbmessiah.domain.columns.Column
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.table.Escaper
 import kotlin.reflect.KClass
@@ -10,7 +9,14 @@ data class Procedure(
     val kclass: KClass<*>,
     val args: List<ProcedureArg>,
 ) {
+    init {
+        //Init late init parent connection
+        this.args.forEach { it.procedure = this }
+    }
+
     val name: String = kclass.simpleName.toString()
+
+
     override fun toString(): String {
         val argsNames = this.args.joinToString(", ") { "${it.name}: ${it.kclass.simpleName}" }
         return "${kclass.simpleName}($argsNames)"

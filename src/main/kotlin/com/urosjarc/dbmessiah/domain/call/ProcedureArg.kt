@@ -21,7 +21,7 @@ class ProcedureArg(
 ) {
     lateinit var procedure: Procedure
     override val inited: Boolean get() = this::procedure.isInitialized
-    override val path: String get() = this.procedure.escaper.wrap(this.kprop.name)
-    override val name: String = kprop.name
+    override val path: String get() = this.procedure.escaper.wrapJoin(this.procedure.name, this.kprop.name)
+    override val name: String get() = this.procedure.escaper.wrap(kprop.name)
     override fun toString(): String = "Arg(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
 }

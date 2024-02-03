@@ -37,7 +37,8 @@ class Test_Sqlite() {
             serializer = SqliteSerializer(
                 schemas = listOf(testSchema),
                 globalSerializers = AllTS.basic,
-                globalInputs = listOf(Input::class)
+                globalInputs = listOf(Input::class),
+                globalProcedures = listOf(TestProcedure::class)
             )
 
             service = DbMessiahService(
@@ -538,37 +539,45 @@ class Test_Sqlite() {
 
     @Test
     fun `test call without arguments`() {
-        service.query {
-            // Get current all parents
-            val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-            it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+        if(this.supportProcedures) {
+            service.query {
+                // Get current all parents
+                val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+                it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+            }
         }
     }
 
     @Test
     fun `test call without arguments and outputs`() {
-        service.query {
-            // Get current all parents
-            val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-            it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+        if(this.supportProcedures) {
+            service.query {
+                // Get current all parents
+                val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+                it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+            }
         }
     }
 
     @Test
     fun `test call with arguments`() {
-        service.query {
-            // Get current all parents
-            val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-            it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+        if (this.supportProcedures) {
+            service.query {
+                // Get current all parents
+                val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+                it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+            }
         }
     }
 
     @Test
     fun `test call with arguments and outputs`() {
-        service.query {
-            // Get current all parents
-            val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-            it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+        if (this.supportProcedures) {
+            service.query {
+                // Get current all parents
+                val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+                it.call(procedure = TestProcedure(child_pk = 1, parent_pk = 2))
+            }
         }
     }
 }

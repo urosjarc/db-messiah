@@ -10,10 +10,10 @@ import kotlin.reflect.KClass
 
 abstract class DbMessiahSerializer(
     schemas: List<Schema>,
-    globalSerializers: List<TypeSerializer<*>> = listOf(),
-    globalInputs: List<KClass<*>> = listOf(),
-    globalOutputs: List<KClass<*>> = listOf(),
-    globalProcedures: List<KClass<*>> = listOf(),
+    globalSerializers: List<TypeSerializer<*>>,
+    globalInputs: List<KClass<*>>,
+    globalOutputs: List<KClass<*>>,
+    globalProcedures: List<KClass<*>>,
     escaper: Escaper,
 ) {
 

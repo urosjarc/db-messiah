@@ -12,39 +12,44 @@ import kotlin.test.assertEquals
 
 class Test_Procedure {
 
+    private lateinit var procedureArg0: ProcedureArg
+    private lateinit var procedureArg1: ProcedureArg
     private lateinit var procedure: Procedure
 
     data class TestProcedure(var arg0: Int, val arg1: String)
-    data class Test2Procedure(var id: Int, val property: String)
 
     @BeforeEach
     fun init() {
+        procedureArg0 = ProcedureArg(
+            kprop = TestProcedure::arg0 as KProperty1<Any, Any?>,
+            dbType = "INT",
+            jdbcType = JDBCType.INTEGER,
+            encoder = NumberTS.Int.encoder,
+            decoder = NumberTS.Int.decoder
+        )
+        procedureArg1 = ProcedureArg(
+            kprop = TestProcedure::arg1 as KProperty1<Any, Any?>,
+            dbType = "INT",
+            jdbcType = JDBCType.VARCHAR,
+            encoder = NumberTS.Int.encoder,
+            decoder = NumberTS.Int.decoder
+        )
         procedure = Procedure(
-            escaper = Escaper(),
+            escaper = Escaper(Escaper.Type.SINGLE_QUOTES),
             kclass = TestProcedure::class, args = listOf(
-                ProcedureArg(
-                    kprop = TestProcedure::arg0 as KProperty1<Any, Any?>,
-                    dbType = "INT",
-                    jdbcType = JDBCType.INTEGER,
-                    encoder = NumberTS.Int.encoder,
-                    decoder = NumberTS.Int.decoder
-                ),
-                ProcedureArg(
-                    kprop = TestProcedure::arg1 as KProperty1<Any, Any?>,
-                    dbType = "INT",
-                    jdbcType = JDBCType.VARCHAR,
-                    encoder = NumberTS.Int.encoder,
-                    decoder = NumberTS.Int.decoder
-                )
+                procedureArg0,
+                procedureArg1
             )
         )
+        procedureArg0.procedure = procedure
+        procedureArg1.procedure = procedure
 
 
     }
 
     @Test
     fun `test getString()`() {
-        assertEquals(expected = "TestProcedure(arg0: Int, arg1: String)", actual = procedure.toString())
+        assertEquals(expected = "TestProcedure('arg0': Int, 'arg1': String)", actual = procedure.toString())
     }
 
     @Test
@@ -59,11 +64,11 @@ class Test_Procedure {
         assertEquals(expected = 2, queryValues.size)
         assertEquals(
             actual = queryValues[0],
-            expected = QueryValue(name = "arg0", value = 3, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
+            expected = QueryValue(name = "'arg0'", value = 3, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
         )
         assertEquals(
             actual = queryValues[1],
-            expected = QueryValue(name = "arg1", value = "pValue", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
+            expected = QueryValue(name = "'arg1'", value = "pValue", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
         )
     }
 }

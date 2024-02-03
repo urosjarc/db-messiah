@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.call.Procedure
+import com.urosjarc.dbmessiah.domain.call.ProcedureArg
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
@@ -78,10 +79,11 @@ class DbMessiahMapper(
         this.kclass_to_kprops[kclass] ?: throw MapperException("Could not find properties of class '${kclass.simpleName}'")
 
     private fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
-        this.kparam_to_serializer[kparam] ?: throw MapperException("Could not find serializer of parameter '${kparam.name}'")
+        this.kparam_to_serializer[kparam] ?: throw MapperException("Could not find serializer of parameter: '${kparam}'")
 
-    fun getSerializer(kprop: KProperty1<out Any, Any?>): TypeSerializer<out Any> =
-        this.kprop_to_serializer[kprop] ?: throw MapperException("Could not find serializer of property '${kprop.name}'")
+    fun getSerializer(kprop: KProperty1<out Any, Any?>): TypeSerializer<out Any> {
+        return this.kprop_to_serializer[kprop] ?: throw MapperException("Could not find serializer of property: '${kprop}'")
+    }
 
     fun getConstructor(kclass: KClass<*>): KFunction<Any> =
         this.kclass_to_constructor[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
@@ -93,12 +95,12 @@ class DbMessiahMapper(
         this.createAssociationMaps()
         this.testSerializer()
         this.createTablesInfos()
+        this.createProcedures()
         this.testMapper()
     }
 
-    private fun createAssociationMaps(table: Table<*>, serializers: List<TypeSerializer<*>>) {
+    private fun createAssociationMaps(table: Table<*>, serializers: List<TypeSerializer<*>>) =
         this.createAssociationMaps(kclass = table.kclass, serializers = serializers, columnSerializers = table.columnSerializers)
-    }
 
     private fun <T : Any> createAssociationMaps(
         kclass: KClass<*>,
@@ -178,7 +180,7 @@ class DbMessiahMapper(
         val registeredTableInfos = mutableListOf<TableInfo>()
         this.schemas.forEach { schema ->
             schema.tables.forEach { table ->
-                val tableInfo = this.register(schema = schema, table = table)
+                val tableInfo = this.registerTable(schema = schema, table = table)
                 this.tableKClass_to_SchemaMap[table.kclass] = schema
                 this.tableKClass_to_tableInfo[table.kclass] = tableInfo
                 registeredTableInfos.add(tableInfo)
@@ -196,6 +198,13 @@ class DbMessiahMapper(
                 column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass]
                     ?: throw MapperException("Could not find link between foreign table and table info")
             }
+        }
+    }
+
+    private fun createProcedures() {
+        this.globalProcedures.forEach {
+            val procedure = this.registerProcedure(kclass = it)
+            this.procedureKClass_to_procedure[it] = procedure
         }
     }
 
@@ -217,7 +226,22 @@ class DbMessiahMapper(
         }
     }
 
-    private fun register(schema: Schema, table: Table<*>): TableInfo {
+    private fun registerProcedure(kclass: KClass<*>): Procedure {
+        val pArgs = mutableListOf<ProcedureArg>()
+        val javaFields = this.getKProps(kclass = kclass)
+        javaFields.forEach {
+            val serializer = this.getSerializer(it)
+            val pArg = ProcedureArg(
+                kprop = it as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                encoder = serializer.encoder, decoder = serializer.decoder
+            )
+            pArgs.add(pArg)
+        }
+
+        return Procedure(escaper = escaper, kclass = kclass, args = pArgs)
+    }
+
+    private fun registerTable(schema: Schema, table: Table<*>): TableInfo {
         //All pk and fk properties
         val pkFkProperties: MutableSet<Any> = mutableSetOf(table.primaryKey)
 

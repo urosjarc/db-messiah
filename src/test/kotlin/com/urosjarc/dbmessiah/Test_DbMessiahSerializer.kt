@@ -74,25 +74,8 @@ class Test_DbMessiahSerializer {
     }
 
     @Test
-    fun `test callQuery()`() {
-        val input = Parent(pk = 12, col = "123")
-        val query = this.seri.callQuery(obj = input)
-        assertEquals(actual = query.sql, expected = "{CALL Parent(?)}")
-        assertEquals(expected = 1, actual = query.values.size)
-        assertEquals(
-            actual = query.values[0],
-            expected = QueryValue(name = "\"col\"", value = input.col, jdbcType = JDBCType.VARCHAR, encoder = NumberTS.Int.encoder)
-        )
-
-        val e = assertThrows<SerializerException> {
-            this.seri.callQuery(obj = "asdfasdf")
-        }
-        assertContains(charSequence = e.message.toString(), other = "Could not find table info for table 'String'", message = e.toString())
-    }
-
-    @Test
-    fun `test selectQuery(0)`() {
-        val query = this.seri.query(input = Output::class) { "SELECT * FROM xxx" }
+    fun `test query(0)`() {
+        val query = this.seri.query { "SELECT * FROM xxx" }
         assertEquals(expected = 0, actual = query.values.size)
         assertEquals(actual = query.sql, expected = "SELECT * FROM xxx")
 
@@ -101,41 +84,13 @@ class Test_DbMessiahSerializer {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = " Output class 'String' is not registered in serializers global outputs!",
+            other = "Input class 'String' is not registered in global inputs",
             message = e.toString()
         )
     }
 
     @Test
     fun `test selectQuery(1)`() {
-        val query = this.seri.query(input = Output(child_id = 1, parent_id = 2)) {
-            """
-                SELECT
-                    col0 as ${it.get(Output::child_id)}
-                    col1 as ${it.get(Output::parent_id)}
-                FROM xxx
-            """.trimIndent()
-        }
-        assertEquals(expected = 0, actual = query.values.size)
-        assertEquals(
-            actual = query.sql, expected = "SELECT\n" +
-                    "    col0 as \"child_id\"\n" +
-                    "    col1 as \"parent_id\"\n" +
-                    "FROM xxx"
-        )
-
-        val e = assertThrows<SerializerException> {
-            this.seri.query(input = "asdf") { " ${it.get(String::length)} " }
-        }
-        assertContains(
-            charSequence = e.message.toString(),
-            other = " Output class 'String' is not registered in serializers global outputs!",
-            message = e.toString()
-        )
-    }
-
-    @Test
-    fun `test selectQuery(2)`() {
         val input = Input(parent_search = "parent", child_search = "child")
         val query = this.seri.query(input = input) {
             """
@@ -148,8 +103,8 @@ class Test_DbMessiahSerializer {
         assertEquals(expected = 3, actual = query.values.size)
         assertEquals(
             actual = query.sql, expected = "SELECT\n" +
-                    "    col0 as \"child_id\"\n" +
-                    "    col1 as \"parent_id\"\n" +
+                    "    col0 as child_id\n" +
+                    "    col1 as parent_id\n" +
                     "FROM xxx WHERE ? > col0 AND ? < col1 OR ?"
         )
         assertEquals(
@@ -170,7 +125,7 @@ class Test_DbMessiahSerializer {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = " Output class 'String' is not registered in serializers global outputs!",
+            other = "Input class 'String' is not registered in global inputs",
             message = e.toString()
         )
     }
