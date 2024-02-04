@@ -122,9 +122,9 @@ open class Test_Maria {
     private fun assertTableNotExists(q: MariaQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.select(table = kclass) }
         assertContains(
-            charSequence = e.message.toString(),
+            charSequence = e.stackTraceToString(),
             other = "Table 'main.Parent' doesn't exist",
-            message = e.toString()
+            message = e.stackTraceToString()
         )
     }
 
@@ -560,7 +560,7 @@ open class Test_Maria {
         val objs = it.query(Parent::class) { "select * from main.Parent where pk < 3;" }
 
         //If multiple select are not supported then it should return only first select
-        assertEquals(expected = listOf(parent1, parent2), actual = objs)
+        assertEquals(expected = listOf(listOf(parent1, parent2)), actual = objs)
 
         //Also If multiple results are not supported then it should not delete the 1 parent also
         assertEquals(actual = it.select(table = Parent::class, pk = 1), expected = parent1)
@@ -577,7 +577,7 @@ open class Test_Maria {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs: List<Any>? = it.query(Child::class, input = input) {
+        val objs = it.query(Child::class, input = input) {
             """
                     select *
                     from main.Child C
@@ -590,11 +590,13 @@ open class Test_Maria {
             actual = objs,
             expected =
             listOf(
-                Child(pk = 6, fk = 2, col = "-1350163013"),
-                Child(pk = 7, fk = 2, col = "1544682258"),
-                Child(pk = 8, fk = 2, col = "-182312124"),
-                Child(pk = 9, fk = 2, col = "-1397853422"),
-                Child(pk = 10, fk = 2, col = "62774084")
+                listOf(
+                    Child(pk = 6, fk = 2, col = "-1350163013"),
+                    Child(pk = 7, fk = 2, col = "1544682258"),
+                    Child(pk = 8, fk = 2, col = "-182312124"),
+                    Child(pk = 9, fk = 2, col = "-1397853422"),
+                    Child(pk = 10, fk = 2, col = "62774084")
+                )
             )
         )
     }

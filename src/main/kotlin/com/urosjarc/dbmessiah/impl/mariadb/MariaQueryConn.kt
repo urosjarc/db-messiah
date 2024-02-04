@@ -52,14 +52,11 @@ open class MariaQueryConn(conn: Connection, ser: MariaSerializer) {
     /**
      * QUERY
      */
-    fun query(getSql: () -> String) {
-        this.conn.query(getSql = getSql)
-    }
+    fun query(getSql: () -> String) = this.conn.query(getSql = getSql)
 
-    fun <OUT: Any> query(output: KClass<OUT>, getSql: () -> String): List<OUT>? =
-        this.conn.query(output, getSql = getSql).firstOrNull() as List<OUT>?
+    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> = this.conn.query(outputs = outputs, getSql = getSql)
 
-    fun <OUT: Any, IN : Any> query(output: KClass<OUT>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT>? =
-        this.conn.query(outputs = arrayOf(output), input = input, getSql = getSql).firstOrNull() as List<OUT>?
+    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> =
+        this.conn.query(outputs = outputs, input = input, getSql = getSql)
 
 }

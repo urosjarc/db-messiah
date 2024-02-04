@@ -1,9 +1,6 @@
 package com.urosjarc.dbmessiah.impl.mariadb
 
 import com.urosjarc.dbmessiah.Service
-import com.urosjarc.dbmessiah.impl.mssql.MssqlQueryConn
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
-import com.urosjarc.dbmessiah.impl.mssql.MssqlTransConn
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel

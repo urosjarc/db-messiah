@@ -44,8 +44,7 @@ open class OracleQueryConn(conn: Connection, ser: OracleSerializer) {
     /**
      * QUERY
      */
-    fun query(getSql: () -> String): List<Any>? =
-        this.conn.query(getSql = getSql).firstOrNull()
+    fun query(getSql: () -> String) = this.conn.query(getSql = getSql)
 
     fun query(vararg outputs: KClass<*>, getSql: () -> String): List<Any>? =
         this.conn.query(outputs = outputs, getSql = getSql).firstOrNull()

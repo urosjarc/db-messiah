@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.domain.queries.BatchQuery
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import com.urosjarc.dbmessiah.exceptions.EngineException
+import com.urosjarc.dbmessiah.exceptions.SerializerException
 import java.sql.Connection
 import kotlin.reflect.KClass
 
@@ -196,35 +197,53 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
      * MANAGING PROCEDURES
      */
 
-    fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>?> {
+    fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>> {
         val query = this.ser.callQuery(obj = procedure)
-        return this.eng.execute(query = query) { i, rs ->
+
+        val results = this.eng.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
         }
+
+        if (results.size != outputs.size)
+            throw SerializerException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+
+        return results
     }
 
     /**
      * Generic queries
      */
-    fun query(getSql: () -> String): List<List<Any>?> {
+    fun query(getSql: () -> String) {
         val query = this.ser.query(getSql = getSql)
-        return this.eng.execute(query = query) { i, rs ->
+        this.eng.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i)
         }
     }
 
-    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>?> {
+    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
-        return this.eng.execute(query = query) { i, rs ->
+
+        val results = this.eng.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
         }
+
+        if (results.size != outputs.size)
+            throw SerializerException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+
+        return results
     }
 
-    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>?> {
+    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
         val query = this.ser.query(input = input, getSql = getSql)
-        return this.eng.execute(query = query) { i, rs ->
+
+        val results = this.eng.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
         }
+
+        if (results.size != outputs.size)
+            throw SerializerException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+
+        return results
     }
 
 }

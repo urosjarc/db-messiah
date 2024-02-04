@@ -91,9 +91,9 @@ open class Test_Sqlite {
     private fun assertTableNotExists(q: SqliteQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.select(table = kclass) }
         assertContains(
-            charSequence = e.message.toString(),
+            charSequence = e.stackTraceToString(),
             other = "SQL error or missing database (no such table: main.Parent)",
-            message = e.toString()
+            message = e.stackTraceToString()
         )
     }
 
@@ -531,7 +531,7 @@ open class Test_Sqlite {
         val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs: List<Any>? = it.query(Parent::class) {
+        val objs = it.query(Parent::class) {
             """
                     select * from Parent where pk < 3;
                     select * from Parent where pk = 1;

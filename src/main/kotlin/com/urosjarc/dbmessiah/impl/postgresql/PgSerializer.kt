@@ -30,9 +30,9 @@ class PgSerializer(
 
         //Foreign keys
         T.foreignKeys.forEach {
-            val isNull = if (it.notNull) "" else "NOT NULL"
-            val isDeleteCascade = if (it.cascadeDelete) "" else "ON DELETE CASCADE"
-            val isUpdateCascade = if (it.cascadeUpdate) "" else "ON UPDATE CASCADE"
+            val isNull = if (it.notNull) "NOT NULL" else ""
+            val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
+            val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
             col.add("${it.name} ${it.dbType} $isNull")
             constraints.add(
                 "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"

@@ -45,18 +45,16 @@ open class PgQueryConn(conn: Connection, ser: PgSerializer) {
     /**
      * PROCEDURES
      */
-    fun <IN : Any> call(function: IN, vararg outputs: KClass<*>): List<List<Any>?> = this.conn.call(procedure = function, outputs = outputs)
+    fun <IN : Any> call(function: IN, vararg outputs: KClass<*>): List<List<Any>> = this.conn.call(procedure = function, outputs = outputs)
 
     /**
      * QUERY
      */
-    fun query(getSql: () -> String) {
-        this.conn.query(getSql = getSql)
-    }
+    fun query(getSql: () -> String) = this.conn.query(getSql = getSql)
 
-    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>?> = this.conn.query(outputs = outputs, getSql = getSql)
+    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> = this.conn.query(outputs = outputs, getSql = getSql)
 
-    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>?> =
+    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> =
         this.conn.query(outputs = outputs, input = input, getSql = getSql)
 
 }

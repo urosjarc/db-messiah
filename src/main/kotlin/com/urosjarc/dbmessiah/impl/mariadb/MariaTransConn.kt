@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.impl.mariadb
 
 import com.urosjarc.dbmessiah.TransactionalConnection
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import java.sql.Connection
 import java.sql.Savepoint
 

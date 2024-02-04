@@ -19,6 +19,6 @@ class Query(
             }
             "\t${index++}) ${it.name}: ${it.jdbcType} = ${value}\n"
         }
-        return "$sql\n${values}"
+        return "\n\n$sql\n${values}"
     }
 }

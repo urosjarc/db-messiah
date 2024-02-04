@@ -313,11 +313,12 @@ class Mapper(
     fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
     fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
         val output = outputs.getOrNull(i)
-        if (output != null) {
-            val objs = mutableListOf<Any>()
-            while (resultSet.next()) objs.add(this.decode(resultSet, output))
-            return objs
-        } else return listOf(resultSet.getInt(1))
+        val objs = mutableListOf<Any>()
+
+        if (output != null) while (resultSet.next()) objs.add(this.decode(resultSet, output))
+        else throw SerializerException("Missing output classes, because there are more queries listed in the query: ${outputs.map { it.simpleName }}")
+
+        return objs
     }
 
     fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {

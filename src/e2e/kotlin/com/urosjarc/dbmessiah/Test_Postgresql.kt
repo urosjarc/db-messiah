@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -125,9 +126,9 @@ open class Test_Postgresql {
     private fun assertTableNotExists(q: PgQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.select(table = kclass) }
         assertContains(
-            charSequence = e.message.toString(),
+            charSequence = e.stackTraceToString(),
             other = """relation "main.parent" does not exist""",
-            message = e.toString()
+            message = e.stackTraceToString()
         )
     }
 
@@ -157,7 +158,7 @@ open class Test_Postgresql {
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.drop(Parent::class), expected = 0)
+        assertEquals(actual = it.drop(Parent::class, cascade = true), expected = 0)
 
         //Select will create error
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -394,13 +395,13 @@ open class Test_Postgresql {
 
         //List should be equal
         val postParents0 = it.select(table = Parent::class)
-        assertEquals(expected = parents, actual = postParents0)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //If you update not allready inserted element it should reject
         assertEquals(expected = listOf(false, false), actual = it.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.select(table = Parent::class), expected = parents)
+        assertEquals(actual = it.select(table = Parent::class).sortedBy { it.pk }, expected = parents.sortedBy { it.pk })
     }
 
     @Test
@@ -540,7 +541,7 @@ open class Test_Postgresql {
     @Test
     fun `test query`() = service.query {
         it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
-        val preParent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
+        it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
         it.query {
@@ -565,7 +566,7 @@ open class Test_Postgresql {
         val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query(Parent::class) {
+        val objs = it.query(Parent::class, Parent::class) {
             """
                     select * from main.Parent where pk < 3;
                     select * from main.Parent where pk = 1;
@@ -574,10 +575,10 @@ open class Test_Postgresql {
         }
 
         //If multiple select are not supported then it should return only first select
-        assertEquals(expected = listOf(listOf(parent1, parent2), listOf(parent1, parent2)), actual = objs)
+        assertEquals(expected = listOf(listOf(parent1, parent2), listOf(parent1)), actual = objs)
 
         //Also If multiple results are not supported then it should not delete the 1 parent also
-        assertEquals(actual = it.select(table = Parent::class, pk = 1), expected = parent1)
+        assertEquals(actual = it.select(table = Parent::class, pk = 1), expected = null)
     }
 
     @Test
@@ -591,8 +592,13 @@ open class Test_Postgresql {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query(Child::class, input = input) {
+        val objs = it.query(Child::class, Child::class, input = input) {
             """
+                    select *
+                    from main.Child C
+                    join main.Parent P on C.fk = P.pk
+                    where P.pk = ${it.get(Input::parent_pk)};
+                    
                     select *
                     from main.Child C
                     join main.Parent P on C.fk = P.pk
@@ -604,6 +610,13 @@ open class Test_Postgresql {
             actual = objs,
             expected =
             listOf(
+                listOf(
+                    Child(pk = 6, fk = 2, col = "-1350163013"),
+                    Child(pk = 7, fk = 2, col = "1544682258"),
+                    Child(pk = 8, fk = 2, col = "-182312124"),
+                    Child(pk = 9, fk = 2, col = "-1397853422"),
+                    Child(pk = 10, fk = 2, col = "62774084")
+                ),
                 listOf(
                     Child(pk = 6, fk = 2, col = "-1350163013"),
                     Child(pk = 7, fk = 2, col = "1544682258"),

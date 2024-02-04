@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.queries.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.exceptions.EngineException
+import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
@@ -20,19 +21,19 @@ open class Engine(private val conn: Connection) {
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             else (queryValue.encoder as Encoder<Any>)(ps, i + 1, queryValue.value) //If value is not null encoding is done over user defined encoder !!!
         }
-        this.log.info("Prepare query: $rawSql")
+        this.log.info("Prepare query: ${rawSql.replace("\\s+".toRegex(), " ")}")
     }
 
     private fun closeAll(ps: PreparedStatement? = null, rs: ResultSet? = null) {
         try {
             ps?.close()
         } catch (e: Throwable) {
-            this.log.error("Closing prepared statement failed: ${e.message}", e)
+            this.log.error("Closing prepared statement failed", e)
         }
         try {
             rs?.close()
         } catch (e: Throwable) {
-            this.log.error("Closing resultSet failed: ${e.message}", e)
+            this.log.error("Closing resultSet failed", e)
         }
     }
 
@@ -66,12 +67,9 @@ open class Engine(private val conn: Connection) {
             //Return result
             return numUpdates
 
-        } catch (e: SQLException) {
-            this.closeAll(ps = ps)
-            throw EngineException(msg = "Could not batch query statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to process batch results for: $batchQuery", cause = e)
         }
     }
 
@@ -91,12 +89,9 @@ open class Engine(private val conn: Connection) {
 
             //Return count
             return count
-        } catch (e: SQLException) {
-            this.closeAll(ps = ps)
-            throw EngineException(msg = "Could not execute update statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to process update results for: $query", cause = e)
         }
     }
 
@@ -120,12 +115,9 @@ open class Engine(private val conn: Connection) {
                 return null
             }
             //Continue with getting ids for inserts
-        } catch (e: SQLException) {
-            this.closeAll(ps = ps)
-            throw EngineException(msg = "Could not execute insert statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to process insert results from: $query", cause = e)
         }
 
         //Try fetching ids normaly
@@ -142,7 +134,7 @@ open class Engine(private val conn: Connection) {
             rs?.close()
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to process id results from: $query", cause = e)
         }
 
         //Try fetching ids with force
@@ -154,24 +146,21 @@ open class Engine(private val conn: Connection) {
                     this.closeAll(ps = ps, rs = rs2)
                     return data
                 }
-            } catch (e: SQLException) {
-                this.closeAll(ps = ps, rs = rs2)
-                throw EngineException(msg = "Could not execute on generated keys fail sql: '$onGeneratedKeysFail'", cause = e)
             } catch (e: Throwable) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
-            } finally {
+                throw EngineException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
+            }  finally {
                 this.closeAll(ps = ps, rs = rs2)
             }
         }
 
-        throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force!")
+        throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 
-    fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>?): MutableList<List<Any>?> {
+    fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
-        val returned = mutableListOf<List<Any>?>()
+        val returned = mutableListOf<List<Any>>()
 
         try {
             ps = conn.prepareStatement(query.sql)
@@ -179,24 +168,23 @@ open class Engine(private val conn: Connection) {
             var isResultSet = ps.execute()
 
             var count = 0
-            while (true) {
+            do {
                 if (isResultSet) {
                     rs = ps.resultSet
                     returned.add(decodeResultSet(count, rs))
                     rs.close()
-                } else if (ps.updateCount == -1) break //If there is no more result finish
+                } else {
+                    if (ps.updateCount == -1) break
+                } //If there is no more result finish
 
                 count++
                 isResultSet = ps.moreResults //Get next result
-            }
+            } while (isResultSet)
 
             return returned
-        } catch (e: SQLException) {
-            this.closeAll(ps = ps, rs = rs)
-            throw EngineException(msg = "Could not execute statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to return query results from: $query", cause = e)
         }
     }
 
@@ -224,12 +212,9 @@ open class Engine(private val conn: Connection) {
             //Return objects
             return objs
 
-        } catch (e: SQLException) {
-            this.closeAll(ps = ps, rs = rs)
-            throw EngineException(msg = "Could not execute select statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
+            throw EngineException(msg = "Failed to return query results from: $query", cause = e)
         }
     }
 

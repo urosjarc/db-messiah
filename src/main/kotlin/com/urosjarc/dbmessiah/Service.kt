@@ -45,7 +45,7 @@ class Service(val conf: HikariConfig) {
 
         } catch (e: Throwable) {
             this.close(conn = conn)
-            throw ServiceException("Unknown execution error: ${e.message}", e)
+            throw ServiceException("Query was interupted by exception", e)
         }
     }
 
@@ -72,7 +72,7 @@ class Service(val conf: HikariConfig) {
             //If any error occurse that is not user handled then rollback, close and raise exception
             this.rollback(conn = conn)
             this.close(conn = conn)
-            throw ServiceException("Unknown transaction error", e)
+            throw ServiceException("Transaction was interupted by exception", e)
         }
     }
 }
