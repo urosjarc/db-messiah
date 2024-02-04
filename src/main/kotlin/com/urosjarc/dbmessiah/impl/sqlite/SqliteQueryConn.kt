@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.impl.mysql
+package com.urosjarc.dbmessiah.impl.sqlite
 
 import com.urosjarc.dbmessiah.QueryConnection
 import com.urosjarc.dbmessiah.domain.queries.Page
@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import java.sql.Connection
 import kotlin.reflect.KClass
 
-open class MysqlQueryConn(conn: Connection, ser: MysqlSerializer) {
+open class SqliteQueryConn(conn: Connection, ser: SqliteSerializer) {
 
     val conn = QueryConnection(conn = conn, ser = ser)
 
@@ -42,12 +42,6 @@ open class MysqlQueryConn(conn: Connection, ser: MysqlSerializer) {
     fun <T : Any> insertBatch(rows: Iterable<T>): Int = this.conn.insertBatch(rows = rows)
     fun <T : Any> updateBatch(rows: Iterable<T>): Int = this.conn.updateBatch(rows = rows)
     fun <T : Any> deleteBatch(rows: Iterable<T>): Int = this.conn.deleteBatch(rows = rows)
-
-    /**
-     * PROCEDURES
-     */
-    fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>?> =
-        this.conn.call(procedure = procedure, outputs = outputs)
 
     /**
      * QUERY

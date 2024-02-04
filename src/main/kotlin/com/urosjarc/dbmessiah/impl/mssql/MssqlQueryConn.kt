@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.impl.mysql
+package com.urosjarc.dbmessiah.impl.mssql
 
 import com.urosjarc.dbmessiah.QueryConnection
 import com.urosjarc.dbmessiah.domain.queries.Page
@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import java.sql.Connection
 import kotlin.reflect.KClass
 
-open class MysqlQueryConn(conn: Connection, ser: MysqlSerializer) {
+open class MssqlQueryConn(conn: Connection, ser: MssqlSerializer) {
 
     val conn = QueryConnection(conn = conn, ser = ser)
 
@@ -54,12 +54,9 @@ open class MysqlQueryConn(conn: Connection, ser: MysqlSerializer) {
      */
     fun query(getSql: () -> String) = this.conn.query(getSql = getSql)
 
-    //Sqlite does not support multiple result sets from queries
-    fun query(output: KClass<*>, getSql: () -> String): List<Any> =
-        this.conn.query(outputs = arrayOf(output), getSql = getSql).firstOrNull() ?: listOf()
+    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> = this.conn.query(outputs = outputs, getSql = getSql)
 
-    //Sqlite does not support multiple result sets from queries
-    fun <IN : Any> query(output: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<Any> =
-        this.conn.query(outputs = arrayOf(output), input = input, getSql = getSql).firstOrNull() ?: listOf()
+    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> =
+        this.conn.query(outputs = outputs, input = input, getSql = getSql)
 
 }

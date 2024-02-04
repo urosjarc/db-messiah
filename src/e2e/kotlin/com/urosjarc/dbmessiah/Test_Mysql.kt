@@ -1,50 +1,46 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.postgresql.PgQueryConn
-import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
-import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
-import com.urosjarc.dbmessiah.impl.postgresql.PgService
+import com.urosjarc.dbmessiah.impl.mysql.MysqlQueryConn
+import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
+import com.urosjarc.dbmessiah.impl.mysql.MysqlSerializer
+import com.urosjarc.dbmessiah.impl.mysql.MysqlService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.SQLException
 import kotlin.reflect.KClass
 import kotlin.test.*
 
 
-open class Test_Postgresql {
+open class Test_Mysql {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: PgService
+        private lateinit var service: MysqlService
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = PgService(
+            service = MysqlService(
                 conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:postgresql://localhost:5432/public"
+                    this.jdbcUrl = "jdbc:mysql://localhost:3307"
                     this.username = "root"
                     this.password = "root"
                 },
-                ser = PgSerializer(
+                ser = MysqlSerializer(
                     schemas = listOf(
-                        PgSchema(
+                        MysqlSchema(
                             name = "main", tables = listOf(
                                 Table(Parent::pk),
                                 Table(
                                     Child::pk, foreignKeys = listOf(
                                         Child::fk to Parent::class
-                                    ), constraints = listOf(
-                                        Child::fk to listOf(C.CASCADE_DELETE)
                                     )
                                 )
                             )
@@ -63,8 +59,10 @@ open class Test_Postgresql {
         //Reseting tables
         service.query {
             it.query { "CREATE SCHEMA IF NOT EXISTS main;" }
-            it.drop(Child::class, cascade = true)
-            it.drop(Parent::class, cascade = true)
+            it.query { "SET FOREIGN_KEY_CHECKS=0;" }
+
+            it.drop(Child::class)
+            it.drop(Parent::class)
             it.create(Parent::class)
             it.create(Child::class)
         }
@@ -101,33 +99,31 @@ open class Test_Postgresql {
         service.query {
             it.query {
                 """
-                CREATE OR REPLACE FUNCTION main.TestProcedure(parent_pk INT)
-                RETURNS SETOF main.Parent AS $$
-                BEGIN
-                  RETURN QUERY SELECT * FROM main.Parent WHERE pk = parent_pk;
-                END;
-                $$ language plpgsql;
-                """.trimIndent()
+                        CREATE PROCEDURE IF NOT EXISTS main.TestProcedure(parent_pk INT)
+                        BEGIN
+                            SELECT * FROM main.Parent WHERE pk = parent_pk;
+                            SELECT * FROM main.Parent WHERE pk = parent_pk1;
+                        END;
+                    """.trimIndent()
             }
             it.query {
                 """
-                CREATE OR REPLACE FUNCTION main.TestProcedureEmpty()
-                RETURNS SETOF main.Parent AS $$
-                BEGIN
-                    RETURN QUERY SELECT * FROM main.Parent WHERE pk = 2;
-                END;
-                $$ language plpgsql;
-                """.trimIndent()
+                        CREATE PROCEDURE IF NOT EXISTS main.TestProcedureEmpty()
+                        BEGIN
+                            SELECT * FROM main.Parent WHERE pk = 2;
+                            SELECT * FROM main.Parent WHERE pk = 2;
+                        END;
+                    """.trimIndent()
             }
         }
 
     }
 
-    private fun assertTableNotExists(q: PgQueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: MysqlQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """relation "main.parent" does not exist""",
+            other = "Table 'main.Parent' doesn't exist",
             message = e.stackTraceToString()
         )
     }
@@ -138,7 +134,7 @@ open class Test_Postgresql {
         it.select(table = Parent::class)
 
         //Drop
-        it.drop(table = Parent::class, cascade = true)
+        it.drop(table = Parent::class)
 
         //You can't select on droped table
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -158,7 +154,7 @@ open class Test_Postgresql {
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.drop(Parent::class, cascade = true), expected = 0)
+        assertEquals(actual = it.drop(Parent::class), expected = 0)
 
         //Select will create error
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -288,7 +284,7 @@ open class Test_Postgresql {
 
         //Get current all parents
         val postParents = it.select(table = Parent::class)
-        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents.sortedBy { it.pk })
+        assertEquals(expected = parents, actual = postParents)
 
         //Object should not be updated if has no primary key
         parents[1].pk = null
@@ -395,13 +391,13 @@ open class Test_Postgresql {
 
         //List should be equal
         val postParents0 = it.select(table = Parent::class)
-        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
+        assertEquals(expected = parents, actual = postParents0)
 
         //If you update not allready inserted element it should reject
         assertEquals(expected = listOf(false, false), actual = it.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.select(table = Parent::class).sortedBy { it.pk }, expected = parents.sortedBy { it.pk })
+        assertEquals(actual = it.select(table = Parent::class), expected = parents)
     }
 
     @Test
@@ -411,7 +407,7 @@ open class Test_Postgresql {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = listOf(true, true), actual = it.delete(rows = listOf(children[0], children[1])))
+        assertEquals(expected = listOf(true, true), actual = it.delete(listOf(children[0], children[1])))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
@@ -491,7 +487,7 @@ open class Test_Postgresql {
 
         //List should be equal
         val postParents0 = it.select(table = Parent::class)
-        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
+        assertEquals(expected = parents, actual = postParents0)
 
         //Insert without primary key
         postParents0[2].pk = null
@@ -541,22 +537,18 @@ open class Test_Postgresql {
     @Test
     fun `test query`() = service.query {
         it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
-        it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
         it.query {
             """
-            delete from main.Parent where pk = 1;
-            delete from main.Parent where pk = 2;
+            delete from main.Parent where pk = 2
             """
         }
 
         //Check for deletion
         val postParent2 = it.select(table = Parent::class, pk = 2)
-        val postParent1 = it.select(table = Parent::class, pk = 1)
 
         //Parent 1 should be deleted
-        assertEquals(expected = null, actual = postParent1)
         assertEquals(expected = null, actual = postParent2)
     }
 
@@ -566,19 +558,12 @@ open class Test_Postgresql {
         val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query(Parent::class, Parent::class) {
-            """
-                    select * from main.Parent where pk < 3;
-                    select * from main.Parent where pk = 1;
-                    delete from main.Parent where pk = 1;
-                """.trimIndent()
+        val objs = it.query(Parent::class) {
+            """ select * from main.Parent where pk < 3; """.trimIndent()
         }
 
         //If multiple select are not supported then it should return only first select
-        assertEquals(expected = listOf(listOf(parent1, parent2), listOf(parent1)), actual = objs)
-
-        //Also If multiple results are not supported then it should delete the 1 parent also
-        assertEquals(actual = it.select(table = Parent::class, pk = 1), expected = null)
+        assertEquals(expected = listOf(parent1, parent2), actual = objs)
     }
 
     @Test
@@ -592,38 +577,24 @@ open class Test_Postgresql {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query(Child::class, Child::class, input = input) {
+        val objs = it.query(Child::class, input = input) {
             """
-                    select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.get(Input::parent_pk)};
-                    
-                    select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.get(Input::parent_pk)}
-                """.trimIndent()
+                select *
+                from main.Child C
+                join main.Parent P on C.fk = P.pk
+                where P.pk = ${it.get(Input::parent_pk)};
+            """.trimIndent()
         }
 
         assertEquals(
             actual = objs,
             expected =
             listOf(
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                ),
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                )
+                Child(pk = 6, fk = 2, col = "-1350163013"),
+                Child(pk = 7, fk = 2, col = "1544682258"),
+                Child(pk = 8, fk = 2, col = "-182312124"),
+                Child(pk = 9, fk = 2, col = "-1397853422"),
+                Child(pk = 10, fk = 2, col = "62774084")
             )
         )
     }

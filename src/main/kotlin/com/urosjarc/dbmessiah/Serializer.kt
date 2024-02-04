@@ -29,7 +29,7 @@ abstract class Serializer(
     open val selectLastId: String? = null
 
 
-    fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
+    open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         val cascadeSql = if (cascade) " CASCADE" else ""
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql;")
