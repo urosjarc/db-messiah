@@ -24,7 +24,7 @@ jobs:
         ports:
           - 3306:3306
 
-      db-postgres:
+      postgres:
         image: postgres
         env:
           POSTGRES_PASSWORD: root
@@ -32,7 +32,7 @@ jobs:
         ports:
           - 5432:5432
 
-      db-mysql:
+      mysql:
         image: mysql
         env:
           MYSQL_ROOT_PASSWORD: root
@@ -40,16 +40,15 @@ jobs:
         ports:
           - 3307:3307
 
-      db-mssql:
+      mssql:
         image: mcr.microsoft.com/mssql/server:2017-latest
         env:
           ACCEPT_EULA: Y
           MSSQL_SA_PASSWORD: Root_root1
-
         ports:
           - 1433:1433
 
-      db-db2:
+      db2:
         image: icr.io/db2_community/db2
         env:
           LICENSE: accept

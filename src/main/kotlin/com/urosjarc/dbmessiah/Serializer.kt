@@ -31,25 +31,23 @@ abstract class Serializer(
 
     fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        val cascadeSql = if(cascade) " CASCADE" else ""
+        val cascadeSql = if (cascade) " CASCADE" else ""
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql;")
     }
 
     abstract fun <T : Any> createQuery(kclass: KClass<T>): Query
-    fun <T : Any> deleteQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
+    fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        val cascadeSql = if(cascade) " CASCADE" else ""
-        return Query(sql = "DELETE FROM ${T.path}$cascadeSql;")
+        return Query(sql = "DELETE FROM ${T.path};")
     }
 
     /**
      * MANAGING ROWS
      */
-    fun deleteQuery(obj: Any, cascade: Boolean = false): Query {
+    fun deleteQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
-        val cascadeSql = if(cascade) " CASCADE" else ""
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?$cascadeSql;",
+            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;",
             T.primaryKey.queryValue(obj)
         )
     }

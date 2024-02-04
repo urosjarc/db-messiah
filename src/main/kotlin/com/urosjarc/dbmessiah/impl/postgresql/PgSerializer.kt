@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.impl.postgresql
 
-import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
@@ -32,8 +31,12 @@ class PgSerializer(
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
+            val isDeleteCascade = if (it.cascadeDelete) "" else "ON DELETE CASCADE"
+            val isUpdateCascade = if (it.cascadeUpdate) "" else "ON UPDATE CASCADE"
             col.add("${it.name} ${it.dbType} $isNull")
-            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) ON DELETE CASCADE")
+            constraints.add(
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+            )
         }
 
         //Other columns

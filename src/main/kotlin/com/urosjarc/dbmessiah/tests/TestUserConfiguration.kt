@@ -110,8 +110,8 @@ class TestUserConfiguration(val mapper: Mapper) {
                             when (it) {
                                 C.AUTO_INC -> {}
                                 C.UNIQUE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
-                                C.CASCADE_UPDATE -> TODO()
-                                C.CASCADE_DELETE -> TODO()
+                                C.CASCADE_UPDATE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
+                                C.CASCADE_DELETE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
                             }
                         }
                     }
@@ -122,8 +122,8 @@ class TestUserConfiguration(val mapper: Mapper) {
                             when (it) {
                                 C.AUTO_INC -> throw SerializerException("Foreign key ${schema}.${table}.'${prop.name}' does not need '${C.AUTO_INC}' constraint")
                                 C.UNIQUE -> {}
-                                C.CASCADE_UPDATE -> TODO()
-                                C.CASCADE_DELETE -> TODO()
+                                C.CASCADE_UPDATE -> {}
+                                C.CASCADE_DELETE -> {}
                             }
                         }
                     }

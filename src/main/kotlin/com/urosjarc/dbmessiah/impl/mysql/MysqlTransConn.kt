@@ -1,12 +1,11 @@
-package com.urosjarc.dbmessiah.impl.mariadb
+package com.urosjarc.dbmessiah.impl.mysql
 
 import com.urosjarc.dbmessiah.TransactionalConnection
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import java.sql.Connection
 import java.sql.Savepoint
 
 
-class MariaTransConn(conn: Connection, ser: MariaSerializer) {
+class MysqlTransConn(conn: Connection, ser: MysqlSerializer) {
 
     val tcon = TransactionalConnection(conn = conn, ser = ser)
     fun rollbackAll() = this.tcon.rollbackAll()

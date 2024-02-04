@@ -272,8 +272,11 @@ class Mapper(
             val serializer = this.getSerializer(fromProp)
             val fkcons = table.constraintsFor(kprop = fromProp)
             val column = ForeignColumn(
-                kprop = fromProp as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
-                encoder = serializer.encoder, decoder = serializer.decoder, unique = fkcons.contains(C.UNIQUE)
+                kprop = fromProp as KProperty1<Any, Any?>,
+                dbType = serializer.dbType, jdbcType = serializer.jdbcType,
+                encoder = serializer.encoder, decoder = serializer.decoder,
+                unique = fkcons.contains(C.UNIQUE),
+                cascadeDelete = fkcons.contains(C.CASCADE_DELETE), cascadeUpdate = fkcons.contains(C.CASCADE_UPDATE)
             )
             this.fkColumn_to_tableKClass[column] = toKClass
             fkColumns.add(column)

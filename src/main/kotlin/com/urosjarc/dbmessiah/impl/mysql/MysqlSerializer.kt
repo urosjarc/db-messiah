@@ -1,14 +1,14 @@
-package com.urosjarc.dbmessiah.impl.mariadb
+package com.urosjarc.dbmessiah.impl.mysql
 
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.queries.Query
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
+import com.urosjarc.dbmessiah.impl.db2.OracleSchema
 import kotlin.reflect.KClass
 
 
-open class MariaSerializer(
-    schemas: List<MariaSchema> = listOf(),
+open class MysqlSerializer(
+    schemas: List<OracleSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
@@ -36,12 +36,8 @@ open class MariaSerializer(
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
-            val isDeleteCascade = if (it.cascadeDelete) "" else "ON DELETE CASCADE"
-            val isUpdateCascade = if (it.cascadeUpdate) "" else "ON UPDATE CASCADE"
             col.add("${it.name} ${it.dbType} $isNull")
-            constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
-            )
+            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})")
         }
 
         //Other columns
@@ -56,4 +52,5 @@ open class MariaSerializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
+
 }

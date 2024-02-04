@@ -14,6 +14,9 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
 
     val eng = Engine(conn = conn)
 
+    /**
+     * MANAGING TABLES
+     */
     fun <T : Any> drop(table: KClass<T>, cascade: Boolean = false): Int {
         val query = this.ser.dropQuery(kclass = table, cascade = cascade)
         return this.eng.update(query = query)
@@ -24,8 +27,8 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         return this.eng.update(query = query)
     }
 
-    fun <T : Any> delete(table: KClass<T>, cascade: Boolean = false): Int {
-        val query = this.ser.deleteQuery(kclass = table, cascade = cascade)
+    fun <T : Any> delete(table: KClass<T>): Int {
+        val query = this.ser.deleteQuery(kclass = table)
         return this.eng.update(query = query)
     }
 
@@ -41,6 +44,16 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         return this.eng.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }
+    }
+
+    /**
+     * MANAGING ROW
+     */
+    fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
+        val query = this.ser.query(kclass = table, pk = pk)
+        return this.eng.query(query = query) {
+            this.ser.mapper.decode(resultSet = it, kclass = table)
+        }.firstOrNull()
     }
 
     fun <T : Any> insert(row: T): Boolean {
@@ -81,14 +94,14 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         else throw EngineException("Number of updated rows must be 1 or 0 but number of updated rows was: $count")
     }
 
-    fun <T : Any> delete(row: T, cascade: Boolean = false): Boolean {
+    fun <T : Any> delete(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has not pk then reject since it must be first created
         if (T.primaryKey.getValue(obj = row) == null) return false //Only objects who doesnt have primary key can be inserted!!!
 
         //Delete object if primary key exists
-        val query = this.ser.deleteQuery(obj = row, cascade = cascade)
+        val query = this.ser.deleteQuery(obj = row)
 
         //Update rows and get change count
         val count = this.eng.update(query = query)
@@ -101,19 +114,22 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         } else throw EngineException("Number of deleted rows must be 1 or 0 but number of updated rows was: $count")
     }
 
-    fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
-        val query = this.ser.query(kclass = table, pk = pk)
-        return this.eng.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, kclass = table)
-        }.firstOrNull()
-    }
+    /**
+     * MANAGING ROWS
+     */
+    fun <T : Any> insert(rows: Iterable<T>): List<Boolean> = rows.map { this.insert(row = it) }
 
+    fun <T : Any> update(rows: Iterable<T>): List<Boolean> = rows.map { this.update(row = it) }
+
+    fun <T : Any> delete(rows: Iterable<T>): List<Boolean> = rows.map { this.delete(row = it) }
 
     /**
      * Managing rows in batch
      */
-    fun <T : Any> insert(vararg rows: T): Int {
-        val T = this.ser.mapper.getTableInfo(obj = rows[0])
+    fun <T : Any> insertBatch(rows: Iterable<T>): Int {
+        val obj = rows.firstOrNull() ?: return 0
+
+        val T = this.ser.mapper.getTableInfo(obj = obj)
 
         //Filter only those whos primary key is null
         val fobjs = rows.filter { T.primaryKey.getValue(it) == null }
@@ -131,8 +147,10 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         return this.eng.batch(batchQuery = batchQuery)
     }
 
-    fun <T : Any> update(vararg rows: T): Int {
-        val T = this.ser.mapper.getTableInfo(obj = rows[0])
+    fun <T : Any> updateBatch(rows: Iterable<T>): Int {
+        val obj = rows.firstOrNull() ?: return 0
+
+        val T = this.ser.mapper.getTableInfo(obj = obj)
 
         //Filter only those whos primary key is null
         val fobjs = rows.filter { T.primaryKey.getValue(it) != null }
@@ -149,8 +167,10 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         return this.eng.batch(batchQuery = batchQuery)
     }
 
-    fun <T : Any> delete(vararg rows: T, cascade: Boolean = false): Int {
-        val T = this.ser.mapper.getTableInfo(obj = rows[0])
+    fun <T : Any> deleteBatch(rows: Iterable<T>): Int {
+        val obj = rows.firstOrNull() ?: return 0
+
+        val T = this.ser.mapper.getTableInfo(obj = obj)
 
         //Filter only those whos primary key is not null
         val fobjs = rows.filter { T.primaryKey.getValue(it) != null }
@@ -159,14 +179,22 @@ open class QueryConnection(conn: Connection, val ser: Serializer) {
         if (fobjs.isEmpty()) return 0
 
         //Delete objects
-        val query = this.ser.deleteQuery(obj = fobjs[0], cascade = cascade)
+        val query = this.ser.deleteQuery(obj = fobjs[0])
         val valueMatrix = fobjs.map { listOf(T.primaryKey.queryValue(obj = it)) }
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
 
         //Return result
-        return this.eng.batch(batchQuery = batchQuery)
+        val count = this.eng.batch(batchQuery = batchQuery)
+
+        //Reset primary keys so that objects become invalid
+        rows.forEach { T.primaryKey.setValue(obj = it, null) }
+
+        return count
     }
 
+    /**
+     * MANAGING PROCEDURES
+     */
 
     fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>?> {
         val query = this.ser.callQuery(obj = procedure)

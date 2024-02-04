@@ -71,7 +71,7 @@ open class Engine(private val conn: Connection) {
             throw EngineException(msg = "Could not batch query statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
         }
     }
 
@@ -96,7 +96,7 @@ open class Engine(private val conn: Connection) {
             throw EngineException(msg = "Could not execute update statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
         }
     }
 
@@ -125,7 +125,7 @@ open class Engine(private val conn: Connection) {
             throw EngineException(msg = "Could not execute insert statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
         }
 
         //Try fetching ids normaly
@@ -159,7 +159,7 @@ open class Engine(private val conn: Connection) {
                 throw EngineException(msg = "Could not execute on generated keys fail sql: '$onGeneratedKeysFail'", cause = e)
             } catch (e: Throwable) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+                throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
             } finally {
                 this.closeAll(ps = ps, rs = rs2)
             }
@@ -196,7 +196,7 @@ open class Engine(private val conn: Connection) {
             throw EngineException(msg = "Could not execute statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
         }
     }
 
@@ -229,7 +229,7 @@ open class Engine(private val conn: Connection) {
             throw EngineException(msg = "Could not execute select statement: ${e.message}", cause = e)
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw ReportIssue(msg = "Unknown executor exception: ${e.message}", cause = e)
+            throw ReportIssue(msg = "Unknown exception: ${e.message}", cause = e)
         }
     }
 
