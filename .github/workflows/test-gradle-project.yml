@@ -17,7 +17,7 @@ jobs:
         run: ./gradlew e2e
 
     services:
-      maria-db:
+      maria:
         image: mariadb
         env:
           MARIADB_ROOT_PASSWORD: root
@@ -27,6 +27,7 @@ jobs:
       postgres:
         image: postgres
         env:
+          POSTGRES_DB: public
           POSTGRES_PASSWORD: root
           POSTGRES_USER: root
         ports:
