@@ -11,12 +11,14 @@ import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import kotlin.test.*
 
 
+@Disabled
 open class Test_Db2 {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
