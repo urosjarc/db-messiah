@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
 import java.sql.Connection
 import kotlin.reflect.KClass
 
-open class Db2QueryConn(conn: Connection, ser: OracleSerializer) {
+open class Db2QueryConn(conn: Connection, ser: Db2Serializer) {
 
     val conn = QueryConnection(conn = conn, ser = ser)
 
@@ -21,12 +21,19 @@ open class Db2QueryConn(conn: Connection, ser: OracleSerializer) {
     fun <T : Any> select(table: KClass<T>, page: Page<T>): List<T> = this.conn.select(table = table, page = page)
 
     /**
-     * ROWS
+     * ROW
      */
+    fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? = this.conn.select(table = table, pk = pk)
     fun <T : Any> insert(row: T): Boolean = this.conn.insert(row = row)
     fun <T : Any> update(row: T): Boolean = this.conn.update(row = row)
     fun <T : Any> delete(row: T): Boolean = this.conn.delete(row = row)
-    fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? = this.conn.select(table = table, pk = pk)
+
+    /**
+     * ROWS
+     */
+    fun <T : Any> insert(rows: Iterable<T>): List<Boolean> = this.conn.insert(rows = rows)
+    fun <T : Any> update(rows: Iterable<T>): List<Boolean> = this.conn.update(rows = rows)
+    fun <T : Any> delete(rows: Iterable<T>): List<Boolean> = this.conn.delete(rows = rows)
 
 
     /**
@@ -39,18 +46,16 @@ open class Db2QueryConn(conn: Connection, ser: OracleSerializer) {
     /**
      * PROCEDURES
      */
-    fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>?> =
-        this.conn.call(procedure = procedure, outputs = outputs)
+    fun <IN : Any> call(function: IN, vararg outputs: KClass<*>): List<List<Any>> = this.conn.call(procedure = function, outputs = outputs)
 
     /**
      * QUERY
      */
     fun query(getSql: () -> String) = this.conn.query(getSql = getSql)
 
-    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<Any>? =
-        this.conn.query(outputs = outputs, getSql = getSql).firstOrNull()
+    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> = this.conn.query(outputs = outputs, getSql = getSql)
 
-    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<Any>? =
-        this.conn.query(outputs = outputs, input = input, getSql = getSql).firstOrNull()
+    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> =
+        this.conn.query(outputs = outputs, input = input, getSql = getSql)
 
 }

@@ -5,7 +5,7 @@ import java.sql.Connection
 import java.sql.Savepoint
 
 
-class Db2TransConn(conn: Connection, ser: OracleSerializer) {
+class Db2TransConn(conn: Connection, ser: Db2Serializer) {
 
     val tcon = TransactionalConnection(conn = conn, ser = ser)
     fun rollbackAll() = this.tcon.rollbackAll()

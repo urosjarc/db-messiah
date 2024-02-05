@@ -4,10 +4,11 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.queries.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
+import com.urosjarc.dbmessiah.impl.db2.Db2QueryConn
+import com.urosjarc.dbmessiah.impl.db2.Db2Schema
+import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
+import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.impl.postgresql.PgQueryConn
-import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
-import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
-import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
@@ -18,25 +19,25 @@ import kotlin.reflect.KClass
 import kotlin.test.*
 
 
-open class Test_Postgresql {
+open class Test_Db2 {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: PgService
+        private lateinit var service: Db2Service
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = PgService(
+            service = Db2Service(
                 conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:postgresql://localhost:5432/public"
-                    this.username = "root"
+                    this.jdbcUrl = "jdbc:db2://localhost:50000/main"
+                    this.username = "db2inst1"
                     this.password = "root"
                 },
-                ser = PgSerializer(
+                ser = Db2Serializer(
                     schemas = listOf(
-                        PgSchema(
+                        Db2Schema(
                             name = "main", tables = listOf(
                                 Table(Parent::pk),
                                 Table(
@@ -61,9 +62,9 @@ open class Test_Postgresql {
     fun prepare() {
         //Reseting tables
         service.query {
-            it.query { "CREATE SCHEMA IF NOT EXISTS main;" }
-            it.drop(Child::class, cascade = true)
-            it.drop(Parent::class, cascade = true)
+            try { it.query { "CREATE SCHEMA main" } } catch (e: Throwable){}
+            it.drop(Child::class)
+            it.drop(Parent::class)
             it.create(Parent::class)
             it.create(Child::class)
         }
@@ -122,7 +123,7 @@ open class Test_Postgresql {
 
     }
 
-    private fun assertTableNotExists(q: PgQueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: Db2QueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
@@ -137,7 +138,7 @@ open class Test_Postgresql {
         it.select(table = Parent::class)
 
         //Drop
-        it.drop(table = Parent::class, cascade = true)
+        it.drop(table = Parent::class)
 
         //You can't select on droped table
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -157,7 +158,7 @@ open class Test_Postgresql {
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.drop(Parent::class, cascade = true), expected = 0)
+        assertEquals(actual = it.drop(Parent::class), expected = 0)
 
         //Select will create error
         this.assertTableNotExists(q = it, kclass = Parent::class)
