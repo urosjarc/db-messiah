@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.db2
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.queries.Query
+import com.urosjarc.dbmessiah.domain.querie.Query
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
@@ -34,9 +34,13 @@ open class Db2Serializer(
 
         //Foreign keys
         T.foreignKeys.forEach {
-            val isNull = if (it.notNull) "" else "NOT NULL"
+            val isNull = if (it.notNull) "NOT NULL" else ""
+            val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
+            val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
             col.add("${it.name} ${it.dbType} $isNull")
-            constraints.add("FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})")
+            constraints.add(
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+            )
         }
 
         //Other columns
@@ -54,7 +58,7 @@ open class Db2Serializer(
     override fun insertQuery(obj: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "INSERT INTO ${T.path} VALUES (${T.sqlInsertQuestions()});",
+            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
             *T.queryValues(obj = obj),
         )
     }

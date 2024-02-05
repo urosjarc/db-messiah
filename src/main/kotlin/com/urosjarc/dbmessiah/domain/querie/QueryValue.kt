@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.domain.queries
+package com.urosjarc.dbmessiah.domain.querie
 
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType

@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.serialization
 
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import java.sql.JDBCType
 import kotlin.reflect.KClass

@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.call
 
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import kotlin.reflect.KClass
 
 data class Procedure(

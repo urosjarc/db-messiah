@@ -7,11 +7,9 @@ import com.zaxxer.hikari.util.IsolationLevel
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 
-class Service(val conf: HikariConfig) {
-
-    val log = this.logger()
-    val db = HikariDataSource(conf)
-
+open class Service(conf: HikariConfig) {
+    private val log = this.logger()
+    private val source = HikariDataSource(conf)
     fun close(conn: Connection?) {
         try {
             conn?.close()
@@ -32,7 +30,7 @@ class Service(val conf: HikariConfig) {
         var conn: Connection? = null
         try {
             //Getting connection
-            conn = db.connection
+            conn = source.connection
 
             //Will connection be read only
             conn.isReadOnly = readOnly
@@ -53,7 +51,7 @@ class Service(val conf: HikariConfig) {
         var conn: Connection? = null
         try {
             //Getting connection
-            conn = db.connection
+            conn = source.connection
 
             //Start transaction
             conn.autoCommit = false

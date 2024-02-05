@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.domain.queries
+package com.urosjarc.dbmessiah.domain.querie
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.exceptions.SerializerException

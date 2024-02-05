@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.domain.table
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.types.AllTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance

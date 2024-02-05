@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.call
 
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import com.urosjarc.dbmessiah.types.NumberTS
 import com.urosjarc.dbmessiah.types.StringTS

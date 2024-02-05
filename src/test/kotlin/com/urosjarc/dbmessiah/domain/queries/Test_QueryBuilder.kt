@@ -2,6 +2,9 @@ package com.urosjarc.dbmessiah.domain.queries
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.domain.querie.Query
+import com.urosjarc.dbmessiah.domain.querie.QueryBuilder
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS

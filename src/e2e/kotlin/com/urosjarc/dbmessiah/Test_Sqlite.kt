@@ -1,9 +1,8 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.Page
+import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteQueryConn
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.types.AllTS
@@ -52,10 +51,10 @@ open class Test_Sqlite {
     fun prepare() {
         //Reseting tables
         service.query {
-            it.drop(Child::class)
-            it.drop(Parent::class)
-            it.create(Parent::class)
-            it.create(Child::class)
+            it.table.drop(Child::class)
+            it.table.drop(Parent::class)
+            it.table.create(Parent::class)
+            it.table.create(Child::class)
         }
 
         val numParents = 5
@@ -68,19 +67,19 @@ open class Test_Sqlite {
             repeat(times = numParents) { p ->
                 val parent = Parent.get(seed = p)
                 parents.add(parent)
-                val parentInserted = it.insert(row = parent)
+                val parentInserted = it.row.insert(row = parent)
                 if (parent.pk == null || !parentInserted) throw TesterException("Parent was not inserted: $parent")
                 repeat(numChildren) { c ->
                     val child = Child.get(fk = parent.pk!!, seed = p * numChildren + c)
                     children.add(child)
-                    val childInserted = it.insert(row = child)
+                    val childInserted = it.row.insert(row = child)
                     if (child.pk == null || !childInserted) throw TesterException("Children was not inserted: $child")
                 }
             }
 
             //Testing current state
-            val insertedParents = it.select(table = Parent::class)
-            val insertedChildren = it.select(table = Child::class)
+            val insertedParents = it.table.select(table = Parent::class)
+            val insertedChildren = it.table.select(table = Child::class)
 
             if (insertedChildren != children || insertedParents != parents)
                 throw TesterException("Test state does not match with expected state")
@@ -88,8 +87,8 @@ open class Test_Sqlite {
 
     }
 
-    private fun assertTableNotExists(q: SqliteQueryConn, kclass: KClass<*>) {
-        val e = assertThrows<Throwable> { q.select(table = kclass) }
+    private fun assertTableNotExists(q: SqliteService.QueryConn, kclass: KClass<*>) {
+        val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
             other = "SQL error or missing database (no such table: main.Parent)",
@@ -100,10 +99,10 @@ open class Test_Sqlite {
     @Test
     fun `test table drop`() = service.query {
         //You can select
-        it.select(table = Parent::class)
+        it.table.select(table = Parent::class)
 
         //Drop
-        it.drop(table = Parent::class)
+        it.table.drop(table = Parent::class)
 
         //You can't select on droped table
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -112,93 +111,93 @@ open class Test_Sqlite {
     @Test
     fun `test table create`() = service.query {
         //Get pre create state
-        val preParents = it.select(table = Parent::class)
+        val preParents = it.table.select(table = Parent::class)
         assertTrue(actual = preParents.isNotEmpty())
 
         //Create table if allready created should not throw error
-        assertEquals(actual = it.create(table = Parent::class), expected = 1)
+        assertEquals(actual = it.table.create(table = Parent::class), expected = 1)
 
         //Create table should not change previous state
-        val postParents = it.select(table = Parent::class)
+        val postParents = it.table.select(table = Parent::class)
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.drop(Parent::class), expected = 1)
+        assertEquals(actual = it.table.drop(Parent::class), expected = 1)
 
         //Select will create error
         this.assertTableNotExists(q = it, kclass = Parent::class)
 
         //Recreate table
-        assertEquals(actual = it.create(table = Parent::class), expected = 1)
+        assertEquals(actual = it.table.create(table = Parent::class), expected = 1)
 
         //Now we can get elements
-        assertTrue(it.select(table = Parent::class).isEmpty())
+        assertTrue(it.table.select(table = Parent::class).isEmpty())
     }
 
     @Test
     fun `test table delete`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Check if number of deletes matches original size
         assertTrue(parents.isNotEmpty())
-        assertEquals(expected = parents.size, actual = it.delete(table = Parent::class))
+        assertEquals(expected = parents.size, actual = it.table.delete(table = Parent::class))
 
         //Check if no parent is left
-        val postParents = it.select(table = Parent::class)
+        val postParents = it.table.select(table = Parent::class)
         assertTrue(actual = postParents.isEmpty())
 
         //If again delete return 0
-        assertEquals(expected = 0, actual = it.delete(table = Parent::class))
+        assertEquals(expected = 0, actual = it.table.delete(table = Parent::class))
     }
 
     @Test
     fun `test table select`() = service.query {
         //It should be equal to inserted parents
-        val selected0 = it.select(table = Parent::class)
+        val selected0 = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = selected0)
 
         //It should be consistent
-        val selected1 = it.select(table = Parent::class)
+        val selected1 = it.table.select(table = Parent::class)
         assertEquals(expected = selected0, actual = selected1)
     }
 
     @Test
     fun `test table select page`() = service.query {
         // Select first 5
-        val select0 = it.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 5))
+        val select0 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 5))
         assertEquals(expected = this.children.subList(0, 5), actual = select0)
 
         // Select first 7
-        val select1 = it.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 7))
+        val select1 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(0, 7), actual = select1)
 
         // Select 3 page of 7
-        val select2 = it.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 7))
+        val select2 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(14, 14 + 7), actual = select2)
 
         // Select 3 page of 4
-        val select3 = it.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
+        val select3 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = this.children.subList(8, 8 + 4), actual = select3)
 
         // It should be consistent
-        val select4 = it.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
+        val select4 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = select3, actual = select4)
     }
 
     @Test
     fun `test row select pk`() = service.query {
         //Should return expected
-        val parent0 = it.select(table = Parent::class, pk = 1)
+        val parent0 = it.row.select(table = Parent::class, pk = 1)
         assertEquals(expected = this.parents[0], actual = parent0)
 
         //It should be consistent
-        val parent1 = it.select(table = Parent::class, pk = 1)
+        val parent1 = it.row.select(table = Parent::class, pk = 1)
         assertEquals(expected = parent0, actual = parent1)
 
         //Should differ
-        val parent2 = it.select(table = Parent::class, pk = 2)
+        val parent2 = it.row.select(table = Parent::class, pk = 2)
         assertEquals(expected = this.parents[1], actual = parent2)
         assertNotEquals(illegal = parent1, actual = parent2)
     }
@@ -206,7 +205,7 @@ open class Test_Sqlite {
     @Test
     fun `test row insert`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Create new object
@@ -219,13 +218,13 @@ open class Test_Sqlite {
         assertFalse(actual = parents.contains(newObj))
 
         //Insert new object
-        assertTrue(actual = it.insert(row = newObj))
+        assertTrue(actual = it.row.insert(row = newObj))
 
         //Check if primary key was updated
         assertTrue(actual = newObj.pk!! > 0)
 
         //Get parents ad check if new object is contained inside
-        val postParents = it.select(table = Parent::class)
+        val postParents = it.table.select(table = Parent::class)
         assertTrue(actual = postParents.contains(newObj))
 
         //Check if table has not been change while inserting
@@ -234,54 +233,54 @@ open class Test_Sqlite {
         assertEquals(actual = preParents, expected = parents)
 
         //Try to insert element again
-        assertFalse(actual = it.insert(row = newObj))
+        assertFalse(actual = it.row.insert(row = newObj))
 
         //Parents really stayed as they were before
-        val postParents2 = it.select(table = Parent::class)
+        val postParents2 = it.table.select(table = Parent::class)
         assertEquals(actual = postParents2, expected = postParents)
     }
 
     @Test
     fun `test row update`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Update first
         parents[0].col = "UPDATE"
-        assertTrue(it.update(row = parents[0]))
+        assertTrue(it.row.update(row = parents[0]))
 
         //Get current all parents
-        val postParents = it.select(table = Parent::class)
-        assertEquals(expected = parents, actual = postParents)
+        val postParents = it.table.select(table = Parent::class)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents.sortedBy { it.pk })
 
         //Object should not be updated if has no primary key
         parents[1].pk = null
         parents[1].col = "UPDATE2"
-        assertFalse(it.update(row = parents[1]))
+        assertFalse(it.row.update(row = parents[1]))
 
         //Update should not change anything in db
-        val postParents2 = it.select(table = Parent::class)
+        val postParents2 = it.table.select(table = Parent::class)
         assertEquals(expected = postParents, actual = postParents2)
     }
 
     @Test
     fun `test row delete`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Check if primary exists and is greater than 0
         assertTrue(parents[0].pk!! > 0)
 
         //Delete first
-        assertTrue(it.delete(row = parents[0]))
+        assertTrue(it.row.delete(row = parents[0]))
 
         //Check if primary was set to null
         assertEquals(actual = parents[0].pk, expected = null)
 
         //Get current all parents
-        val postParents = it.select(table = Parent::class).toMutableList()
+        val postParents = it.table.select(table = Parent::class).toMutableList()
 
         //Check if the parent was removed
         assertEquals(expected = parents.size, actual = postParents.size + 1)
@@ -292,10 +291,10 @@ open class Test_Sqlite {
 
         //Object should not be deleted if has no primary key
         parents[1].pk = null
-        assertFalse(it.delete(row = parents[1]))
+        assertFalse(it.row.delete(row = parents[1]))
 
         //Update should not change anything in db
-        val postParents2 = it.select(table = Parent::class)
+        val postParents2 = it.table.select(table = Parent::class)
         assertEquals(expected = postParents, actual = postParents2)
     }
 
@@ -303,14 +302,14 @@ open class Test_Sqlite {
     fun `test rows insert`() = service.query {
 
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Trying to insert empty array does nothing
-        assertEquals(actual = it.insert(rows = listOf()), expected = listOf())
+        assertEquals(actual = it.row.insert(rows = listOf()), expected = listOf())
 
         //State is the same as before
-        assertEquals(expected = this.parents, actual = it.select(table = Parent::class))
+        assertEquals(expected = this.parents, actual = it.table.select(table = Parent::class))
 
         //New object is not contained inside parents
         val newObj0 = Parent(col = "NEW0")
@@ -322,7 +321,7 @@ open class Test_Sqlite {
         assertTrue(actual = parents.contains(newObj2))
 
         //Insert new object
-        assertEquals(actual = it.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(true, true, false))
+        assertEquals(actual = it.row.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(true, true, false))
 
         //Check if primary key are not updated after batch insert
         assertTrue(actual = newObj0.pk != null)
@@ -330,7 +329,7 @@ open class Test_Sqlite {
         assertTrue(actual = newObj2.pk != null)
 
         //Get updated parents
-        val postParents = it.select(table = Parent::class)
+        val postParents = it.table.select(table = Parent::class)
 
         //Check if new parents have 2 more elements because other was allready inserted because of its pk allrady set
         assertEquals(expected = parents.size + 2, actual = postParents.size)
@@ -340,66 +339,66 @@ open class Test_Sqlite {
         assertEquals(expected = listOf(newObj0, newObj1), actual = last2Parents)
 
         //Trying to insert elements that are really allready in the database
-        assertEquals(actual = it.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(false, false, false))
+        assertEquals(actual = it.row.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(false, false, false))
 
         //This will not change anything
-        assertEquals(actual = it.select(table = Parent::class), expected = postParents)
+        assertEquals(actual = it.table.select(table = Parent::class), expected = postParents)
     }
 
     @Test
     fun `test rows update`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         parents[0].col = "UPDATE0"
         parents[1].col = "UPDATE1"
 
         //Update
-        assertEquals(expected = listOf(true, true), actual = it.update(rows = listOf(parents[0], parents[1])))
+        assertEquals(expected = listOf(true, true), actual = it.row.update(rows = listOf(parents[0], parents[1])))
 
         //List should be equal
-        val postParents0 = it.select(table = Parent::class)
-        assertEquals(expected = parents, actual = postParents0)
+        val postParents0 = it.table.select(table = Parent::class)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //If you update not allready inserted element it should reject
-        assertEquals(expected = listOf(false, false), actual = it.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
+        assertEquals(expected = listOf(false, false), actual = it.row.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.select(table = Parent::class), expected = parents)
+        assertEquals(actual = it.table.select(table = Parent::class), expected = parents)
     }
 
     @Test
     fun `test rows delete`() = service.query {
         //Get current all parents
-        val children = it.select(table = Child::class)
+        val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = listOf(true, true), actual = it.delete(listOf(children[0], children[1])))
+        assertEquals(expected = listOf(true, true), actual = it.row.delete(listOf(children[0], children[1])))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
         assertEquals(actual = children[1].pk, expected = null)
 
         //List should not be equal
-        val postChildren0 = it.select(table = Child::class)
+        val postChildren0 = it.table.select(table = Child::class)
         assertEquals(expected = children.size, actual = postChildren0.size + 2)
         val filteredChildren = children.drop(2)
         assertEquals(expected = filteredChildren, actual = postChildren0)
 
         //If you try to delete not allready inserted element it should reject
-        assertEquals(expected = listOf(false, false), actual = it.delete(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
+        assertEquals(expected = listOf(false, false), actual = it.row.delete(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.select(table = Parent::class), expected = parents)
+        assertEquals(actual = it.table.select(table = Parent::class), expected = parents)
     }
 
 
     @Test
     fun `test rows insertBatch`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         //Create new object
@@ -413,13 +412,13 @@ open class Test_Sqlite {
         assertFalse(actual = parents.contains(newObj1))
 
         //Insert new object
-        assertEquals(actual = it.insertBatch(rows = listOf(newObj0, newObj1)), expected = 2)
+        assertEquals(actual = it.batch.insertBatch(rows = listOf(newObj0, newObj1)), expected = 2)
 
         //Check if primary key are not updated after batch insert
         assertEquals(expected = null, actual = newObj0.pk)
         assertEquals(expected = null, actual = newObj1.pk)
 
-        val postParents = it.select(table = Parent::class)
+        val postParents = it.table.select(table = Parent::class)
         assertEquals(expected = parents.size + 2, actual = postParents.size)
         val last2Parents = postParents.takeLast(2).map {
             it.pk = null
@@ -432,11 +431,11 @@ open class Test_Sqlite {
         newObj1.pk = 0
 
         //Get snapshot of parents before trying to insert
-        val postParents2 = it.select(table = Parent::class)
-        assertEquals(actual = it.insertBatch(rows = listOf(newObj0, newObj1)), expected = 0)
+        val postParents2 = it.table.select(table = Parent::class)
+        assertEquals(actual = it.batch.insertBatch(rows = listOf(newObj0, newObj1)), expected = 0)
 
         //Parents really stayed as they were before
-        val postParents3 = it.select(table = Parent::class)
+        val postParents3 = it.table.select(table = Parent::class)
 
         //Check if post and pre matches
         assertEquals(actual = postParents2, expected = postParents3)
@@ -445,47 +444,47 @@ open class Test_Sqlite {
     @Test
     fun `test rows updateBatch`() = service.query {
         //Get current all parents
-        val parents = it.select(table = Parent::class)
+        val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
 
         parents[0].col = "UPDATE0"
         parents[1].col = "UPDATE1"
 
         //Update
-        assertEquals(expected = 2, actual = it.updateBatch(rows = listOf(parents[0], parents[1])))
+        assertEquals(expected = 2, actual = it.batch.updateBatch(rows = listOf(parents[0], parents[1])))
 
         //List should be equal
-        val postParents0 = it.select(table = Parent::class)
-        assertEquals(expected = parents, actual = postParents0)
+        val postParents0 = it.table.select(table = Parent::class)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //Insert without primary key
         postParents0[2].pk = null
         postParents0[3].pk = null
 
         //Create snapshot before inserting for comparison
-        val postParents1 = it.select(table = Parent::class)
-        assertEquals(expected = 0, actual = it.updateBatch(rows = listOf(postParents0[2], postParents0[3])))
+        val postParents1 = it.table.select(table = Parent::class)
+        assertEquals(expected = 0, actual = it.batch.updateBatch(rows = listOf(postParents0[2], postParents0[3])))
 
         //List should be equal
-        val postParents2 = it.select(table = Parent::class)
+        val postParents2 = it.table.select(table = Parent::class)
         assertEquals(expected = postParents1, actual = postParents2)
     }
 
     @Test
     fun `test rows deleteBatch`() = service.query {
         //Get current all parents
-        val children = it.select(table = Child::class)
+        val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = 2, actual = it.deleteBatch(listOf(children[0], children[1])))
+        assertEquals(expected = 2, actual = it.batch.deleteBatch(listOf(children[0], children[1])))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
         assertEquals(actual = children[1].pk, expected = null)
 
         //List should not be equal
-        val postChildren0 = it.select(table = Child::class)
+        val postChildren0 = it.table.select(table = Child::class)
         assertEquals(expected = children.size, actual = postChildren0.size + 2)
         val filteredChildren = children.drop(2)
         assertEquals(expected = filteredChildren, actual = postChildren0)
@@ -495,30 +494,30 @@ open class Test_Sqlite {
         postChildren0[3].pk = null
 
         //Create snapshot before inserting for comparison
-        val postChildren1 = it.select(table = Child::class)
-        assertEquals(expected = 0, actual = it.updateBatch(rows = listOf(postChildren0[2], postChildren0[3])))
+        val postChildren1 = it.table.select(table = Child::class)
+        assertEquals(expected = 0, actual = it.batch.updateBatch(rows = listOf(postChildren0[2], postChildren0[3])))
 
         //List should be equal
-        val postChildren2 = it.select(table = Child::class)
+        val postChildren2 = it.table.select(table = Child::class)
         assertEquals(expected = postChildren1, actual = postChildren2)
     }
 
     @Test
     fun `test query`() = service.query {
-        it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
-        val preParent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
+        it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
+        val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query {
+        it.run.query {
             """
-            delete from Parent where pk = 1;
-            delete from Parent where pk = 2;
+            delete from main.Parent where pk = 1;
+            delete from main.Parent where pk = 2;
             """
         }
 
         //Check for deletion
-        val postParent2 = it.select(table = Parent::class, pk = 2)
-        val postParent1 = it.select(table = Parent::class, pk = 1)
+        val postParent2 = it.row.select(table = Parent::class, pk = 2)
+        val postParent1 = it.row.select(table = Parent::class, pk = 1)
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
@@ -528,14 +527,14 @@ open class Test_Sqlite {
     @Test
     fun `test query(outputs)`() = service.query {
         //Get current all parents
-        val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-        val parent2 = it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
+        val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+        val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query(Parent::class) {
+        val objs = it.run.query(Parent::class) {
             """
-                    select * from Parent where pk < 3;
-                    select * from Parent where pk = 1;
-                    delete from Parent where pk = 1;
+                    select * from main.Parent where pk < 3;
+                    select * from main.Parent where pk = 1;
+                    delete from main.Parent where pk = 1;
                 """.trimIndent()
         }
 
@@ -543,27 +542,27 @@ open class Test_Sqlite {
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
 
         //Also If multiple results are not supported then it should not delete the 1 parent also
-        assertEquals(actual = it.select(table = Parent::class, pk = 1), expected = parent1)
+        assertEquals(actual = it.row.select(table = Parent::class, pk = 1), expected = parent1)
     }
 
     @Test
     fun `test query(outputs, input)`() = service.query {
         //Get current all parents
-        val parent1 = it.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-        it.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
+        val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
+        it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
         //Test pre state
         assertNotEquals(illegal = Parent(pk = 1, col = "XXX"), actual = parent1)
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query(Child::class, input = input) {
+        val objs = it.run.query(output = Child::class, input = input) {
             """
-                    select *
-                    from Child C
-                    join Parent P on C.fk = P.pk
-                    where P.pk = ${it.get(Input::parent_pk)}
-                """.trimIndent()
+                select *
+                from main.Child C
+                join main.Parent P on C.fk = P.pk
+                where P.pk = ${it.get(Input::parent_pk)}
+            """.trimIndent()
         }
 
         assertEquals(

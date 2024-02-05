@@ -1,5 +1,7 @@
 package com.urosjarc.dbmessiah.domain.queries
 
+import com.urosjarc.dbmessiah.domain.querie.Query
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.types.StringTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance

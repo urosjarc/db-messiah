@@ -1,16 +1,15 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.BatchQuery
-import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.BatchQuery
+import com.urosjarc.dbmessiah.domain.querie.Query
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
-import com.urosjarc.dbmessiah.exceptions.EngineException
-import com.urosjarc.dbmessiah.exceptions.MapperException
+import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
 
-open class Engine(private val conn: Connection) {
+open class Driver(private val conn: Connection) {
     private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, query: Query) {
@@ -69,7 +68,7 @@ open class Engine(private val conn: Connection) {
 
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw EngineException(msg = "Failed to process batch results for: $batchQuery", cause = e)
+            throw DriverException(msg = "Failed to process batch results for: $batchQuery", cause = e)
         }
     }
 
@@ -91,7 +90,7 @@ open class Engine(private val conn: Connection) {
             return count
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw EngineException(msg = "Failed to process update results for: $query", cause = e)
+            throw DriverException(msg = "Failed to process update results for: $query", cause = e)
         }
     }
 
@@ -117,7 +116,7 @@ open class Engine(private val conn: Connection) {
             //Continue with getting ids for inserts
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
-            throw EngineException(msg = "Failed to process insert results from: $query", cause = e)
+            throw DriverException(msg = "Failed to process insert results from: $query", cause = e)
         }
 
         //Try fetching ids normaly
@@ -134,7 +133,7 @@ open class Engine(private val conn: Connection) {
             rs?.close()
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw EngineException(msg = "Failed to process id results from: $query", cause = e)
+            throw DriverException(msg = "Failed to process id results from: $query", cause = e)
         }
 
         //Try fetching ids with force
@@ -148,7 +147,7 @@ open class Engine(private val conn: Connection) {
                 }
             } catch (e: Throwable) {
                 this.closeAll(ps = ps, rs = rs2)
-                throw EngineException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
+                throw DriverException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
             }  finally {
                 this.closeAll(ps = ps, rs = rs2)
             }
@@ -184,7 +183,7 @@ open class Engine(private val conn: Connection) {
             return returned
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw EngineException(msg = "Failed to return query results from: $query", cause = e)
+            throw DriverException(msg = "Failed to return query results from: $query", cause = e)
         }
     }
 
@@ -214,7 +213,7 @@ open class Engine(private val conn: Connection) {
 
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
-            throw EngineException(msg = "Failed to return query results from: $query", cause = e)
+            throw DriverException(msg = "Failed to return query results from: $query", cause = e)
         }
     }
 

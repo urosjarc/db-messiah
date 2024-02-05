@@ -61,10 +61,7 @@ services:
       shm_size: '8gb'
       container_name: oracle
       ports:
-        - 9445:9445
-      image: container-registry.oracle.com/database/standard
+        - 1521:1521
+      image: container-registry.oracle.com/database/express:latest
       environment:
-        DB_SID: OraDoc
-        DB_PASSWD: MyPasswd123
-        DB_DOMAIN: my.domain.com
-        DB_BUNDLE: basic
+        - ORACLE_PWD=welcome123

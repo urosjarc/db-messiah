@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.domain.columns.Column
 import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
 import com.urosjarc.dbmessiah.domain.columns.OtherColumn
 import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.queries.QueryValue
+import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import java.sql.JDBCType

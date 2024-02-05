@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.queries.Page
-import com.urosjarc.dbmessiah.domain.queries.Query
-import com.urosjarc.dbmessiah.domain.queries.QueryBuilder
+import com.urosjarc.dbmessiah.domain.table.Page
+import com.urosjarc.dbmessiah.domain.querie.Query
+import com.urosjarc.dbmessiah.domain.querie.QueryBuilder
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
@@ -32,13 +32,13 @@ abstract class Serializer(
     open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         val cascadeSql = if (cascade) " CASCADE" else ""
-        return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql;")
+        return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql")
     }
 
     abstract fun <T : Any> createQuery(kclass: KClass<T>): Query
     fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "DELETE FROM ${T.path};")
+        return Query(sql = "DELETE FROM ${T.path}")
     }
 
     /**
@@ -47,7 +47,7 @@ abstract class Serializer(
     fun deleteQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?;",
+            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?",
             T.primaryKey.queryValue(obj)
         )
     }
@@ -55,7 +55,7 @@ abstract class Serializer(
     open fun insertQuery(obj: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()});",
+            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
             *T.queryValues(obj = obj),
         )
     }
@@ -63,7 +63,7 @@ abstract class Serializer(
     fun updateQuery(obj: Any): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(
-            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?;",
+            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?",
             *T.queryValues(obj = obj),
             T.primaryKey.queryValue(obj = obj)
         )
@@ -92,7 +92,7 @@ abstract class Serializer(
      */
     open fun <T : Any> callQuery(obj: T): Query {
         val P = this.mapper.getProcedure(obj = obj)
-        return Query(sql = "CALL ${P.name}(${P.sqlArguments()};")
+        return Query(sql = "CALL ${P.name}(${P.sqlArguments()}")
     }
 
     /**

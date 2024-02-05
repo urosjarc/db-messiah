@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.domain.queries
+package com.urosjarc.dbmessiah.domain.table
 
 import kotlin.reflect.KProperty1
 

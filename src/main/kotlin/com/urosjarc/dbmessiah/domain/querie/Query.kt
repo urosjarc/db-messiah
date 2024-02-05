@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.domain.queries
+package com.urosjarc.dbmessiah.domain.querie
 
 class Query(
     val sql: String,
