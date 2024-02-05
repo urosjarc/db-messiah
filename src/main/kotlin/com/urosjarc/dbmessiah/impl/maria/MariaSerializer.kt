@@ -1,9 +1,8 @@
-package com.urosjarc.dbmessiah.impl.mariadb
+package com.urosjarc.dbmessiah.impl.maria
 
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.querie.Query
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import kotlin.reflect.KClass
 
 
@@ -21,7 +20,7 @@ open class MariaSerializer(
     globalProcedures = globalProcedures
 ) {
 
-    override fun <T : Any> selectLastId(row: T): String = "SELECT LAST_INSERT_ID()"
+    override val selectLastId = "SELECT LAST_INSERT_ID()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -54,6 +53,6 @@ open class MariaSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 }

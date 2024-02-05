@@ -17,7 +17,7 @@ class PgSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
 ) {
-    override fun <T : Any> selectLastId(row: T): String = "without select last id"
+    override val selectLastId: String? = null
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -50,13 +50,13 @@ class PgSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 
     override fun insertQuery(obj: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         var sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})"
-        sql += if (!batch) " RETURNING ${T.primaryKey.name};" else ";"
+        sql += if (!batch) " RETURNING ${T.primaryKey.name}" else ""
         return Query(
             sql = sql,
             *T.queryValues(obj = obj),
@@ -66,7 +66,7 @@ class PgSerializer(
     override fun <T : Any> callQuery(obj: T): Query {
         val P = this.mapper.getProcedure(obj = obj)
         return Query(
-            sql = "SELECT * FROM ${P.path}(${P.sqlArguments()});",
+            sql = "SELECT * FROM ${P.path}(${P.sqlArguments()})",
             *P.queryValues(obj = obj)
         )
     }

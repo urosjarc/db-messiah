@@ -1,26 +1,24 @@
+package com.urosjarc.dbmessiah.impl.sqlite
+
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.TransConn
-import com.urosjarc.dbmessiah.domain.queries.BatchQueries
-import com.urosjarc.dbmessiah.domain.queries.RowQueries
-import com.urosjarc.dbmessiah.domain.queries.RunManyQueries
-import com.urosjarc.dbmessiah.domain.queries.TableQueries
-import com.urosjarc.dbmessiah.impl.oracle.OracleRowQueries
-import com.urosjarc.dbmessiah.impl.oracle.OracleTableQueries
+import com.urosjarc.dbmessiah.domain.queries.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
-class OracleService(conf: HikariConfig, val ser: Serializer) {
+
+class H2Service(conf: HikariConfig, val ser: Serializer) {
     val service = Service(conf = conf)
 
     open class QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
-        val table = OracleTableQueries(ser = ser, driver = driver)
-        val row = OracleRowQueries(ser = ser, driver = driver)
+        val table = TableCascadeQueries(ser = ser, driver = driver)
+        val row = RowQueries(ser = ser, driver = driver)
         val batch = BatchQueries(ser = ser, driver = driver)
-        val run = RunManyQueries(ser = ser, driver = driver)
+        val run = RunOneQueries(ser = ser, driver = driver)
     }
 
     fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit) =

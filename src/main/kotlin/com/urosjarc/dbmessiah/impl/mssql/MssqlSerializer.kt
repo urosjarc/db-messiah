@@ -21,7 +21,7 @@ open class MssqlSerializer(
     globalProcedures = globalProcedures
 ) {
 
-    override fun <T : Any> selectLastId(row: T): String = "SELECT SCOPE_IDENTITY()"
+    override val selectLastId = "SELECT SCOPE_IDENTITY()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -54,15 +54,15 @@ open class MssqlSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE ${T.path} ($columns)")
     }
 
     override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY;")
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY")
     }
     override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "DROP TABLE IF EXISTS ${T.path};")
+        return Query(sql = "DROP TABLE IF EXISTS ${T.path}")
     }
 }

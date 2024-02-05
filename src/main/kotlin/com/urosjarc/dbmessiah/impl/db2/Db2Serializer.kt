@@ -19,7 +19,7 @@ open class Db2Serializer(
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures
 ) {
-    override fun <T : Any> selectLastId(row: T): String = "VALUES IDENTITY_VAL_LOCAL()"
+    override val selectLastId = "VALUES IDENTITY_VAL_LOCAL()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -52,7 +52,7 @@ open class Db2Serializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
     override fun insertQuery(obj: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = obj)

@@ -21,7 +21,8 @@ open class RowQueries(val ser: Serializer, val driver: Driver) {
 
         //Insert it
         val query = this.ser.insertQuery(obj = row, batch = false)
-        val pk = this.driver.insert(query = query, onGeneratedKeysFail = this.ser.selectLastId(row)) { rs, i -> rs.getInt(i) }
+        val selectLastId = this.ser.selectLastId
+        val pk = this.driver.insert(query = query, onGeneratedKeysFail = selectLastId) { rs, i -> rs.getInt(i) }
 
         //If pk didn't retrieved insert didn't happend
         if (pk == null) return false

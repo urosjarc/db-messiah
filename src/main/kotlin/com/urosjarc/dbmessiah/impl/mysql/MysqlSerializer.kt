@@ -20,7 +20,7 @@ open class MysqlSerializer(
     globalProcedures = globalProcedures
 ) {
 
-    override fun <T : Any> selectLastId(row: T): String = "SELECT LAST_INSERT_ID()"
+    override val selectLastId = "SELECT LAST_INSERT_ID()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -53,6 +53,6 @@ open class MysqlSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 }

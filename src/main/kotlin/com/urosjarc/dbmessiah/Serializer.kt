@@ -25,7 +25,7 @@ abstract class Serializer(
     /**
      * MANAGING TABLES
      */
-    abstract fun <T: Any> selectLastId(row: T): String
+    open val selectLastId: String? = null
 
 
     open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {

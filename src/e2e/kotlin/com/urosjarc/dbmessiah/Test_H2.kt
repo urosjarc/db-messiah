@@ -1,11 +1,11 @@
 package com.urosjarc.dbmessiah
 
-import MariaService
+import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.maria.MariaSchema
-import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
+import com.urosjarc.dbmessiah.impl.sqlite.H2Serializer
+import com.urosjarc.dbmessiah.impl.sqlite.H2Service
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
@@ -15,33 +15,31 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import kotlin.test.*
 
-
-open class Test_Maria {
-    open var parents = mutableListOf<Parent>()
-    open var children = mutableListOf<Child>()
+open class Test_H2 {
+    var parents = mutableListOf<Parent>()
+    var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: MariaService
+        private lateinit var service: H2Service
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = MariaService(
+            service = H2Service(
                 conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:mariadb://localhost:3306"
-                    this.username = "root"
-                    this.password = "root"
+                    this.jdbcUrl = "jdbc:h2:mem:main"
+                    this.username = null
+                    this.password = null
                 },
-                ser = MariaSerializer(
-                    schemas = listOf(
-                        MariaSchema(
-                            name = "main", tables = listOf(
-                                Table(Parent::pk),
-                                Table(
-                                    Child::pk, foreignKeys = listOf(
-                                        Child::fk to Parent::class
-                                    )
-                                )
+                ser = H2Serializer(
+                    tables = listOf(
+                        Table(Parent::pk),
+                        Table(
+                            Child::pk, foreignKeys = listOf(
+                                Child::fk to Parent::class
+                            ),
+                            constraints = listOf(
+                                Child::fk to listOf(C.CASCADE_DELETE)
                             )
                         )
                     ),
@@ -57,11 +55,9 @@ open class Test_Maria {
     fun prepare() {
         //Reseting tables
         service.query {
-            it.run.query { "CREATE OR REPLACE SCHEMA main;" }
-            it.run.query { "SET FOREIGN_KEY_CHECKS=0;" }
-
-            it.table.drop(Child::class)
-            it.table.drop(Parent::class)
+            it.run.query { "CREATE SCHEMA IF NOT EXISTS main" }
+            it.table.dropCascade(Child::class)
+            it.table.dropCascade(Parent::class)
             it.table.create(Parent::class)
             it.table.create(Child::class)
         }
@@ -94,35 +90,13 @@ open class Test_Maria {
                 throw TesterException("Test state does not match with expected state")
         }
 
-        //Create procedures and disable foreign checks
-        service.query {
-            it.run.query {
-                """
-                        CREATE OR REPLACE PROCEDURE main.TestProcedure(parent_pk INT)
-                        BEGIN
-                            SELECT * FROM main.Parent WHERE pk = parent_pk;
-                            SELECT * FROM main.Parent WHERE pk = parent_pk1;
-                        END;
-                    """.trimIndent()
-            }
-            it.run.query {
-                """
-                        CREATE OR REPLACE PROCEDURE main.TestProcedureEmpty()
-                        BEGIN
-                            SELECT * FROM main.Parent WHERE pk = 2;
-                            SELECT * FROM main.Parent WHERE pk = 2;
-                        END;
-                    """.trimIndent()
-            }
-        }
-
     }
 
-    private fun assertTableNotExists(q: MariaService.QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: H2Service.QueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = "Table 'main.Parent' doesn't exist",
+            other = """ Table "PARENT" not found""",
             message = e.stackTraceToString()
         )
     }
@@ -133,7 +107,7 @@ open class Test_Maria {
         it.table.select(table = Parent::class)
 
         //Drop
-        it.table.drop(table = Parent::class)
+        it.table.dropCascade(table = Parent::class)
 
         //You can't select on droped table
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -153,7 +127,7 @@ open class Test_Maria {
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.table.drop(Parent::class), expected = 0)
+        assertEquals(actual = it.table.dropCascade(Parent::class), expected = 0)
 
         //Select will create error
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -539,7 +513,12 @@ open class Test_Maria {
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query { "delete from main.Parent where pk = 1" }
+        it.run.query {
+            """
+            delete from main.Parent where pk = 1;
+            delete from main.Parent where pk = 2;
+            """
+        }
 
         //Check for deletion
         val postParent2 = it.row.select(table = Parent::class, pk = 2)
@@ -547,7 +526,7 @@ open class Test_Maria {
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
-        assertEquals(expected = preParent2, actual = postParent2)
+        assertEquals(expected = null, actual = postParent2)
     }
 
     @Test
@@ -556,13 +535,19 @@ open class Test_Maria {
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.run.query(Parent::class) { "select * from main.Parent where pk < 3" }
+        val objs = it.run.query(Parent::class) {
+            """
+                    select * from main.Parent where pk < 3;
+                    select * from main.Parent where pk = 1;
+                    delete from main.Parent where pk = 1;
+                """.trimIndent()
+        }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
 
-        //Also If multiple results are not supported then it should not delete the 1 parent also
-        assertEquals(actual = it.row.select(table = Parent::class, pk = 1), expected = parent1)
+        //Also If multiple results are not supported then it should delete the 1 parent also
+        assertEquals(actual = it.row.select(table = Parent::class, pk = 1), expected = null)
     }
 
     @Test
@@ -578,22 +563,28 @@ open class Test_Maria {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.run.query(Child::class, input = input) {
             """
-                select *
-                from main.Child C
-                join main.Parent P on C.fk = P.pk
-                where P.pk = ${it.get(Input::parent_pk)}
-            """
+                    select *
+                    from main.Child C
+                    join main.Parent P on C.fk = P.pk
+                    where P.pk = ${it.get(Input::parent_pk)};
+                    
+                    select *
+                    from main.Child C
+                    join main.Parent P on C.fk = P.pk
+                    where P.pk = ${it.get(Input::parent_pk)}
+                """.trimIndent()
         }
 
         assertEquals(
             actual = objs,
-            expected = listOf(
+            expected =
+            listOf(
                 Child(pk = 6, fk = 2, col = "-1350163013"),
                 Child(pk = 7, fk = 2, col = "1544682258"),
                 Child(pk = 8, fk = 2, col = "-182312124"),
                 Child(pk = 9, fk = 2, col = "-1397853422"),
                 Child(pk = 10, fk = 2, col = "62774084")
-            )
+            ),
         )
     }
 }

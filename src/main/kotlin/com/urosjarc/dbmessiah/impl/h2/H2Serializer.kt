@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.reflect.KClass
 
 
-open class SqliteSerializer(
+open class H2Serializer(
     tables: List<Table<*>> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
@@ -28,7 +28,7 @@ open class SqliteSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTOINCREMENT" else ""
+        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTO_INCREMENT" else ""
         col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
 
         //Foreign keys
@@ -38,7 +38,7 @@ open class SqliteSerializer(
             val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
             col.add("${it.name} ${it.dbType} $isNull")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
             )
         }
 
@@ -52,6 +52,6 @@ open class SqliteSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
     }
 }

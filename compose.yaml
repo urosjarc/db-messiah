@@ -7,7 +7,7 @@ services:
     ports:
       - 3306:3306
 
-  postgres:
+  postgresql:
     image: postgres
     environment:
       POSTGRES_DB: public
