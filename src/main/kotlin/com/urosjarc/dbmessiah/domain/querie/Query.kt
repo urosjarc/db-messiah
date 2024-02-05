@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.domain.querie
 
 class Query(
-    val sql: String,
+    var sql: String,
     vararg val values: QueryValue
 ) {
     private val hash = "$sql$values".hashCode()

@@ -25,8 +25,7 @@ abstract class Serializer(
     /**
      * MANAGING TABLES
      */
-
-    open val selectLastId: String? = null
+    abstract fun <T: Any> selectLastId(row: T): String
 
 
     open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
@@ -103,5 +102,6 @@ abstract class Serializer(
         val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
         return qBuilder.build(sql = getSql(qBuilder))
     }
+
 
 }

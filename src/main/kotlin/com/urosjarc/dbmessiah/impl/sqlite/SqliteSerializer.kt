@@ -19,8 +19,8 @@ open class SqliteSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs
 ) {
+    override fun <T : Any> selectLastId(row: T): String = "SELECT LAST_INSERT_ROWID();"
 
-    override val selectLastId: String = "select last_insert_rowid();"
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
 

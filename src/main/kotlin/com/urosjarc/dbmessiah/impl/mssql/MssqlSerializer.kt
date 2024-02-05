@@ -21,7 +21,7 @@ open class MssqlSerializer(
     globalProcedures = globalProcedures
 ) {
 
-    override val selectLastId: String = "SELECT SCOPE_IDENTITY();"
+    override fun <T : Any> selectLastId(row: T): String = "SELECT SCOPE_IDENTITY()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)

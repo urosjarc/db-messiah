@@ -19,8 +19,7 @@ open class Db2Serializer(
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures
 ) {
-
-    override val selectLastId: String = "VALUES IDENTITY_VAL_LOCAL();"
+    override fun <T : Any> selectLastId(row: T): String = "VALUES IDENTITY_VAL_LOCAL()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)

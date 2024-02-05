@@ -20,7 +20,7 @@ open class MysqlSerializer(
     globalProcedures = globalProcedures
 ) {
 
-    override val selectLastId: String = "select LAST_INSERT_ID();"
+    override fun <T : Any> selectLastId(row: T): String = "SELECT LAST_INSERT_ID()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)

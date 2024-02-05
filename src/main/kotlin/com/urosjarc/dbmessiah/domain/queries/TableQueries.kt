@@ -5,13 +5,13 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.table.Page
 import kotlin.reflect.KClass
 
-class TableQueries(val ser: Serializer, val driver: Driver) {
-    fun <T : Any> drop(table: KClass<T>, cascade: Boolean = false): Int {
-        val query = this.ser.dropQuery(kclass = table, cascade = cascade)
+open class TableQueries(val ser: Serializer, val driver: Driver) {
+    open fun <T : Any> drop(table: KClass<T>): Int {
+        val query = this.ser.dropQuery(kclass = table)
         return this.driver.update(query = query)
     }
 
-    fun <T : Any> create(table: KClass<T>): Int {
+    open fun <T : Any> create(table: KClass<T>): Int {
         val query = this.ser.createQuery(kclass = table)
         return this.driver.update(query = query)
     }

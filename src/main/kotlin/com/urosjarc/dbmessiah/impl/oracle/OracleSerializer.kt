@@ -19,8 +19,11 @@ open class OracleSerializer(
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures
 ) {
-
-    override val selectLastId: String = "select LAST_INSERT_ID();"
+    override fun <T : Any> selectLastId(row: T): String {
+        val T = this.mapper.getTableInfo(obj = row)
+        val pkSeq = T.primaryKey.path.replace(".", "_")
+        return "SELECT $pkSeq.nextval from ${T.path} where rownum = 1"
+    }
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -29,8 +32,8 @@ open class OracleSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "AUTO_INCREMENT" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
+        constraints.add("PRIMARY KEY(${T.primaryKey.name})")
+        col.add("${T.primaryKey.name} ${T.primaryKey.dbType}")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -48,8 +51,32 @@ open class OracleSerializer(
         //Connect all column definitions to one string
         val columns = (col + constraints).joinToString(", ")
 
+        val pkSeq = T.primaryKey.path.replace(".", "_")
+
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns);")
+        return Query(sql = """
+            CREATE TABLE ${T.path} ($columns);
+            CREATE SEQUENCE $pkSeq INCREMENT BY 1 START WITH 1;
+            CREATE OR REPLACE TRIGGER trig_$pkSeq
+            BEFORE INSERT ON ${T.path} FOR EACH ROW
+            BEGIN
+                :new.${T.primaryKey.name} := $pkSeq.nextval;
+            END;
+        """)
+    }
+    override fun insertQuery(obj: Any, batch: Boolean): Query {
+        val T = this.mapper.getTableInfo(obj = obj)
+        val pkSeq = T.primaryKey.path.replace(".", "_")
+        return Query(
+            sql = """
+                INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})
+            """,
+            *T.queryValues(obj = obj),
+        )
     }
 
+    override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
+        val T = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "DROP TABLE ${T.path}")
+    }
 }

@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import kotlin.reflect.KClass
 
-class RowQueries(val ser: Serializer, val driver: Driver) {
+open class RowQueries(val ser: Serializer, val driver: Driver) {
     fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
         val query = this.ser.query(kclass = table, pk = pk)
         return this.driver.query(query = query) {
@@ -13,7 +13,7 @@ class RowQueries(val ser: Serializer, val driver: Driver) {
         }.firstOrNull()
     }
 
-    fun <T : Any> insert(row: T): Boolean {
+    open fun <T : Any> insert(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has pk then reject it since its allready identified
@@ -21,7 +21,7 @@ class RowQueries(val ser: Serializer, val driver: Driver) {
 
         //Insert it
         val query = this.ser.insertQuery(obj = row, batch = false)
-        val pk = this.driver.insert(query = query, onGeneratedKeysFail = this.ser.selectLastId) { rs, i -> rs.getInt(i) }
+        val pk = this.driver.insert(query = query, onGeneratedKeysFail = this.ser.selectLastId(row)) { rs, i -> rs.getInt(i) }
 
         //If pk didn't retrieved insert didn't happend
         if (pk == null) return false

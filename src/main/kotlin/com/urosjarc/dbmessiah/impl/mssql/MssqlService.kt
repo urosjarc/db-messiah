@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.TransConn
 import com.urosjarc.dbmessiah.domain.queries.BatchQueries
 import com.urosjarc.dbmessiah.domain.queries.RowQueries
-import com.urosjarc.dbmessiah.domain.queries.RunOneQueries
+import com.urosjarc.dbmessiah.domain.queries.RunManyQueries
 import com.urosjarc.dbmessiah.domain.queries.TableQueries
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
@@ -18,7 +18,7 @@ class MssqlService(conf: HikariConfig, val ser: Serializer) {
         val table = TableQueries(ser = ser, driver = driver)
         val row = RowQueries(ser = ser, driver = driver)
         val batch = BatchQueries(ser = ser, driver = driver)
-        val run = RunOneQueries(ser = ser, driver = driver)
+        val run = RunManyQueries(ser = ser, driver = driver)
     }
 
     fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit) =

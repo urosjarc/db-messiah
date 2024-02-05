@@ -17,6 +17,7 @@ class PgSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
 ) {
+    override fun <T : Any> selectLastId(row: T): String = "without select last id"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)

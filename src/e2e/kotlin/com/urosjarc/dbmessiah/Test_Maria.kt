@@ -587,8 +587,7 @@ open class Test_Maria {
 
         assertEquals(
             actual = objs,
-            expected =
-            listOf(
+            expected = listOf(
                 Child(pk = 6, fk = 2, col = "-1350163013"),
                 Child(pk = 7, fk = 2, col = "1544682258"),
                 Child(pk = 8, fk = 2, col = "-182312124"),

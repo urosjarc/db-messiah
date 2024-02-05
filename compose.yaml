@@ -26,7 +26,7 @@ services:
     ports:
       - 3307:3307
 
-  db-mssql:
+  mssql:
     container_name: mssql
     image: mcr.microsoft.com/mssql/server:2017-latest
     environment:
@@ -64,4 +64,6 @@ services:
         - 1521:1521
       image: container-registry.oracle.com/database/express:latest
       environment:
-        - ORACLE_PWD=welcome123
+        - ORACLE_SID=XE
+        - ORACLE_PDB=main
+        - ORACLE_PWD=root
