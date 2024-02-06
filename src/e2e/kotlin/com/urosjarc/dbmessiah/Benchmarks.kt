@@ -1,9 +1,5 @@
 package com.urosjarc.dbmessiah
 
-import org.jetbrains.letsPlot.export.ggsave
-import org.jetbrains.letsPlot.geom.geomBoxplot
-import org.jetbrains.letsPlot.letsPlot
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import kotlin.math.absoluteValue
 import kotlin.reflect.KCallable
@@ -11,7 +7,7 @@ import kotlin.system.measureNanoTime
 
 class Benchmarks {
 
-    val numCycles = 1
+    val numCycles = 5
 
     fun contract_to_method(testContract: Test_Contract): Map<KCallable<*>, KCallable<*>> {
         val map = mutableMapOf<KCallable<*>, KCallable<*>>()
@@ -26,12 +22,13 @@ class Benchmarks {
     fun benchmarkCycle(testContract: Test_Contract) {
         val testCycles = mutableListOf<Float>()
         val testMap = this.contract_to_method(testContract = testContract)
+        val test = testContract::class.simpleName.toString()
 
         repeat(numCycles) {
             testMap.forEach { t, u ->
                 testContract.prepare()
-                val time = measureNanoTime { u.call(testContract) }
-                testCycles.add(time / 100000f)
+                val msTime = measureNanoTime { u.call(testContract) } / 100000f
+                testCycles.add(msTime)
             }
         }
 
@@ -39,22 +36,9 @@ class Benchmarks {
         val errors = testCycles.map { (it - average).absoluteValue }
         val averageError = errors.sum() / errors.size
 
-        val test = testContract::class.simpleName.toString()
         println("$test: (${average.toInt()} +- ${averageError.toInt()}) ms")
-        times[test] = testCycles
     }
 
-    companion object {
-        val x = listOf<String>()
-        val y = listOf<Float>()
-
-        @JvmStatic
-        @AfterAll
-        fun export() {
-            val p = letsPlot(times) + geomBoxplot()
-            ggsave(plot = p, "benchmarks.png")
-        }
-    }
 
     @Test
     fun db2() {
@@ -103,4 +87,9 @@ class Benchmarks {
         Test_Sqlite.init()
         this.benchmarkCycle(Test_Sqlite())
     }
+}
+
+
+fun main() {
+
 }
