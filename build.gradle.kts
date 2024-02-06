@@ -36,6 +36,8 @@ testing {
         register<JvmTestSuite>("e2e") {
             dependencies {
                 implementation(project())
+                this.implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.6.0")
+                this.implementation("org.jetbrains.lets-plot:lets-plot-image-export:4.2.0")
                 this.implementation("com.zaxxer:HikariCP:5.1.0")
                 this.implementation("io.dropwizard.metrics:metrics-core:4.2.25")
                 this.runtimeOnly("com.ibm.db2:jcc:11.5.9.0")

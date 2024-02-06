@@ -12,11 +12,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.SQLException
 import kotlin.reflect.KClass
 import kotlin.test.*
 
-open class Test_Derby {
+open class Test_Derby: Test_Contract {
     var parents = mutableListOf<Parent>()
     var children = mutableListOf<Child>()
 
@@ -53,7 +52,7 @@ open class Test_Derby {
     }
 
     @BeforeEach
-    fun prepare() {
+    override fun prepare() {
         //Reseting tables
         service.query {
             try {
@@ -106,7 +105,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test table drop`() = service.query {
+    override fun `test table drop`() = service.query {
         //You can select
         it.table.select(table = Parent::class)
 
@@ -118,7 +117,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test table create`() = service.query {
+    override fun `test table create`() = service.query {
         //Get pre create state
         val preParents = it.table.select(table = Parent::class)
         assertTrue(actual = preParents.isNotEmpty())
@@ -132,7 +131,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test table delete`() = service.query {
+    override fun `test table delete`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -150,7 +149,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test table select`() = service.query {
+    override fun `test table select`() = service.query {
         //It should be equal to inserted parents
         val selected0 = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = selected0)
@@ -161,7 +160,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test table select page`() = service.query {
+    override fun `test table select page`() = service.query {
         // Select first 5
         val select0 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 5))
         assertEquals(expected = this.children.subList(0, 5), actual = select0)
@@ -184,7 +183,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test row select pk`() = service.query {
+    override fun `test row select pk`() = service.query {
         //Should return expected
         val parent0 = it.row.select(table = Parent::class, pk = 1)
         assertEquals(expected = this.parents[0], actual = parent0)
@@ -200,7 +199,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test row insert`() = service.query {
+    override fun `test row insert`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -238,7 +237,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test row update`() = service.query {
+    override fun `test row update`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -262,7 +261,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test row delete`() = service.query {
+    override fun `test row delete`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -296,7 +295,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test rows insert`() = service.query {
+    override fun `test rows insert`() = service.query {
 
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
@@ -343,7 +342,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test rows update`() = service.query {
+    override fun `test rows update`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -366,7 +365,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test rows delete`() = service.query {
+    override fun `test rows delete`() = service.query {
         //Get current all parents
         val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
@@ -393,7 +392,7 @@ open class Test_Derby {
 
 
     @Test
-    fun `test rows insertBatch`() = service.query {
+    override fun `test rows insertBatch`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -439,7 +438,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test rows updateBatch`() = service.query {
+    override fun `test rows updateBatch`() = service.query {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -468,7 +467,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test rows deleteBatch`() = service.query {
+    override fun `test rows deleteBatch`() = service.query {
         //Get current all parents
         val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
@@ -500,7 +499,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test query`() = service.query {
+    override fun `test query`() = service.query {
         it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
@@ -518,7 +517,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test query(outputs)`() = service.query {
+    override fun `test query(outputs)`() = service.query {
         //Get current all parents
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
@@ -530,7 +529,7 @@ open class Test_Derby {
     }
 
     @Test
-    fun `test query(outputs, input)`() = service.query {
+    override fun `test query(outputs, input)`() = service.query {
         //Get current all parents
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
@@ -560,5 +559,112 @@ open class Test_Derby {
                 Child(pk = 10, fk = 2, col = "62774084")
             ),
         )
+    }
+
+
+    @Test
+    override fun `test transaction with rollback all`() {
+        service.transaction {
+            //Get state snapshot
+            val parents0 = it.table.select(table = Parent::class)
+            assertTrue(parents0.isNotEmpty())
+
+            //Delete all table
+            it.table.delete(table = Parent::class)
+
+            //Check if table is deleted
+            val parents1 = it.table.select(table = Parent::class)
+            assertTrue(parents1.isEmpty())
+
+            //Rollback changes
+            it.roolback.all()
+
+            //Check if rollback revert changes
+            val parents2 = it.table.select(table = Parent::class)
+            assertTrue(parents2.isNotEmpty())
+            assertEquals(actual = parents2, expected = parents0)
+        }
+    }
+
+    @Test
+    override fun `test transaction with exception`() {
+        var parents0: List<Parent> = listOf()
+        val e = assertThrows<Throwable> {
+            service.transaction {
+                //Get state snapshot
+                parents0 = it.table.select(table = Parent::class)
+                assertTrue(parents0.isNotEmpty())
+
+                //Delete table
+                it.table.delete(table = Parent::class)
+
+                //Check if table is really deleted
+                val parents1 = it.table.select(table = Parent::class)
+                assertTrue(parents1.isEmpty())
+
+                //Raise exception
+                throw Throwable()
+            }
+        }
+
+        assertContains(charSequence = e.stackTraceToString(), "executing rollback")
+
+        //Check if transaction did not finished
+        service.query {
+            val parents2 = it.table.select(table = Parent::class)
+            assertTrue(parents2.isNotEmpty())
+            assertEquals(actual = parents2, expected = parents0)
+        }
+    }
+
+    @Test
+    override fun `test transaction with roolback snapshot`() {
+        var parents0: List<Parent>
+        var children0: List<Child>
+
+        assertThrows<Throwable> {
+            service.transaction {
+                //Get state snapshot
+                parents0 = it.table.select(table = Parent::class)
+                children0 = it.table.select(table = Child::class)
+
+                //Check if both tables are filled
+                assertTrue(parents0.isNotEmpty())
+                assertTrue(parents0.isNotEmpty())
+
+                val save0 = it.roolback.savePoint()
+
+                //Delete child table
+                it.table.delete(table = Child::class)
+
+                //Save point
+                val save1 = it.roolback.savePoint()
+
+                //Delete parent table
+                it.table.delete(table = Parent::class)
+
+                //Get final state of the system
+                val parents1 = it.table.select(table = Parent::class)
+                val children1 = it.table.select(table = Child::class)
+                assertTrue(parents1.isEmpty())
+                assertTrue(children1.isEmpty())
+
+                it.roolback.to(point = save1)
+
+                //Get roolback state 1 snapshot
+                val parents2 = it.table.select(table = Parent::class)
+                val children2 = it.table.select(table = Child::class)
+                assertTrue(parents2.isEmpty())
+                assertEquals(actual = children2, expected = children0)
+
+                it.roolback.to(point = save0)
+
+                //Get roolback state 1 snapshot
+                val parents3 = it.table.select(table = Parent::class)
+                val children3 = it.table.select(table = Child::class)
+                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = children3, expected = children0)
+            }
+        }
     }
 }

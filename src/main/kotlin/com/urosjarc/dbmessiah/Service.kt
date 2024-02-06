@@ -18,7 +18,7 @@ open class Service(conf: HikariConfig) {
         }
     }
 
-    fun rollback(conn: Connection?) {
+    private fun rollback(conn: Connection?) {
         try {
             conn?.rollback()
         } catch (e: Throwable) {
@@ -70,7 +70,7 @@ open class Service(conf: HikariConfig) {
             //If any error occurse that is not user handled then rollback, close and raise exception
             this.rollback(conn = conn)
             this.close(conn = conn)
-            throw ServiceException("Transaction was interupted by exception", e)
+            throw ServiceException("Transaction was interupted by exception, executing rollback", e)
         }
     }
 }

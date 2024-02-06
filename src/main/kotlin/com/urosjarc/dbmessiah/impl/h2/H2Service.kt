@@ -15,6 +15,7 @@ class H2Service(conf: HikariConfig, val ser: Serializer) {
 
     open class QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
+        val schema = SchemaQueries(ser = ser, driver = driver)
         val table = TableCascadeQueries(ser = ser, driver = driver)
         val row = RowQueries(ser = ser, driver = driver)
         val batch = BatchQueries(ser = ser, driver = driver)

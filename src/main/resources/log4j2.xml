@@ -33,7 +33,7 @@
     </Appenders>
 
     <Loggers>
-        <Root includeLocation="true" level="INFO">
+        <Root includeLocation="true" level="ERROR">
             <AppenderRef level="trace" ref="Async-Console"/>
             <AppenderRef level="trace" ref="Async-File"/>
         </Root>

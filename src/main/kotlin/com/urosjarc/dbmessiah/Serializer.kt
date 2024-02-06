@@ -1,17 +1,18 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.querie.Query
 import com.urosjarc.dbmessiah.domain.querie.QueryBuilder
 import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
+import com.urosjarc.dbmessiah.domain.table.Page
+import com.urosjarc.dbmessiah.exceptions.MapperException
 import kotlin.reflect.KClass
 
 abstract class Serializer(
-    schemas: List<Schema>,
-    globalSerializers: List<TypeSerializer<*>>,
-    globalInputs: List<KClass<*>>,
-    globalOutputs: List<KClass<*>>,
-    globalProcedures: List<KClass<*>> = listOf()
+    val schemas: List<Schema>,
+    val globalSerializers: List<TypeSerializer<*>>,
+    val globalInputs: List<KClass<*>>,
+    val globalOutputs: List<KClass<*>>,
+    val globalProcedures: List<KClass<*>> = listOf()
 ) {
 
     val mapper = Mapper(
@@ -27,6 +28,58 @@ abstract class Serializer(
      */
     open val selectLastId: String? = null
 
+    fun plantUML(): String {
+        val text = mutableListOf(
+            "@startuml",
+            "skinparam backgroundColor darkgray",
+            "skinparam ClassBackgroundColor lightgray"
+        )
+
+        val relationships = mutableMapOf<String, String>()
+        val kclass_to_path = mutableMapOf<KClass<*>, String>()
+        this.schemas.forEach { s ->
+            s.tables.forEach { t ->
+                kclass_to_path[t.kclass] = "${s.name}.${t.name}"
+            }
+        }
+
+        text.add("")
+        this.schemas.forEach { s ->
+            text.add("package ${s.name} <<Folder>> {")
+            s.tables.forEach { t ->
+                val className = kclass_to_path[t.kclass]
+                val type = (t.primaryKey.returnType.classifier as KClass<*>).simpleName
+                text.add("\t class $className {")
+                text.add("\t\t ${t.primaryKey.name}: $type")
+
+                t.foreignKeys.forEach {
+                    val fk = it.first.name
+                    val kclass = it.second
+                    val toClass = kclass_to_path[kclass] ?: throw MapperException("Could not find path for kclass: ${kclass.simpleName}.")
+                    val fromClass = "${s.name}.${t.name}"
+                    relationships[toClass] = fromClass
+                    text.add("\t\t $fk: ${kclass.simpleName}")
+                }
+
+                text.add("\t }")
+            }
+            text.add("}")
+        }
+
+        text.add("")
+        relationships.forEach { t, u ->
+            text.add("$t -down-> $u")
+        }
+
+        text.add("")
+        text.add("@enduml")
+
+        return text.joinToString("\n")
+
+    }
+
+    fun createQuery(schema: Schema) = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
+    fun dropQuery(schema: Schema) = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
 
     open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
@@ -102,6 +155,5 @@ abstract class Serializer(
         val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
         return qBuilder.build(sql = getSql(qBuilder))
     }
-
 
 }
