@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.reflect.KClass
 
-class MariaSchema(
+open class MariaSchema(
     name: String,
     tables: List<Table<*>>,
     serializers: List<TypeSerializer<*>> = listOf(),

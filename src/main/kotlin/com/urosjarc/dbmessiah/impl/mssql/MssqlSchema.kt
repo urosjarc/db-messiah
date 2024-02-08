@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.reflect.KClass
 
-class MssqlSchema(
+open class MssqlSchema(
     name: String,
     tables: List<Table<*>>,
     serializers: List<TypeSerializer<*>> = listOf(),

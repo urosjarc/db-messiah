@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 
-class PgSerializer(
+open class PgSerializer(
     schemas: List<PgSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),

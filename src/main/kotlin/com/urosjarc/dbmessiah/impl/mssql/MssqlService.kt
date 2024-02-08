@@ -7,7 +7,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
-class MssqlService(conf: HikariConfig, val ser: Serializer) {
+open class MssqlService(conf: HikariConfig, val ser: Serializer) {
     val service = Service(conf = conf)
 
     open class QueryConn(conn: Connection, ser: Serializer) {

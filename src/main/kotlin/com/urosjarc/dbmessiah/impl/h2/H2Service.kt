@@ -10,7 +10,7 @@ import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
 
-class H2Service(conf: HikariConfig, val ser: Serializer) {
+open class H2Service(conf: HikariConfig, val ser: Serializer) {
     val service = Service(conf = conf)
 
     open class QueryConn(conn: Connection, ser: Serializer) {

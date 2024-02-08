@@ -9,7 +9,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
-class Db2Service(conf: HikariConfig, val ser: Serializer) {
+open class Db2Service(conf: HikariConfig, val ser: Serializer) {
     val service = Service(conf = conf)
     open class QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
