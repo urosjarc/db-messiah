@@ -3,10 +3,11 @@ plugins {
     kotlin("jvm") version "1.9.22"
     id("com.adarshr.test-logger") version "4.0.0"
     `jvm-test-suite`
+    `maven-publish`
 }
 
 group = "com.urosjarc"
-version = "0.1.0"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -58,4 +59,34 @@ testlogger {
 
 kotlin {
     jvmToolchain(19)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = rootProject.group as String
+            artifactId = rootProject.name
+            version = rootProject.version as String
+            from(components["java"])
+
+            pom {
+                name = "Db Messiah"
+                description = "Kotlin lib. for enterprise database development"
+                url = "https://github.com/urosjarc/db-messiah"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "urosjarc"
+                        name = "Uroš Jarc"
+                        email = "jar.fmf@gmail.com"
+                    }
+                }
+            }
+        }
+    }
 }
