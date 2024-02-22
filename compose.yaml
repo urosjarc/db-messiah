@@ -48,14 +48,13 @@ services:
       - BLU=false
       - ENABLE_ORACLE_COMPATIBILITY=false
       - UPDATEAVAIL=NO
-      - TO_CREATE_SAMPLEDB=false
+      - TO_CREATE_SAMPLEDB=true
       - REPODB=false
       - IS_OSXFS=false
-      - PERSISTENT_HOME=true
+      - PERSISTENT_HOME=false
       - HADR_ENABLED=false
     ports:
       - 50000:50000
-    command: db2sampl
 
   oracle:
       shm_size: '8gb'

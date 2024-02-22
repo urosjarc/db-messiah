@@ -91,38 +91,3 @@ publishing {
         }
     }
 }
-
-/**
- * Test coverage for unit and e2e tests
- */
-
-val e2eSources = listOf(
-    "**/dbmessiah/impl/**",
-    "**/dbmessiah/domain/queries/**",
-    "**/dbmessiah/Driver.class",
-    "**/dbmessiah/Service.class",
-)
-
-val noLogicSources = listOf(
-    "**/dbmessiah/exceptions/**",
-    "**/dbmessiah/types/**",
-    "**/dbmessiah/Schema.class",
-    "**/dbmessiah/TransConn.class",
-)
-
-koverReport {
-    filters {
-        // filters for all reports
-    }
-
-    verify {
-        // verification rules for all reports
-    }
-
-    defaults {
-        xml { /* default XML report config */ }
-        html { /* default HTML report config */ }
-        verify { /* default verification config */ }
-        log { /* default logging config */ }
-    }
-}

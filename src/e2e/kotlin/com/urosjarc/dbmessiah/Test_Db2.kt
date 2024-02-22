@@ -14,7 +14,6 @@ import kotlin.reflect.KClass
 import kotlin.test.*
 
 
-@Disabled
 open class Test_Db2 : Test_Contract {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
