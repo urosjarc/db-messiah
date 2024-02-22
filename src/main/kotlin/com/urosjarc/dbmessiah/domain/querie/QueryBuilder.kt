@@ -24,7 +24,7 @@ open class QueryBuilder<IN : Any>(
             name = kp.name,
             jdbcType = ser.jdbcType,
             encoder = ser.encoder,
-            value = if (this.input != null) kp.get(receiver = this.input) else null
+            value = kp.get(receiver = this.input)
         )
 
         this.queryValues.add(qv)

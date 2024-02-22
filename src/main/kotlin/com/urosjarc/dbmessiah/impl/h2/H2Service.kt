@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.impl.sqlite
+package com.urosjarc.dbmessiah.impl.h2
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer

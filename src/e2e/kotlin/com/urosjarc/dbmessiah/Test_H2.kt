@@ -4,8 +4,8 @@ import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
-import com.urosjarc.dbmessiah.impl.sqlite.H2Serializer
-import com.urosjarc.dbmessiah.impl.sqlite.H2Service
+import com.urosjarc.dbmessiah.impl.h2.H2Serializer
+import com.urosjarc.dbmessiah.impl.h2.H2Service
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll

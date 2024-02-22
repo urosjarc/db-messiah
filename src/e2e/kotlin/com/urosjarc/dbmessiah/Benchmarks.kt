@@ -7,7 +7,7 @@ import kotlin.system.measureNanoTime
 
 class Benchmarks {
 
-    val numCycles = 5
+    val numCycles = 0
 
     fun contract_to_method(testContract: Test_Contract): Map<KCallable<*>, KCallable<*>> {
         val map = mutableMapOf<KCallable<*>, KCallable<*>>()
@@ -87,9 +87,4 @@ class Benchmarks {
         Test_Sqlite.init()
         this.benchmarkCycle(Test_Sqlite())
     }
-}
-
-
-fun main() {
-
 }

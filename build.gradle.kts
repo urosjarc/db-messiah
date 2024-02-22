@@ -1,16 +1,25 @@
 plugins {
     `java-library`
+    `maven-publish`
+    `jvm-test-suite`
     kotlin("jvm") version "1.9.22"
     id("com.adarshr.test-logger") version "4.0.0"
-    `jvm-test-suite`
-    `maven-publish`
+    id("org.jetbrains.kotlinx.kover") version "0.7.6"
 }
 
 group = "com.urosjarc"
 version = "0.0.1-SNAPSHOT"
 
+kotlin {
+    jvmToolchain(19)
+}
+
 repositories {
     mavenCentral()
+}
+
+testlogger {
+    this.setTheme("mocha")
 }
 
 dependencies {
@@ -53,14 +62,6 @@ testing {
     }
 }
 
-testlogger {
-    this.setTheme("mocha")
-}
-
-kotlin {
-    jvmToolchain(19)
-}
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
@@ -88,5 +89,40 @@ publishing {
                 }
             }
         }
+    }
+}
+
+/**
+ * Test coverage for unit and e2e tests
+ */
+
+val e2eSources = listOf(
+    "**/dbmessiah/impl/**",
+    "**/dbmessiah/domain/queries/**",
+    "**/dbmessiah/Driver.class",
+    "**/dbmessiah/Service.class",
+)
+
+val noLogicSources = listOf(
+    "**/dbmessiah/exceptions/**",
+    "**/dbmessiah/types/**",
+    "**/dbmessiah/Schema.class",
+    "**/dbmessiah/TransConn.class",
+)
+
+koverReport {
+    filters {
+        // filters for all reports
+    }
+
+    verify {
+        // verification rules for all reports
+    }
+
+    defaults {
+        xml { /* default XML report config */ }
+        html { /* default HTML report config */ }
+        verify { /* default verification config */ }
+        log { /* default logging config */ }
     }
 }

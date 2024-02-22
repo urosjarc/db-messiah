@@ -9,17 +9,13 @@ import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
 
 @Disabled
-open class Test_Db2: Test_Contract {
+open class Test_Db2 : Test_Contract {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
 
@@ -706,7 +702,7 @@ open class Test_Db2: Test_Contract {
                 //Get roolback state 1 snapshot
                 val parents3 = it.table.select(table = Parent::class)
                 val children3 = it.table.select(table = Child::class)
-                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
         }
