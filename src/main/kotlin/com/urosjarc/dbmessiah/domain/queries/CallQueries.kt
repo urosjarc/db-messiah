@@ -5,8 +5,11 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KClass
 
-class CallQueries(val ser: Serializer, val driver: Driver) {
-    fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>> {
+public class CallQueries(
+    private val ser: Serializer,
+    private val driver: Driver
+) {
+    public fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>> {
         val query = this.ser.callQuery(obj = procedure)
 
         val results = this.driver.execute(query = query) { i, rs ->

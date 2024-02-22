@@ -10,12 +10,12 @@ import kotlin.reflect.full.extensionReceiverParameter
 import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.jvm.javaField
 
-class Table<T : Any>(
-    val primaryKey: KMutableProperty1<out T, out Any?>,
-    val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
-    var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
-    val serializers: List<TypeSerializer<*>> = listOf(),
-    val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<Any>>> = listOf()
+public class Table<T : Any>(
+    public val primaryKey: KMutableProperty1<out T, out Any?>,
+    public val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
+    internal var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
+    internal val serializers: List<TypeSerializer<*>> = listOf(),
+    internal val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<Any>>> = listOf()
 ) {
     init {
         //If user has not provided constraints for primary key, then add default ones here
@@ -27,12 +27,12 @@ class Table<T : Any>(
         }
     }
 
-    val name: String = ((primaryKey.instanceParameter ?: primaryKey.extensionReceiverParameter)!!.type.classifier as KClass<*>).simpleName.toString()
+    public val name: String = ((primaryKey.instanceParameter ?: primaryKey.extensionReceiverParameter)!!.type.classifier as KClass<*>).simpleName.toString()
 
-    val kclass: KClass<*> = (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializerException("Could not found enclosing class for primary key"))
-    val primaryKeyConstraints get() = this.constraintsFor(kprop = this.primaryKey)
+    public val kclass: KClass<*> = (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializerException("Could not found enclosing class for primary key"))
+    internal val primaryKeyConstraints get() = this.constraintsFor(kprop = this.primaryKey)
 
-    val hash = this.name.hashCode()
+    private val hash = this.name.hashCode()
     override fun hashCode(): Int = this.hash
 
     override fun equals(other: Any?): Boolean {
@@ -40,5 +40,5 @@ class Table<T : Any>(
     }
     override fun toString(): String = "'${this.name}'"
 
-    fun constraintsFor(kprop: KProperty1<*, *>) = this.constraints.firstOrNull { it.first == kprop }?.second ?: listOf()
+    internal fun constraintsFor(kprop: KProperty1<*, *>) = this.constraints.firstOrNull { it.first == kprop }?.second ?: listOf()
 }

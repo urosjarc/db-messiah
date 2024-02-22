@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.domain.call
 import com.urosjarc.dbmessiah.domain.querie.QueryValue
 import kotlin.reflect.KClass
 
-data class Procedure(
+internal data class Procedure(
     val schema: String?,
     val kclass: KClass<*>,
     val args: List<ProcedureArg>,

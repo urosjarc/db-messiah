@@ -3,14 +3,14 @@ package com.urosjarc.dbmessiah.domain.querie
 import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
 
-data class QueryValue(
-    val name: String,
-    val value: Any?,
-    val jdbcType: JDBCType,
-    val encoder: Encoder<*>
+public data class QueryValue(
+    internal val name: String,
+    internal val value: Any?,
+    internal val jdbcType: JDBCType,
+    internal val encoder: Encoder<*>
 ) {
 
-    val hash = this.toString().hashCode()
+    private val hash = this.toString().hashCode()
 
     override fun toString(): String {
         return "$name: ($jdbcType,$escapped)"
@@ -22,7 +22,7 @@ data class QueryValue(
         return this.hashCode() == other.hashCode()
     }
 
-    val escapped
+    internal val escapped
         get() = when (this.value) {
             is String -> "'$value'"
             is Char -> "'$value'"

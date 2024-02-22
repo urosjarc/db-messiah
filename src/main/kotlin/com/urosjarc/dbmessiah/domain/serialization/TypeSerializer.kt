@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.domain.serialization
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
-data class TypeSerializer<T : Any>(
+public data class TypeSerializer<T : Any>(
     val kclass: KClass<T>,
     val dbType: String,
     val jdbcType: JDBCType,

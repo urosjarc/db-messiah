@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.domain.querie
 
-class Query(
-    var sql: String,
-    vararg val values: QueryValue
+public class Query(
+    public var sql: String,
+    public vararg val values: QueryValue
 ) {
     private val hash = "$sql$values".hashCode()
     override fun hashCode(): Int = this.hash

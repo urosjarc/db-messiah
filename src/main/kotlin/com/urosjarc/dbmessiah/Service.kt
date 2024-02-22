@@ -7,10 +7,10 @@ import com.zaxxer.hikari.util.IsolationLevel
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 
-open class Service(conf: HikariConfig) {
+public open class Service(conf: HikariConfig) {
     private val log = this.logger()
     private val source = HikariDataSource(conf)
-    fun close(conn: Connection?) {
+    private fun close(conn: Connection?) {
         try {
             conn?.close()
         } catch (e: Throwable) {
@@ -26,7 +26,7 @@ open class Service(conf: HikariConfig) {
         }
     }
 
-    fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
+    public fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection
@@ -47,7 +47,7 @@ open class Service(conf: HikariConfig) {
         }
     }
 
-    fun transaction(isoLevel: IsolationLevel? = null, body: (conn: Connection) -> Unit) {
+    public fun transaction(isoLevel: IsolationLevel? = null, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection

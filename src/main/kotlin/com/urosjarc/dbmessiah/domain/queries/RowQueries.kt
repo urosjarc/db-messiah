@@ -5,15 +5,18 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import kotlin.reflect.KClass
 
-open class RowQueries(val ser: Serializer, val driver: Driver) {
-    fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
+public open class RowQueries(
+    private val ser: Serializer,
+    private val driver: Driver
+) {
+    public fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
         val query = this.ser.query(kclass = table, pk = pk)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }.firstOrNull()
     }
 
-    open fun <T : Any> insert(row: T): Boolean {
+    public open fun <T : Any> insert(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has pk then reject it since its allready identified
@@ -34,7 +37,7 @@ open class RowQueries(val ser: Serializer, val driver: Driver) {
         return true
     }
 
-    fun <T : Any> update(row: T): Boolean {
+    public fun <T : Any> update(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has not pk then reject since it must be first created
@@ -52,7 +55,7 @@ open class RowQueries(val ser: Serializer, val driver: Driver) {
         else throw DriverException("Number of updated rows must be 1 or 0 but number of updated rows was: $count")
     }
 
-    fun <T : Any> delete(row: T): Boolean {
+    public fun <T : Any> delete(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has not pk then reject since it must be first created
@@ -72,9 +75,9 @@ open class RowQueries(val ser: Serializer, val driver: Driver) {
         } else throw DriverException("Number of deleted rows must be 1 or 0 but number of updated rows was: $count")
     }
 
-    fun <T : Any> insert(rows: Iterable<T>): List<Boolean> = rows.map { this.insert(row = it) }
+    public fun <T : Any> insert(rows: Iterable<T>): List<Boolean> = rows.map { this.insert(row = it) }
 
-    fun <T : Any> update(rows: Iterable<T>): List<Boolean> = rows.map { this.update(row = it) }
+    public fun <T : Any> update(rows: Iterable<T>): List<Boolean> = rows.map { this.update(row = it) }
 
-    fun <T : Any> delete(rows: Iterable<T>): List<Boolean> = rows.map { this.delete(row = it) }
+    public fun <T : Any> delete(rows: Iterable<T>): List<Boolean> = rows.map { this.delete(row = it) }
 }

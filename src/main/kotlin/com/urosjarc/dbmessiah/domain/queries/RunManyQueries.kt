@@ -6,15 +6,18 @@ import com.urosjarc.dbmessiah.domain.querie.QueryBuilder
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KClass
 
-class RunManyQueries(val ser: Serializer, val driver: Driver) {
-    fun query(getSql: () -> String) {
+public class RunManyQueries(
+    private val ser: Serializer,
+    private val driver: Driver
+) {
+    public fun query(getSql: () -> String) {
         val query = this.ser.query(getSql = getSql)
         this.driver.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i)
         }
     }
 
-    fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> {
+    public fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
 
         val results = this.driver.execute(query = query) { i, rs ->
@@ -27,7 +30,7 @@ class RunManyQueries(val ser: Serializer, val driver: Driver) {
         return results
     }
 
-    fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
+    public fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
         val query = this.ser.query(input = input, getSql = getSql)
 
         val results = this.driver.execute(query = query) { i, rs ->

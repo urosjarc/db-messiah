@@ -2,7 +2,6 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
-import com.urosjarc.dbmessiah.exceptions.TesterException
 import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
 import com.urosjarc.dbmessiah.impl.maria.MariaService
@@ -77,12 +76,12 @@ open class Test_Maria : Test_Contract {
                 val parent = Parent.get(seed = p)
                 parents.add(parent)
                 val parentInserted = it.row.insert(row = parent)
-                if (parent.pk == null || !parentInserted) throw TesterException("Parent was not inserted: $parent")
+                if (parent.pk == null || !parentInserted) throw Exception("Parent was not inserted: $parent")
                 repeat(numChildren) { c ->
                     val child = Child.get(fk = parent.pk!!, seed = p * numChildren + c)
                     children.add(child)
                     val childInserted = it.row.insert(row = child)
-                    if (child.pk == null || !childInserted) throw TesterException("Children was not inserted: $child")
+                    if (child.pk == null || !childInserted) throw Exception("Children was not inserted: $child")
                 }
             }
 
@@ -91,7 +90,7 @@ open class Test_Maria : Test_Contract {
             val insertedChildren = it.table.select(table = Child::class)
 
             if (insertedChildren != children || insertedParents != parents)
-                throw TesterException("Test state does not match with expected state")
+                throw Exception("Test state does not match with expected state")
         }
 
         //Create procedures and disable foreign checks
@@ -118,7 +117,7 @@ open class Test_Maria : Test_Contract {
 
     }
 
-    private fun assertTableNotExists(q: MariaService.QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: MariaService.MariaQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),

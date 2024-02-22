@@ -5,19 +5,19 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import kotlin.reflect.KProperty1
 
 
-open class QueryBuilder<IN : Any>(
-    val input: IN,
-    val mapper: Mapper
+public open class QueryBuilder<IN : Any>(
+    public val input: IN,
+    private val mapper: Mapper
 ) {
-    val queryValues: MutableList<QueryValue> = mutableListOf()
+    private val queryValues: MutableList<QueryValue> = mutableListOf()
 
     init {
         if (!mapper.globalInputs.contains(input::class))
             throw SerializerException("Input class '${input::class.simpleName}' is not registered in global inputs")
     }
 
-    fun build(sql: String) = Query(sql = sql, values = this.queryValues.toTypedArray())
-    fun get(kp: KProperty1<IN, *>): String {
+    internal fun build(sql: String) = Query(sql = sql, values = this.queryValues.toTypedArray())
+    public fun get(kp: KProperty1<IN, *>): String {
         val ser = this.mapper.getSerializer(kp)
 
         val qv = QueryValue(

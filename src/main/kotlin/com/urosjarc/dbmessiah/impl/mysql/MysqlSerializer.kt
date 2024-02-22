@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 
-open class MysqlSerializer(
+public open class MysqlSerializer(
     schemas: List<MysqlSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),

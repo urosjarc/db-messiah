@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 
-open class Db2Serializer(
+public open class Db2Serializer(
     schemas: List<Db2Schema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
@@ -19,7 +19,7 @@ open class Db2Serializer(
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures
 ) {
-    override val selectLastId = "VALUES IDENTITY_VAL_LOCAL()"
+    override val selectLastId: String = "VALUES IDENTITY_VAL_LOCAL()"
 
     override fun <T : Any> createQuery(kclass: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)

@@ -9,26 +9,26 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
-open class Db2Service(conf: HikariConfig, val ser: Serializer) {
-    val service = Service(conf = conf)
+public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
+    private val service = Service(conf = conf)
 
-    open class QueryConn(conn: Connection, ser: Serializer) {
+    public open class Db2QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
-        val schema = SchemaQueries(ser = ser, driver = driver)
-        val table = TableQueries(ser = ser, driver = driver)
-        val row = RowQueries(ser = ser, driver = driver)
-        val batch = BatchQueries(ser = ser, driver = driver)
-        val call = CallQueries(ser = ser, driver = driver)
-        val run = RunOneQueries(ser = ser, driver = driver)
+        public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
+        public val table: TableQueries = TableQueries(ser = ser, driver = driver)
+        public val row: RowQueries = RowQueries(ser = ser, driver = driver)
+        public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
+        public val call: CallQueries = CallQueries(ser = ser, driver = driver)
+        public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
     }
 
-    fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit) =
-        this.service.query(readOnly = readOnly) { body(QueryConn(conn = it, ser = this.ser)) }
+    public fun query(readOnly: Boolean = false, body: (conn: Db2QueryConn) -> Unit): Unit =
+        this.service.query(readOnly = readOnly) { body(Db2QueryConn(conn = it, ser = this.ser)) }
 
-    class TransConn(conn: Connection, ser: Serializer) : QueryConn(conn = conn, ser = ser) {
-        val roolback = TransConn(conn = conn)
+    public class Db2TransConn(conn: Connection, ser: Serializer) : Db2QueryConn(conn = conn, ser = ser) {
+        public val roolback: TransConn = TransConn(conn = conn)
     }
 
-    fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: TransConn) -> Unit) =
-        this.service.transaction(isoLevel = isolationLevel) { body(TransConn(conn = it, ser = this.ser)) }
+    public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: Db2TransConn) -> Unit): Unit =
+        this.service.transaction(isoLevel = isolationLevel) { body(Db2TransConn(conn = it, ser = this.ser)) }
 }

@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import kotlin.reflect.KClass
 
 
-open class MariaSerializer(
+public open class MariaSerializer(
     schemas: List<MariaSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),

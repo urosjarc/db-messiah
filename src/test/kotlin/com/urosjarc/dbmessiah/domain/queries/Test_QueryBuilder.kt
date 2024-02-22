@@ -81,8 +81,8 @@ class Test_QueryBuilder {
         val actual: Query = queryBuilder.build(sql = sql)
         val expected = Query(
             sql = sql,
-            QueryValue(name = "id", value = input.id, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder),
-            QueryValue(name = "property", value = input.property, jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
+            QueryValue(name = "id", value = input.id, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
+            QueryValue(name = "property", value = input.property, jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(0).encoder)
         )
         assertEquals(actual = actual.sql, expected = expected.sql)
 

@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
-class ProcedureArg(
+internal class ProcedureArg(
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,

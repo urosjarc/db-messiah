@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import kotlin.reflect.KClass
 
 
-open class H2Serializer(
+public open class H2Serializer(
     tables: List<Table<*>> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),

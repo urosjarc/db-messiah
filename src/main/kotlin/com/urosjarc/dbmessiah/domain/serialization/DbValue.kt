@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
-abstract class DbValue(
+internal abstract class DbValue(
     val kprop: KProperty1<Any, Any?>,
     val dbType: String,
     val jdbcType: JDBCType,

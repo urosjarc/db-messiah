@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     `jvm-test-suite`
     kotlin("jvm") version "1.9.22"
+    id("org.jetbrains.dokka") version "1.9.10"
     id("com.adarshr.test-logger") version "4.0.0"
     id("org.jetbrains.kotlinx.kover") version "0.7.6"
 }
@@ -11,6 +12,7 @@ group = "com.urosjarc"
 version = "0.0.1-SNAPSHOT"
 
 kotlin {
+    explicitApi()
     jvmToolchain(19)
 }
 

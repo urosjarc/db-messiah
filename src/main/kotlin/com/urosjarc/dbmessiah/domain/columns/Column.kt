@@ -7,7 +7,7 @@ import com.urosjarc.dbmessiah.domain.table.TableInfo
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
-open class Column(
+internal open class Column(
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,

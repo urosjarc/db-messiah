@@ -161,9 +161,9 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int) + listOf(NumberTS.Int),
+                            serializers = listOf(NumberTS.int) + listOf(NumberTS.int),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic + NumberTS.int,
                     globalOutputs = listOf(), globalInputs = listOf(),
                     globalProcedures = listOf()
                 )
@@ -187,11 +187,11 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(
                                     primaryKey = Child::pk,
-                                    serializers = listOf(NumberTS.Int) + listOf(NumberTS.Int),
+                                    serializers = listOf(NumberTS.int) + listOf(NumberTS.int),
                                 ),
                             ),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic + NumberTS.int,
                     globalOutputs = listOf(), globalInputs = listOf(),
                     globalProcedures = listOf()
                 )
@@ -399,7 +399,7 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int, NumberTS.Int),
+                            serializers = listOf(NumberTS.int, NumberTS.int),
                         ),
                     ), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf(),
@@ -425,9 +425,9 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int, NumberTS.Int),
+                            serializers = listOf(NumberTS.int, NumberTS.int),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic + NumberTS.int,
                     globalOutputs = listOf(Parent::class), globalInputs = listOf(),
                     globalProcedures = listOf()
                 )
@@ -451,9 +451,9 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int, NumberTS.Int),
+                            serializers = listOf(NumberTS.int, NumberTS.int),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic + NumberTS.int,
                     globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),
                     globalProcedures = listOf()
                 )
@@ -477,9 +477,9 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int, NumberTS.Int),
+                            serializers = listOf(NumberTS.int, NumberTS.int),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic + NumberTS.int,
                     globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),
                     globalProcedures = listOf()
                 )

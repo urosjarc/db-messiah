@@ -4,13 +4,16 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 
-open class SchemaQueries(val ser: Serializer, val driver: Driver) {
-    fun drop(schema: Schema): Int {
+public open class SchemaQueries(
+    private val ser: Serializer,
+    private val driver: Driver
+) {
+    public fun drop(schema: Schema): Int {
         val query = this.ser.dropQuery(schema = schema)
         return this.driver.update(query = query)
     }
 
-    fun create(schema: Schema): Int {
+    public fun create(schema: Schema): Int {
         val query = this.ser.createQuery(schema = schema)
         return this.driver.update(query = query)
     }

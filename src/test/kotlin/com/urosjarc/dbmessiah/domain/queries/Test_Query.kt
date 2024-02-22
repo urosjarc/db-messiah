@@ -16,8 +16,8 @@ class Test_Query {
     fun init() {
         this.query = Query(
             sql = "SELECT * FROM Table", values = arrayOf(
-                QueryValue(name = "name1", value = "value1" as Any?, jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder),
-                QueryValue(name = "name2", value = 123 as Any?, jdbcType = JDBCType.INTEGER, encoder = StringTS.String(0).encoder)
+                QueryValue(name = "name1", value = "value1" as Any?, jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(0).encoder),
+                QueryValue(name = "name2", value = 123 as Any?, jdbcType = JDBCType.INTEGER, encoder = StringTS.string(0).encoder)
             )
         )
 

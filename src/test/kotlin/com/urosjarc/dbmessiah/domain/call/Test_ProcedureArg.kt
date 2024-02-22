@@ -30,22 +30,22 @@ class Test_ProcedureArg {
             kprop = TestProcedure::arg0 as KProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,
-            encoder = NumberTS.Int.encoder,
-            decoder = NumberTS.Int.decoder
+            encoder = NumberTS.int.encoder,
+            decoder = NumberTS.int.decoder
         )
         pArg0Copy = ProcedureArg(
             kprop = TestProcedure::arg0 as KProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,
-            encoder = NumberTS.Int.encoder,
-            decoder = NumberTS.Int.decoder
+            encoder = NumberTS.int.encoder,
+            decoder = NumberTS.int.decoder
         )
         pArg1 = ProcedureArg(
             kprop = TestProcedure::arg1 as KProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.VARCHAR,
-            encoder = NumberTS.Int.encoder,
-            decoder = NumberTS.Int.decoder
+            encoder = NumberTS.int.encoder,
+            decoder = NumberTS.int.decoder
         )
         procedure = Procedure(
             schema = "main",
@@ -102,11 +102,11 @@ class Test_ProcedureArg {
         val testProcedure = TestProcedure(arg0 = 0, arg1 = "arg1_value")
         assertEquals(
             actual = this.pArg0.queryValue(testProcedure),
-            expected = QueryValue(name = "arg0", value = 0, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
+            expected = QueryValue(name = "arg0", value = 0, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
         )
         assertEquals(
             actual = this.pArg1.queryValue(testProcedure),
-            expected = QueryValue(name = "arg1", value = "arg1_value", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
+            expected = QueryValue(name = "arg1", value = "arg1_value", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(0).encoder)
         )
 
         val testProcedure2 = TestProcedure2(arg0 = 0, arg1 = "arg1_value")

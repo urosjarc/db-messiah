@@ -4,9 +4,9 @@ import java.sql.Connection
 import java.sql.Savepoint
 
 
-class TransConn(private val conn: Connection){
-    fun all() = this.conn.rollback()
-    fun to(point: Savepoint) = this.conn.rollback(point)
-    fun savePoint() = this.conn.setSavepoint()
+public class TransConn(private val conn: Connection){
+    public fun all(): Unit = this.conn.rollback()
+    public fun to(point: Savepoint): Unit = this.conn.rollback(point)
+    public fun savePoint(): Savepoint = this.conn.setSavepoint()
 
 }

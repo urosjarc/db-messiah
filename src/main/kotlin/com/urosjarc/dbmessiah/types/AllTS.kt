@@ -1,8 +1,10 @@
 package com.urosjarc.dbmessiah.types
 
-object AllTS {
+import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 
-    val basic = listOf(
+public object AllTS {
+
+    public val basic: List<TypeSerializer<out Any>> = listOf(
         BooleanTS.all,
         CharTS.all,
         FloatTS.all,

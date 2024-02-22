@@ -7,7 +7,7 @@ import java.awt.print.Book
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
-class ForeignColumn(
+internal class ForeignColumn(
     unique: Boolean,
     val cascadeDelete: Boolean,
     val cascadeUpdate: Boolean,

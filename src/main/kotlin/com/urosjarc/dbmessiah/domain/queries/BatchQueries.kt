@@ -4,8 +4,11 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.querie.BatchQuery
 
-class BatchQueries(val ser: Serializer, val driver: Driver) {
-    fun <T : Any> insertBatch(rows: Iterable<T>): Int {
+public class BatchQueries(
+    private val ser: Serializer,
+    private val driver: Driver
+) {
+    public fun <T : Any> insertBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)
@@ -26,7 +29,7 @@ class BatchQueries(val ser: Serializer, val driver: Driver) {
         return this.driver.batch(batchQuery = batchQuery)
     }
 
-    fun <T : Any> updateBatch(rows: Iterable<T>): Int {
+    public fun <T : Any> updateBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)
@@ -46,7 +49,7 @@ class BatchQueries(val ser: Serializer, val driver: Driver) {
         return this.driver.batch(batchQuery = batchQuery)
     }
 
-    fun <T : Any> deleteBatch(rows: Iterable<T>): Int {
+    public fun <T : Any> deleteBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)

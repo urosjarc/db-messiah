@@ -22,18 +22,18 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 
-class Mapper(
-    var schemas: List<Schema>,
-    var globalSerializers: List<TypeSerializer<*>>,
-    var globalInputs: List<KClass<*>>,
-    var globalOutputs: List<KClass<*>>,
-    var globalProcedures: List<KClass<*>>
+public class Mapper(
+    internal var schemas: List<Schema>,
+    private var globalSerializers: List<TypeSerializer<*>>,
+    internal var globalInputs: List<KClass<*>>,
+    internal var globalOutputs: List<KClass<*>>,
+    internal var globalProcedures: List<KClass<*>>
 ) {
-    val log = this.logger()
+    private val log = this.logger()
 
     //All table informations
-    var tableInfos = listOf<TableInfo>()
-    var procedures = listOf<Procedure>()
+    internal var tableInfos = listOf<TableInfo>()
+    internal var procedures = listOf<Procedure>()
 
     /**
      * LINKED LISTS
@@ -70,17 +70,17 @@ class Mapper(
     /**
      * GETTERS
      */
-    fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, Any?>> =
+    internal fun getKProps(kclass: KClass<*>): List<KProperty1<out Any, Any?>> =
         this.kclass_to_kprops[kclass] ?: throw MapperException("Could not find properties of class '${kclass.simpleName}'")
 
     private fun getSerializer(kparam: KParameter): TypeSerializer<out Any> =
         this.kparam_to_serializer[kparam] ?: throw MapperException("Could not find serializer of parameter: '${kparam}'")
 
-    fun getSerializer(kprop: KProperty1<out Any, Any?>): TypeSerializer<out Any> {
+    internal fun getSerializer(kprop: KProperty1<out Any, Any?>): TypeSerializer<out Any> {
         return this.kprop_to_serializer[kprop] ?: throw MapperException("Could not find serializer of property: '${kprop}'")
     }
 
-    fun getConstructor(kclass: KClass<*>): KFunction<Any> =
+    internal fun getConstructor(kclass: KClass<*>): KFunction<Any> =
         this.kclass_to_constructor[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     private fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
@@ -220,7 +220,7 @@ class Mapper(
         this.procedures = procedures
     }
 
-    fun testMapper() {
+    internal fun testMapper() {
         //Test registered tables
         MapperTests(mapper = this).also {
             //Test emptiness
@@ -303,15 +303,15 @@ class Mapper(
         )
     }
 
-    fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
-    fun getProcedure(kclass: KClass<*>): Procedure =
+    internal fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
+    internal fun getProcedure(kclass: KClass<*>): Procedure =
         this.procedureKClass_to_procedure[kclass] ?: throw SerializerException("Could not find procedure for kclass: '${kclass.simpleName}'")
 
-    fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
+    internal fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
         this.tableKClass_to_tableInfo[kclass] ?: throw SerializerException("Could not find table info for table: '${kclass.simpleName}'")
 
-    fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
-    fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
+    internal fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
+    internal fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
         val output = outputs.getOrNull(i)
         val objs = mutableListOf<Any>()
 
@@ -321,7 +321,7 @@ class Mapper(
         return objs
     }
 
-    fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
+    internal fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
 
         val constructor = this.getConstructor(kclass = kclass)
         val constructorParameters = this.getConstructorParameters(kclass = kclass)

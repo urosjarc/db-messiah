@@ -7,7 +7,7 @@ import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
-class MapperTests(val mapper: Mapper) {
+internal class MapperTests(val mapper: Mapper) {
     /**
      * Check for emptyness
      */

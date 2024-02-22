@@ -10,7 +10,7 @@ import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
-data class TableInfo(
+internal data class TableInfo(
     val schema: String,
     val kclass: KClass<*>,
     val primaryKey: PrimaryColumn,

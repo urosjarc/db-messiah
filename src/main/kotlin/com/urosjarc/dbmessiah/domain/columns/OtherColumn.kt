@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
-open class OtherColumn(
+internal open class OtherColumn(
     val unique: Boolean,
     kprop: KProperty1<Any, Any?>,
     dbType: String,

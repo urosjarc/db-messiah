@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain.querie
 
-class BatchQuery(
-    val sql: String,
-    val valueMatrix: List<List<QueryValue>>
+public class BatchQuery(
+    public val sql: String,
+    public val valueMatrix: List<List<QueryValue>>
 )

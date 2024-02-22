@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.serialization.Encoder
 import java.sql.JDBCType
 import kotlin.reflect.KMutableProperty1
 
-class PrimaryColumn(
+internal class PrimaryColumn(
     val autoIncrement: Boolean,
     kprop: KMutableProperty1<Any, Any?>,
     dbType: String,

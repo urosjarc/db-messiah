@@ -109,13 +109,13 @@ class Test_Db_Mapper {
     @Test
     fun `test getSerializer()`() {
         val ser0 = this.mapper.getSerializer(kprop = Parent::pk)
-        assertEquals(actual = ser0, expected = NumberTS.Int)
+        assertEquals(actual = ser0, expected = NumberTS.int)
 
         val ser1 = this.mapper.getSerializer(kprop = Output::pk)
-        assertEquals(actual = ser1, expected = NumberTS.Int)
+        assertEquals(actual = ser1, expected = NumberTS.int)
 
         val ser2 = this.mapper.getSerializer(kprop = ProcedureNotEmpty::col)
-        assertEquals(actual = ser2, expected = StringTS.String(0))
+        assertEquals(actual = ser2, expected = StringTS.string(0))
 
         val e0 = assertThrows<MapperException> {
             this.mapper.getSerializer(kprop = String::length)
@@ -205,15 +205,15 @@ class Test_Db_Mapper {
                         kprop = ProcedureNotEmpty::col as KProperty1<Any, Any?>,
                         dbType = "VARCHAR",
                         jdbcType = JDBCType.VARCHAR,
-                        encoder = StringTS.String(0).encoder,
-                        decoder = StringTS.String(0).decoder
+                        encoder = StringTS.string(0).encoder,
+                        decoder = StringTS.string(0).decoder
                     ),
                     ProcedureArg(
                         kprop = ProcedureNotEmpty::pk as KProperty1<Any, Any?>,
                         dbType = "INT",
                         jdbcType = JDBCType.INTEGER,
-                        encoder = NumberTS.Int.encoder,
-                        decoder = NumberTS.Int.decoder
+                        encoder = NumberTS.int.encoder,
+                        decoder = NumberTS.int.decoder
                     )
                 )
             )
@@ -246,8 +246,8 @@ class Test_Db_Mapper {
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,
-                    encoder = NumberTS.Int.encoder,
-                    decoder = NumberTS.Int.decoder
+                    encoder = NumberTS.int.encoder,
+                    decoder = NumberTS.int.decoder
                 ),
                 foreignKeys = listOf(),
                 otherColumns = listOf(),
@@ -265,8 +265,8 @@ class Test_Db_Mapper {
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,
-                    encoder = NumberTS.Int.encoder,
-                    decoder = NumberTS.Int.decoder
+                    encoder = NumberTS.int.encoder,
+                    decoder = NumberTS.int.decoder
                 ),
                 foreignKeys = listOf(),
                 otherColumns = listOf(),

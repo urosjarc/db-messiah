@@ -9,7 +9,7 @@ import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
 
-open class Driver(private val conn: Connection) {
+public open class Driver(private val conn: Connection) {
     private val log = this.logger()
 
     private fun prepareQuery(ps: PreparedStatement, query: Query) {
@@ -36,7 +36,7 @@ open class Driver(private val conn: Connection) {
         }
     }
 
-    fun batch(batchQuery: BatchQuery): Int {
+    internal fun batch(batchQuery: BatchQuery): Int {
         var ps: PreparedStatement? = null
         var numUpdates = 0
 
@@ -72,7 +72,7 @@ open class Driver(private val conn: Connection) {
         }
     }
 
-    fun update(query: Query): Int {
+    internal fun update(query: Query): Int {
         var ps: PreparedStatement? = null
 
         try {
@@ -94,7 +94,7 @@ open class Driver(private val conn: Connection) {
         }
     }
 
-    fun <T> insert(query: Query, onGeneratedKeysFail: String? = null, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
+    internal fun <T> insert(query: Query, onGeneratedKeysFail: String? = null, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -156,7 +156,7 @@ open class Driver(private val conn: Connection) {
         throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 
-    fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
+    internal fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         val returned = mutableListOf<List<Any>>()
@@ -187,7 +187,7 @@ open class Driver(private val conn: Connection) {
         }
     }
 
-    fun <T> query(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
+    internal fun <T> query(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 

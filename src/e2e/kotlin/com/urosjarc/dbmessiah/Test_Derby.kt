@@ -3,7 +3,6 @@ package com.urosjarc.dbmessiah
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
-import com.urosjarc.dbmessiah.exceptions.TesterException
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import com.urosjarc.dbmessiah.impl.derby.DerbyService
 import com.urosjarc.dbmessiah.types.AllTS
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import kotlin.test.*
 
-open class Test_Derby: Test_Contract {
+open class Test_Derby : Test_Contract {
     var parents = mutableListOf<Parent>()
     var children = mutableListOf<Child>()
 
@@ -59,8 +58,14 @@ open class Test_Derby: Test_Contract {
                 it.run.query { "CREATE SCHEMA main" }
             } catch (e: Throwable) {
             }
-            try { it.table.drop(Child::class) } catch (e: Throwable){}
-            try { it.table.drop(Parent::class) } catch (e: Throwable){}
+            try {
+                it.table.drop(Child::class)
+            } catch (e: Throwable) {
+            }
+            try {
+                it.table.drop(Parent::class)
+            } catch (e: Throwable) {
+            }
             it.table.create(Parent::class)
             it.table.create(Child::class)
         }
@@ -76,12 +81,12 @@ open class Test_Derby: Test_Contract {
                 val parent = Parent.get(seed = p)
                 parents.add(parent)
                 val parentInserted = it.row.insert(row = parent)
-                if (parent.pk == null || !parentInserted) throw TesterException("Parent was not inserted: $parent")
+                if (parent.pk == null || !parentInserted) throw Exception("Parent was not inserted: $parent")
                 repeat(numChildren) { c ->
                     val child = Child.get(fk = parent.pk!!, seed = p * numChildren + c)
                     children.add(child)
                     val childInserted = it.row.insert(row = child)
-                    if (child.pk == null || !childInserted) throw TesterException("Children was not inserted: $child")
+                    if (child.pk == null || !childInserted) throw Exception("Children was not inserted: $child")
                 }
             }
 
@@ -90,12 +95,12 @@ open class Test_Derby: Test_Contract {
             val insertedChildren = it.table.select(table = Child::class)
 
             if (insertedChildren != children || insertedParents != parents)
-                throw TesterException("Test state does not match with expected state")
+                throw Exception("Test state does not match with expected state")
         }
 
     }
 
-    private fun assertTableNotExists(q: DerbyService.QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: DerbyService.DerbyQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
@@ -504,7 +509,8 @@ open class Test_Derby: Test_Contract {
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query { "delete from main.Parent where pk = 1"
+        it.run.query {
+            "delete from main.Parent where pk = 1"
         }
 
         //Check for deletion
@@ -662,7 +668,7 @@ open class Test_Derby: Test_Contract {
                 //Get roolback state 1 snapshot
                 val parents3 = it.table.select(table = Parent::class)
                 val children3 = it.table.select(table = Child::class)
-                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
         }
