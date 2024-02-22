@@ -131,7 +131,7 @@ class Test_Db_Mapper {
         }
         assertContains(
             charSequence = e1.message.toString(),
-            "Could not find serializer of property: 'val com.urosjarc.dbmessiah.Test_DbMessiahMapper.Input.pk: kotlin.Int'",
+            "Could not find serializer of property: 'val com.urosjarc.dbmessiah.Test_Db_Mapper.Input.pk: kotlin.Int'",
             message = e1.toString()
         )
     }
@@ -198,7 +198,7 @@ class Test_Db_Mapper {
         val ti0 = this.mapper.getProcedure(kclass = ProcedureNotEmpty::class)
         assertEquals(
             actual = ti0, expected = Procedure(
-                schema = "main",
+                schema = null,
                 kclass = ProcedureNotEmpty::class,
                 args = listOf(
                     ProcedureArg(
@@ -222,7 +222,7 @@ class Test_Db_Mapper {
         val ti1 = this.mapper.getProcedure(kclass = ProcedureEmpty::class)
         assertEquals(
             actual = ti1, expected = Procedure(
-                schema = "main",
+                schema = null,
                 kclass = ProcedureEmpty::class,
                 args = listOf()
             )

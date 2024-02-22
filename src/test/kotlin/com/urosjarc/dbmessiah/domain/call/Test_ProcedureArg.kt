@@ -63,13 +63,13 @@ class Test_ProcedureArg {
     @Test
     fun `test path`() {
         pArg0.procedure = procedure
-        assertEquals(expected = "'TestProcedure'.'arg0'", actual = pArg0.path)
+        assertEquals(expected = "TestProcedure.arg0", actual = pArg0.path)
     }
 
     @Test
     fun `test name`() {
         pArg0.procedure = procedure
-        assertEquals(expected = "'arg0'", actual = pArg0.name)
+        assertEquals(expected = "arg0", actual = pArg0.name)
     }
 
     @Test
@@ -102,11 +102,11 @@ class Test_ProcedureArg {
         val testProcedure = TestProcedure(arg0 = 0, arg1 = "arg1_value")
         assertEquals(
             actual = this.pArg0.queryValue(testProcedure),
-            expected = QueryValue(name = "'arg0'", value = 0, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
+            expected = QueryValue(name = "arg0", value = 0, jdbcType = JDBCType.INTEGER, encoder = NumberTS.Int.encoder)
         )
         assertEquals(
             actual = this.pArg1.queryValue(testProcedure),
-            expected = QueryValue(name = "'arg1'", value = "arg1_value", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
+            expected = QueryValue(name = "arg1", value = "arg1_value", jdbcType = JDBCType.VARCHAR, encoder = StringTS.String(0).encoder)
         )
 
         val testProcedure2 = TestProcedure2(arg0 = 0, arg1 = "arg1_value")

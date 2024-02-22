@@ -1,12 +1,12 @@
 package com.urosjarc.dbmessiah
 
-import PgService
 import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
+import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
 import kotlin.test.*
 
 
-open class Test_Postgresql: Test_Contract {
+open class Test_Postgresql : Test_Contract {
     open var parents = mutableListOf<Parent>()
     open var children = mutableListOf<Child>()
 
@@ -727,7 +727,7 @@ open class Test_Postgresql: Test_Contract {
                 //Get roolback state 1 snapshot
                 val parents3 = it.table.select(table = Parent::class)
                 val children3 = it.table.select(table = Child::class)
-                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
         }

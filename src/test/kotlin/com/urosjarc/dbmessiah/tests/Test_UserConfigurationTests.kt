@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.domain.columns.C
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.types.AllTS
@@ -399,11 +399,11 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int),
+                            serializers = listOf(NumberTS.Int, NumberTS.Int),
                         ),
-                    ), globalSerializers = AllTS.basic + NumberTS.Int,
+                    ), globalSerializers = AllTS.basic,
                     globalOutputs = listOf(), globalInputs = listOf(),
-                    globalProcedures = listOf(Parent::class, Parent::class)
+                    globalProcedures = listOf(Parent::class)
                 )
             )
         }
@@ -425,10 +425,10 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int),
+                            serializers = listOf(NumberTS.Int, NumberTS.Int),
                         ),
                     ), globalSerializers = AllTS.basic + NumberTS.Int,
-                    globalOutputs = listOf(Parent::class, Parent::class), globalInputs = listOf(),
+                    globalOutputs = listOf(Parent::class), globalInputs = listOf(),
                     globalProcedures = listOf()
                 )
             )
@@ -439,6 +439,7 @@ class Test_UserConfigurationTests {
             message = e.toString()
         )
     }
+
     @Test
     fun `test 15-th()`() {
         val e = assertThrows<SerializerException> {
@@ -450,7 +451,7 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int),
+                            serializers = listOf(NumberTS.Int, NumberTS.Int),
                         ),
                     ), globalSerializers = AllTS.basic + NumberTS.Int,
                     globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),
@@ -464,6 +465,7 @@ class Test_UserConfigurationTests {
             message = e.toString()
         )
     }
+
     @Test
     fun `test 16-th()`() {
         val e = assertThrows<SerializerException> {
@@ -475,7 +477,7 @@ class Test_UserConfigurationTests {
                             tables = listOf(
                                 Table(Child::pk),
                             ),
-                            serializers = listOf(NumberTS.Int),
+                            serializers = listOf(NumberTS.Int, NumberTS.Int),
                         ),
                     ), globalSerializers = AllTS.basic + NumberTS.Int,
                     globalOutputs = listOf(), globalInputs = listOf(Parent::class, Parent::class),

@@ -1,3 +1,5 @@
+package com.urosjarc.dbmessiah.impl.postgresql
+
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service

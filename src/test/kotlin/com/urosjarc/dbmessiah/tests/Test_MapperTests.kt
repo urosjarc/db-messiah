@@ -79,7 +79,9 @@ class Test_MapperTests {
             dbType = "VARCHAR",
             jdbcType = JDBCType.VARCHAR,
             decoder = { rs, i, _ -> rs.getString(i) },
-            encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+            encoder = { ps, i, x -> ps.setString(i, x.toString()) },
+            cascadeDelete = false,
+            cascadeUpdate = false
         )
         primaryColumn = PrimaryColumn(
             autoIncrement = true,
@@ -120,7 +122,9 @@ class Test_MapperTests {
             dbType = "VARCHAR",
             jdbcType = JDBCType.VARCHAR,
             decoder = { rs, i, _ -> rs.getString(i) },
-            encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+            encoder = { ps, i, x -> ps.setString(i, x.toString()) },
+            cascadeUpdate = false,
+            cascadeDelete = false
         )
         pArg = ProcedureArg(
             kprop = TestProcedure::value as KProperty1<Any, Any?>,
@@ -148,37 +152,6 @@ class Test_MapperTests {
     }
 
     @Test
-    fun `test 2-th()`() {
-        repo.tableInfos = listOf(
-            TableInfo(
-                schema = "Schema",
-                kclass = Entity::class,
-                primaryKey = primaryColumn,
-                foreignKeys = listOf(foreignColumn),
-                otherColumns = listOf(otherColumn),
-                serializers = listOf()
-            ),
-            TableInfo(
-                schema = "Schema",
-                kclass = Entity2::class,
-                primaryKey = primaryColumn,
-                foreignKeys = listOf(foreignColumn),
-                otherColumns = listOf(otherColumn),
-                serializers = listOf()
-            )
-        )
-        val e = assertThrows<MapperException> {
-            repo.testMapper()
-        }
-        assertContains(
-            charSequence = e.message.toString(),
-            other = "Found first inconsistent escaper Escaper(type=SINGLE_QUOTES, joinStr=x) on table 'Schema'x'Entity2'",
-            message = e.toString()
-        )
-    }
-
-
-    @Test
     fun `test 3-th()`() {
         repo.tableInfos = listOf(
             TableInfo(
@@ -203,7 +176,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = "Following tables have been created multiple times: ['Schema'.'Entity']",
+            other = "Following tables have been created multiple times: [Schema.Entity]",
             message = e.toString()
         )
     }
@@ -225,7 +198,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = "Table 'Schema'.'Entity' does not have unique columns: [Column(name='col', dbType='VARCHAR', jdbcType='VARCHAR')]",
+            other = "Table 'Schema.Entity' does not have unique columns: [Column(name='col', dbType='VARCHAR', jdbcType='VARCHAR')]",
             message = e.toString()
         )
     }
@@ -261,7 +234,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = "Table 'Schema'.'Entity2' does own primary key: Column(name='pk', dbType='INT', jdbcType='INTEGER')",
+            other = "Table 'Schema.Entity2' does own primary key: Column(name='pk', dbType='INT', jdbcType='INTEGER')",
             message = e.toString()
         )
 
@@ -296,7 +269,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e2.message.toString(),
-            other = "Table 'Schema'.'Entity' does own foreign key: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
+            other = "Table 'Schema.Entity' does own foreign key: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
             message = e2.toString()
         )
 
@@ -320,7 +293,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e3.message.toString(),
-            other = "Table 'Schema'.'Entity' does own column: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
+            other = "Table 'Schema.Entity' does own column: Column(name='text', dbType='VARCHAR', jdbcType='VARCHAR')",
             message = e3.toString()
         )
     }
@@ -348,7 +321,7 @@ class Test_MapperTests {
 
         assertContains(
             charSequence = e2.message.toString(),
-            other = "Foreign key 'Schema'.'Entity'.'fk' is not initialized and connected to foreign table",
+            other = "Foreign key 'Schema.Entity.fk' is not initialized and connected to foreign table",
             message = e2.toString()
         )
         /**
@@ -376,7 +349,7 @@ class Test_MapperTests {
 
         assertContains(
             charSequence = e.message.toString(),
-            other = "Foreign key Column(name='fk', dbType='VARCHAR', jdbcType='VARCHAR') of table 'Schema'.'Entity' does not points to registered table: 'Schema'.'String'",
+            other = "Foreign key Column(name='fk', dbType='VARCHAR', jdbcType='VARCHAR') of table 'Schema.Entity' does not points to registered table: 'Schema.String'",
             message = e.toString()
         )
     }
@@ -405,7 +378,7 @@ class Test_MapperTests {
         val e = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e.message.toString(),
-            other = "Column 'Schema'.'String'.'pk' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",
+            other = "Column 'Schema.String.pk' have parent 'Schema.String' but it should have parent: 'Schema.Entity'",
             message = e.toString()
         )
 
@@ -418,7 +391,9 @@ class Test_MapperTests {
                 foreignKeys = listOf(
                     ForeignColumn(unique = true, kprop = Entity::fk as KProperty1<Any, Any?>, dbType = "VARCHAR", jdbcType = JDBCType.VARCHAR,
                         decoder = { rs, i, _ -> rs.getString(i) },
-                        encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+                        encoder = { ps, i, x -> ps.setString(i, x.toString()) },
+                        cascadeUpdate = false,
+                        cascadeDelete = false
                     )
                 ), otherColumns = listOf(otherColumn), serializers = listOf()
             )
@@ -428,7 +403,7 @@ class Test_MapperTests {
         val e2 = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e2.message.toString(),
-            other = "Column 'Schema'.'String'.'fk' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",
+            other = "Column 'Schema.String.fk' have parent 'Schema.String' but it should have parent: 'Schema.Entity'",
             message = e2.toString()
         )
 
@@ -449,7 +424,7 @@ class Test_MapperTests {
         val e3 = assertThrows<MapperException> { repo.testMapper() }
         assertContains(
             charSequence = e3.message.toString(),
-            other = "Column 'Schema'.'String'.'col' have parent 'Schema'.'String' but it should have parent: 'Schema'.'Entity'",
+            other = "Column 'Schema.String.col' have parent 'Schema.String' but it should have parent: 'Schema.Entity'",
             message = e3.toString()
         )
     }
@@ -471,7 +446,7 @@ class Test_MapperTests {
         }
         assertContains(
             charSequence = e.message.toString(),
-            other = "Primary key 'Schema'.'Entity'.'pk' of type 'VARCHAR' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'",
+            other = "Primary key 'Schema.Entity.pk' of type 'VARCHAR' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'",
             message = e.toString()
         )
     }
@@ -490,7 +465,7 @@ class Test_MapperTests {
             )
         )
 
-        repo.procedures[0].args[0].procedure = Procedure(schema = "main", kclass = TestProcedure::class, args = listOf())
+        repo.procedures[0].args[0].procedure = Procedure(schema = null, kclass = TestProcedure::class, args = listOf())
 
         val e2 = assertThrows<MapperException> {
             repo.testMapper()
@@ -498,7 +473,7 @@ class Test_MapperTests {
 
         assertContains(
             charSequence = e2.message.toString(),
-            other = " Argument 'TestProcedure'.'value' have parent 'TestProcedure()' but it should have parent: 'TestProcedure('value': String)",
+            other = " Argument 'TestProcedure.value' have parent 'TestProcedure()' but it should have parent: 'TestProcedure(value: String)",
             message = e2.toString()
         )
     }
@@ -523,7 +498,7 @@ class Test_MapperTests {
 
         assertContains(
             charSequence = e2.message.toString(),
-            other = "Procedure 'TestProcedure('pk': Int)' does own argument: Arg(name='pk', dbType='VARCHAR', jdbcType='VARCHAR')",
+            other = "Procedure TestProcedure(pk: Int) does own argument: Arg(name='pk', dbType='VARCHAR', jdbcType='VARCHAR')",
             message = e2.toString()
         )
     }

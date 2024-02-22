@@ -29,7 +29,7 @@ class MapperTests(val mapper: Mapper) {
     fun `4-th Test - If all columns are unique`() {
         this.mapper.tableInfos.forEach { T ->
             val notUnique = (listOf(T.primaryKey) + T.foreignKeys + T.otherColumns).ext_notUnique
-            if (notUnique.isNotEmpty()) throw MapperException("Table ${T.path} does not have unique columns: ${notUnique.keys}")
+            if (notUnique.isNotEmpty()) throw MapperException("Table '${T.path}' does not have unique columns: ${notUnique.keys}")
         }
     }
 
@@ -37,14 +37,14 @@ class MapperTests(val mapper: Mapper) {
         this.mapper.tableInfos.forEach { T: TableInfo ->
             val kprops = this.mapper.getKProps(kclass = T.kclass)
             if (!kprops.contains(T.primaryKey.kprop))
-                throw MapperException("Table ${T.path} does own primary key: ${T.primaryKey}")
+                throw MapperException("Table '${T.path}' does own primary key: ${T.primaryKey}")
             T.foreignKeys.forEach {
                 if (!kprops.contains(it.kprop))
-                    throw MapperException("Table ${T.path} does own foreign key: $it")
+                    throw MapperException("Table '${T.path}' does own foreign key: $it")
             }
             T.otherColumns.forEach {
                 if (!kprops.contains(it.kprop))
-                    throw MapperException("Table ${T.path} does own column: $it")
+                    throw MapperException("Table '${T.path}' does own column: $it")
             }
         }
     }
@@ -52,9 +52,9 @@ class MapperTests(val mapper: Mapper) {
     fun `6-th Test - If all foreign columns are connected to registered table`() {
         this.mapper.tableInfos.forEach { T ->
             T.foreignKeys.forEach {
-                if (!it.inited) throw MapperException("Foreign key ${it.path} is not initialized and connected to foreign table")
+                if (!it.inited) throw MapperException("Foreign key '${it.path}' is not initialized and connected to foreign table")
                 if (!this.mapper.tableInfos.contains(it.foreignTable))
-                    throw MapperException("Foreign key $it of table $T does not points to registered table: ${it.foreignTable}")
+                    throw MapperException("Foreign key $it of table '$T' does not points to registered table: '${it.foreignTable}'")
             }
         }
     }
@@ -62,7 +62,7 @@ class MapperTests(val mapper: Mapper) {
     fun `7-th Test - If all columns have been inited and connected with parent table`() {
         this.mapper.tableInfos.forEach { T ->
             (listOf(T.primaryKey) + T.foreignKeys + T.otherColumns).forEach {
-                if (T != it.table) throw MapperException("Column ${it.path} have parent ${it.table.path} but it should have parent: ${T.path}")
+                if (T != it.table) throw MapperException("Column '${it.path}' have parent '${it.table.path}' but it should have parent: '${T.path}'")
             }
         }
     }
@@ -74,7 +74,7 @@ class MapperTests(val mapper: Mapper) {
                     val dbType = T.primaryKey.dbType.split("(").first()
                     if (dbType == it) continue@nextTable
                 }
-                throw SerializerException("Primary key ${T.primaryKey.path} of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
+                throw SerializerException("Primary key '${T.primaryKey.path}' of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
             }
         }
     }
@@ -85,7 +85,7 @@ class MapperTests(val mapper: Mapper) {
     fun `9-th Test - If all procedures arguments have been inited and connected with its owner`(){
         this.mapper.procedures.forEach { P ->
             P.args.forEach {
-                if (P != it.procedure) throw MapperException("Argument ${it.path} have parent '${it.procedure}' but it should have parent: '${P}'")
+                if (P != it.procedure) throw MapperException("Argument '${it.path}' have parent '${it.procedure}' but it should have parent: '${P}'")
             }
         }
     }
@@ -95,7 +95,7 @@ class MapperTests(val mapper: Mapper) {
             val kprops = this.mapper.getKProps(kclass = P.kclass)
             P.args.forEach {
                 if (!kprops.contains(it.kprop))
-                    throw MapperException("Procedure '$P' does own argument: $it")
+                    throw MapperException("Procedure $P does own argument: $it")
             }
         }
     }

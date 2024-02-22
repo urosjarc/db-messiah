@@ -14,7 +14,7 @@ data class Procedure(
     }
 
     val name: String = kclass.simpleName.toString()
-    val path: String = listOf(this.schema, this.name).joinToString(".")
+    val path: String = listOf(this.schema, this.name).filterNotNull().joinToString(".")
     val hash = this.path.hashCode()
     override fun hashCode(): Int = this.hash
     override fun equals(other: Any?): Boolean =

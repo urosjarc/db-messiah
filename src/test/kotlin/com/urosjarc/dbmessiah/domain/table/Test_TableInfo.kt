@@ -39,7 +39,9 @@ class Test_TableInfo {
             dbType = "VARCHAR",
             jdbcType = JDBCType.VARCHAR,
             decoder = { rs, i, _ -> rs.getString(i) },
-            encoder = { ps, i, x -> ps.setString(i, x.toString()) }
+            encoder = { ps, i, x -> ps.setString(i, x.toString()) },
+            cascadeUpdate = false,
+            cascadeDelete = false
         )
         this.primaryColumn = PrimaryColumn(
             autoIncrement = true,
@@ -72,12 +74,12 @@ class Test_TableInfo {
 
     @Test
     fun `test toString()`() {
-        assertEquals(actual = this.tableInfo.toString(), expected = "'Schema'.'Entity'")
+        assertEquals(actual = this.tableInfo.toString(), expected = "Schema.Entity")
     }
 
     @Test
     fun `test sqlInsertColumns()`() {
-        assertEquals(actual = this.tableInfo.sqlInsertColumns(), expected = "'fk', 'col'")
+        assertEquals(actual = this.tableInfo.sqlInsertColumns(), expected = "fk, col")
     }
 
     @Test
@@ -87,7 +89,7 @@ class Test_TableInfo {
 
     @Test
     fun `test sqlUpdateColumns()`() {
-        assertEquals(actual = this.tableInfo.sqlUpdateColumns(), expected = "'fk' = ?, 'col' = ?")
+        assertEquals(actual = this.tableInfo.sqlUpdateColumns(), expected = "fk = ?, col = ?")
     }
 
     @Test
@@ -105,7 +107,7 @@ class Test_TableInfo {
         val entity = Entity(pk = 1, fk = "2", col = "3")
         val queryValues = this.tableInfo.queryValues(entity)
         assertEquals(expected = 2, queryValues.size)
-        assertEquals(actual = queryValues[0], expected = QueryValue(name = "'fk'", value = "2", jdbcType = JDBCType.VARCHAR, encoder = foreignColumn.encoder))
-        assertEquals(actual = queryValues[1], expected = QueryValue(name = "'col'", value = "3", jdbcType = JDBCType.VARCHAR, encoder = otherColumn.encoder))
+        assertEquals(actual = queryValues[0], expected = QueryValue(name = "fk", value = "2", jdbcType = JDBCType.VARCHAR, encoder = foreignColumn.encoder))
+        assertEquals(actual = queryValues[1], expected = QueryValue(name = "col", value = "3", jdbcType = JDBCType.VARCHAR, encoder = otherColumn.encoder))
     }
 }

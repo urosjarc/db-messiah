@@ -1,11 +1,11 @@
 package com.urosjarc.dbmessiah
 
-import MssqlService
 import com.urosjarc.dbmessiah.domain.table.Page
 import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.exceptions.TesterException
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
+import com.urosjarc.dbmessiah.impl.mssql.MssqlService
 import com.urosjarc.dbmessiah.types.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 import kotlin.test.*
 
 
-open class Test_Mssql: Test_Contract {
+open class Test_Mssql : Test_Contract {
     open var children = mutableListOf<Child>()
     open var parents = mutableListOf<Parent>()
 
@@ -742,7 +742,7 @@ open class Test_Mssql: Test_Contract {
                 //Get roolback state 1 snapshot
                 val parents3 = it.table.select(table = Parent::class)
                 val children3 = it.table.select(table = Child::class)
-                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
         }

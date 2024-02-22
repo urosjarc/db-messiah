@@ -1,16 +1,17 @@
+package com.urosjarc.dbmessiah.impl.db2
+
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.TransConn
 import com.urosjarc.dbmessiah.domain.queries.*
-import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
 open class Db2Service(conf: HikariConfig, val ser: Serializer) {
     val service = Service(conf = conf)
+
     open class QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
         val schema = SchemaQueries(ser = ser, driver = driver)
