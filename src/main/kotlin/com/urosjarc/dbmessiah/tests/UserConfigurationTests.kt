@@ -8,7 +8,7 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
-class TestUserConfiguration(val mapper: Mapper) {
+class UserConfigurationTests(val mapper: Mapper) {
     /**
      * CHECK FOR EMPTYNESS
      */

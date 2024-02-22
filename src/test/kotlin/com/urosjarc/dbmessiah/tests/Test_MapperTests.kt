@@ -20,7 +20,7 @@ import kotlin.reflect.KProperty1
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-class Test_TestMapper {
+class Test_MapperTests {
 
     private lateinit var otherPArg: ProcedureArg
     private lateinit var pArg: ProcedureArg

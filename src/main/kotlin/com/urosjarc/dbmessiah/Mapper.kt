@@ -12,8 +12,8 @@ import com.urosjarc.dbmessiah.domain.table.Table
 import com.urosjarc.dbmessiah.domain.table.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
-import com.urosjarc.dbmessiah.tests.TestMapper
-import com.urosjarc.dbmessiah.tests.TestUserConfiguration
+import com.urosjarc.dbmessiah.tests.MapperTests
+import com.urosjarc.dbmessiah.tests.UserConfigurationTests
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.ResultSet
 import kotlin.reflect.*
@@ -152,7 +152,7 @@ class Mapper(
     }
 
     private fun testConfiguration() {
-        TestUserConfiguration(mapper = this).also {
+        UserConfigurationTests(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table exist`()
             //Test uniqueness
@@ -222,7 +222,7 @@ class Mapper(
 
     fun testMapper() {
         //Test registered tables
-        TestMapper(mapper = this).also {
+        MapperTests(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
             //Test uniqueness

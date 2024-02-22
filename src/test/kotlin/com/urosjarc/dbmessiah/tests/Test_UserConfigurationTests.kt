@@ -11,7 +11,7 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-class Test_TestUserConfiguration {
+class Test_UserConfigurationTests {
 
     private data class Child(var pk: Int, val fk: String, val col: Float)
     private data class Parent(var pk: String, val col: String)
@@ -20,7 +20,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 1-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(), globalSerializers = listOf(),
                     globalOutputs = listOf(), globalInputs = listOf(),
@@ -32,7 +32,7 @@ class Test_TestUserConfiguration {
         assertContains(charSequence = e.message.toString(), other = "Missing schema", message = e.toString())
 
         val e2 = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(Schema(name = "Schema0", tables = listOf())), globalSerializers = listOf(),
                     globalOutputs = listOf(), globalInputs = listOf(),
@@ -47,7 +47,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 2-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(name = "Schema0", tables = listOf(Table(Parent::pk))),
@@ -66,7 +66,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 3-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -91,7 +91,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 4-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -120,7 +120,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 5-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -153,7 +153,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 6-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -179,7 +179,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 7-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -207,7 +207,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 8-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -234,7 +234,7 @@ class Test_TestUserConfiguration {
         )
 
         val e2 = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -265,7 +265,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 9-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -296,7 +296,7 @@ class Test_TestUserConfiguration {
         )
 
         val e2 = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -326,7 +326,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 10-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(name = "Schema0", tables = listOf(Table(primaryKey = Unknown::pk))),
@@ -348,7 +348,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 11-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(name = "Schema0", tables = listOf(Table(primaryKey = Child::pk))),
@@ -370,7 +370,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 12-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(name = "Schema0", tables = listOf(Table(primaryKey = Child::pk))),
@@ -391,7 +391,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 13-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -417,7 +417,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 14-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -442,7 +442,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 15-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
@@ -467,7 +467,7 @@ class Test_TestUserConfiguration {
     @Test
     fun `test 16-th()`() {
         val e = assertThrows<SerializerException> {
-            TestUserConfiguration(
+            UserConfigurationTests(
                 mapper = Mapper(
                     schemas = listOf(
                         Schema(
