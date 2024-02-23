@@ -5,10 +5,23 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import kotlin.reflect.KClass
 
+/**
+ * Class that provides various row queries for a database table.
+ *
+ * @param ser The serializer to use for serialization and deserialization of objects.
+ * @param driver The database driver to use for executing queries.
+ */
 public open class RowQueries(
     private val ser: Serializer,
     private val driver: Driver
 ) {
+    /**
+     * Retrieves a single object from the specified table based on the primary key.
+     *
+     * @param table The class representing the table to select from.
+     * @param pk The primary key value of the object to retrieve.
+     * @return The object retrieved from the table, or null if no matching object is found.
+     */
     public fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
         val query = this.ser.query(kclass = table, pk = pk)
         return this.driver.query(query = query) {
@@ -16,6 +29,14 @@ public open class RowQueries(
         }.firstOrNull()
     }
 
+    /**
+     * Inserts a row into the table.
+     *
+     * If [row] does not exists in the table its primary key will be inited with the assigned database value.
+     *
+     * @param row The object representing the row to be inserted.
+     * @return true if the row was successfully inserted, false otherwise.
+     */
     public open fun <T : Any> insert(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
@@ -37,6 +58,13 @@ public open class RowQueries(
         return true
     }
 
+    /**
+     * Updates a row in the table by its primary key.
+     *
+     * @param row The object representing the row to be updated.
+     * @return true if the row was successfully updated, false otherwise.
+     * @throws DriverException if there is an error executing the update query.
+     */
     public fun <T : Any> update(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
@@ -55,6 +83,14 @@ public open class RowQueries(
         else throw DriverException("Number of updated rows must be 1 or 0 but number of updated rows was: $count")
     }
 
+    /**
+     * Deletes a row from the table. By its primary key.
+     * If row is deleted the primary key will reset to null value.
+     *
+     * @param row The object representing the row to be deleted.
+     * @return true if the row was successfully deleted, false otherwise.
+     * @throws DriverException if there is an error executing the delete query.
+     */
     public fun <T : Any> delete(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
@@ -75,9 +111,31 @@ public open class RowQueries(
         } else throw DriverException("Number of deleted rows must be 1 or 0 but number of updated rows was: $count")
     }
 
+    /**
+     * Inserts a rows into the table with method [insert]. It should not be confused with batch insert!
+     * Primary keys will be assigned in the process!
+     *
+     * If [row] does not exist in the table, its primary key will be initialized with the assigned database value.
+     *
+     * @param row The object representing the row to be inserted.
+     * @return A list of booleans indicating whether each row was successfully inserted or not.
+     */
     public fun <T : Any> insert(rows: Iterable<T>): List<Boolean> = rows.map { this.insert(row = it) }
 
+    /**
+     * Updates rows in the table by its primary key with method [update]. It should not be confused with batch update!
+     *
+     * @param rows The objects representing the rows to be updated.
+     * @return A list of booleans indicating whether each row was successfully updated or not.
+     */
     public fun <T : Any> update(rows: Iterable<T>): List<Boolean> = rows.map { this.update(row = it) }
 
+    /**
+     * Deletes rows in the table by its primary key with method [delete]. It should not be confused with batch delete!
+     * Primary keys will be reseted to null values in the process!
+     *
+     * @param rows The objects representing the rows to be updated.
+     * @return A list of booleans indicating whether each row was successfully updated or not.
+     */
     public fun <T : Any> delete(rows: Iterable<T>): List<Boolean> = rows.map { this.delete(row = it) }
 }

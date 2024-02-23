@@ -3,6 +3,18 @@ package com.urosjarc.dbmessiah.data
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 
+/**
+ * Represents the metadata of a database table.
+ * This class is final representation of database table defined by the user.
+ * This class will be used internaly by the system.
+ *
+ * @param schema The [Schema] that contains this table.
+ * @param kclass The class representing the table.
+ * @param primaryKey The [PrimaryColumn] for this table.
+ * @param foreignKeys The list of [ForeignColumn] for this table.
+ * @param otherColumns The list of [OtherColumn] for this table.
+ * @param serializers The list of [TypeSerializer] which will help in serialization process.
+ */
 internal data class TableInfo(
     val schema: String,
     val kclass: KClass<*>,
@@ -11,8 +23,18 @@ internal data class TableInfo(
     val otherColumns: List<OtherColumn>,
     val serializers: List<TypeSerializer<*>>
 ) {
+
+    /**
+     * Represents the name of this table.
+     */
     val name = this.kclass.simpleName!!
+
+    /**
+     * Full path where this table is located.
+     */
     val path = listOf(this.schema, this.name).joinToString(".")
+
+    /** @suppress */
     val hash = this.path.hashCode()
 
     init {
@@ -22,6 +44,10 @@ internal data class TableInfo(
         }
     }
 
+    /**
+     * Represents a list of columns that can be modified by the user in `UPDATE` statement.
+     * This includes the [ForeignColumn] and [OtherColumn], as well as the [PrimaryColumn] if it is not marked auto-increment.
+     */
     val userControlledColumns
         get(): List<Column> {
             val columns: MutableList<Column> = (this.foreignKeys + this.otherColumns).toMutableList()
@@ -29,26 +55,65 @@ internal data class TableInfo(
             return columns
         }
 
-    override fun hashCode(): Int = this.hash
-
-    override fun equals(other: Any?): Boolean =
-        this.hashCode() == other.hashCode()
-
-    override fun toString(): String = this.path
-
+    /**
+     * Helper method to generate a SQL string with the column names which should be used in first part of `INSERT` statement.
+     * @see [sqlInsertQuestions]
+     *
+     * @param separator The separator to use between column names. Default is ", ".
+     * @return The SQL string with the column names.
+     */
     fun sqlInsertColumns(separator: String = ", "): String =
         this.userControlledColumns.joinToString(separator = separator) { it.name }
 
+    /**
+     * Helper method to generate a SQL string with the values as question marks which should be used in second part of `INSERT` statement.
+     * @see [sqlInsertColumns]
+     *
+     * @param separator The separator to use between question marks. Default is ", ".
+     * @return The SQL string with the question marks.
+     */
     fun sqlInsertQuestions(separator: String = ", "): String =
         this.userControlledColumns.joinToString(separator = separator) { "?" }
 
+    /**
+     * Helper method to generate a SQL string with the column names and the corresponding update values.
+     * This method should be used in `UPDATE` statement.
+     *
+     * @param separator The separator to use between column names. The default is ", ".
+     * @param zipper The string to use between column names and values. The default is " = ".
+     * @return The SQL string with the column names and values.
+     */
     fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = "): String =
         this.userControlledColumns.joinToString(separator = separator) { it.name + "$zipper?" }
 
+    /**
+     * Represents a list of JDBC types derived from the [userControlledColumns].
+     */
     val jdbcTypes: MutableList<JDBCType> get() = this.userControlledColumns.map { it.jdbcType }.toMutableList()
+    /**
+     * Represents a list of [Encoder] derived from the [userControlledColumns].
+     */
     val encoders: MutableList<Encoder<*>> get() = userControlledColumns.map { it.encoder }.toMutableList()
+
+    /**
+     * Extract list of [QueryValue] from the table columns inside [obj].
+     * Those [QueryValue] elements will be used further in the system.
+     *
+     * @param obj The object from which to retrieve the list of [QueryValue].
+     * @return An array of [QueryValue] objects representing the values of the object.
+     */
     fun queryValues(obj: Any): Array<out QueryValue> = this.userControlledColumns
         .map { QueryValue(name = it.name, value = it.getValue(obj = obj), jdbcType = it.jdbcType, encoder = it.encoder) }
         .toTypedArray()
 
+
+    /** @suppress */
+    override fun hashCode(): Int = this.hash
+
+    /** @suppress */
+    override fun equals(other: Any?): Boolean =
+        this.hashCode() == other.hashCode()
+
+    /** @suppress */
+    override fun toString(): String = this.path
 }

@@ -3,6 +3,9 @@ package com.urosjarc.dbmessiah.serializers
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 
+/**
+ * The CharTS provides type serializers for the Char types.
+ */
 public object CharTS {
     public val char: TypeSerializer<Char> = TypeSerializer(
         kclass = Char::class,

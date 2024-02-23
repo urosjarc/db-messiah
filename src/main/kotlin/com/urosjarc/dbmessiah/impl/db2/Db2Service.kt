@@ -9,6 +9,12 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
+/**
+ * Db2Service class provides a high-level interface for interacting with a Db2 database.
+ *
+ * @param conf The configuration for Hikari connection pool.
+ * @param ser The serializer used for serializing and deserializing data.
+ */
 public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
     private val service = Service(conf = conf)
 
@@ -22,6 +28,12 @@ public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
         public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
     }
 
+    /**
+     * Provides connection on which non-transactional queries can be executed.
+     *
+     * @param readOnly Specifies whether the connection should be read-only.
+     * @param body The query logic to be executed on the connection.
+     */
     public fun query(readOnly: Boolean = false, body: (conn: Db2QueryConn) -> Unit): Unit =
         this.service.query(readOnly = readOnly) { body(Db2QueryConn(conn = it, ser = this.ser)) }
 
@@ -29,6 +41,12 @@ public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
         public val roolback: TransConn = TransConn(conn = conn)
     }
 
+    /**
+     * Provides connection on which transactional queries can be executed.
+     *
+     * @param isolationLevel The isolation level for the transaction. Default is null.
+     * @param body The transaction logic to be executed.
+     */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: Db2TransConn) -> Unit): Unit =
         this.service.transaction(isoLevel = isolationLevel) { body(Db2TransConn(conn = it, ser = this.ser)) }
 }

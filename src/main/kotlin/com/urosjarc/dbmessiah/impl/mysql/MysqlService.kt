@@ -9,6 +9,12 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
+/**
+ * Represents a service that provides an interface for interacting with a MySQL database.
+ *
+ * @param conf The configuration for connecting to the MySQL database.
+ * @param ser The serializer to use for serializing and deserializing data.
+ */
 public open class MysqlService(conf: HikariConfig, private val ser: Serializer) {
     private val service = Service(conf = conf)
 
@@ -21,6 +27,13 @@ public open class MysqlService(conf: HikariConfig, private val ser: Serializer) 
         public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
     }
 
+    /**
+     * Provides connection on which non-transactional queries can be executed.
+     *
+     * @param readOnly Specifies whether the connection should be read-only.
+     * @param body The query logic to be executed on the connection.
+     * @throws ServiceException if the query was interrupted by an exception.
+     */
     public fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit): Unit =
         this.service.query(readOnly = readOnly) { body(QueryConn(conn = it, ser = this.ser)) }
 
@@ -28,6 +41,13 @@ public open class MysqlService(conf: HikariConfig, private val ser: Serializer) 
         public val roolback: TransConn = TransConn(conn = conn)
     }
 
+    /**
+     * Provides connection on which transactional queries can be executed.
+     *
+     * @param isolationLevel The isolation level for the transaction. Default is null.
+     * @param body The transaction logic to be executed on the connection.
+     * @throws ServiceException if an exception occurs during the transaction.
+     */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: MysqlTransConn) -> Unit): Unit =
         this.service.transaction(isoLevel = isolationLevel) { body(MysqlTransConn(conn = it, ser = this.ser)) }
 }

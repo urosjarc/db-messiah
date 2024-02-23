@@ -3,6 +3,9 @@ package com.urosjarc.dbmessiah.serializers
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 
+/**
+ * The StringTS object provides type serializers for strings.
+ */
 public object StringTS {
     public fun string(size: Int): TypeSerializer<String> = TypeSerializer(
         kclass = String::class,

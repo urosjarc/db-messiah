@@ -4,13 +4,13 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 /**
- * Represents an argument for a database procedure.
+ * Represents an argument for a [Procedure].
  *
  * @property kprop The Kotlin property used to access the argument value.
  * @property dbType The database type of the argument.
  * @property jdbcType The JDBC type of the argument.
- * @property encoder The encoder used to encode the argument value.
- * @property decoder The decoder used to decode the argument value.
+ * @property encoder The [Encoder] used to encode the argument value.
+ * @property decoder The [Decoder] used to decode the argument value.
  */
 internal class ProcedureArg(
     kprop: KProperty1<Any, Any?>,
@@ -41,9 +41,10 @@ internal class ProcedureArg(
     override val inited: Boolean get() = this::procedure.isInitialized
 
     /**
-     * Represents the full path of a [ProcedureArg].
+     * Represents the full path of a [ProcedureArg] location.
      */
     override val path: String get() = listOf(this.procedure.name, this.kprop.name).joinToString(".")
 
+    /** @suppress */
     override fun toString(): String = "Arg(name='${this.name}', dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
 }

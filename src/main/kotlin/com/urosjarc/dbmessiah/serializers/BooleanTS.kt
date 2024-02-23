@@ -2,7 +2,11 @@ package com.urosjarc.dbmessiah.serializers
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 
+/**
+ * BooleanTS class represents a collection of TypeSerializers for the Boolean types.
+ */
 public object BooleanTS {
+
     public val boolean: TypeSerializer<Boolean> = TypeSerializer(
         kclass = Boolean::class,
         dbType = "BOOL",

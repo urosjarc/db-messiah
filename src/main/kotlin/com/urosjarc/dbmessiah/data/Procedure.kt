@@ -5,9 +5,9 @@ import kotlin.reflect.KClass
 /**
  * Represents a database procedure.
  *
- * @property schema The schema where this procedure is located.
- * @property kclass The Kotlin class representing the procedure.
- * @property args The list of [ProcedureArg] representing procedure arguments.
+ * @property schema The schema in which this [Procedure] is located.
+ * @property kclass The Kotlin class representing this [Procedure].
+ * @property args The list of procedure arguments.
  */
 internal data class Procedure(
     val schema: String?,
@@ -25,7 +25,7 @@ internal data class Procedure(
     val name: String = kclass.simpleName.toString()
 
     /**
-     * Represents the full path of a [Procedure].
+     * Represents the full path of a [Procedure] location.
      */
     val path: String = listOf(this.schema, this.name).filterNotNull().joinToString(".")
 
@@ -50,11 +50,18 @@ internal data class Procedure(
         .map { QueryValue(name = it.name, value = it.getValue(obj = obj), jdbcType = it.jdbcType, encoder = it.encoder) }
         .toTypedArray()
 
+    /** @suppress */
+
     private val hash = this.path.hashCode()
+
+    /** @suppress */
     override fun hashCode(): Int = this.hash
+
+    /** @suppress */
     override fun equals(other: Any?): Boolean =
         this.hashCode() == other.hashCode()
 
+    /** @suppress */
     override fun toString(): String {
         val argsNames = this.args.joinToString(", ") { "${it.name}: ${it.kclass.simpleName}" }
         return "${kclass.simpleName}($argsNames)"

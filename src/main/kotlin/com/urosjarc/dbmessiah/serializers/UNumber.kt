@@ -1,7 +1,11 @@
 package com.urosjarc.dbmessiah.serializers
+
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 
+/**
+ * Provides type serializers for unsigned numbers.
+ */
 public object UNumber {
     public val ubyte: TypeSerializer<UByte> = TypeSerializer(
         kclass = UByte::class,

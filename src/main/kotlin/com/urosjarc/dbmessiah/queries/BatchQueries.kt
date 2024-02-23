@@ -4,10 +4,23 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.BatchQuery
 
+/**
+ * Class for performing batch operations.
+ *
+ * @property ser The Serializer used for generating queries and mapping objects to tables in the database.
+ * @property driver The Driver used for executing the batch queries.
+ */
 public class BatchQueries(
     private val ser: Serializer,
     private val driver: Driver
 ) {
+    /**
+     * Inserts a batch of objects into the database.
+     * This method WILL not update objects primary keys!!!
+     *
+     * @param rows The iterable collection of objects to be inserted.
+     * @return The number of objects inserted.
+     */
     public fun <T : Any> insertBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
@@ -29,6 +42,12 @@ public class BatchQueries(
         return this.driver.batch(batchQuery = batchQuery)
     }
 
+    /**
+     * Updates a batch of objects in the database.
+     *
+     * @param rows The iterable collection of objects to be updated.
+     * @return The number of objects updated.
+     */
     public fun <T : Any> updateBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
@@ -49,6 +68,13 @@ public class BatchQueries(
         return this.driver.batch(batchQuery = batchQuery)
     }
 
+    /**
+     * Deletes a batch of objects from the database.
+     * This method WILL not reset objects primary keys!!!
+     *
+     * @param rows The iterable collection of objects to be deleted.
+     * @return The number of objects deleted.
+     */
     public fun <T : Any> deleteBatch(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 

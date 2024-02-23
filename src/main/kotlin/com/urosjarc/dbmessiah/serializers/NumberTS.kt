@@ -3,6 +3,9 @@ package com.urosjarc.dbmessiah.serializers
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 
+/**
+ * Class provides type serializers for various non-floating point number types.
+ */
 public object NumberTS {
     public val BIT: TypeSerializer<Boolean> = TypeSerializer(
         kclass = Boolean::class,

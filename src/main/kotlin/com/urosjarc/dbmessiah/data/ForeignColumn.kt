@@ -4,11 +4,11 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 /**
- * Represents a foreign column table.
+ * Represents a foreign column.
  *
- * @property cascadeDelete Determines whether the delete operation cascades to the foreign table.
- * @property cascadeUpdate Determines whether the update operation cascades to the foreign table.
- * @property foreignTable The [TableInfo] of the foreign table.
+ * @property cascadeDelete Determines whether the delete operation cascades.
+ * @property cascadeUpdate Determines whether the update operation cascades.
+ * @property foreignTable The [TableInfo] instant of the foreign table.
  */
 internal class ForeignColumn(
     unique: Boolean,
@@ -28,5 +28,9 @@ internal class ForeignColumn(
     decoder = decoder
 ) {
     lateinit var foreignTable: TableInfo
+
+    /**
+     * Represents a boolean flag indicating whether the [ForeignColumn] has been initialized.
+     */
     override val inited get() = super.inited && this::foreignTable.isInitialized
 }

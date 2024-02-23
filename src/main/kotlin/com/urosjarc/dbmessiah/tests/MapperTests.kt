@@ -7,6 +7,10 @@ import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
+/**
+ * This class contains the post init tests for the [Mapper].
+ * They are responsible for test [Mapper] internal structure.
+ */
 internal class MapperTests(val mapper: Mapper) {
     /**
      * Check for emptyness

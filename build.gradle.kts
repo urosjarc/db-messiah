@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.DokkaConfiguration.*
+
 plugins {
     `java-library`
     `maven-publish`
@@ -26,11 +28,20 @@ testlogger {
 
 tasks.dokkaHtml {
     dokkaSourceSets {
-        create("main") {
+        configureEach {
+            documentedVisibilities.set(
+                setOf(
+                    Visibility.PUBLIC, // Same for both Kotlin and Java
+                    Visibility.PRIVATE, // Same for both Kotlin and Java
+                    Visibility.PROTECTED, // Same for both Kotlin and Java
+                    Visibility.INTERNAL, // Kotlin-specific internal modifier
+                    Visibility.PACKAGE, // Java-specific package-private visibility
+                )
+            )
             includeNonPublic.set(true)
-            skipDeprecated.set(false)
+            jdkVersion.set(19)
             reportUndocumented.set(true)
-            skipEmptyPackages.set(true)
+            skipEmptyPackages.set(false)
         }
     }
 }

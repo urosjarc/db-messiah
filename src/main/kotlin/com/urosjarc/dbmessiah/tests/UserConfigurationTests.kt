@@ -8,6 +8,13 @@ import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
+/**
+ * Responsible for testing the user defined configuration.
+ * Tests are responsible to provide strong type safety before database initialization.
+ * It contains various tests to ensure the correctness of the database configuration.
+ *
+ * @param mapper The [Mapper] instance to be tested.
+ */
 internal class UserConfigurationTests(val mapper: Mapper) {
     /**
      * CHECK FOR EMPTYNESS

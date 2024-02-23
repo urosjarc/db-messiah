@@ -9,6 +9,12 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 
+/**
+ * Represents a service for executing queries on a Microsoft SQL Server database using HikariCP connection pooling.
+ *
+ * @property conf The configuration object for HikariCP.
+ * @property ser The serializer used for query parameter serialization and result deserialization.
+ */
 public open class MssqlService(conf: HikariConfig, private val ser: Serializer) {
     private val service = Service(conf = conf)
 
@@ -21,6 +27,13 @@ public open class MssqlService(conf: HikariConfig, private val ser: Serializer) 
         public val run: RunManyQueries = RunManyQueries(ser = ser, driver = driver)
     }
 
+    /**
+     * Provides connection on which non-transactional queries can be executed.
+     *
+     * @param readOnly Specifies whether the connection should be read-only.
+     * @param body The query logic to be executed on the connection.
+     * @throws ServiceException if the query was interrupted by an exception.
+     */
     public fun query(readOnly: Boolean = false, body: (conn: MssqlQueryConn) -> Unit): Unit =
         this.service.query(readOnly = readOnly) { body(MssqlQueryConn(conn = it, ser = this.ser)) }
 
@@ -28,6 +41,13 @@ public open class MssqlService(conf: HikariConfig, private val ser: Serializer) 
         public val roolback: TransConn = TransConn(conn = conn)
     }
 
+    /**
+     * Provides connection on which transactional queries can be executed.
+     *
+     * @param isolationLevel The isolation level for the transaction. Default is null.
+     * @param body The transaction logic to be executed on the connection.
+     * @throws ServiceException if an exception occurs during the transaction.
+     */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: MssqlTransConn) -> Unit): Unit =
         this.service.transaction(isoLevel = isolationLevel) { body(MssqlTransConn(conn = it, ser = this.ser)) }
 }
