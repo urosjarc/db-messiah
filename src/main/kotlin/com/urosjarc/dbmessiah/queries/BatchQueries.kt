@@ -21,7 +21,7 @@ public class BatchQueries(
      * @param rows The iterable collection of objects to be inserted.
      * @return The number of objects inserted.
      */
-    public fun <T : Any> insertBatch(rows: Iterable<T>): Int {
+    public fun <T : Any> insert(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)
@@ -48,7 +48,7 @@ public class BatchQueries(
      * @param rows The iterable collection of objects to be updated.
      * @return The number of objects updated.
      */
-    public fun <T : Any> updateBatch(rows: Iterable<T>): Int {
+    public fun <T : Any> update(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)
@@ -70,12 +70,12 @@ public class BatchQueries(
 
     /**
      * Deletes a batch of objects from the database.
-     * This method WILL not reset objects primary keys!!!
+     * This method WILL reset objects primary keys!!!
      *
      * @param rows The iterable collection of objects to be deleted.
      * @return The number of objects deleted.
      */
-    public fun <T : Any> deleteBatch(rows: Iterable<T>): Int {
+    public fun <T : Any> delete(rows: Iterable<T>): Int {
         val obj = rows.firstOrNull() ?: return 0
 
         val T = this.ser.mapper.getTableInfo(obj = obj)

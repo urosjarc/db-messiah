@@ -50,7 +50,7 @@ val config = Properties().apply {
  */
 val sqlite = SqliteService(config = config, ser = serializer)
 
-fun main() {
+fun main_000() {
     sqlite.query { // Fetch available non-transactional connection from HikariCP connection pool ...
         /**
          * 5. Create table...
@@ -81,7 +81,7 @@ fun main() {
          * 9. Check if change was updated
          */
         val ele2 = it.row.select(table = Parent::class, pk = parent.pk!!) // Get specific row from the table by primary key...
-        assertEquals(ele2, parent)                                         // Parent is equal to original...
+        assertEquals(ele2, parent)                                        // Parent is equal to original...
 
         /**
          * 10. Remove row
@@ -121,8 +121,9 @@ fun main() {
         parents1.forEach { assertNull(it.pk) }   // All primary keys should be reseted by the library...
 
         /**
-         * 11. Drop table
+         * 14. Drop table
          */
+        it.table.drop(table = Child::class)  // Drop table from database
         it.table.drop(table = Parent::class) // Drop table from database
     }
 }

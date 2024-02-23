@@ -25,6 +25,10 @@ data class PgChild(
 
 /**
  * 2. Define your database schemas
+ *
+ * In sqlite there is no schema to be defined (sqlite does have schemas).
+ * But in postgresql you have schemas so you have to define your tables to
+ * appropriate schema and follow best practice for that specific database.
  */
 val parent_schema = PgSchema(
     name = "parent_schema",
@@ -44,7 +48,7 @@ val child_schema = PgSchema(
 )
 
 /**
- * 2. Create database serializer and explain database structure...
+ * 3. Create database serializer and explain database structure...
  */
 val pgSerializer = PgSerializer(
     schemas = listOf(parent_schema, child_schema),
@@ -52,7 +56,7 @@ val pgSerializer = PgSerializer(
 )
 
 /**
- * 3. Define HikariCP configuration...
+ * 4. Define HikariCP configuration...
  *
  * > https://github.com/brettwooldridge/HikariCP
  * > https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#rocket-initialization
@@ -64,23 +68,45 @@ val pgConfig = Properties().apply {
 }
 
 /**
- * 4. Create database service by providing it your db serializer and db configuration...
+ * 5. Create database service by providing it your db serializer and db configuration...
  */
 val postgresql = PgService(config = pgConfig, ser = pgSerializer)
 
-fun main() {
-    postgresql.query { // Fetch available non-transactional connection from HikariCP connection pool ...
+fun main_001() {
+    postgresql.query {
         /**
-         * 5. Create schema
+         * 6. Create schema
          */
         it.schema.create(schema = parent_schema)
         it.schema.create(schema = child_schema)
 
         /**
-         * 5. Create tables
+         * 7. Create tables
          */
         it.table.create(table = PgParent::class)
         it.table.create(table = PgChild::class)
+
+        /**
+         * 8. Make some batch inserts
+         *
+         * Note that batch inserts are highly optimized! If you don't care
+         * to retrieve primary keys then batch operations are preferred!
+         * Library will group batch operations in groups of 1000 and then execute
+         * each group one by one in order to not block the database process.
+         */
+//        it.batch.insert()
+
+        /**
+         * 8. Drop tables
+         */
+        it.table.drop(table = PgChild::class)
+        it.table.drop(table = PgParent::class)
+
+        /**
+         * 9. Drop schema
+         */
+        it.schema.drop(schema = parent_schema)
+        it.schema.drop(schema = child_schema)
 
     }
 }

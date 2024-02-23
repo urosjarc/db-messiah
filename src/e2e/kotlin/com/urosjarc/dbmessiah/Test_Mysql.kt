@@ -442,7 +442,7 @@ open class Test_Mysql : Test_Contract {
         assertFalse(actual = parents.contains(newObj1))
 
         //Insert new object
-        assertEquals(actual = it.batch.insertBatch(rows = listOf(newObj0, newObj1)), expected = 2)
+        assertEquals(actual = it.batch.insert(rows = listOf(newObj0, newObj1)), expected = 2)
 
         //Check if primary key are not updated after batch insert
         assertEquals(expected = null, actual = newObj0.pk)
@@ -462,7 +462,7 @@ open class Test_Mysql : Test_Contract {
 
         //Get snapshot of parents before trying to insert
         val postParents2 = it.table.select(table = Parent::class)
-        assertEquals(actual = it.batch.insertBatch(rows = listOf(newObj0, newObj1)), expected = 0)
+        assertEquals(actual = it.batch.insert(rows = listOf(newObj0, newObj1)), expected = 0)
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select(table = Parent::class)
@@ -481,7 +481,7 @@ open class Test_Mysql : Test_Contract {
         parents[1].col = "UPDATE1"
 
         //Update
-        assertEquals(expected = 2, actual = it.batch.updateBatch(rows = listOf(parents[0], parents[1])))
+        assertEquals(expected = 2, actual = it.batch.update(rows = listOf(parents[0], parents[1])))
 
         //List should be equal
         val postParents0 = it.table.select(table = Parent::class)
@@ -493,7 +493,7 @@ open class Test_Mysql : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postParents1 = it.table.select(table = Parent::class)
-        assertEquals(expected = 0, actual = it.batch.updateBatch(rows = listOf(postParents0[2], postParents0[3])))
+        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postParents0[2], postParents0[3])))
 
         //List should be equal
         val postParents2 = it.table.select(table = Parent::class)
@@ -507,7 +507,7 @@ open class Test_Mysql : Test_Contract {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = 2, actual = it.batch.deleteBatch(listOf(children[0], children[1])))
+        assertEquals(expected = 2, actual = it.batch.delete(listOf(children[0], children[1])))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
@@ -525,7 +525,7 @@ open class Test_Mysql : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postChildren1 = it.table.select(table = Child::class)
-        assertEquals(expected = 0, actual = it.batch.updateBatch(rows = listOf(postChildren0[2], postChildren0[3])))
+        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
 
         //List should be equal
         val postChildren2 = it.table.select(table = Child::class)
