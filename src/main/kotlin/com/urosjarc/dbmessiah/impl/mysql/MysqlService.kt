@@ -18,7 +18,7 @@ import java.sql.Connection
 public open class MysqlService(conf: HikariConfig, private val ser: Serializer) {
     private val service = Service(conf = conf)
 
-    public open class QueryConn(conn: Connection, ser: Serializer) {
+    public open class MysqlQueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
         public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
@@ -34,10 +34,10 @@ public open class MysqlService(conf: HikariConfig, private val ser: Serializer) 
      * @param body The query logic to be executed on the connection.
      * @throws ServiceException if the query was interrupted by an exception.
      */
-    public fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit): Unit =
-        this.service.query(readOnly = readOnly) { body(QueryConn(conn = it, ser = this.ser)) }
+    public fun query(readOnly: Boolean = false, body: (conn: MysqlQueryConn) -> Unit): Unit =
+        this.service.query(readOnly = readOnly) { body(MysqlQueryConn(conn = it, ser = this.ser)) }
 
-    public class MysqlTransConn(conn: Connection, ser: Serializer) : QueryConn(conn = conn, ser = ser) {
+    public class MysqlTransConn(conn: Connection, ser: Serializer) : MysqlQueryConn(conn = conn, ser = ser) {
         public val roolback: TransConn = TransConn(conn = conn)
     }
 

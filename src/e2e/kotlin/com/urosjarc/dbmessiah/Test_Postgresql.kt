@@ -120,7 +120,7 @@ open class Test_Postgresql : Test_Contract {
 
     }
 
-    private fun assertTableNotExists(q: PgService.QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: PgService.PgQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),

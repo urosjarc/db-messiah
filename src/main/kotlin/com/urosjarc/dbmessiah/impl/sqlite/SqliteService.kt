@@ -19,7 +19,7 @@ import java.sql.Connection
 public class SqliteService(conf: HikariConfig, private val ser: Serializer) {
     private val service = Service(conf = conf)
 
-    public open class QueryConn(conn: Connection, ser: Serializer) {
+    public open class SqliteQueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
         public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
@@ -35,10 +35,10 @@ public class SqliteService(conf: HikariConfig, private val ser: Serializer) {
      * @param body The query logic to be executed on the connection.
      * @throws ServiceException if the query was interrupted by an exception.
      */
-    public fun query(readOnly: Boolean = false, body: (conn: QueryConn) -> Unit): Unit =
-        this.service.query(readOnly = readOnly) { body(QueryConn(conn = it, ser = this.ser)) }
+    public fun query(readOnly: Boolean = false, body: (conn: SqliteQueryConn) -> Unit): Unit =
+        this.service.query(readOnly = readOnly) { body(SqliteQueryConn(conn = it, ser = this.ser)) }
 
-    public class SqliteTransConn(conn: Connection, ser: Serializer) : QueryConn(conn = conn, ser = ser) {
+    public class SqliteTransConn(conn: Connection, ser: Serializer) : SqliteQueryConn(conn = conn, ser = ser) {
         public val roolback: TransConn = TransConn(conn = conn)
     }
 

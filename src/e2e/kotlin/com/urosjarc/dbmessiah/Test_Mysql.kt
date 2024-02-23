@@ -117,7 +117,7 @@ open class Test_Mysql : Test_Contract {
 
     }
 
-    private fun assertTableNotExists(q: MysqlService.QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: MysqlService.MysqlQueryConn, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
