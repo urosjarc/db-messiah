@@ -6,11 +6,11 @@ import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSerializer
 import com.urosjarc.dbmessiah.impl.mysql.MysqlService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -26,10 +26,10 @@ open class Test_Mysql : Test_Contract {
         @BeforeAll
         fun init() {
             service = MysqlService(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:mysql://localhost:3307"
-                    this.username = "root"
-                    this.password = "root"
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:mysql://localhost:3307"
+                    this["username"] = "root"
+                    this["password"] = "root"
                 },
                 ser = MysqlSerializer(
                     schemas = listOf(

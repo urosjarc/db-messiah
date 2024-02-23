@@ -1,14 +1,9 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.data.Procedure
-import com.urosjarc.dbmessiah.data.ProcedureArg
-import com.urosjarc.dbmessiah.data.ForeignColumn
-import com.urosjarc.dbmessiah.data.OtherColumn
-import com.urosjarc.dbmessiah.data.PrimaryColumn
 import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.serializers.AllTS
@@ -389,7 +384,8 @@ class Test_MapperTests {
             TableInfo(
                 schema = "Schema", kclass = Entity::class, primaryKey = primaryColumn,
                 foreignKeys = listOf(
-                    ForeignColumn(unique = true, kprop = Entity::fk as KProperty1<Any, Any?>, dbType = "VARCHAR", jdbcType = JDBCType.VARCHAR,
+                    ForeignColumn(
+                        unique = true, kprop = Entity::fk as KProperty1<Any, Any?>, dbType = "VARCHAR", jdbcType = JDBCType.VARCHAR,
                         decoder = { rs, i, _ -> rs.getString(i) },
                         encoder = { ps, i, x -> ps.setString(i, x.toString()) },
                         cascadeUpdate = false,

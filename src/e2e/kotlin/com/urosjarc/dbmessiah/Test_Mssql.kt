@@ -6,11 +6,11 @@ import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import com.urosjarc.dbmessiah.impl.mssql.MssqlService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -25,29 +25,30 @@ open class Test_Mssql : Test_Contract {
         @JvmStatic
         @BeforeAll
         fun init() {
-            val conf = HikariConfig().apply {
-                this.jdbcUrl = "jdbc:sqlserver://localhost:1433;encrypt=false;"
-                this.username = "sa"
-                this.password = "Root_root1"
-            }
-            val ser = MssqlSerializer(
-                schemas = listOf(
-                    MssqlSchema(
-                        name = "main", tables = listOf(
-                            Table(Parent::pk),
-                            Table(
-                                Child::pk, foreignKeys = listOf(
-                                ), constraints = listOf(
+            service = MssqlService(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:sqlserver://localhost:1433;encrypt=false;"
+                    this["username"] = "sa"
+                    this["password"] = "Root_root1"
+                },
+                ser = MssqlSerializer(
+                    schemas = listOf(
+                        MssqlSchema(
+                            name = "main", tables = listOf(
+                                Table(Parent::pk),
+                                Table(
+                                    Child::pk, foreignKeys = listOf(
+                                    ), constraints = listOf(
+                                    )
                                 )
                             )
                         )
-                    )
-                ),
-                globalSerializers = AllTS.basic,
-                globalOutputs = listOf(Output::class),
-                globalInputs = listOf(Input::class),
+                    ),
+                    globalSerializers = AllTS.basic,
+                    globalOutputs = listOf(Output::class),
+                    globalInputs = listOf(Input::class),
+                )
             )
-            service = MssqlService(conf = conf, ser = ser)
         }
     }
 

@@ -1,4 +1,5 @@
 package com.urosjarc.dbmessiah.serializers
+
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
 

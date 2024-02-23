@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.serializers
 
 import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.serializers.AllTS.basic
 
 /**
  * Represents a collection of all TypeSerializers provided by the library.

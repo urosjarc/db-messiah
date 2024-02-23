@@ -5,19 +5,17 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.TransConn
 import com.urosjarc.dbmessiah.queries.*
-import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
+import java.util.*
 
 
 /**
- * A service for interacting with a SQLite database using HikariCP connection pooling.
- *
- * @param conf The HikariCP configuration for connecting to the database.
- * @param ser The serializer to use for serializing and deserializing data.
+ * This class represents a service for interacting with an SQLite database.
  */
-public class SqliteService(conf: HikariConfig, private val ser: Serializer) {
-    private val service = Service(conf = conf)
+public class SqliteService : Service {
+    public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
+    public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 
     public open class SqliteQueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
@@ -36,7 +34,7 @@ public class SqliteService(conf: HikariConfig, private val ser: Serializer) {
      * @throws ServiceException if the query was interrupted by an exception.
      */
     public fun query(readOnly: Boolean = false, body: (conn: SqliteQueryConn) -> Unit): Unit =
-        this.service.query(readOnly = readOnly) { body(SqliteQueryConn(conn = it, ser = this.ser)) }
+        this.conn.query(readOnly = readOnly) { body(SqliteQueryConn(conn = it, ser = this.ser)) }
 
     public class SqliteTransConn(conn: Connection, ser: Serializer) : SqliteQueryConn(conn = conn, ser = ser) {
         public val roolback: TransConn = TransConn(conn = conn)
@@ -50,5 +48,5 @@ public class SqliteService(conf: HikariConfig, private val ser: Serializer) {
      * @throws ServiceException if an exception occurs during the transaction.
      */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: SqliteTransConn) -> Unit): Unit =
-        this.service.transaction(isoLevel = isolationLevel) { body(SqliteTransConn(conn = it, ser = this.ser)) }
+        this.conn.transaction(isoLevel = isolationLevel) { body(SqliteTransConn(conn = it, ser = this.ser)) }
 }

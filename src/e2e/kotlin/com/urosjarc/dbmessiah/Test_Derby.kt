@@ -6,11 +6,11 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import com.urosjarc.dbmessiah.impl.derby.DerbyService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.Properties
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -25,10 +25,8 @@ open class Test_Derby : Test_Contract {
         @BeforeAll
         fun init() {
             service = DerbyService(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:derby:memory:db;create=true"
-                    this.username = null
-                    this.password = null
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:derby:memory:db;create=true"
                 },
                 ser = DerbySerializer(
                     tables = listOf(

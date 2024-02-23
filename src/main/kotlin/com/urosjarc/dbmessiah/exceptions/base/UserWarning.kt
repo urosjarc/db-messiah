@@ -6,4 +6,4 @@ package com.urosjarc.dbmessiah.exceptions.base
  * @param msg The message associated with the warning.
  * @param cause The cause of the warning, if any.
  */
-internal open class UserWarning(msg: String, cause: Throwable?): Throwable(message = "USER WARNING: $msg", cause=cause)
+internal open class UserWarning(msg: String, cause: Throwable?) : Throwable(message = "USER WARNING: $msg", cause = cause)

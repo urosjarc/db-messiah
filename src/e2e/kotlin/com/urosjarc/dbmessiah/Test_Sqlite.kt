@@ -5,11 +5,11 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.Properties
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -24,10 +24,8 @@ open class Test_Sqlite : Test_Contract {
         @BeforeAll
         fun init() {
             service = SqliteService(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:sqlite::memory:"
-                    this.username = null
-                    this.password = null
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:sqlite::memory:"
                 },
                 ser = SqliteSerializer(
                     tables = listOf(

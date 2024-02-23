@@ -6,11 +6,11 @@ import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
 import com.urosjarc.dbmessiah.impl.maria.MariaService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -26,10 +26,10 @@ open class Test_Maria : Test_Contract {
         @BeforeAll
         fun init() {
             service = MariaService(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:mariadb://localhost:3306"
-                    this.username = "root"
-                    this.password = "root"
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:mariadb://localhost:3306"
+                    this["username"] = "root"
+                    this["password"] = "root"
                 },
                 ser = MariaSerializer(
                     schemas = listOf(

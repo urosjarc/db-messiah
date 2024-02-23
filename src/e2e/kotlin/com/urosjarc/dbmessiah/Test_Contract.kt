@@ -1,4 +1,5 @@
 package com.urosjarc.dbmessiah
+
 interface Test_Contract {
     fun prepare()
 

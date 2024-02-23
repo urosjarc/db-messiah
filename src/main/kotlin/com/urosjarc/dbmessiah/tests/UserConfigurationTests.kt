@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
@@ -183,6 +183,7 @@ internal class UserConfigurationTests(val mapper: Mapper) {
         val notUnique = this.mapper.globalProcedures.ext_notUnique
         if (notUnique.isNotEmpty()) throw SerializerException("Global procedures registered multiple times: ${notUnique.keys}")
     }
+
     fun `14-th Test - If global outputs registered multiple times`() {
         val notUnique = this.mapper.globalOutputs.ext_notUnique
         if (notUnique.isNotEmpty()) throw SerializerException("Global outputs registered multiple times: ${notUnique.keys}")

@@ -6,4 +6,4 @@ package com.urosjarc.dbmessiah.exceptions
  * @param msg The detail message of the exception.
  * @param cause The cause of the exception.
  */
-internal class ServiceException(msg: String, cause: Throwable? = null): Throwable(msg, cause)
+internal class ServiceException(msg: String, cause: Throwable? = null) : Throwable(msg, cause)

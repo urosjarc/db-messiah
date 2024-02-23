@@ -5,18 +5,16 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.TransConn
 import com.urosjarc.dbmessiah.queries.*
-import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
+import java.util.*
 
 /**
  * Represents a service that provides an interface for interacting with a MySQL database.
- *
- * @param conf The configuration for connecting to the MySQL database.
- * @param ser The serializer to use for serializing and deserializing data.
  */
-public open class MysqlService(conf: HikariConfig, private val ser: Serializer) {
-    private val service = Service(conf = conf)
+public open class MysqlService : Service {
+    public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
+    public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 
     public open class MysqlQueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
@@ -35,7 +33,7 @@ public open class MysqlService(conf: HikariConfig, private val ser: Serializer) 
      * @throws ServiceException if the query was interrupted by an exception.
      */
     public fun query(readOnly: Boolean = false, body: (conn: MysqlQueryConn) -> Unit): Unit =
-        this.service.query(readOnly = readOnly) { body(MysqlQueryConn(conn = it, ser = this.ser)) }
+        this.conn.query(readOnly = readOnly) { body(MysqlQueryConn(conn = it, ser = this.ser)) }
 
     public class MysqlTransConn(conn: Connection, ser: Serializer) : MysqlQueryConn(conn = conn, ser = ser) {
         public val roolback: TransConn = TransConn(conn = conn)
@@ -49,5 +47,5 @@ public open class MysqlService(conf: HikariConfig, private val ser: Serializer) 
      * @throws ServiceException if an exception occurs during the transaction.
      */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: MysqlTransConn) -> Unit): Unit =
-        this.service.transaction(isoLevel = isolationLevel) { body(MysqlTransConn(conn = it, ser = this.ser)) }
+        this.conn.transaction(isoLevel = isolationLevel) { body(MysqlTransConn(conn = it, ser = this.ser)) }
 }

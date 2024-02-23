@@ -6,15 +6,15 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.h2.H2Serializer
 import com.urosjarc.dbmessiah.impl.h2.H2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
-open class Test_H2: Test_Contract {
+open class Test_H2 : Test_Contract {
     var parents = mutableListOf<Parent>()
     var children = mutableListOf<Child>()
 
@@ -25,10 +25,8 @@ open class Test_H2: Test_Contract {
         @BeforeAll
         fun init() {
             service = H2Service(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:h2:mem:main"
-                    this.username = null
-                    this.password = null
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:h2:mem:main"
                 },
                 ser = H2Serializer(
                     tables = listOf(
@@ -688,7 +686,7 @@ open class Test_H2: Test_Contract {
                 //Get roolback state 1 snapshot
                 val parents3 = it.table.select(table = Parent::class)
                 val children3 = it.table.select(table = Child::class)
-                assertEquals(actual = parents3, expected  = parents0)
+                assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
         }

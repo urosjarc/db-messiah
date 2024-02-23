@@ -1,10 +1,10 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.data.PrimaryColumn
 import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.ProcedureArg
-import com.urosjarc.dbmessiah.data.PrimaryColumn
 import com.urosjarc.dbmessiah.data.TableInfo
+import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.serializers.AllTS
@@ -231,7 +231,11 @@ class Test_Mapper {
         val e = assertThrows<SerializerException> {
             this.mapper.getProcedure(kclass = ProcedureNotRegistered::class)
         }
-        assertContains(charSequence = e.message.toString(), other = " Could not find procedure for kclass: 'ProcedureNotRegistered'", message = e.toString())
+        assertContains(
+            charSequence = e.message.toString(),
+            other = " Could not find procedure for kclass: 'ProcedureNotRegistered'",
+            message = e.toString()
+        )
     }
 
     @Test

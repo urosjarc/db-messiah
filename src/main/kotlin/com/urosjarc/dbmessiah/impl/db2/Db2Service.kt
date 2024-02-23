@@ -5,18 +5,16 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.TransConn
 import com.urosjarc.dbmessiah.queries.*
-import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
+import java.util.*
 
 /**
  * Db2Service class provides a high-level interface for interacting with a Db2 database.
- *
- * @param conf The configuration for Hikari connection pool.
- * @param ser The serializer used for serializing and deserializing data.
  */
-public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
-    private val service = Service(conf = conf)
+public open class Db2Service : Service {
+    public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
+    public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 
     public open class Db2QueryConn(conn: Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
@@ -35,7 +33,7 @@ public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
      * @param body The query logic to be executed on the connection.
      */
     public fun query(readOnly: Boolean = false, body: (conn: Db2QueryConn) -> Unit): Unit =
-        this.service.query(readOnly = readOnly) { body(Db2QueryConn(conn = it, ser = this.ser)) }
+        this.conn.query(readOnly = readOnly) { body(Db2QueryConn(conn = it, ser = this.ser)) }
 
     public class Db2TransConn(conn: Connection, ser: Serializer) : Db2QueryConn(conn = conn, ser = ser) {
         public val roolback: TransConn = TransConn(conn = conn)
@@ -48,5 +46,5 @@ public open class Db2Service(conf: HikariConfig, private val ser: Serializer) {
      * @param body The transaction logic to be executed.
      */
     public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: Db2TransConn) -> Unit): Unit =
-        this.service.transaction(isoLevel = isolationLevel) { body(Db2TransConn(conn = it, ser = this.ser)) }
+        this.conn.transaction(isoLevel = isolationLevel) { body(Db2TransConn(conn = it, ser = this.ser)) }
 }

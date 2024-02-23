@@ -1,7 +1,5 @@
 package com.urosjarc.dbmessiah.data
 
-import com.urosjarc.dbmessiah.data.Query
-import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.serializers.StringTS
 import org.junit.jupiter.api.BeforeEach
 import java.sql.JDBCType

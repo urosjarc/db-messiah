@@ -55,10 +55,12 @@ public open class DerbySerializer(
         //Return created query
         return Query(sql = "CREATE TABLE ${T.path} ($columns)")
     }
+
     override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH FIRST ${page.limit} ROWS ONLY")
     }
+
     override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "DROP TABLE ${T.path}")

@@ -102,7 +102,13 @@ class Test_TableInfo {
         val entity = Entity(pk = 1, fk = "2", col = "3")
         val queryValues = this.tableInfo.queryValues(entity)
         assertEquals(expected = 2, queryValues.size)
-        assertEquals(actual = queryValues[0], expected = QueryValue(name = "fk", value = "2", jdbcType = JDBCType.VARCHAR, encoder = foreignColumn.encoder))
-        assertEquals(actual = queryValues[1], expected = QueryValue(name = "col", value = "3", jdbcType = JDBCType.VARCHAR, encoder = otherColumn.encoder))
+        assertEquals(
+            actual = queryValues[0],
+            expected = QueryValue(name = "fk", value = "2", jdbcType = JDBCType.VARCHAR, encoder = foreignColumn.encoder)
+        )
+        assertEquals(
+            actual = queryValues[1],
+            expected = QueryValue(name = "col", value = "3", jdbcType = JDBCType.VARCHAR, encoder = otherColumn.encoder)
+        )
     }
 }

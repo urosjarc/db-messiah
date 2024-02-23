@@ -86,7 +86,7 @@ internal class MapperTests(val mapper: Mapper) {
     /**
      * CHECK FOR PROCEDURES
      */
-    fun `9-th Test - If all procedures arguments have been inited and connected with its owner`(){
+    fun `9-th Test - If all procedures arguments have been inited and connected with its owner`() {
         this.mapper.procedures.forEach { P ->
             P.args.forEach {
                 if (P != it.procedure) throw MapperException("Argument '${it.path}' have parent '${it.procedure}' but it should have parent: '${P}'")

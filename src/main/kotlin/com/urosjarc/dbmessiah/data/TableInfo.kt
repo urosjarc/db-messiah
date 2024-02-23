@@ -90,6 +90,7 @@ internal data class TableInfo(
      * Represents a list of JDBC types derived from the [userControlledColumns].
      */
     val jdbcTypes: MutableList<JDBCType> get() = this.userControlledColumns.map { it.jdbcType }.toMutableList()
+
     /**
      * Represents a list of [Encoder] derived from the [userControlledColumns].
      */

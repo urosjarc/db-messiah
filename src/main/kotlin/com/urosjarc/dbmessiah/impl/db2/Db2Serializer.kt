@@ -54,6 +54,7 @@ public open class Db2Serializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
+
     override fun insertQuery(obj: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = obj)
         return Query(

@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah.impl.mssql
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.domain.Page
 import kotlin.reflect.KClass
 
 
@@ -61,6 +61,7 @@ public open class MssqlSerializer(
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY")
     }
+
     override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}")

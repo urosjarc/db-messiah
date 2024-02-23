@@ -6,12 +6,14 @@ import kotlin.random.Random
 data class TestProcedure(
     val parent_pk: Int
 )
+
 class TestProcedureEmpty
 
 data class Input(
     val child_pk: Int,
     val parent_pk: Int,
 )
+
 data class Output(
     val child_pk: Int,
     val parent_pk: Int,

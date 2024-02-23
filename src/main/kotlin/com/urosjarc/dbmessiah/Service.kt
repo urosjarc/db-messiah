@@ -1,114 +1,38 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.exceptions.ServiceException
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import com.zaxxer.hikari.util.IsolationLevel
-import org.apache.logging.log4j.kotlin.logger
-import java.sql.Connection
+import java.util.*
 
 /**
- * This class represents a Service that creates query or transactional connections on which
- * queries can be executed.
+ * This class represents a Service that provides query and transactional operations on a database.
  *
- * @param conf The HikariConfig object used to configure the connection pool.
- */
-public open class Service(conf: HikariConfig) {
-    /** @suppress */
-    private val log = this.logger()
+ * @property conn The connection pool for creating query or transactional connections.
+ * @property ser The serializer for serializing and deserializing data.
+ * */
+public abstract class Service {
+    internal val conn: ConnectionPool
+    internal val ser: Serializer
 
     /**
-     * Represents a pool of database connections from which connections can be fetched.
+     * This class represents a Service that provides query and transactional operations on a database.
      *
-     * @property source The HikariCP data source instance.
+     * @param config The properties configuration for the connection pool that,
+     * is then directly passed to [HikariCP](https://github.com/brettwooldridge/HikariCP).
+     * @param ser The serializer for serializing and deserializing data.
      */
-    private val source = HikariDataSource(conf)
-
-    /**
-     * Return database connection to connection pool.
-     *
-     * @param conn The database connection to return to connection pool.
-     */
-    private fun close(conn: Connection?) {
-        try {
-            conn?.close()
-        } catch (e: Throwable) {
-            this.log.error("Closing connection failed", e)
-        }
+    public constructor(config: Properties, ser: Serializer) {
+        this.ser = ser
+        this.conn = ConnectionPool(config)
     }
 
     /**
-     * Rollbacks changes on given database connection.
+     * Construct a Service object with the given configuration path and serializer.
      *
-     * @param conn the connection to rollback
+     * @param configPath The path to properties configuration for the connection pool,
+     * that is then directly passed to [HikariCP](https://github.com/brettwooldridge/HikariCP).
+     * @param ser The serializer for serializing and deserializing data.
      */
-    private fun rollback(conn: Connection?) {
-        try {
-            conn?.rollback()
-        } catch (e: Throwable) {
-            this.log.error("Rollback connection failed", e)
-        }
-    }
-
-    /**
-     * Fetch available connection from connection pool which will be non-transactional.
-     *
-     * @param readOnly Specifies whether the connection should be read-only.
-     * @param body The query logic to be executed on the connection.
-     * @throws ServiceException if the query was interrupted by an exception.
-     */
-    public fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
-        var conn: Connection? = null
-        try {
-            //Getting connection
-            conn = source.connection
-
-            //Will connection be read only
-            conn.isReadOnly = readOnly
-
-            //Execute query body and get user result
-            body(conn)
-
-            //Close connection
-            this.close(conn = conn)
-
-        } catch (e: Throwable) {
-            this.close(conn = conn)
-            throw ServiceException("Query was interupted by exception", e)
-        }
-    }
-
-    /**
-     * Fetch available connection from connection pool which will be transactional.
-     *
-     * @param isoLevel The isolation level for the transaction.
-     * @param body The transaction logic to be executed.
-     * @throws ServiceException if an exception occurs during the transaction.
-     */
-    public fun transaction(isoLevel: IsolationLevel? = null, body: (conn: Connection) -> Unit) {
-        var conn: Connection? = null
-        try {
-            //Getting connection
-            conn = source.connection
-
-            //Start transaction
-            conn.autoCommit = false
-
-            //Set user defined isolation level
-            this.log.info("Transaction type: ${conn.transactionIsolation}")
-            if (isoLevel != null) conn.transactionIsolation = isoLevel.ordinal
-
-            //Execute transaction body and get user result
-            body(conn)
-
-            //Commit changes and close connection
-            conn.commit()
-            conn.close()
-        } catch (e: Throwable) {
-            //If any error occurse that is not user handled then rollback, close and raise exception
-            this.rollback(conn = conn)
-            this.close(conn = conn)
-            throw ServiceException("Transaction was interupted by exception, executing rollback", e)
-        }
+    public constructor(configPath: String, ser: Serializer) {
+        this.ser = ser
+        this.conn = ConnectionPool(configPath)
     }
 }

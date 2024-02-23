@@ -7,8 +7,8 @@ import com.urosjarc.dbmessiah.impl.db2.Db2Schema
 import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.*
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -24,10 +24,10 @@ open class Test_Db2 : Test_Contract {
         @BeforeAll
         fun init() {
             service = Db2Service(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:db2://localhost:50000/main"
-                    this.username = "db2inst1"
-                    this.password = "root"
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:db2://localhost:50000/main"
+                    this["username"] = "db2inst1"
+                    this["password"] = "root"
                 },
                 ser = Db2Serializer(
                     schemas = listOf(

@@ -7,11 +7,11 @@ import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
 
@@ -27,10 +27,10 @@ open class Test_Postgresql : Test_Contract {
         @BeforeAll
         fun init() {
             service = PgService(
-                conf = HikariConfig().apply {
-                    this.jdbcUrl = "jdbc:postgresql://localhost:5432/public"
-                    this.username = "root"
-                    this.password = "root"
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"
+                    this["username"] = "root"
+                    this["password"] = "root"
                 },
                 ser = PgSerializer(
                     schemas = listOf(

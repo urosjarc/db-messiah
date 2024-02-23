@@ -1,4 +1,5 @@
 package com.urosjarc.dbmessiah.domain
+
 import org.junit.jupiter.api.BeforeEach
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -47,6 +48,7 @@ class Test_Table {
         //Primary key constraint should be injected automaticly
         assertEquals(expected = listOf(C.AUTO_INC), table.primaryKeyConstraints)
     }
+
     @Test
     fun `test toString()`() {
         //Primary key constraint should be injected automaticly
