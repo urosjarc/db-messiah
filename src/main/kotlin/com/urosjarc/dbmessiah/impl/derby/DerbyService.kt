@@ -3,8 +3,8 @@ package com.urosjarc.dbmessiah.impl.derby
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
-import com.urosjarc.dbmessiah.TransConn
-import com.urosjarc.dbmessiah.domain.queries.*
+import com.urosjarc.dbmessiah.domain.TransConn
+import com.urosjarc.dbmessiah.queries.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection

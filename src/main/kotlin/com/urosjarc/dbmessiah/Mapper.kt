@@ -1,15 +1,15 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.call.Procedure
-import com.urosjarc.dbmessiah.domain.call.ProcedureArg
-import com.urosjarc.dbmessiah.domain.columns.C
-import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
-import com.urosjarc.dbmessiah.domain.columns.OtherColumn
-import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
-import com.urosjarc.dbmessiah.domain.serialization.DecodeInfo
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Table
-import com.urosjarc.dbmessiah.domain.table.TableInfo
+import com.urosjarc.dbmessiah.domain.C
+import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.data.Procedure
+import com.urosjarc.dbmessiah.data.ProcedureArg
+import com.urosjarc.dbmessiah.data.ForeignColumn
+import com.urosjarc.dbmessiah.data.OtherColumn
+import com.urosjarc.dbmessiah.data.PrimaryColumn
+import com.urosjarc.dbmessiah.data.DecodeInfo
+import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.tests.MapperTests

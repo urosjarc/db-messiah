@@ -1,17 +1,17 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.domain.call.Procedure
-import com.urosjarc.dbmessiah.domain.call.ProcedureArg
-import com.urosjarc.dbmessiah.domain.columns.ForeignColumn
-import com.urosjarc.dbmessiah.domain.columns.OtherColumn
-import com.urosjarc.dbmessiah.domain.columns.PrimaryColumn
+import com.urosjarc.dbmessiah.data.Procedure
+import com.urosjarc.dbmessiah.data.ProcedureArg
+import com.urosjarc.dbmessiah.data.ForeignColumn
+import com.urosjarc.dbmessiah.data.OtherColumn
+import com.urosjarc.dbmessiah.data.PrimaryColumn
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.domain.table.Table
-import com.urosjarc.dbmessiah.domain.table.TableInfo
+import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
-import com.urosjarc.dbmessiah.types.AllTS
+import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType

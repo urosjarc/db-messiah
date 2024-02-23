@@ -1,11 +1,11 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.table.Page
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
 import com.urosjarc.dbmessiah.impl.maria.MariaService
-import com.urosjarc.dbmessiah.types.AllTS
+import com.urosjarc.dbmessiah.serializers.AllTS
 import com.zaxxer.hikari.HikariConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

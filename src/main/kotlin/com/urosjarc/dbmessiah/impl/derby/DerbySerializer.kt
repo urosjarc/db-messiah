@@ -2,10 +2,10 @@ package com.urosjarc.dbmessiah.impl.derby
 
 import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.querie.Query
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Page
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.data.Query
+import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.domain.Table
 import kotlin.reflect.KClass
 
 

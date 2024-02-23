@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.querie.Query
-import com.urosjarc.dbmessiah.domain.querie.QueryBuilder
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Page
+import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.data.Query
+import com.urosjarc.dbmessiah.data.QueryBuilder
+import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import kotlin.reflect.KClass
 
@@ -155,5 +155,4 @@ public abstract class Serializer(
         val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
         return qBuilder.build(sql = getSql(qBuilder))
     }
-
 }

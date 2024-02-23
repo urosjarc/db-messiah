@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.domain.call.Procedure
-import com.urosjarc.dbmessiah.domain.table.TableInfo
+import com.urosjarc.dbmessiah.data.Procedure
+import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique

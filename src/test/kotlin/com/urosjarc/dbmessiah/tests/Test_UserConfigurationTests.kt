@@ -2,11 +2,11 @@ package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.domain.columns.C
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.domain.C
+import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
-import com.urosjarc.dbmessiah.types.AllTS
-import com.urosjarc.dbmessiah.types.NumberTS
+import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.NumberTS
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains

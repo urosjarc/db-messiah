@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah.tests
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.domain.columns.C
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass

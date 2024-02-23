@@ -24,6 +24,17 @@ testlogger {
     this.setTheme("mocha")
 }
 
+tasks.dokkaHtml {
+    dokkaSourceSets {
+        create("main") {
+            includeNonPublic.set(true)
+            skipDeprecated.set(false)
+            reportUndocumented.set(true)
+            skipEmptyPackages.set(true)
+        }
+    }
+}
+
 dependencies {
     implementation(kotlin("reflect"))
     //Pool connection

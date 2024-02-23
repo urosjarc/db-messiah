@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.impl.maria
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.querie.Query
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
+import com.urosjarc.dbmessiah.data.Query
+import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
 
 

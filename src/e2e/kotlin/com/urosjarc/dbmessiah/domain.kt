@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.domain.Table
 import kotlin.random.Random
 
 data class TestProcedure(

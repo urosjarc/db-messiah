@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
 
 public open class Schema(

@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.impl.h2
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
-import com.urosjarc.dbmessiah.domain.table.Table
+import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.domain.Table
 
 public open class H2Schema(
     name: String,

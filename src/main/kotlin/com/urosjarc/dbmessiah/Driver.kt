@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.querie.BatchQuery
-import com.urosjarc.dbmessiah.domain.querie.Query
-import com.urosjarc.dbmessiah.domain.querie.QueryValue
-import com.urosjarc.dbmessiah.domain.serialization.Encoder
+import com.urosjarc.dbmessiah.data.BatchQuery
+import com.urosjarc.dbmessiah.data.Query
+import com.urosjarc.dbmessiah.data.QueryValue
+import com.urosjarc.dbmessiah.data.Encoder
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
 import org.apache.logging.log4j.kotlin.logger

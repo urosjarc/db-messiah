@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah.impl.mssql
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.domain.table.Page
-import com.urosjarc.dbmessiah.domain.querie.Query
-import com.urosjarc.dbmessiah.domain.serialization.TypeSerializer
+import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.data.Query
+import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
 
 
