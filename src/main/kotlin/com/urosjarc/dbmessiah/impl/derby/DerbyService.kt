@@ -3,9 +3,9 @@ package com.urosjarc.dbmessiah.impl.derby
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
+import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.domain.TransConn
 import com.urosjarc.dbmessiah.queries.*
-import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 import java.util.*
 
@@ -44,10 +44,10 @@ public open class DerbyService : Service {
     /**
      * Provides connection on which transactional queries can be executed.
      *
-     * @param isolationLevel The isolation level for the transaction. Default is null.
+     * @param isolation The isolation level for the transaction. Default is null.
      * @param body The transaction logic to be executed on the connection.
      * @throws ServiceException if an exception occurs during the transaction.
      */
-    public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: DerbyTransConn) -> Unit): Unit =
-        this.conn.transaction(isoLevel = isolationLevel) { body(DerbyTransConn(conn = it, ser = this.ser)) }
+    public fun transaction(isolation: Isolation? = null, body: (tr: DerbyTransConn) -> Unit): Unit =
+        this.conn.transaction(isolation = isolation) { body(DerbyTransConn(conn = it, ser = this.ser)) }
 }

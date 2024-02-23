@@ -10,6 +10,7 @@ import java.sql.Savepoint
  * @property conn The Connection object to manage transactions on.
  */
 public class TransConn(private val conn: Connection) {
+
     /**
      * It reverts all changes made in the current database connection.
      */

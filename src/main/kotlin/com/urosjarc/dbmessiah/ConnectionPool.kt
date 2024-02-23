@@ -1,9 +1,9 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.exceptions.ServiceException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import com.zaxxer.hikari.util.IsolationLevel
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.Connection
 import java.util.*
@@ -110,11 +110,11 @@ public open class ConnectionPool {
     /**
      * Fetch available connection from connection pool which will be transactional.
      *
-     * @param isoLevel The isolation level for the transaction.
+     * @param isolation The isolation level for the transaction.
      * @param body The transaction logic to be executed.
      * @throws ServiceException if an exception occurs during the transaction.
      */
-    public fun transaction(isoLevel: IsolationLevel? = null, body: (conn: Connection) -> Unit) {
+    public fun transaction(isolation: Isolation? = null, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection
@@ -125,7 +125,7 @@ public open class ConnectionPool {
 
             //Set user defined isolation level
             this.log.info("Transaction type: ${conn.transactionIsolation}")
-            if (isoLevel != null) conn.transactionIsolation = isoLevel.ordinal
+            if (isolation != null) conn.transactionIsolation = isolation.ordinal
 
             //Execute transaction body and get user result
             body(conn)

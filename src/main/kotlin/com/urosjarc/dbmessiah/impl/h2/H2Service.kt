@@ -3,9 +3,9 @@ package com.urosjarc.dbmessiah.impl.h2
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
+import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.domain.TransConn
 import com.urosjarc.dbmessiah.queries.*
-import com.zaxxer.hikari.util.IsolationLevel
 import java.sql.Connection
 import java.util.*
 
@@ -43,10 +43,10 @@ public open class H2Service : Service {
     /**
      * Provides connection on which transactional queries can be executed.
      *
-     * @param isolationLevel The isolation level for the transaction.
+     * @param isolation The isolation level for the transaction.
      * @param body The transaction logic to be executed.
      * @throws ServiceException if an exception occurs during the transaction.
      */
-    public fun transaction(isolationLevel: IsolationLevel? = null, body: (tr: H2TransConn) -> Unit): Unit =
-        this.conn.transaction(isoLevel = isolationLevel) { body(H2TransConn(conn = it, ser = this.ser)) }
+    public fun transaction(isolation: Isolation? = null, body: (tr: H2TransConn) -> Unit): Unit =
+        this.conn.transaction(isolation = isolation) { body(H2TransConn(conn = it, ser = this.ser)) }
 }

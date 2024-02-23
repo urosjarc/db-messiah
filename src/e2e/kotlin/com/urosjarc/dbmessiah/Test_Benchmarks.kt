@@ -5,7 +5,7 @@ import kotlin.math.absoluteValue
 import kotlin.reflect.KCallable
 import kotlin.system.measureNanoTime
 
-class Benchmarks {
+class Test_Benchmarks {
 
     val numCycles = 0
 
