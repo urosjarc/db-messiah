@@ -16,6 +16,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test
 
+      - name: Run demo tests
+        run: ./gradlew demo
+
       - name: Run e2e tests
         run: ./gradlew e2e
 

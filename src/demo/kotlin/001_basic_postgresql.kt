@@ -2,11 +2,9 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
-import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.*
+import kotlin.test.assertEquals
 
 
 /**
@@ -94,16 +92,37 @@ fun main_001() {
          * Library will group batch operations in groups of 1000 and then execute
          * each group one by one in order to not block the database process.
          */
-//        it.batch.insert()
+        val pgParents = MutableList(size = 100) { PgParent(value = "$it parent") }
+        val numInserted = it.batch.insert(pgParents)
+        assertEquals(numInserted, 100)
 
         /**
-         * 8. Drop tables
+         * 9. Get all inserted rows since primary key is not retrieved in batch queries.
+         */
+        val newPgParents = it.table.select(table = PgParent::class)
+
+        /**
+         * 10. Batch update
+         */
+        newPgParents.forEach { it.value += " new" }
+        val numUpdated = it.batch.update(newPgParents)
+        assertEquals(numUpdated, 100)
+
+        /**
+         * 11. Batch delete
+         */
+        newPgParents.forEach { it.value += " new" }
+        val numDeleted = it.batch.delete(newPgParents)
+        assertEquals(numDeleted, 100)
+
+        /**
+         * 12. Drop tables
          */
         it.table.drop(table = PgChild::class)
         it.table.drop(table = PgParent::class)
 
         /**
-         * 9. Drop schema
+         * 13. Drop schema
          */
         it.schema.drop(schema = parent_schema)
         it.schema.drop(schema = child_schema)
