@@ -2,14 +2,17 @@ import org.junit.jupiter.api.Test
 
 class Test_All {
     @Test
-    fun `test sqlite basic`() = main_000()
+    fun `test basic sqlite`() = main_000()
 
     @Test
-    fun `test postgresql basic`() = main_001()
+    fun `test basic postgresql`() = main_001()
 
     @Test
-    fun `test sqlite custom queries`() = main_002()
+    fun `test query sqlite`() = main_002()
 
     @Test
-    fun `test postgresql custom queries`() = main_003()
+    fun `test query postgresql`() = main_003()
+
+    @Test
+    fun `test custom type serializers`() = main_008()
 }

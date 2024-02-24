@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 
 /**
- * 1. Define your domain classes (tables)...
+ * Define your domain classes (tables)...
  */
 data class Parent1(
     var pk: Int? = null,
@@ -24,8 +24,7 @@ data class Child1(
 )
 
 /**
- * 2. Define your database schemas
- *
+ * Define your database schemas
  * In sqlite there is no schema to be defined (sqlite does have schemas).
  * But in postgresql you have schemas so you have to define your tables to
  * appropriate schema and follow best practice for that specific database.
@@ -48,8 +47,7 @@ val child1_schema = PgSchema(
 )
 
 /**
- * 3. Create database service...
- *
+ * Create database service...
  * Note that for different databases the Serializer API will differ since there are some differences between databases.
  * The same goes for the queries! Not all database will support some query functionality... The library tries to
  * adapt to those differences as much as possible to reflect supported functionality by the specific database.
@@ -70,15 +68,14 @@ val pgService0 = PgService(config = postgresqlConfig, ser = pgSerializer0)
 fun main_001() {
     pgService0.query {
         /**
-         * 4. Create schema
-         *
+         * Create schema
          * Note that nothing in this library will be created by it self
          */
         it.schema.create(schema = parent1_schema) // We have defined schema as variable so that we can use it in tape safe maner.
         it.schema.create(schema = child1_schema)  // We have defined schema as variable so that we can use it in tape safe maner.
 
         /**
-         * 5. Create tables and reset them
+         * Create tables and reset them
          */
         it.table.create(table = Parent1::class)
         it.table.create(table = Child1::class)
@@ -86,8 +83,7 @@ fun main_001() {
         it.table.delete(table = Child1::class)
 
         /**
-         * 6. Make some batch inserts
-         *
+         * Make some batch inserts
          * Note that batch inserts are highly optimized! If you don't care
          * to retrieve primary keys then batch operations are preferred!
          * Library will group batch operations in groups of 1000 and then execute
@@ -98,54 +94,52 @@ fun main_001() {
         assertEquals(numInserted, 100)
 
         /**
-         * 7. Get all inserted rows since primary key is not retrieved in batch queries.
+         * Get all inserted rows since primary key is not retrieved in batch queries.
          */
         val newPgParents = it.table.select(table = Parent1::class)
 
         /**
-         * 8. Batch update
+         * Batch update
          */
         newPgParents.forEach { it.value += " new" }
         val numUpdated = it.batch.update(newPgParents)
         assertEquals(numUpdated, 100)
 
         /**
-         * 9. Select specific page with offset pagination.
-         *
+         * Select specific page with offset pagination.
          * Note that this should be used for small tables.
          */
         val page0 = it.table.select(table = Parent1::class, page = Page(number = 3, orderBy = Parent1::pk, limit = 4))
         assertEquals(page0.size, 4)
 
         /**
-         * 10. Select specific page with cursor pagination.
-         *
+         * Select specific page with cursor pagination.
          * Note that this should be used for big tables.
          */
         val page1 = it.table.select(table = Parent1::class, cursor = Cursor(index = 3, orderBy = Parent1::pk, limit = 4))
         assertEquals(page1.size, 4)
 
         /**
-         * 11. Cursor pagination with better type safety.
+         * Cursor pagination with better type safety.
          */
         val page2 = it.table.select(table = Parent1::class, cursor = Cursor(row = page1[0], orderBy = Parent1::pk, limit = 4))
         assertEquals(page2.size, 4)
 
         /**
-         * 12. Batch delete
+         * Batch delete
          */
         newPgParents.forEach { it.value += " new" }
         val numDeleted = it.batch.delete(newPgParents)
         assertEquals(numDeleted, 100)
 
         /**
-         * 13. Drop tables (with cascading)
+         * Drop tables (with cascading)
          */
         it.table.dropCascade(table = Child1::class)
         it.table.dropCascade(table = Parent1::class)
 
         /**
-         * 14. Drop schema
+         * Drop schema
          */
         it.schema.drop(schema = parent1_schema)
         it.schema.drop(schema = child1_schema)

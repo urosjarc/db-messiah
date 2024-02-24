@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * 1. Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
+ * Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
  */
 data class Parent2(
     var pk: Int? = null,
@@ -30,7 +30,7 @@ data class Input2(
 )
 
 /**
- * 2. Create database serializer and explain database structure...
+ * Create database serializer and explain database structure...
  */
 val sqliteSerializer1 = SqliteSerializer(
     tables = listOf(
@@ -52,24 +52,22 @@ fun main_002() {
     sqliteService1.query {
 
         /**
-         * 3. Create table for parent and child
+         * Create table for parent and child
          */
         it.table.create(table = Parent2::class)
         it.table.create(table = Child2::class)
 
         /**
-         * 4. Write custom query without input or output
-         *
+         * Write custom query without input or output
          * If you are using JetBrains you can use SUPER DUPER "inject SQL language reference"
          * to the SQL string and execute it directly in the editor!!!
-         *
          * > https://www.jetbrains.com/help/idea/using-language-injections.html
          */
         it.run.query { "INSERT INTO Parent2 (pk, value) VALUES (1, 'parent_asdf')" }
         it.run.query { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (1, 1, 'child_asdf')" }
 
         /**
-         * 5. Write custom query with output
+         * Write custom query with output
          */
         val output0 = it.run.query(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 1" }
         val output1 = it.run.query(output = Child2::class) { "SELECT * FROM Child2" }
@@ -77,8 +75,7 @@ fun main_002() {
         assertEquals(output1.size, 1)
 
         /**
-         * 6. Write SQL injection safe custom query with output and input
-         *
+         * Write SQL injection safe custom query with output and input
          * For input objects you can use any table registered in serializer, if you use custom objects (not tables)
          * you will have to defined them to globalInputs in the serializer constructor to ensure type safety.
          */
@@ -96,10 +93,10 @@ fun main_002() {
         assertEquals(output2[0].pk, 1)
 
         /**
-         * 7. Write custom query with custom output and input
-         *
+         * Write custom query with custom output and input
          * Note that Sqlite driver only supports one output per database call thats why you can have only one output!
          * Other databases can support many outputs per output since underling driver supports it...
+         *
          * > https://github.com/xerial/sqlite-jdbc/issues/1062
          *
          * Those who use JetBrains please dont forget to inject sql string with reference so that you can directly test sql string on your database.

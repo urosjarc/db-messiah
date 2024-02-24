@@ -25,6 +25,10 @@ repositories {
 testlogger {
     this.setTheme("mocha")
 }
+tasks.register<GradleBuild>("github") {
+    this.group = "verification"
+    this.tasks = listOf("test", "demo", "e2e")
+}
 
 tasks.dokkaHtml {
     dokkaSourceSets {
@@ -83,6 +87,7 @@ testing {
         register<JvmTestSuite>("demo") {
             dependencies {
                 implementation(project())
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
             }

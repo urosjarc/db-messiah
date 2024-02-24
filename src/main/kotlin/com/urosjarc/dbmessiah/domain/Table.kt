@@ -24,7 +24,7 @@ public class Table<T : Any>(
     public val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
     internal var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
     internal val serializers: List<TypeSerializer<*>> = listOf(),
-    internal val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<Any>>> = listOf()
+    internal val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<*>>> = listOf()
 ) {
     init {
         //If user has not provided constraints for primary key, then add default ones here

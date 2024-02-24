@@ -7,7 +7,7 @@ import kotlin.test.*
 
 
 /**
- * 1. Define your domain classes (tables)...
+ * Define your domain classes (tables)...
  */
 data class Parent0(
     var pk: Int? = null, // Primary keys should be mutable (since value will be set on insert action)...
@@ -21,7 +21,7 @@ data class Child0(
 )
 
 /**
- * 2. Create database serializer and explain database structure...
+ * Create database serializer and explain database structure...
  */
 val sqliteSerializer0 = SqliteSerializer(
     tables = listOf(
@@ -36,8 +36,7 @@ val sqliteSerializer0 = SqliteSerializer(
 )
 
 /**
- * 3. Define HikariCP configuration...
- *
+ * Define HikariCP configuration...
  * > https://github.com/brettwooldridge/HikariCP
  * > https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#rocket-initialization
  */
@@ -46,19 +45,19 @@ val sqliteConfig = Properties().apply {
 }
 
 /**
- * 4. Create database service by providing it your db serializer and db configuration...
+ * Create database service by providing it your db serializer and db configuration...
  */
 val sqliteService0 = SqliteService(config = sqliteConfig, ser = sqliteSerializer0)
 
 fun main_000() {
     sqliteService0.query { // Fetch available non-transactional connection from HikariCP connection pool ...
         /**
-         * 5. Create table...
+         * Create table...
          */
         it.table.create(table = Parent0::class) // Create new table...
 
         /**
-         * 6. Insert row...
+         * Insert row...
          */
         val parent0 = Parent0(value = "Hello World")    // Create new object...
         val isInserted = it.row.insert(row = parent0)  // Insert object to table...
@@ -66,33 +65,32 @@ fun main_000() {
         assertNotNull(parent0.pk)                      // Check if object has primary key...
 
         /**
-         * 7. Select all table elements
+         * Select all table elements
          */
         val parents0 = it.table.select(table = Parent0::class) // SELECT all table elements...
         assertContains(parents0, parent0)                      // Parent is contained in selected elements...
 
         /**
-         * 8. Update row
+         * Update row
          */
         parent0.value = "Hello Space" // Change value or the object (row)...
         it.row.update(row = parent0)  // Send this change to the database...
 
         /**
-         * 9. Check if change was updated
+         * Check if change was updated
          */
         val parent1 = it.row.select(table = Parent0::class, pk = parent0.pk!!) // Get specific row from the table by primary key...
         assertEquals(parent1, parent0)                                        // Parent is equal to original...
 
         /**
-         * 10. Remove row
+         * Remove row
          */
         val isDeleted = it.row.delete(row = parent0) // Delete row from database
         assertTrue(isDeleted)                       // Check if object was deleted...
         assertNull(parent0.pk)                       // Check if objects primary key was reseted on null...
 
         /**
-         * 11. Insert many rows
-         *
+         * Insert many rows
          * Note that inserting rows will create database call for each row and another call for fetching primary key.
          * So if you are inserting 3 rows to database there there will be 6 database calls in the worst case.
          * If database driver supports fetching primary key there will be only 3 database calls.
@@ -107,27 +105,27 @@ fun main_000() {
         assertFalse(parents1.map { it.pk }.contains(null))  // All primary keys should be setted by the library...
 
         /**
-         * 12. Update many rows
+         * Update many rows
          */
         parents1.forEach { it.value += "_new" }
         val areUpdated = it.row.update(parents1)
         assertFalse(areUpdated.contains(false))   // Check if list of bools does not have false values (all are updated)...
 
         /**
-         * 13. Remove many rows
+         * Remove many rows
          */
         val areDeleted = it.row.delete(parents1) // Delete all parents...
         assertFalse(areDeleted.contains(false))  // Check if list of bools does not have false values (all are updated)...
         parents1.forEach { assertNull(it.pk) }   // All primary keys should be reseted by the library...
 
         /**
-         * 14. Delete all table rows...
+         * Delete all table rows...
          */
         val numDeleted = it.table.delete(table = Parent0::class)
         assertEquals(numDeleted, 0)                             // Num deleted should be 0 since there was no children in the table
 
         /**
-         * 15. Drop table
+         * Drop table
          */
         it.table.drop(table = Child0::class)  // Drop table from database
         it.table.drop(table = Parent0::class) // Drop table from database

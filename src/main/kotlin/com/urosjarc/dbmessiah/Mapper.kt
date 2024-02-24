@@ -172,7 +172,7 @@ public class Mapper(
      */
     private fun <T : Any> fillAssociationMaps(
         kclass: KClass<*>,
-        columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<Any>>> = listOf(),
+        columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<*>>> = listOf(),
         serializers: List<TypeSerializer<*>>,
         isProcedure: Boolean = false
     ) {

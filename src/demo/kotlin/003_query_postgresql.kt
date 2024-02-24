@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.serializers.AllTS
 import kotlin.test.assertEquals
 
 /**
- * 1. Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
+ * Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
  */
 data class Parent3(
     var pk: Int? = null,
@@ -28,7 +28,7 @@ data class Input3(
     val parent_pk: Int
 )
 
-val mainSchema = PgSchema(
+val mainSchema3 = PgSchema(
     name = "main", tables = listOf(
         Table(Parent3::pk),
         Table(
@@ -40,10 +40,10 @@ val mainSchema = PgSchema(
 )
 
 /**
- * 2. Create database serializer and explain database structure...
+ * Create database serializer and explain database structure...
  */
 val postgresqlSerializer1 = PgSerializer(
-    schemas = listOf(mainSchema),
+    schemas = listOf(mainSchema3),
     globalSerializers = AllTS.basic,
     globalOutputs = listOf(Output3::class), // Note if you use custom objects as input or output you have to register them to global inputs or outputs.
     globalInputs = listOf(Input3::class),   // This is because library uses reflection at initilization to scan objects of their properties, constructors etc...
@@ -53,18 +53,21 @@ val postgresqlService1 = PgService(config = postgresqlConfig, ser = postgresqlSe
 
 fun main_003() {
     postgresqlService1.query { it ->
+        /**
+         * Setup schema
+         */
+        it.schema.create(schema = mainSchema3)
         it.table.dropCascade(table = Parent3::class)
         it.table.dropCascade(table = Child3::class)
 
         /**
-         * 3. Create table for parent and child
+         * Create table for parent and child
          */
         it.table.create(table = Parent3::class)
         it.table.create(table = Child3::class)
 
         /**
-         * 4. Write custom query without input or output
-         *
+         * Write custom query without input or output
          * Sqlite driver support only one query per database call,
          * Postgresql driver on other hand it supports many per db call...
          */
@@ -87,8 +90,7 @@ fun main_003() {
         }
 
         /**
-         * 5. Write custom query with multiple output
-         *
+         * Write custom query with multiple output
          * Note that now returning structure will be 2D list of Any objects where each row represents results
          * from one query. If you would like to peak inside list you will have to cast it to specific type...
          */
@@ -103,7 +105,7 @@ fun main_003() {
         assertEquals((matrix0[0] as List<Parent3>).size, 4) // Check the specific row with casting.
 
         /**
-         * 6. Write custom query with multiple output and input
+         * Write custom query with multiple output and input
          */
         val matrix1 = it.run.query(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
             """
