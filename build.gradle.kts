@@ -20,9 +20,6 @@ kotlin {
 
 repositories {
     mavenCentral()
-    maven {
-        setUrl("https://jitpack.io")
-    }
 }
 
 testlogger {
@@ -85,7 +82,7 @@ testing {
 
         register<JvmTestSuite>("demo") {
             dependencies {
-                implementation("com.github.urosjarc:db-messiah:0.0.7")
+                implementation(project())
                 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
             }

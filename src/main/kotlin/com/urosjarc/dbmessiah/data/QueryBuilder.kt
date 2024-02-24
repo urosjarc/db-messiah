@@ -27,8 +27,8 @@ public open class QueryBuilder<IN : Any>(
     private val queryValues: MutableList<QueryValue> = mutableListOf()
 
     init {
-        if (!mapper.globalInputs.contains(input::class))
-            throw SerializerException("Input class '${input::class.simpleName}' is not registered in global inputs")
+        if (!this.mapper.isRegistered(kclass = this.input::class))
+            throw SerializerException("Input class '${this.input::class.simpleName}' is not registered in global inputs")
     }
 
     /**

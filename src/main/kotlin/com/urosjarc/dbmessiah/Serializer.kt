@@ -228,7 +228,7 @@ public abstract class Serializer(
             Order.ASC -> ">="
             Order.DESC -> "<="
         }
-        return Query(sql = "SELECT * FROM ${T.path} WHERE ${cursor.order.name} $lge ${cursor.index} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
+        return Query(sql = "SELECT * FROM ${T.path} WHERE ${cursor.orderBy.name} $lge ${cursor.index} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
     }
 
     /**

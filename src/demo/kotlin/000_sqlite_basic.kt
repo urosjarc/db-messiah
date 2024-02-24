@@ -9,12 +9,12 @@ import kotlin.test.*
 /**
  * 1. Define your domain classes (tables)...
  */
-data class Parent(
+data class Parent0(
     var pk: Int? = null, // Primary keys should be mutable (since value will be set on insert action)...
     var value: String
 )
 
-data class Child(
+data class Child0(
     var pk: Int? = null, // Primary keys should be mutable (since value will be set on insert action)...
     val parent_pk: Int,  // Foreign key pointing to parent primary key...
     var value: String
@@ -23,12 +23,12 @@ data class Child(
 /**
  * 2. Create database serializer and explain database structure...
  */
-val serializer = SqliteSerializer(
+val sqliteSerializer0 = SqliteSerializer(
     tables = listOf(
-        Table(Parent::pk), //Pass primary key reference to table to register `Parent` as db table and mark `pk` as primary key.
+        Table(Parent0::pk), //Pass primary key reference to table to register `Parent` as db table and mark `pk` as primary key.
         Table(
-            Child::pk, foreignKeys = listOf(
-                Child::parent_pk to Parent::class // Define mapping from foreign key to parent table.
+            Child0::pk, foreignKeys = listOf(
+                Child0::parent_pk to Parent0::class // Define mapping from foreign key to parent table.
             )
         ),
     ),
@@ -41,54 +41,54 @@ val serializer = SqliteSerializer(
  * > https://github.com/brettwooldridge/HikariCP
  * > https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#rocket-initialization
  */
-val config = Properties().apply {
+val sqliteConfig = Properties().apply {
     this["jdbcUrl"] = "jdbc:sqlite::memory:"
 }
 
 /**
  * 4. Create database service by providing it your db serializer and db configuration...
  */
-val sqlite = SqliteService(config = config, ser = serializer)
+val sqliteService0 = SqliteService(config = sqliteConfig, ser = sqliteSerializer0)
 
 fun main_000() {
-    sqlite.query { // Fetch available non-transactional connection from HikariCP connection pool ...
+    sqliteService0.query { // Fetch available non-transactional connection from HikariCP connection pool ...
         /**
          * 5. Create table...
          */
-        it.table.create(table = Parent::class) // Create new table...
+        it.table.create(table = Parent0::class) // Create new table...
 
         /**
          * 6. Insert row...
          */
-        val parent = Parent(value = "Hello World")    // Create new object...
-        val isInserted = it.row.insert(row = parent)  // Insert object to table...
+        val parent0 = Parent0(value = "Hello World")    // Create new object...
+        val isInserted = it.row.insert(row = parent0)  // Insert object to table...
         assertTrue(isInserted)                        // Check if object was inserted...
-        assertNotNull(parent.pk)                      // Check if object has primary key...
+        assertNotNull(parent0.pk)                      // Check if object has primary key...
 
         /**
          * 7. Select all table elements
          */
-        val parents0 = it.table.select(table = Parent::class) // SELECT all table elements...
-        assertContains(parents0, parent)                      // Parent is contained in selected elements...
+        val parents0 = it.table.select(table = Parent0::class) // SELECT all table elements...
+        assertContains(parents0, parent0)                      // Parent is contained in selected elements...
 
         /**
          * 8. Update row
          */
-        parent.value = "Hello Space" // Change value or the object (row)...
-        it.row.update(row = parent)  // Send this change to the database...
+        parent0.value = "Hello Space" // Change value or the object (row)...
+        it.row.update(row = parent0)  // Send this change to the database...
 
         /**
          * 9. Check if change was updated
          */
-        val ele2 = it.row.select(table = Parent::class, pk = parent.pk!!) // Get specific row from the table by primary key...
-        assertEquals(ele2, parent)                                        // Parent is equal to original...
+        val parent1 = it.row.select(table = Parent0::class, pk = parent0.pk!!) // Get specific row from the table by primary key...
+        assertEquals(parent1, parent0)                                        // Parent is equal to original...
 
         /**
          * 10. Remove row
          */
-        val isDeleted = it.row.delete(row = parent) // Delete row from database
+        val isDeleted = it.row.delete(row = parent0) // Delete row from database
         assertTrue(isDeleted)                       // Check if object was deleted...
-        assertNull(parent.pk)                       // Check if objects primary key was reseted on null...
+        assertNull(parent0.pk)                       // Check if objects primary key was reseted on null...
 
         /**
          * 11. Insert many rows
@@ -98,9 +98,9 @@ fun main_000() {
          * If database driver supports fetching primary key there will be only 3 database calls.
          */
         val parents1 = listOf(
-            Parent(value = "parent10"),
-            Parent(value = "parent11"),
-            Parent(value = "parent12"),
+            Parent0(value = "parent10"),
+            Parent0(value = "parent11"),
+            Parent0(value = "parent12"),
         )
         val areInserted = it.row.insert(parents1)           // Insert all parents one by one...
         assertFalse(areInserted.contains(false))            // Check if list of bools does not have false values (all are inserted)...
@@ -123,13 +123,13 @@ fun main_000() {
         /**
          * 14. Delete all table rows...
          */
-        val numDeleted = it.table.delete(table = Parent::class)
+        val numDeleted = it.table.delete(table = Parent0::class)
         assertEquals(numDeleted, 0)                             // Num deleted should be 0 since there was no children in the table
 
         /**
          * 15. Drop table
          */
-        it.table.drop(table = Child::class)  // Drop table from database
-        it.table.drop(table = Parent::class) // Drop table from database
+        it.table.drop(table = Child0::class)  // Drop table from database
+        it.table.drop(table = Parent0::class) // Drop table from database
     }
 }

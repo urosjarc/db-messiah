@@ -80,6 +80,19 @@ public class Mapper(
     private val kprop_to_serializer = mutableMapOf<KProperty1<out Any, Any?>, TypeSerializer<out Any>>()
 
     /**
+     * Checks if the given class is registered or associated by the [Mapper] with [fillAssociationMaps].
+     *
+     * @param kclass The class to check for.
+     * @return True if the class is associated, False otherwise.
+     */
+    public fun isRegistered(kclass: KClass<*>): Boolean {
+        val hasConst = this.kclass_to_constructor.containsKey(key = kclass)
+        val hasConstParams = this.kclass_to_constructorParameters.containsKey(key = kclass)
+        val hasProps = this.kclass_to_kprops.containsKey(key = kclass)
+        return hasProps && hasConst && hasConstParams
+    }
+
+    /**
      * Retrieves the list of properties (KProperty1) for a given class (KClass).
      *
      * @param kclass The class for which to retrieve the properties.
@@ -149,6 +162,7 @@ public class Mapper(
 
     /**
      * Fills the association maps for a given table class.
+     * To check if class was associated or registered use [isRegistered] method.
      *
      * @param kclass The class of the table for which to fill the association maps.
      * @param columnSerializers The list of column serializers for the table.
