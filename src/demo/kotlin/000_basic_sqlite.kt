@@ -121,7 +121,13 @@ fun main_000() {
         parents1.forEach { assertNull(it.pk) }   // All primary keys should be reseted by the library...
 
         /**
-         * 14. Drop table
+         * 14. Delete all table rows...
+         */
+        val numDeleted = it.table.delete(table = Parent::class)
+        assertEquals(numDeleted, 0)                             // Num deleted should be 0 since there was no children in the table
+
+        /**
+         * 15. Drop table
          */
         it.table.drop(table = Child::class)  // Drop table from database
         it.table.drop(table = Parent::class) // Drop table from database

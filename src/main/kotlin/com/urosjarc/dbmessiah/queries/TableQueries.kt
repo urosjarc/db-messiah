@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
+import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Page
 import kotlin.reflect.KClass
 
@@ -69,6 +70,21 @@ public open class TableQueries(
      */
     public fun <T : Any> select(table: KClass<T>, page: Page<T>): List<T> {
         val query = this.ser.query(kclass = table, page = page)
+        return this.driver.query(query = query) {
+            this.ser.mapper.decode(resultSet = it, kclass = table)
+        }
+    }
+
+    /**
+     * Select table rows with cursor pagination.
+     * Use this method on big tables.
+     *
+     * @param table The class representing the table to select from.
+     * @param cursor The cursor configuration for fetching items.
+     * @return A list of objects representing the selected rows.
+     */
+    public fun <T: Any, V: Any> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
+        val query = this.ser.query(kclass = table, cursor = cursor)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }

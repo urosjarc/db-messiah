@@ -3,6 +3,7 @@ package com.urosjarc.dbmessiah
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryBuilder
 import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import kotlin.reflect.KClass
@@ -202,7 +203,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates SQL string for selecting rows from table with pagination.
+     * Generates SQL string for selecting rows from table with offset pagination.
      *
      * @param kclass the Kotlin class to query from.
      * @param page the pagination details.
@@ -210,7 +211,19 @@ public abstract class Serializer(
      */
     internal open fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ASC LIMIT ${page.limit} OFFSET ${page.offset}")
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ${page.order} LIMIT ${page.limit} OFFSET ${page.offset}")
+    }
+
+    /**
+     * Generates SQL string for selecting rows from table with cursor pagination.
+     *
+     * @param kclass the Kotlin class representing the table to be queried
+     * @param cursor the cursor object containing query parameters such as order by, order and limit
+     * @return a Query object representing the executed query
+     */
+    internal open fun <T : Any, V: Any> query(kclass: KClass<T>, cursor: Cursor<T, V>): Query {
+        val T = this.mapper.getTableInfo(kclass = kclass)
+        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
     }
 
     /**

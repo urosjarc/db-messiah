@@ -1,3 +1,4 @@
+import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
@@ -47,6 +48,10 @@ val child_schema = PgSchema(
 
 /**
  * 3. Create database serializer and explain database structure...
+ *
+ * Note that for different databases the Serializer API will differ since there are some differences between databases.
+ * The same goes for the queries! Not all database will support some query functionality... The library tries to
+ * adapt to those differences as much as possible to reflect supported functionality by the specific database.
  */
 val pgSerializer = PgSerializer(
     schemas = listOf(parent_schema, child_schema),
@@ -109,20 +114,31 @@ fun main_001() {
         assertEquals(numUpdated, 100)
 
         /**
-         * 11. Batch delete
+         * 11. Select specific page with offset pagination
+         *
+         * Note that this should be used for small tables
+         */
+        val pgParentsOffset = it.table.select(table = PgParent::class, page = Page(number = 3, orderBy = PgParent::pk, limit = 4))
+        assertEquals(pgParentsOffset.size, 4)
+
+//        val pgParentsCursor = it.table.select(table = PgParent::class, cursor = Cursor(number = 3, orderBy = PgParent::pk, limit = 4))
+//        assertEquals(pgParentsCursor.size, 4)
+
+        /**
+         * 12. Batch delete
          */
         newPgParents.forEach { it.value += " new" }
         val numDeleted = it.batch.delete(newPgParents)
         assertEquals(numDeleted, 100)
 
         /**
-         * 12. Drop tables
+         * 13. Drop tables
          */
         it.table.drop(table = PgChild::class)
         it.table.drop(table = PgParent::class)
 
         /**
-         * 13. Drop schema
+         * 14. Drop schema
          */
         it.schema.drop(schema = parent_schema)
         it.schema.drop(schema = child_schema)
