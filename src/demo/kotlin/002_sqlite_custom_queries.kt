@@ -65,15 +65,15 @@ fun main_002() {
          *
          * > https://www.jetbrains.com/help/idea/using-language-injections.html
          */
-        it.run.query { "INSERT INTO Parent2 (pk, value) VALUES (123, 'parent_asdf')" }
-        it.run.query { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (321, 123, 'child_asdf')" }
+        it.run.query { "INSERT INTO Parent2 (pk, value) VALUES (1, 'parent_asdf')" }
+        it.run.query { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (1, 1, 'child_asdf')" }
 
         /**
          * 5. Write custom query with output
          */
-        val output0 = it.run.query(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 123" }
+        val output0 = it.run.query(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 1" }
         val output1 = it.run.query(output = Child2::class) { "SELECT * FROM Child2" }
-        assertEquals(output0[0].pk, 123)
+        assertEquals(output0[0].pk, 1)
         assertEquals(output1.size, 1)
 
         /**
@@ -85,15 +85,15 @@ fun main_002() {
         val output2 = it.run.query(
             output = Parent2::class,
             input = Child2(value = "parent_asdf") // For our input we can also use the same table but lets use different so that it's not confusing...
-        ) { q: QueryBuilder<Child2> ->     // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
-            """SELECT * FROM Parent2 WHERE value = ${q.get(Child2::value)}
+        ) { q: QueryBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
+            """SELECT * FROM Parent2 WHERE value = ${q.put(Child2::value)}
                 
-            -- q.get() will return '?' char back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
+            -- q.put() will return '?' char back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
             -- to read more about magic '?' character please refer to this link: https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html
-            -- q.get() will also register Kproperty1<INPUT, *> and find this property in input object to supply JDBC appropriate value to be replaced instead of '?' character.
+            -- q.put() will also register Kproperty1<INPUT, *> and find this property in input object to supply JDBC appropriate value to be replaced instead of '?' character.
             """
         }
-        assertEquals(output2[0].pk, 123)
+        assertEquals(output2[0].pk, 1)
 
         /**
          * 7. Write custom query with custom output and input
@@ -106,7 +106,7 @@ fun main_002() {
          */
         val output3 = it.run.query(
             output = Output2::class,
-            input = Input2(parent_pk = 123)
+            input = Input2(parent_pk = 1)
         ) {
             """
             SELECT
@@ -114,7 +114,7 @@ fun main_002() {
                 p.value AS ${Output2::parent_value.name} 
             FROM Child2 c
                 JOIN Parent2 p ON c.parent_pk = p.pk
-            WHERE p.pk = ${it.get(Input2::parent_pk)}
+            WHERE p.pk = ${it.put(Input2::parent_pk)}
             """
         }
 

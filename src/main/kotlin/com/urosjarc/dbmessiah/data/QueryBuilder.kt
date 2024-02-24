@@ -21,7 +21,7 @@ public open class QueryBuilder<IN : Any>(
 
     /**
      * Used within the class to accumulate query values while the custom SQL query is being built by the user.
-     * It is populated through the [get] function, which takes a [KProperty1] object representing a property of the input class,
+     * It is populated through the [put] function, which takes a [KProperty1] object representing a property of the input class,
      * and maps it to a corresponding [QueryValue].
      */
     private val queryValues: MutableList<QueryValue> = mutableListOf()
@@ -46,7 +46,7 @@ public open class QueryBuilder<IN : Any>(
      * @param kp The [KProperty1] which should be injected in SQL string.
      * @return The placeholder character "?" indicating the serialized value will be replaced by [QueryValue] in the [queryValues].
      */
-    public fun get(kp: KProperty1<IN, *>): String {
+    public fun put(kp: KProperty1<IN, *>): String {
         val ser = this.mapper.getSerializer(kp)
 
         val qv = QueryValue(

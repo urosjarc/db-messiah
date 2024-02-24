@@ -594,12 +594,12 @@ open class Test_Postgresql : Test_Contract {
                     select *
                     from main.Child C
                     join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.get(Input::parent_pk)};
+                    where P.pk = ${it.put(Input::parent_pk)};
                     
                     select *
                     from main.Child C
                     join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.get(Input::parent_pk)}
+                    where P.pk = ${it.put(Input::parent_pk)}
                 """.trimIndent()
         }
 

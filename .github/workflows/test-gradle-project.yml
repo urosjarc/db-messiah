@@ -13,14 +13,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Run unit tests
-        run: ./gradlew test
-
-      - name: Run demo tests
-        run: ./gradlew demo
-
-      - name: Run e2e tests
-        run: ./gradlew e2e
+      - name: Run all tests
+        run: ./gradlew test demo e2e
 
     services:
 

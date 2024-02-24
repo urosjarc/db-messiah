@@ -9,4 +9,7 @@ class Test_All {
 
     @Test
     fun `test sqlite custom queries`() = main_002()
+
+    @Test
+    fun `test postgresql custom queries`() = main_003()
 }
