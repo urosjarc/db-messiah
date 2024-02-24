@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryBuilder
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Cursor
+import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import kotlin.reflect.KClass
@@ -221,9 +222,13 @@ public abstract class Serializer(
      * @param cursor the cursor object containing query parameters such as order by, order and limit
      * @return a Query object representing the executed query
      */
-    internal open fun <T : Any, V: Any> query(kclass: KClass<T>, cursor: Cursor<T, V>): Query {
+    internal open fun <T : Any, V : Comparable<V>> query(kclass: KClass<T>, cursor: Cursor<T, V>): Query {
         val T = this.mapper.getTableInfo(kclass = kclass)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
+        val lge = when (cursor.order) {
+            Order.ASC -> ">="
+            Order.DESC -> "<="
+        }
+        return Query(sql = "SELECT * FROM ${T.path} WHERE ${cursor.order.name} $lge ${cursor.index} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
     }
 
     /**

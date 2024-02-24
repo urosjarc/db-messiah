@@ -1,3 +1,4 @@
+import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
@@ -114,31 +115,42 @@ fun main_001() {
         assertEquals(numUpdated, 100)
 
         /**
-         * 11. Select specific page with offset pagination
+         * 11. Select specific page with offset pagination.
          *
-         * Note that this should be used for small tables
+         * Note that this should be used for small tables.
          */
-        val pgParentsOffset = it.table.select(table = PgParent::class, page = Page(number = 3, orderBy = PgParent::pk, limit = 4))
-        assertEquals(pgParentsOffset.size, 4)
-
-//        val pgParentsCursor = it.table.select(table = PgParent::class, cursor = Cursor(number = 3, orderBy = PgParent::pk, limit = 4))
-//        assertEquals(pgParentsCursor.size, 4)
+        val page0 = it.table.select(table = PgParent::class, page = Page(number = 3, orderBy = PgParent::pk, limit = 4))
+        assertEquals(page0.size, 4)
 
         /**
-         * 12. Batch delete
+         * 12. Select specific page with cursor pagination.
+         *
+         * Note that this should be used for big tables.
+         */
+        val page1 = it.table.select(table = PgParent::class, cursor = Cursor(index = 3, orderBy = PgParent::pk, limit = 4))
+        assertEquals(page1.size, 4)
+
+        /**
+         * 13. Cursor pagination with better type safety.
+         */
+        val page2 = it.table.select(table = PgParent::class, cursor = Cursor(row = pgParents[0], orderBy = PgParent::pk, limit = 4))
+        assertEquals(page2.size, 4)
+
+        /**
+         * 14. Batch delete
          */
         newPgParents.forEach { it.value += " new" }
         val numDeleted = it.batch.delete(newPgParents)
         assertEquals(numDeleted, 100)
 
         /**
-         * 13. Drop tables
+         * 15. Drop tables
          */
         it.table.drop(table = PgChild::class)
         it.table.drop(table = PgParent::class)
 
         /**
-         * 14. Drop schema
+         * 16. Drop schema
          */
         it.schema.drop(schema = parent_schema)
         it.schema.drop(schema = child_schema)

@@ -1,4 +1,4 @@
-import org.jetbrains.dokka.DokkaConfiguration.*
+import org.jetbrains.dokka.DokkaConfiguration.Visibility
 
 plugins {
     `java-library`
@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.urosjarc"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 
 kotlin {
     explicitApi()
@@ -85,7 +85,7 @@ testing {
 
         register<JvmTestSuite>("demo") {
             dependencies {
-                implementation("com.github.urosjarc:db-messiah:0.0.6")
+                implementation("com.github.urosjarc:db-messiah:0.0.7")
                 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
             }

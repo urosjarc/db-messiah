@@ -83,7 +83,7 @@ public open class TableQueries(
      * @param cursor The cursor configuration for fetching items.
      * @return A list of objects representing the selected rows.
      */
-    public fun <T: Any, V: Any> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
+    public fun <T: Any, V: Comparable<V>> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
         val query = this.ser.query(kclass = table, cursor = cursor)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
