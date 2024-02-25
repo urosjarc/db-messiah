@@ -90,6 +90,7 @@ testing {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
+                runtimeOnly("org.apache.derby:derby:10.17.1.0")
             }
         }
     }

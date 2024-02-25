@@ -55,7 +55,7 @@ open class Test_Db2 : Test_Contract {
     @BeforeEach
     override fun prepare() {
         //Reseting tables
-        service.query {
+        service.autocommit {
             try {
                 it.run.query { "CREATE SCHEMA main" }
             } catch (e: Throwable) {
@@ -72,7 +72,7 @@ open class Test_Db2 : Test_Contract {
         parents = mutableListOf()
 
         //Inserting tables
-        service.query {
+        service.autocommit {
             repeat(times = numParents) { p ->
                 val parent = Parent.get(seed = p)
                 parents.add(parent)
@@ -120,7 +120,7 @@ open class Test_Db2 : Test_Contract {
 
     }
 
-    private fun assertTableNotExists(q: Db2Service.Db2QueryConn, kclass: KClass<*>) {
+    private fun assertTableNotExists(q: Db2Service.Connection, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
@@ -130,7 +130,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test table drop`() = service.query {
+    override fun `test table drop`() = service.autocommit {
         //You can select
         it.table.select(table = Parent::class)
 
@@ -142,7 +142,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test table create`() = service.query {
+    override fun `test table create`() = service.autocommit {
         //Get pre create state
         val preParents = it.table.select(table = Parent::class)
         assertTrue(actual = preParents.isNotEmpty())
@@ -168,7 +168,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test table delete`() = service.query {
+    override fun `test table delete`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -186,7 +186,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test table select`() = service.query {
+    override fun `test table select`() = service.autocommit {
         //It should be equal to inserted parents
         val selected0 = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = selected0)
@@ -197,7 +197,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test table select page`() = service.query {
+    override fun `test table select page`() = service.autocommit {
         // Select first 5
         val select0 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 5))
         assertEquals(expected = this.children.subList(0, 5), actual = select0)
@@ -220,7 +220,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test row select pk`() = service.query {
+    override fun `test row select pk`() = service.autocommit {
         //Should return expected
         val parent0 = it.row.select(table = Parent::class, pk = 1)
         assertEquals(expected = this.parents[0], actual = parent0)
@@ -236,7 +236,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test row insert`() = service.query {
+    override fun `test row insert`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -274,7 +274,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test row update`() = service.query {
+    override fun `test row update`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -298,7 +298,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test row delete`() = service.query {
+    override fun `test row delete`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -332,7 +332,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test rows insert`() = service.query {
+    override fun `test rows insert`() = service.autocommit {
 
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
@@ -379,7 +379,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test rows update`() = service.query {
+    override fun `test rows update`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -402,7 +402,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test rows delete`() = service.query {
+    override fun `test rows delete`() = service.autocommit {
         //Get current all parents
         val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
@@ -429,7 +429,7 @@ open class Test_Db2 : Test_Contract {
 
 
     @Test
-    override fun `test rows insertBatch`() = service.query {
+    override fun `test rows insertBatch`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -475,7 +475,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test rows updateBatch`() = service.query {
+    override fun `test rows updateBatch`() = service.autocommit {
         //Get current all parents
         val parents = it.table.select(table = Parent::class)
         assertEquals(expected = this.parents, actual = parents)
@@ -504,7 +504,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test rows deleteBatch`() = service.query {
+    override fun `test rows deleteBatch`() = service.autocommit {
         //Get current all parents
         val children = it.table.select(table = Child::class)
         assertEquals(expected = this.children, actual = children)
@@ -536,7 +536,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test query`() = service.query {
+    override fun `test query`() = service.autocommit {
         it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
@@ -553,7 +553,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test query(outputs)`() = service.query {
+    override fun `test query(outputs)`() = service.autocommit {
         //Get current all parents
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
@@ -568,7 +568,7 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test query(outputs, input)`() = service.query {
+    override fun `test query(outputs, input)`() = service.autocommit {
         //Get current all parents
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
@@ -648,7 +648,7 @@ open class Test_Db2 : Test_Contract {
         assertContains(charSequence = e.stackTraceToString(), "executing rollback")
 
         //Check if transaction did not finished
-        service.query {
+        service.autocommit {
             val parents2 = it.table.select(table = Parent::class)
             assertTrue(parents2.isNotEmpty())
             assertEquals(actual = parents2, expected = parents0)

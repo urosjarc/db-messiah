@@ -16,19 +16,7 @@ import kotlin.reflect.KClass
 public class RunManyQueries(
     private val ser: Serializer,
     private val driver: Driver
-) {
-
-    /**
-     * Executes a query without input or outputs using the provided SQL statement.
-     *
-     * @param getSql A function that returns the user provided SQL statement to be executed.
-     */
-    public fun query(getSql: () -> String) {
-        val query = this.ser.query(getSql = getSql)
-        this.driver.execute(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i)
-        }
-    }
+) : RunOneQueries(ser = ser, driver = driver) {
 
     /**
      * Executes a database query with outputs using the provided SQL string.

@@ -4,6 +4,8 @@ import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -21,64 +23,35 @@ val service4 = SqliteService(
 )
 
 fun main_004() {
-    /**
-     * If you know that you will be only reading from the database you can activate "readOnly" mode.
-     * This flag will activate additional optimization to underlying database driver!
-     * You can only use this flag in non-transactional mode.
-     */
-    service4.query(readOnly = false) {
+    service4.autocommit {
         it.table.drop(table = Parent4::class)
         it.table.create(table = Parent4::class)
     }
 
     /**
-     * Database connection activated with "query" will be by default non-transactional, with other words db connection will auto-commit changes.
+     * Database connection activated with "autocommit" will be by default non-transactional, with other words db connection will auto-commit changes.
      * This means that for every database call the changes will be reflected in the database right away without the possibility of reverting changes.
      * If you are performing some special actions for which you need to revert the changes you should use "transactional" database connection like so...
      */
-    try {
+    val exception0 = assertThrows<ConnectionException> {
         service4.transaction {
             it.row.insert(row = Parent4(value = "parent1")) // We insert one row to the database.
             throw Exception("Ops something went wrong!!!")  // But unfortunately somewhere inside our code the exception occurs.
         }
-    } catch (e: ConnectionException) {
-        println("Ops connection interrupted by unhandled exception! BUT all changes commited to db are reverted!")
     }
+    assertEquals(exception0.message, "Transaction was interrupted by unhandled exception, executing rollback")
 
     /**
      * Because in the previous transaction exception occurred the changes are reverted inside database and our table should be still empty!
      */
-    service4.query {
-        assertTrue(it.table.select(table = Parent4::class).isEmpty())
-    }
-
-    /**
-     * If we write first transaction again the underlying implementation is following...
-     */
-    try {
-        service4.transaction(isolation = Isolation.SERIALIZABLE) {
-            try {
-                it.row.insert(row = Parent4(value = "parent1")) // We insert one row to the database.
-            } catch (e: Throwable) { // We catch any exception with the grandparent exception type to catch any of his child exception also.
-                it.roolback.all()   // In case of any exception we roll back all the changes on the connection stack.
-                throw ConnectionException("Transaction interrupted by unhandled exception!")
-            }
-        }
-    } catch (e: ConnectionException) {
-        println("Ops connection interrupted by unhandled exception! BUT all changes commited to db are reverted!")
-    }
-
-    /**
-     * The table is still empty...
-     */
-    service4.query {
+    service4.autocommit {
         assertTrue(it.table.select(table = Parent4::class).isEmpty())
     }
 
     /**
      * Transactional database connections are joust like git commits but with the difference that db commits are PUSHED automatically with every commit.
      * When transactional connection is active all database calls will perform so-called db commit and then PUSH changes (commit) right away to the database!
-     * Its important to note that this is difference between git commits and db commits. When you are using git commits changes are located only
+     * It's important to note that this is difference between git commits and db commits. When you are using git commits changes are located only
      * in your local repository and if you like you can then push changes (commits) to the remote repository to synchronize the changes.
      * But when we use db commits the changes are pushed automatically to database!!!
      * If you roll back all the changes the db will joust like git, revert all commits performed on this specific connection back to the original state.
@@ -94,14 +67,14 @@ fun main_004() {
         /**
          * Commits:
          *  - parent1
-         *  - savepoint0
+         *  - savepoint1
          */
-        val savePoint0 = it.roolback.savePoint()
+        val savePoint1 = it.roolback.savePoint()
 
         /**
          * Commits:
          *  - parent1
-         *  - savepoint0
+         *  - savepoint1
          *  - parent2
          */
         it.row.insert(row = Parent4(value = "parent2"))
@@ -113,14 +86,14 @@ fun main_004() {
          *  - parent2
          *  - savepoint1
          */
-        val savePoint1 = it.roolback.savePoint()
+        val savePoint2 = it.roolback.savePoint()
 
         /**
          * Commits:
          *  - parent1
-         *  - savepoint0
-         *  - parent2
          *  - savepoint1
+         *  - parent2
+         *  - savepoint2
          *  - parent3
          */
         it.row.insert(row = Parent4(value = "parent3"))
@@ -129,7 +102,7 @@ fun main_004() {
          * Commits:
          *  - parent1
          */
-        it.roolback.to(point = savePoint0)
+        it.roolback.to(point = savePoint1)
 
         /**
          * At the current point we have only parent1 commit,
@@ -140,11 +113,26 @@ fun main_004() {
 
         /**
          * If you at this point rollback changes to savepoint1
-         * nothing will happen because you cant rollback changes to the future,
-         * that's why you call operation rollback because you can only go to the history not future!
+         * JDBC driver will raise Exception telling you that savepoint does not exists.
          */
-        it.roolback.to(point = savePoint1)
-        assertEquals(1, it.table.select(table = Parent4::class).size)
+        val exception1 = assertThrows<SQLException> {
+            it.roolback.to(point = savePoint2)
+        }
+
+        /**
+         * Similar exception message will be produced by other database drivers but with different names etc...
+         */
+        assertEquals(exception1.message, "[SQLITE_ERROR] SQL error or missing database (no such savepoint: SQLITE_SAVEPOINT_2)")
+    }
+
+    /**
+     * If your application deals with multiple database connection running at the same time querying the database you would want to
+     * set the isolation level for your transactions. Isolation defines how or when the changes made by one operation become visible to others.
+     * > https://en.wikipedia.org/wiki/Isolation_(database_systems)
+     * If you need to specificaly define isolation level you can do it like so...
+     */
+    service4.transaction(isolation = Isolation.READ_UNCOMMITTED) {
+        // your operations
     }
 
 }

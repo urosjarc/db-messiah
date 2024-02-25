@@ -53,7 +53,7 @@ val instantTS: TypeSerializer<Instant> = TypeSerializer(
  *
  * Here is an example how to apply Instant::class serializer to different database level
  */
-val mainSchema4 = PgSchema(
+val mainSchema8 = PgSchema(
     name = "main", tables = listOf(
         Table(
             primaryKey = Parent8::pk,
@@ -71,7 +71,7 @@ val mainSchema4 = PgSchema(
 )
 
 val postgresqlSerializer2 = PgSerializer(
-    schemas = listOf(mainSchema4),
+    schemas = listOf(mainSchema8),
     globalSerializers = listOf( // One option is to define serializer to global serializer which will be applied to all database.
         NumberTS.int, // You can use allready defined serializer provided by the library...
         instantTS     // Here you defined your own serializer...
@@ -82,12 +82,12 @@ val postgresqlService2 = PgService(config = config1, ser = postgresqlSerializer2
 
 fun main_008() {
 
-    postgresqlService2.query {
+    postgresqlService2.autocommit {
 
         /**
          * Setup database
          */
-        it.schema.create(schema = mainSchema4)
+        it.schema.create(schema = mainSchema8)
         it.table.dropCascade(table = Parent8::class)
         it.table.create(table = Parent8::class)
 

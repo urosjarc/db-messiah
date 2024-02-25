@@ -4,9 +4,8 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.Isolation
-import com.urosjarc.dbmessiah.domain.TransConn
+import com.urosjarc.dbmessiah.domain.Rollback
 import com.urosjarc.dbmessiah.queries.*
-import java.sql.Connection
 import java.util.*
 
 /**
@@ -16,7 +15,7 @@ public open class MariaService : Service {
     public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
     public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 
-    public open class MariaQueryConn(conn: Connection, ser: Serializer) {
+    public open class Connection(conn: java.sql.Connection, ser: Serializer) {
         private val driver = Driver(conn = conn)
         public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
@@ -33,11 +32,11 @@ public open class MariaService : Service {
      * @param body The query logic to be executed on the connection.
      * @throws ServiceException if the query was interrupted by an exception.
      */
-    public fun query(readOnly: Boolean = false, body: (conn: MariaQueryConn) -> Unit): Unit =
-        this.conn.query(readOnly = readOnly) { body(MariaQueryConn(conn = it, ser = this.ser)) }
+    public fun autocommit(body: (conn: Connection) -> Unit): Unit =
+        this.conn.autocommit { body(Connection(conn = it, ser = ser)) }
 
-    public class MariaTransConn(conn: Connection, ser: Serializer) : MariaQueryConn(conn = conn, ser = ser) {
-        public val roolback: TransConn = TransConn(conn = conn)
+    public class Transaction(conn: java.sql.Connection, ser: Serializer) : Connection(conn = conn, ser = ser) {
+        public val roolback: Rollback = Rollback(conn = conn)
     }
 
     /**
@@ -47,6 +46,6 @@ public open class MariaService : Service {
      * @param body The logic to be executed within the transaction.
      * @throws ServiceException if an exception occurs during the transaction.
      */
-    public fun transaction(isolation: Isolation? = null, body: (tr: MariaTransConn) -> Unit): Unit =
-        this.conn.transaction(isolation = isolation) { body(MariaTransConn(conn = it, ser = this.ser)) }
+    public fun transaction(isolation: Isolation? = null, body: (tr: Transaction) -> Unit): Unit =
+        this.conn.transaction(isolation = isolation) { body(Transaction(conn = it, ser = this.ser)) }
 }

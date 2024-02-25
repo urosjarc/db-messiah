@@ -82,18 +82,14 @@ public open class ConnectionPool {
     /**
      * Fetch available connection from connection pool which will be non-transactional.
      *
-     * @param readOnly Specifies whether the connection should be read-only.
      * @param body The query logic to be executed on the connection.
      * @throws ConnectionException if the query was interrupted by an exception.
      */
-    public fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
+    public fun autocommit(body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
         try {
             //Getting connection
             conn = source.connection
-
-            //Will connection be read only
-            conn.isReadOnly = readOnly
 
             //Execute query body and get user result
             body(conn)

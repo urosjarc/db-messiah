@@ -23,7 +23,7 @@ public class CallQueries(
      * @return A list of lists representing the result of the stored procedure call.
      * @throws SerializerException if the number of results does not match the number of output classes.
      */
-    public fun <IN : Any> call(procedure: IN, vararg outputs: KClass<*>): List<List<Any>> {
+    public fun <IN : Any, OUT: Any> call(procedure: IN, vararg outputs: KClass<OUT>): List<List<Any>> {
         val query = this.ser.callQuery(obj = procedure)
 
         val results = this.driver.execute(query = query) { i, rs ->

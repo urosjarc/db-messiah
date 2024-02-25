@@ -54,7 +54,7 @@ val ser2 = SqliteSerializer(
 val service2 = SqliteService(config = config0, ser = ser2)
 
 fun main_002() {
-    service2.query {
+    service2.autocommit {
 
         /**
          * Create table for parent and child.

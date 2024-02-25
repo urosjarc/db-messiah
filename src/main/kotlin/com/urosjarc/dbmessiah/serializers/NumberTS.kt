@@ -7,13 +7,6 @@ import java.sql.JDBCType
  * Class provides type serializers for various non-floating point number types.
  */
 public object NumberTS {
-    public val BIT: TypeSerializer<Boolean> = TypeSerializer(
-        kclass = Boolean::class,
-        dbType = "BIT",
-        jdbcType = JDBCType.BIT,
-        decoder = { rs, i, _ -> rs.getBoolean(i) },
-        encoder = { ps, i, x -> ps.setBoolean(i, x) })
-
     public val byte: TypeSerializer<Byte> = TypeSerializer(
         kclass = Byte::class,
         dbType = "TINYINT",
@@ -43,7 +36,6 @@ public object NumberTS {
         encoder = { ps, i, x -> ps.setLong(i, x) })
 
     public val all: List<TypeSerializer<out Any>> = listOf(
-        BIT,
         byte,
         short,
         int,

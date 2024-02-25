@@ -66,7 +66,7 @@ val config1 = Properties().apply {
 val service1 = PgService(config = config1, ser = ser1)
 
 fun main_001() {
-    service1.query {
+    service1.autocommit {
         /**
          * Create schema
          * Note that nothing in this library will be created by it self only primary keys on insertion!

@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
  * @param ser The serializer used to map objects to SQL queries.
  * @param driver The driver used to execute the SQL queries.
  */
-public class RunOneQueries(
+public open class RunOneQueries(
     private val ser: Serializer,
     private val driver: Driver
 ) {
@@ -40,12 +40,9 @@ public class RunOneQueries(
      */
     public fun <OUT : Any> query(output: KClass<OUT>, getSql: () -> String): List<OUT> {
         val query = this.ser.query(getSql = getSql)
-
-        val results = this.driver.execute(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i, output)
-        }.firstOrNull() ?: throw SerializerException("Could not return first result from: $query")
-
-        return results as List<OUT>
+        return this.driver.query(query = query) {
+            this.ser.mapper.decode(resultSet = it, output)
+        }
     }
 
     /**
@@ -59,11 +56,8 @@ public class RunOneQueries(
      */
     public fun <IN : Any, OUT : Any> query(output: KClass<OUT>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
         val query = this.ser.query(input = input, getSql = getSql)
-
-        val results = this.driver.execute(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i, output)
-        }.firstOrNull() ?: throw SerializerException("Could not return first result from: $query")
-
-        return results as List<OUT>
+        return this.driver.query(query = query) {
+            this.ser.mapper.decode(resultSet = it, output)
+        }
     }
 }

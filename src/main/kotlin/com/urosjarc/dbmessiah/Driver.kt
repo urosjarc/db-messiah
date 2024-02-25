@@ -215,10 +215,10 @@ public open class Driver(private val conn: Connection) {
      * @return The result of the query as a mutable list of lists, where each inner list represents a row of the result set.
      * @throws DriverException If there is an error executing the query.
      */
-    internal fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
+    internal fun <T> execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<T>): MutableList<List<T>> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
-        val returned = mutableListOf<List<Any>>()
+        val returned = mutableListOf<List<T>>()
 
         try {
             ps = conn.prepareStatement(query.sql)

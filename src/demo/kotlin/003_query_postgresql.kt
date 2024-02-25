@@ -52,7 +52,7 @@ val ser3 = PgSerializer(
 val service3 = PgService(config = config1, ser = ser3)
 
 fun main_003() {
-    service3.query { it ->
+    service3.autocommit { it ->
         /**
          * Setup schema
          */
@@ -90,9 +90,10 @@ fun main_003() {
         }
 
         /**
-         * Write custom query with multiple output
-         * Note that now returning structure will be 2D list of Any objects where each row represents results
-         * from one query. If you would like to peak inside list you will have to cast it to specific type...
+         * Write custom query with one or multiple output.
+         * Note that if you use multiple outputs the returning structure will be 2D list of Any objects where each row represents results from one query.
+         * If you would like to peak inside list you will have to cast it to specific type.
+         * If you use singe output, function will not return matrix but a list which don't have to be cast since there is only one output type provided.
          */
         val matrix0 = it.run.query(Parent3::class, Child3::class) {
             """
@@ -105,7 +106,10 @@ fun main_003() {
         assertEquals((matrix0[0] as List<Parent3>).size, 4) // Check the specific row with casting.
 
         /**
-         * Write custom query with multiple output and input
+         * Write custom query with multiple output and input.
+         * Joust like in the previous example the output structure depends on number of outputs,
+         * if you will use multiple outputs the resulting output will be matrix and if you use single output
+         * you will get list.
          */
         val matrix1 = it.run.query(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
             """
