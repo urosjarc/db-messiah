@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.domain.Isolation
-import com.urosjarc.dbmessiah.exceptions.ServiceException
+import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.apache.logging.log4j.kotlin.logger
@@ -84,7 +84,7 @@ public open class ConnectionPool {
      *
      * @param readOnly Specifies whether the connection should be read-only.
      * @param body The query logic to be executed on the connection.
-     * @throws ServiceException if the query was interrupted by an exception.
+     * @throws ConnectionException if the query was interrupted by an exception.
      */
     public fun query(readOnly: Boolean = false, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
@@ -103,7 +103,7 @@ public open class ConnectionPool {
 
         } catch (e: Throwable) {
             this.close(conn = conn)
-            throw ServiceException("Query was interupted by exception", e)
+            throw ConnectionException("Query was interrupted by unhandled exception", e)
         }
     }
 
@@ -112,7 +112,7 @@ public open class ConnectionPool {
      *
      * @param isolation The isolation level for the transaction.
      * @param body The transaction logic to be executed.
-     * @throws ServiceException if an exception occurs during the transaction.
+     * @throws ConnectionException if an exception occurs during the transaction.
      */
     public fun transaction(isolation: Isolation? = null, body: (conn: Connection) -> Unit) {
         var conn: Connection? = null
@@ -137,7 +137,7 @@ public open class ConnectionPool {
             //If any error occurse that is not user handled then rollback, close and raise exception
             this.rollback(conn = conn)
             this.close(conn = conn)
-            throw ServiceException("Transaction was interupted by exception, executing rollback", e)
+            throw ConnectionException("Transaction was interrupted by unhandled exception, executing rollback", e)
         }
     }
 }

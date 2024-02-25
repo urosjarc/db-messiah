@@ -14,5 +14,8 @@ class Test_All {
     fun `test query postgresql`() = main_003()
 
     @Test
+    fun `test transactions`() = main_004()
+
+    @Test
     fun `test custom type serializers`() = main_008()
 }

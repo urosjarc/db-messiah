@@ -52,24 +52,24 @@ val child1_schema = PgSchema(
  * The same goes for the queries! Not all database will support some query functionality... The library tries to
  * adapt to those differences as much as possible to reflect supported functionality by the specific database.
  */
-val pgSerializer0 = PgSerializer(
+val ser1 = PgSerializer(
     schemas = listOf(parent1_schema, child1_schema),
     globalSerializers = AllTS.basic
 )
 
-val postgresqlConfig = Properties().apply {
+val config1 = Properties().apply {
     this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"
     this["username"] = "root"
     this["password"] = "root"
 }
 
-val pgService0 = PgService(config = postgresqlConfig, ser = pgSerializer0)
+val service1 = PgService(config = config1, ser = ser1)
 
 fun main_001() {
-    pgService0.query {
+    service1.query {
         /**
          * Create schema
-         * Note that nothing in this library will be created by it self
+         * Note that nothing in this library will be created by it self only primary keys on insertion!
          */
         it.schema.create(schema = parent1_schema) // We have defined schema as variable so that we can use it in tape safe maner.
         it.schema.create(schema = child1_schema)  // We have defined schema as variable so that we can use it in tape safe maner.
@@ -89,20 +89,20 @@ fun main_001() {
          * Library will group batch operations in groups of 1000 and then execute
          * each group one by one in order to not block the database process.
          */
-        val pgParents = MutableList(size = 100) { Parent1(value = "$it parent") }
-        val numInserted = it.batch.insert(pgParents)
+        val parent0 = MutableList(size = 100) { Parent1(value = "$it parent") }
+        val numInserted = it.batch.insert(parent0)
         assertEquals(numInserted, 100)
 
         /**
          * Get all inserted rows since primary key is not retrieved in batch queries.
          */
-        val newPgParents = it.table.select(table = Parent1::class)
+        val parents0 = it.table.select(table = Parent1::class)
 
         /**
          * Batch update
          */
-        newPgParents.forEach { it.value += " new" }
-        val numUpdated = it.batch.update(newPgParents)
+        parents0.forEach { it.value += " new" }
+        val numUpdated = it.batch.update(parents0)
         assertEquals(numUpdated, 100)
 
         /**
@@ -128,8 +128,8 @@ fun main_001() {
         /**
          * Batch delete
          */
-        newPgParents.forEach { it.value += " new" }
-        val numDeleted = it.batch.delete(newPgParents)
+        parents0.forEach { it.value += " new" }
+        val numDeleted = it.batch.delete(parents0)
         assertEquals(numDeleted, 100)
 
         /**
@@ -143,6 +143,5 @@ fun main_001() {
          */
         it.schema.drop(schema = parent1_schema)
         it.schema.drop(schema = child1_schema)
-
     }
 }

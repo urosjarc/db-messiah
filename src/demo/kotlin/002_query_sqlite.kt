@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
+ * Define your domain classes (tables)...
  */
 data class Parent2(
     var pk: Int? = null,
@@ -20,6 +20,11 @@ data class Child2(
     var value: String
 )
 
+/**
+ * Output and input classes that will be used in the custom queries.
+ * Input classes will provide values to custom queries...
+ * Output classes will hold output results from the queries...
+ */
 data class Output2(
     val child_value: String,
     val parent_value: String
@@ -32,7 +37,7 @@ data class Input2(
 /**
  * Create database serializer and explain database structure...
  */
-val sqliteSerializer1 = SqliteSerializer(
+val ser2 = SqliteSerializer(
     tables = listOf(
         Table(Parent2::pk),
         Table(
@@ -43,31 +48,31 @@ val sqliteSerializer1 = SqliteSerializer(
     ),
     globalSerializers = AllTS.basic,
     globalOutputs = listOf(Output2::class), // Note if you use custom objects as input or output you have to register them to global inputs or outputs.
-    globalInputs = listOf(Input2::class),   // This is because library uses reflection at initilization to scan objects of their properties, constructors etc...
+    globalInputs = listOf(Input2::class),   // This is because library uses reflection at initialization to scan objects of their properties, constructors etc...
 )
 
-val sqliteService1 = SqliteService(config = sqliteConfig, ser = sqliteSerializer1)
+val service2 = SqliteService(config = config0, ser = ser2)
 
 fun main_002() {
-    sqliteService1.query {
+    service2.query {
 
         /**
-         * Create table for parent and child
+         * Create table for parent and child.
          */
         it.table.create(table = Parent2::class)
         it.table.create(table = Child2::class)
 
         /**
-         * Write custom query without input or output
+         * Write custom query without input or output.
          * If you are using JetBrains you can use SUPER DUPER "inject SQL language reference"
-         * to the SQL string and execute it directly in the editor!!!
+         * to the SQL string and execute it directly in the editor to check SQL validity!!!
          * > https://www.jetbrains.com/help/idea/using-language-injections.html
          */
         it.run.query { "INSERT INTO Parent2 (pk, value) VALUES (1, 'parent_asdf')" }
         it.run.query { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (1, 1, 'child_asdf')" }
 
         /**
-         * Write custom query with output
+         * Write custom query with output.
          */
         val output0 = it.run.query(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 1" }
         val output1 = it.run.query(output = Child2::class) { "SELECT * FROM Child2" }
@@ -75,7 +80,7 @@ fun main_002() {
         assertEquals(output1.size, 1)
 
         /**
-         * Write SQL injection safe custom query with output and input
+         * Write SQL injection safe custom query with output and input.
          * For input objects you can use any table registered in serializer, if you use custom objects (not tables)
          * you will have to defined them to globalInputs in the serializer constructor to ensure type safety.
          */
@@ -85,7 +90,7 @@ fun main_002() {
         ) { q: QueryBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
             """SELECT * FROM Parent2 WHERE value = ${q.put(Child2::value)}
                 
-            -- q.put() will return '?' char back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
+            -- q.put() will return '?' character back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
             -- to read more about magic '?' character please refer to this link: https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html
             -- q.put() will also register Kproperty1<INPUT, *> and find this property in input object to supply JDBC appropriate value to be replaced instead of '?' character.
             """
@@ -93,13 +98,12 @@ fun main_002() {
         assertEquals(output2[0].pk, 1)
 
         /**
-         * Write custom query with custom output and input
+         * Write custom query with custom output and input.
          * Note that Sqlite driver only supports one output per database call thats why you can have only one output!
          * Other databases can support many outputs per output since underling driver supports it...
-         *
          * > https://github.com/xerial/sqlite-jdbc/issues/1062
-         *
-         * Those who use JetBrains please dont forget to inject sql string with reference so that you can directly test sql string on your database.
+         * Those who use JetBrains please don't forget to inject sql string with reference so that you can directly test sql string on your database.
+         * > https://youtrack.jetbrains.com/issue/DBE-20046/Support-for-in-code-SQL-execution-on-string-templates-with
          */
         val output3 = it.run.query(
             output = Output2::class,

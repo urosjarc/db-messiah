@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.serializers.AllTS
 import kotlin.test.assertEquals
 
 /**
- * Reuse sqlite and postgresql service defined in 000_basic_sqlite and 001_basic_postgresql
+ * Define your domain classes (tables)...
  */
 data class Parent3(
     var pk: Int? = null,
@@ -28,7 +28,7 @@ data class Input3(
     val parent_pk: Int
 )
 
-val mainSchema3 = PgSchema(
+val schema3 = PgSchema(
     name = "main", tables = listOf(
         Table(Parent3::pk),
         Table(
@@ -42,21 +42,21 @@ val mainSchema3 = PgSchema(
 /**
  * Create database serializer and explain database structure...
  */
-val postgresqlSerializer1 = PgSerializer(
-    schemas = listOf(mainSchema3),
+val ser3 = PgSerializer(
+    schemas = listOf(schema3),
     globalSerializers = AllTS.basic,
     globalOutputs = listOf(Output3::class), // Note if you use custom objects as input or output you have to register them to global inputs or outputs.
     globalInputs = listOf(Input3::class),   // This is because library uses reflection at initilization to scan objects of their properties, constructors etc...
 )
 
-val postgresqlService1 = PgService(config = postgresqlConfig, ser = postgresqlSerializer1)
+val service3 = PgService(config = config1, ser = ser3)
 
 fun main_003() {
-    postgresqlService1.query { it ->
+    service3.query { it ->
         /**
          * Setup schema
          */
-        it.schema.create(schema = mainSchema3)
+        it.schema.create(schema = schema3)
         it.table.dropCascade(table = Parent3::class)
         it.table.dropCascade(table = Child3::class)
 
@@ -69,7 +69,7 @@ fun main_003() {
         /**
          * Write custom query without input or output
          * Sqlite driver support only one query per database call,
-         * Postgresql driver on other hand it supports many per db call...
+         * Postgresql driver on other hand supports many queries per db call...
          */
         it.run.query {
             """
@@ -113,9 +113,9 @@ fun main_003() {
             SELECT * FROM main.Child3 WHERE pk = 2  
             """
         }
-        val parent3 = matrix1[0][0] as Parent3
-        val child3 = matrix1[1][0] as Child3
-        assertEquals(parent3.pk, 3)
-        assertEquals(child3.pk, 2)
+        val parent0 = matrix1[0][0] as Parent3
+        val child0 = matrix1[1][0] as Child3
+        assertEquals(parent0.pk, 3)
+        assertEquals(child0.pk, 2)
     }
 }

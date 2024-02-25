@@ -78,7 +78,7 @@ val postgresqlSerializer2 = PgSerializer(
     )
 )
 
-val postgresqlService2 = PgService(config = postgresqlConfig, ser = postgresqlSerializer2)
+val postgresqlService2 = PgService(config = config1, ser = postgresqlSerializer2)
 
 fun main_008() {
 

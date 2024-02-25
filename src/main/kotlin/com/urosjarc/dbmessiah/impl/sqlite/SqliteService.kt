@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.domain.TransConn
+import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.urosjarc.dbmessiah.queries.*
 import java.sql.Connection
 import java.util.*
@@ -31,7 +32,7 @@ public class SqliteService : Service {
      *
      * @param readOnly Specifies whether the connection should be read-only.
      * @param body The query logic to be executed on the connection.
-     * @throws ServiceException if the query was interrupted by an exception.
+     * @throws ConnectionException if the query connection was interrupted by an exception.
      */
     public fun query(readOnly: Boolean = false, body: (conn: SqliteQueryConn) -> Unit): Unit =
         this.conn.query(readOnly = readOnly) { body(SqliteQueryConn(conn = it, ser = this.ser)) }
@@ -45,7 +46,7 @@ public class SqliteService : Service {
      *
      * @param isolation The isolation level for the transaction. Default is null.
      * @param body The transaction logic to be executed on the connection.
-     * @throws ServiceException if an exception occurs during the transaction.
+     * @throws ConnectionException if an exception occurs during the transaction.
      */
     public fun transaction(isolation: Isolation? = null, body: (tr: SqliteTransConn) -> Unit): Unit =
         this.conn.transaction(isolation = isolation) { body(SqliteTransConn(conn = it, ser = this.ser)) }
