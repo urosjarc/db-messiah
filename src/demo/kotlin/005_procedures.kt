@@ -79,7 +79,7 @@ fun main_005() {
          * Create procedure with one output
          */
         it.procedure.create(procedure = Procedure50::class) {
-            "SELECT * FROM schema5.Parent5 where pk = @value;"
+            "SELECT * FROM schema5.Parent5 where pk = @${Procedure51::value.name};"
         }
 
         /**
@@ -93,7 +93,7 @@ fun main_005() {
          */
         it.procedure.create(procedure = Procedure51::class) {
             """
-            SELECT * FROM schema5.Parent5 where pk = @value;
+            SELECT * FROM schema5.Parent5 where pk = @${Procedure51::value.name};
             SELECT * FROM schema5.Parent5;
             """
         }
