@@ -7,7 +7,10 @@ import com.urosjarc.dbmessiah.impl.db2.Db2Schema
 import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.*
@@ -20,6 +23,19 @@ open class Test_Db2 : Test_Contract {
     companion object {
         private lateinit var service: Db2Service
 
+        val schema = Db2Schema(
+            name = "main", tables = listOf(
+                Table(Parent::pk),
+                Table(
+                    Child::pk, foreignKeys = listOf(
+                        Child::fk to Parent::class
+                    ), constraints = listOf(
+                        Child::fk to listOf(C.CASCADE_DELETE)
+                    )
+                )
+            )
+        )
+
         @JvmStatic
         @BeforeAll
         fun init() {
@@ -30,20 +46,7 @@ open class Test_Db2 : Test_Contract {
                     this["password"] = "root"
                 },
                 ser = Db2Serializer(
-                    schemas = listOf(
-                        Db2Schema(
-                            name = "main", tables = listOf(
-                                Table(Parent::pk),
-                                Table(
-                                    Child::pk, foreignKeys = listOf(
-                                        Child::fk to Parent::class
-                                    ), constraints = listOf(
-                                        Child::fk to listOf(C.CASCADE_DELETE)
-                                    )
-                                )
-                            )
-                        )
-                    ),
+                    schemas = listOf(schema),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
@@ -56,10 +59,7 @@ open class Test_Db2 : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            try {
-                it.run.query { "CREATE SCHEMA main" }
-            } catch (e: Throwable) {
-            }
+            it.schema.create(schema = schema, throws = false)
             it.table.drop(Child::class)
             it.table.drop(Parent::class)
             it.table.create(Parent::class)

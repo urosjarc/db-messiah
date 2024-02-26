@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.exceptions.DriverException
 import kotlin.reflect.KClass
 
 /**
@@ -17,23 +18,37 @@ public open class TableQueries(
     /**
      * Drops a database table.
      *
-     * @param table the class representing the table to be dropped
-     * @return the number of affected rows
+     * @param table The Kotlin class representing the table to be dropped.
+     * @param throws Flag indicating whether to throw an exception if an error occurs while dropping the table.
+     *               The default value is true.
+     * @return The number of affected rows.
      */
-    public open fun <T : Any> drop(table: KClass<T>): Int {
+    public open fun <T : Any> drop(table: KClass<T>, throws: Boolean = true): Int {
         val query = this.ser.dropTable(table = table)
-        return this.driver.update(query = query)
+        try {
+            return this.driver.update(query = query)
+        } catch (e: DriverException) {
+            if(throws) throw e
+            return 0
+        }
     }
 
     /**
-     * Creates a new table.
+     * Creates a new row in the database table specified by the given Kotlin class representation.
      *
-     * @param table the class representing the table to be created.
-     * @return the number of affected rows
+     * @param table The Kotlin class representing the database table to which the row will be created.
+     * @param throws Flag indicating whether to throw an exception if an error occurs while creating the row.
+     *               The default value is true.
+     * @return The number of affected rows.
      */
-    public open fun <T : Any> create(table: KClass<T>): Int {
+    public open fun <T : Any> create(table: KClass<T>, throws: Boolean = true): Int {
         val query = this.ser.createTable(table = table)
-        return this.driver.update(query = query)
+        try {
+            return this.driver.update(query = query)
+        } catch (e: DriverException) {
+            if(throws) throw e
+            return 0
+        }
     }
 
     /**

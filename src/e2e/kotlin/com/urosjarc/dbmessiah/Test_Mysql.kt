@@ -22,6 +22,17 @@ open class Test_Mysql : Test_Contract {
     companion object {
         private lateinit var service: MysqlService
 
+        val schema = MysqlSchema(
+                name = "main", tables = listOf(
+                    Table(Parent::pk),
+                    Table(
+                        Child::pk, foreignKeys = listOf(
+                            Child::fk to Parent::class
+                        )
+                    )
+                )
+            )
+
         @JvmStatic
         @BeforeAll
         fun init() {
@@ -32,18 +43,7 @@ open class Test_Mysql : Test_Contract {
                     this["password"] = "root"
                 },
                 ser = MysqlSerializer(
-                    schemas = listOf(
-                        MysqlSchema(
-                            name = "main", tables = listOf(
-                                Table(Parent::pk),
-                                Table(
-                                    Child::pk, foreignKeys = listOf(
-                                        Child::fk to Parent::class
-                                    )
-                                )
-                            )
-                        )
-                    ),
+                    schemas = listOf(schema),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
@@ -56,9 +56,8 @@ open class Test_Mysql : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.run.query { "CREATE SCHEMA IF NOT EXISTS main;" }
+            it.schema.create(schema = schema)
             it.run.query { "SET FOREIGN_KEY_CHECKS=0;" }
-
             it.table.drop(Child::class)
             it.table.drop(Parent::class)
             it.table.create(Parent::class)

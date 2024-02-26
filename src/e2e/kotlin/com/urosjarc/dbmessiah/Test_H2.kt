@@ -52,7 +52,7 @@ open class Test_H2 : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.run.query { "CREATE SCHEMA IF NOT EXISTS main" }
+            it.schema.create(schema = "main")
             it.table.dropCascade(Child::class)
             it.table.dropCascade(Parent::class)
             it.table.create(Parent::class)

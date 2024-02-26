@@ -7,7 +7,6 @@ import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
 import kotlin.reflect.KClass
 
-
 public open class MssqlSerializer(
     schemas: List<MssqlSchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
@@ -97,5 +96,20 @@ public open class MssqlSerializer(
         )
     }
 
-    override fun createSchema(schema: Schema) = Query(sql = "CREATE SCHEMA ${schema.name}")
+    /**
+     * Creates a new database schema if it does not already exist.
+     *
+     * @param schema The [Schema] object representing the schema to be created.
+     * @return A [Query] object representing the SQL query to create the schema.
+     */
+    override fun createSchema(schema: Schema): Query {
+        return Query(
+            sql = """
+                IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '${schema.name}')
+                BEGIN
+                    EXEC( 'CREATE SCHEMA ${schema.name}' );
+                END
+            """
+        )
+    }
 }

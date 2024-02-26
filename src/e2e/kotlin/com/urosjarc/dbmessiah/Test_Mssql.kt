@@ -22,6 +22,17 @@ open class Test_Mssql : Test_Contract {
     companion object {
         private lateinit var service: MssqlService
 
+        val schema = MssqlSchema(
+            name = "main", tables = listOf(
+                Table(Parent::pk),
+                Table(
+                    Child::pk, foreignKeys = listOf(
+                    ), constraints = listOf(
+                    )
+                )
+            )
+        )
+
         @JvmStatic
         @BeforeAll
         fun init() {
@@ -32,18 +43,7 @@ open class Test_Mssql : Test_Contract {
                     this["password"] = "Root_root1"
                 },
                 ser = MssqlSerializer(
-                    schemas = listOf(
-                        MssqlSchema(
-                            name = "main", tables = listOf(
-                                Table(Parent::pk),
-                                Table(
-                                    Child::pk, foreignKeys = listOf(
-                                    ), constraints = listOf(
-                                    )
-                                )
-                            )
-                        )
-                    ),
+                    schemas = listOf(schema),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
@@ -56,26 +56,11 @@ open class Test_Mssql : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            try {
-                it.run.query { "CREATE SCHEMA main;" }
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.drop(Child::class)
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.drop(Parent::class)
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.create(Parent::class)
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.create(Child::class)
-            } catch (e: Throwable) {
-            }
+            it.schema.create(schema = schema)
+            it.table.drop(Child::class, throws = false)
+            it.table.drop(Parent::class, throws = false)
+            it.table.create(Parent::class, throws = false)
+            it.table.create(Child::class, throws = false)
         }
 
         val numParents = 5

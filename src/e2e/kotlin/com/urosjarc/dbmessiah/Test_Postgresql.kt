@@ -23,6 +23,19 @@ open class Test_Postgresql : Test_Contract {
     companion object {
         private lateinit var service: PgService
 
+        val schema = PgSchema(
+            name = "main", tables = listOf(
+                Table(Parent::pk),
+                Table(
+                    Child::pk, foreignKeys = listOf(
+                        Child::fk to Parent::class
+                    ), constraints = listOf(
+                        Child::fk to listOf(C.CASCADE_DELETE)
+                    )
+                )
+            )
+        )
+
         @JvmStatic
         @BeforeAll
         fun init() {
@@ -33,20 +46,7 @@ open class Test_Postgresql : Test_Contract {
                     this["password"] = "root"
                 },
                 ser = PgSerializer(
-                    schemas = listOf(
-                        PgSchema(
-                            name = "main", tables = listOf(
-                                Table(Parent::pk),
-                                Table(
-                                    Child::pk, foreignKeys = listOf(
-                                        Child::fk to Parent::class
-                                    ), constraints = listOf(
-                                        Child::fk to listOf(C.CASCADE_DELETE)
-                                    )
-                                )
-                            )
-                        )
-                    ),
+                    schemas = listOf(schema),
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
@@ -59,7 +59,7 @@ open class Test_Postgresql : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.run.query { "CREATE SCHEMA IF NOT EXISTS main;" }
+            it.schema.create(schema = schema)
             it.table.dropCascade(Child::class)
             it.table.dropCascade(Parent::class)
             it.table.create(Parent::class)

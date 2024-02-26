@@ -52,18 +52,9 @@ open class Test_Derby : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            try {
-                it.run.query { "CREATE SCHEMA main" }
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.drop(Child::class)
-            } catch (e: Throwable) {
-            }
-            try {
-                it.table.drop(Parent::class)
-            } catch (e: Throwable) {
-            }
+            it.schema.create(schema = "main", throws = false)
+            it.table.drop(Child::class, throws = false)
+            it.table.drop(Parent::class, throws = false)
             it.table.create(Parent::class)
             it.table.create(Child::class)
         }
