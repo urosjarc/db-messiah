@@ -20,20 +20,71 @@ import kotlin.reflect.jvm.javaField
  * @property columnSerializers the serializers which will overrides global, schema and table serializers (optional).
  */
 public class Table<T : Any>(
-    public val primaryKey: KMutableProperty1<out T, out Any?>,
+    public val primaryKey: KProperty1<T, *>,
     public val foreignKeys: List<Pair<KProperty1<T, *>, KClass<*>>> = listOf(),
     internal var constraints: List<Pair<KProperty1<T, *>, List<C>>> = listOf(),
     internal val serializers: List<TypeSerializer<*>> = listOf(),
     internal val columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<*>>> = listOf()
 ) {
     init {
-        //If user has not provided constraints for primary key, then add default ones here
-        this.primaryKey as KProperty1<T, *>
-        if (!this.constraints.map { it.first }.contains(this.primaryKey)) {
-            val constrs = this.constraints.toMutableList()
-            constrs.add(Pair(first = this.primaryKey, second = listOf(C.AUTO_INC)))
-            this.constraints = constrs
+        val pkConstraints = this.constraints.firstOrNull { it.first == this.primaryKey }?.second
+        val pkCanBeNull = this.primaryKey.returnType.isMarkedNullable
+
+        /**
+         * LOGIC FOR THE PRIMARY KEYS
+         * Constraint tests will be present in mapper tests.
+         */
+
+        if (pkCanBeNull) { // Column marked as auto incremental...
+            if (pkConstraints != null) { // User defined his own primary key constraints...
+                if (!pkConstraints.contains(C.AUTO_INC)) {
+                    // User forgot to add auto incremental constraint for the primary key...
+                    this.constraints += listOf(Pair(this.primaryKey, listOf(C.AUTO_INC)))
+                    // User did not define primary key constraints
+                } else this.constraints = listOf(Pair(this.primaryKey, listOf(C.AUTO_INC)))
+            }
         }
+
+        /**
+         * LOGIC FOR THE FOREIGN KEYS
+         */
+
+        this.foreignKeys.forEach {
+            val fk = it.first
+            val fkConstraints = it.second
+            val fkCanBeNull = fk.returnType.isMarkedNullable
+            val fkIsMutable = fk is KMutableProperty1<T, *>
+
+            throw Exception("You stayed here!")
+
+            if (pkCanBeNull) { // Fk Column marked as null...
+                if (pkConstraints != null) { // User defined his own primary key constraints...
+                    if (pkConstraints.contains(C.NOT_NULL)) { // User added auto incremental constraint for the primary key...
+                        //Everything good user did not forget to add auto incremental constraints :)
+                    } else { // Primary key constraints does not contains auto incremental...
+                        //User forgot to add auto increment to the constraints and we shall warn him about it...
+                        throw SerializerException("User defined constraints missing AUTO_INC constraint for mutable primary key: $primaryKey")
+                    }
+                } else { // User did not defined primary key constraints...
+                    // We create primary key constraints with auto incremental...
+                    this.constraints = listOf(Pair(this.primaryKey, listOf(C.AUTO_INC)))
+                }
+
+            } else { // Column marked non auto incremental...
+                if (pkConstraints != null) { // User defined his own primary key constraints...
+                    if (pkConstraints.contains(C.AUTO_INC)) { // User add auto incremental constraint for the primary key...
+                        //User add redundant auto increment constraint to the constraints and we shall warn him about it...
+                        throw SerializerException("User defined constraints contains redundant AUTO_INC constraint for imutable primary key: $primaryKey")
+                    } else { // Primary key constraints does not contains auto incremental...
+                        // All good
+                    }
+                } else { // User did not defined primary key constraints...
+                    // All good
+                }
+            }
+
+        }
+
     }
 
     /**
