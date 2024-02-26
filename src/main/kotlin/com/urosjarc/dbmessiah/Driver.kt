@@ -33,9 +33,7 @@ public open class Driver(private val conn: Connection) {
             rawSql = rawSql.replaceFirst("?", queryValue.escapped)
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             else (queryValue.encoder as Encoder<Any>)(
-                ps,
-                i + 1,
-                queryValue.value
+                ps, i + 1, queryValue.value
             ) //If value is not null encoding is done over user defined encoder !!!
         }
         this.log.info("Prepare query: ${rawSql.replace("\\s+".toRegex(), " ")}")
@@ -215,10 +213,10 @@ public open class Driver(private val conn: Connection) {
      * @return The result of the query as a mutable list of lists, where each inner list represents a row of the result set.
      * @throws DriverException If there is an error executing the query.
      */
-    internal fun <T> execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<T>): MutableList<List<T>> {
+    internal fun execute(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
-        val returned = mutableListOf<List<T>>()
+        val returned = mutableListOf<List<Any>>()
 
         try {
             ps = conn.prepareStatement(query.sql)
@@ -279,6 +277,38 @@ public open class Driver(private val conn: Connection) {
             //Return objects
             return objs
 
+        } catch (e: Throwable) {
+            this.closeAll(ps = ps, rs = rs)
+            throw DriverException(msg = "Failed to return query results from: $query", cause = e)
+        }
+    }
+
+    internal fun call(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
+        var ps: CallableStatement? = null
+        var rs: ResultSet? = null
+        val returned = mutableListOf<List<Any>>()
+
+        try {
+            //Prepare statement and query
+            ps = conn.prepareCall(query.sql)
+            this.prepareQuery(ps = ps, query = query)
+            var isResultSet = ps.execute()
+
+            var count = 0
+            do {
+                if (isResultSet) {
+                    rs = ps.resultSet
+                    returned.add(decodeResultSet(count, rs))
+                    rs.close()
+                } else {
+                    if (ps.updateCount == -1) break
+                } //If there is no more result finish
+
+                count++
+                isResultSet = ps.moreResults //Get next result
+            } while (isResultSet)
+
+            return returned
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs)
             throw DriverException(msg = "Failed to return query results from: $query", cause = e)

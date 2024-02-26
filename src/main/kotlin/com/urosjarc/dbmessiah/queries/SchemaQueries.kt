@@ -21,7 +21,7 @@ public open class SchemaQueries(
      * @return The number of rows affected.
      */
     public fun drop(schema: Schema): Int {
-        val query = this.ser.dropQuery(schema = schema)
+        val query = this.ser.dropSchema(schema = schema)
         return this.driver.update(query = query)
     }
 
@@ -33,7 +33,7 @@ public open class SchemaQueries(
      * @return The number of rows affected.
      */
     public fun create(schema: Schema): Int {
-        val query = this.ser.createQuery(schema = schema)
+        val query = this.ser.createSchema(schema = schema)
         return this.driver.update(query = query)
     }
 

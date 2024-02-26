@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah.impl.mssql
 
+import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
@@ -23,8 +24,8 @@ public open class MssqlSerializer(
 
     override val selectLastId = "SELECT SCOPE_IDENTITY()"
 
-    override fun <T : Any> createQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> createTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
 
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
@@ -57,13 +58,44 @@ public open class MssqlSerializer(
         return Query(sql = "CREATE TABLE ${T.path} ($columns)")
     }
 
-    override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY")
     }
 
-    override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}")
     }
+
+    public override fun <T : Any> callProcedure(obj: T): Query {
+        val P = this.mapper.getProcedure(obj = obj)
+        val args = P.args.map { "@${it.name} = ?" }.joinToString(", ")
+        return Query(
+            sql = "EXEC ${P.name} $args",
+            *P.queryValues(obj = obj)
+        )
+    }
+
+    /**
+     * Generates SQL string for calling stored procedure.
+     *
+     * @param obj The input object representing the stored procedure to be called.
+     * @return A [Query] object representing the SQL query.
+     * @throws SerializerException if the [Procedure] for the object cannot be found.
+     */
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        val args = P.args.map { "@${it.name} ${it.dbType}" }.joinToString(", ")
+        return Query(
+            sql = """
+                CREATE OR ALTER PROCEDURE ${P.path} $args
+                AS BEGIN
+                    ${body()}
+                END;
+            """.trimIndent()
+        )
+    }
+
+    override fun createSchema(schema: Schema) = Query(sql = "CREATE SCHEMA ${schema.name}")
 }

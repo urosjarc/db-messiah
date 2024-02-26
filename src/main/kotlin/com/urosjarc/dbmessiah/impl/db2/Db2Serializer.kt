@@ -21,8 +21,8 @@ public open class Db2Serializer(
 ) {
     override val selectLastId: String = "VALUES IDENTITY_VAL_LOCAL()"
 
-    override fun <T : Any> createQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> createTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
 
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
@@ -55,11 +55,19 @@ public open class Db2Serializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 
-    override fun insertQuery(obj: Any, batch: Boolean): Query {
-        val T = this.mapper.getTableInfo(obj = obj)
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : Any> callProcedure(procedure: T): Query {
+        TODO("Not yet implemented")
+    }
+
+    override fun insertRow(row: Any, batch: Boolean): Query {
+        val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
-            *T.queryValues(obj = obj),
+            *T.queryValues(obj = row),
         )
     }
 }

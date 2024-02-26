@@ -23,7 +23,7 @@ public open class RowQueries(
      * @return The object retrieved from the table, or null if no matching object is found.
      */
     public fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
-        val query = this.ser.query(kclass = table, pk = pk)
+        val query = this.ser.selectTable(table = table, pk = pk)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }.firstOrNull()
@@ -44,7 +44,7 @@ public open class RowQueries(
         if (T.primaryKey.getValue(obj = row) != null) return false //Only objects who doesnt have primary key can be inserted!!!
 
         //Insert it
-        val query = this.ser.insertQuery(obj = row, batch = false)
+        val query = this.ser.insertRow(row = row, batch = false)
         val selectLastId = this.ser.selectLastId
         val pk = this.driver.insert(query = query, onGeneratedKeysFail = selectLastId) { rs, i -> rs.getInt(i) }
 
@@ -72,7 +72,7 @@ public open class RowQueries(
         if (T.primaryKey.getValue(obj = row) == null) return false //Only objects who doesnt have primary key can be inserted!!!
 
         //Update object
-        val query = this.ser.updateQuery(obj = row)
+        val query = this.ser.updateRow(row = row)
 
         //Return number of updates
         val count = this.driver.update(query = query)
@@ -98,7 +98,7 @@ public open class RowQueries(
         if (T.primaryKey.getValue(obj = row) == null) return false //Only objects who doesnt have primary key can be inserted!!!
 
         //Delete object if primary key exists
-        val query = this.ser.deleteQuery(obj = row)
+        val query = this.ser.deleteRow(row = row)
 
         //Update rows and get change count
         val count = this.driver.update(query = query)

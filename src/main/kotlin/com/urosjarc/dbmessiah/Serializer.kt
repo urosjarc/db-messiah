@@ -106,7 +106,7 @@ public abstract class Serializer(
      * @param schema The schema object representing the schema to be created.
      * @return The [String] to create the schema.
      */
-    internal fun createQuery(schema: Schema) = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
+    internal open fun createSchema(schema: Schema) = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
 
     /**
      * Creates a SQL string representing a drop query for the given schema.
@@ -114,17 +114,17 @@ public abstract class Serializer(
      * @param schema The schema to be dropped.
      * @return The [String] representing the drop query.
      */
-    internal fun dropQuery(schema: Schema) = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
+    internal fun dropSchema(schema: Schema) = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
 
     /**
      * Creates a SQL string to drop a database table.
      *
-     * @param kclass The Kotlin class representing the table to be dropped.
+     * @param table The Kotlin class representing the table to be dropped.
      * @param cascade Flag indicating whether to drop the table cascade (i.e., also drop dependent objects).
      * @return The [Query] object representing the drop query.
      */
-    internal open fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean = false): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal open fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean = false): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         val cascadeSql = if (cascade) " CASCADE" else ""
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql")
     }
@@ -132,98 +132,100 @@ public abstract class Serializer(
     /**
      * Creates a SQL string to create new table.
      *
-     * @param kclass The Kotlin class representing the database table to which the row will be created.
+     * @param table The Kotlin class representing the database table to which the row will be created.
      * @return The [Query] object representing the SQL query.
      */
-    internal abstract fun <T : Any> createQuery(kclass: KClass<T>): Query
+    internal abstract fun <T : Any> createTable(table: KClass<T>): Query
+    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query
+    internal abstract fun <T : Any> callProcedure(procedure: T): Query
 
     /**
      * Creates a SQL string for deleting all rows from the specified table.
      *
-     * @param kclass The Kotlin class representing the table to delete records from.
+     * @param table The Kotlin class representing the table to delete records from.
      * @return The [Query] object representing the delete query.
      */
-    internal fun <T : Any> deleteQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal fun <T : Any> deleteTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DELETE FROM ${T.path}")
     }
 
     /**
      * Creates a SQL string to deletes specific row by id from the database table.
      *
-     * @param obj The object representing the table from which row to be deleted.
+     * @param row The object representing the table from which row to be deleted.
      * @return The [Query] object representing the delete query.
      */
-    internal fun deleteQuery(obj: Any): Query {
-        val T = this.mapper.getTableInfo(obj = obj)
+    internal fun deleteRow(row: Any): Query {
+        val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?",
-            T.primaryKey.queryValue(obj)
+            T.primaryKey.queryValue(row)
         )
     }
 
     /**
      * Generates an SQL string for inserting new row.
      *
-     * @param obj The object to be inserted into the database.
+     * @param row The object to be inserted into the database.
      * @param batch A flag indicating whether to use batch insertion. Default is false.
      * @return The [Query] object representing the SQL insert query.
      */
-    internal open fun insertQuery(obj: Any, batch: Boolean): Query {
-        val T = this.mapper.getTableInfo(obj = obj)
+    internal open fun insertRow(row: Any, batch: Boolean): Query {
+        val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
-            *T.queryValues(obj = obj),
+            *T.queryValues(obj = row),
         )
     }
 
     /**
      * Generates an SQL string to update a row by specific id in the database table.
      *
-     * @param obj The object representing the row to be updated.
+     * @param row The object representing the row to be updated.
      * @return The [Query] object representing the SQL update query.
      */
-    internal fun updateQuery(obj: Any): Query {
-        val T = this.mapper.getTableInfo(obj = obj)
+    internal fun updateRow(row: Any): Query {
+        val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?",
-            *T.queryValues(obj = obj),
-            T.primaryKey.queryValue(obj = obj)
+            *T.queryValues(obj = row),
+            T.primaryKey.queryValue(obj = row)
         )
     }
 
     /**
      * Generates SQL string for selecting all rows from table.
      *
-     * @param kclass The Kotlin class or table to query.
+     * @param table The Kotlin class or table to query.
      * @return The Query object representing the SELECT query.
      */
-    internal fun <T : Any> query(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal fun <T : Any> selectTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path}")
     }
 
     /**
      * Generates SQL string for selecting rows from table with offset pagination.
      *
-     * @param kclass the Kotlin class to query from.
+     * @param table the Kotlin class to query from.
      * @param page the pagination details.
      * @return a Query object representing the executed database query.
      */
-    internal open fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal open fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ${page.order} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
     /**
      * Generates SQL string for selecting rows from table with cursor pagination.
      *
-     * @param kclass the Kotlin class representing the table to be queried
+     * @param table the Kotlin class representing the table to be queried
      * @param cursor the cursor object containing query parameters such as order by, order and limit
      * @return a Query object representing the executed query
      */
-    internal open fun <T : Any, V : Comparable<V>> query(kclass: KClass<T>, cursor: Cursor<T, V>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal open fun <T : Any, V : Comparable<V>> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         val lge = when (cursor.order) {
             Order.ASC -> ">="
             Order.DESC -> "<="
@@ -234,26 +236,15 @@ public abstract class Serializer(
     /**
      * Generates SQL string for a specific row based on the primary key value.
      *
-     * @param kclass The class representing the table in the database.
+     * @param table The class representing the table in the database.
      * @param pk The primary key value of the record to query.
      * @return A `Query` object representing the SQL query to fetch the record.
      */
-    internal fun <T : Any, K : Any> query(kclass: KClass<T>, pk: K): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    internal fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
     }
 
-    /**
-     * Generates SQL string for calling stored procedure.
-     *
-     * @param obj The input object representing the stored procedure to be called.
-     * @return A [Query] object representing the SQL query.
-     * @throws SerializerException if the [Procedure] for the object cannot be found.
-     */
-    internal open fun <T : Any> callQuery(obj: T): Query {
-        val P = this.mapper.getProcedure(obj = obj)
-        return Query(sql = "CALL ${P.name}(${P.sqlArguments()}")
-    }
 
     /**
      * Creates [Query] from user defined SQL string

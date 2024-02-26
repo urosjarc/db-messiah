@@ -17,5 +17,8 @@ class Test_All {
     fun `test transactions`() = main_004()
 
     @Test
+    fun `test procedures`() = main_005()
+
+    @Test
     fun `test custom type serializers`() = main_008()
 }

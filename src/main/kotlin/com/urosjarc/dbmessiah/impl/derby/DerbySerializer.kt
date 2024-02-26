@@ -22,8 +22,8 @@ public open class DerbySerializer(
 ) {
     override val selectLastId = "SELECT LAST_INSERT_ROWID();"
 
-    override fun <T : Any> createQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> createTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
 
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
@@ -56,13 +56,21 @@ public open class DerbySerializer(
         return Query(sql = "CREATE TABLE ${T.path} ($columns)")
     }
 
-    override fun <T : Any> query(kclass: KClass<T>, page: Page<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : Any> callProcedure(procedure: T): Query {
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH FIRST ${page.limit} ROWS ONLY")
     }
 
-    override fun <T : Any> dropQuery(kclass: KClass<T>, cascade: Boolean): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DROP TABLE ${T.path}")
     }
 }

@@ -22,6 +22,7 @@ public open class MysqlService : Service {
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
         public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val call: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 
     /**

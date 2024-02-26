@@ -33,7 +33,7 @@ public class BatchQueries(
         if (fobjs.isEmpty()) return 0
 
         //Insert it to db
-        val query = this.ser.insertQuery(obj = fobjs[0], batch = true)
+        val query = this.ser.insertRow(row = fobjs[0], batch = true)
 
         //Execute query
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = fobjs.map { T.queryValues(obj = it).toList() })
@@ -60,7 +60,7 @@ public class BatchQueries(
         if (fobjs.isEmpty()) return 0
 
         //Update objects
-        val query = this.ser.updateQuery(obj = fobjs[0])
+        val query = this.ser.updateRow(row = fobjs[0])
         val valueMatrix = fobjs.map { listOf(*T.queryValues(obj = it), T.primaryKey.queryValue(obj = it)) }
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
 
@@ -87,7 +87,7 @@ public class BatchQueries(
         if (fobjs.isEmpty()) return 0
 
         //Delete objects
-        val query = this.ser.deleteQuery(obj = fobjs[0])
+        val query = this.ser.deleteRow(row = fobjs[0])
         val valueMatrix = fobjs.map { listOf(T.primaryKey.queryValue(obj = it)) }
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
 

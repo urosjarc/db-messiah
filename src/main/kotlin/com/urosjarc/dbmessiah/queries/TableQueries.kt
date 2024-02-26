@@ -21,7 +21,7 @@ public open class TableQueries(
      * @return the number of affected rows
      */
     public open fun <T : Any> drop(table: KClass<T>): Int {
-        val query = this.ser.dropQuery(kclass = table)
+        val query = this.ser.dropTable(table = table)
         return this.driver.update(query = query)
     }
 
@@ -32,7 +32,7 @@ public open class TableQueries(
      * @return the number of affected rows
      */
     public open fun <T : Any> create(table: KClass<T>): Int {
-        val query = this.ser.createQuery(kclass = table)
+        val query = this.ser.createTable(table = table)
         return this.driver.update(query = query)
     }
 
@@ -43,7 +43,7 @@ public open class TableQueries(
      * @return the number of records deleted
      */
     public fun <T : Any> delete(table: KClass<T>): Int {
-        val query = this.ser.deleteQuery(kclass = table)
+        val query = this.ser.deleteTable(table = table)
         return this.driver.update(query = query)
     }
 
@@ -54,7 +54,7 @@ public open class TableQueries(
      * @return a list of objects representing the selected rows
      */
     public fun <T : Any> select(table: KClass<T>): List<T> {
-        val query = this.ser.query(kclass = table)
+        val query = this.ser.selectTable(table = table)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }
@@ -69,7 +69,7 @@ public open class TableQueries(
      * @return A list of objects representing the selected page.
      */
     public fun <T : Any> select(table: KClass<T>, page: Page<T>): List<T> {
-        val query = this.ser.query(kclass = table, page = page)
+        val query = this.ser.selectTable(table = table, page = page)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }
@@ -84,7 +84,7 @@ public open class TableQueries(
      * @return A list of objects representing the selected rows.
      */
     public fun <T: Any, V: Comparable<V>> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
-        val query = this.ser.query(kclass = table, cursor = cursor)
+        val query = this.ser.selectTable(table = table, cursor = cursor)
         return this.driver.query(query = query) {
             this.ser.mapper.decode(resultSet = it, kclass = table)
         }

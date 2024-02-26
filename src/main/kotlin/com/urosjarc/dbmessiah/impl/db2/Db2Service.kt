@@ -21,8 +21,8 @@ public open class Db2Service : Service {
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val call: CallQueries = CallQueries(ser = ser, driver = driver)
         public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val call: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 
     /**

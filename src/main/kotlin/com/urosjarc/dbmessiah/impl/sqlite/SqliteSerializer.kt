@@ -21,8 +21,8 @@ public open class SqliteSerializer(
 ) {
     override val selectLastId = "SELECT LAST_INSERT_ROWID();"
 
-    override fun <T : Any> createQuery(kclass: KClass<T>): Query {
-        val T = this.mapper.getTableInfo(kclass = kclass)
+    override fun <T : Any> createTable(table: KClass<T>): Query {
+        val T = this.mapper.getTableInfo(kclass = table)
 
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
@@ -53,5 +53,13 @@ public open class SqliteSerializer(
 
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+    }
+
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        TODO("Not yet implemented")
+    }
+
+    override fun <T : Any> callProcedure(procedure: T): Query {
+        TODO("Not yet implemented")
     }
 }

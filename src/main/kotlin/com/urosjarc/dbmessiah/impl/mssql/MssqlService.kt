@@ -22,6 +22,7 @@ public open class MssqlService : Service {
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
         public val run: RunManyQueries = RunManyQueries(ser = ser, driver = driver)
+        public val procedure: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 
     /**
