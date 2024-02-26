@@ -37,6 +37,8 @@ data class Procedure51(val value: Int)
 
 /**
  * Define your database schema with registered procedures...
+ * In this demonstration I will be using MS SQL server since sqlite does not have procedures
+ * and postgresql support only functions.
  */
 val schema5 = MssqlSchema(
     name = "schema5",

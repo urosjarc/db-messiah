@@ -32,9 +32,10 @@ public open class PgSerializer(
         //Foreign keys
         T.foreignKeys.forEach {
             val isNull = if (it.notNull) "NOT NULL" else ""
+            val isUnique = if (it.unique) "UNIQUE" else ""
             val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
             val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType} $isNull")
+            col.add("${it.name} ${it.dbType} $isNull $isUnique")
             constraints.add(
                 "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
             )
@@ -43,7 +44,8 @@ public open class PgSerializer(
         //Other columns
         T.otherColumns.forEach {
             val isNull = if (it.notNull) "" else "NOT NULL"
-            col.add("${it.name} ${it.dbType} $isNull")
+            val isUnique = if (it.unique) "UNIQUE" else ""
+            col.add("${it.name} ${it.dbType} $isNull $isUnique")
         }
 
         //Connect all column definitions to one string
