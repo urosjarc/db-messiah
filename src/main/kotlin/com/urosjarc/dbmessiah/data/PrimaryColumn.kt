@@ -1,15 +1,17 @@
 package com.urosjarc.dbmessiah.data
 
+import com.urosjarc.dbmessiah.extend.ext_canBeNull
+import com.urosjarc.dbmessiah.extend.ext_isMutable
+import com.urosjarc.dbmessiah.extend.ext_isWholeNumber
 import java.sql.JDBCType
 import kotlin.reflect.KMutableProperty1
 
 /**
  * Represents a column in a [TableInfo], specifically a primary column.
  *
- * @property autoIncrement Determines if the primary column has auto-increment enabled.
+ * @property getAutoIncrement Determines if the primary column has auto-increment enabled.
  */
 internal class PrimaryColumn(
-    val autoIncrement: Boolean,
     kprop: KMutableProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -21,4 +23,7 @@ internal class PrimaryColumn(
     jdbcType = jdbcType,
     encoder = encoder,
     decoder = decoder
-)
+) {
+
+    val autoIncrement: Boolean get() = false !in listOf(kprop.ext_isWholeNumber, kprop.ext_isMutable, kprop.ext_canBeNull)
+}

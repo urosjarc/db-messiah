@@ -56,7 +56,6 @@ class Test_Column {
             cascadeDelete = false
         )
         primaryColumn = PrimaryColumn(
-            autoIncrement = true,
             kprop = Entity::id as KMutableProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,

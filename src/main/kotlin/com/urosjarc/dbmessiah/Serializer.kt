@@ -75,8 +75,8 @@ public abstract class Serializer(
                 text.add("\t\t ${t.primaryKey.name}: $type")
 
                 t.foreignKeys.forEach {
-                    val fk = it.first.name
-                    val kclass = it.second
+                    val fk = it.key.name
+                    val kclass = it.value
                     val toClass = kclass_to_path[kclass] ?: throw MapperException("Could not find path for kclass: ${kclass.simpleName}.")
                     val fromClass = "${s.name}.${t.name}"
                     relationships[toClass] = fromClass

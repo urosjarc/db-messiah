@@ -15,7 +15,7 @@ class Test_TableInfo {
     private lateinit var otherColumn: OtherColumn
     private lateinit var tableInfo: TableInfo
 
-    data class Entity(var pk: Int, val fk: String, val col: String)
+    data class Entity(var pk: Int? = null, val fk: String, val col: String)
 
     @Suppress("UNCHECKED_CAST")
     @BeforeEach
@@ -39,7 +39,6 @@ class Test_TableInfo {
             cascadeDelete = false
         )
         this.primaryColumn = PrimaryColumn(
-            autoIncrement = true,
             kprop = Entity::pk as KMutableProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,

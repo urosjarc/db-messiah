@@ -79,7 +79,6 @@ class Test_MapperTests {
             cascadeUpdate = false
         )
         primaryColumn = PrimaryColumn(
-            autoIncrement = true,
             kprop = Entity::pk as KMutableProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,
@@ -87,7 +86,6 @@ class Test_MapperTests {
             encoder = { ps, i, x -> ps.setString(i, x.toString()) }
         )
         primaryColumnBad = PrimaryColumn(
-            autoIncrement = true,
             kprop = Entity::pk as KMutableProperty1<Any, Any?>,
             dbType = "VARCHAR",
             jdbcType = JDBCType.INTEGER,
@@ -95,7 +93,6 @@ class Test_MapperTests {
             encoder = { ps, i, x -> ps.setString(i, x.toString()) }
         )
         primaryColumn2 = PrimaryColumn(
-            autoIncrement = true,
             kprop = Entity2::pk as KMutableProperty1<Any, Any?>,
             dbType = "INT",
             jdbcType = JDBCType.INTEGER,
@@ -422,28 +419,6 @@ class Test_MapperTests {
             charSequence = e3.message.toString(),
             other = "Column 'Schema.String.col' have parent 'Schema.String' but it should have parent: 'Schema.Entity'",
             message = e3.toString()
-        )
-    }
-
-    @Test
-    fun `test 8-th()`() {
-        repo.tableInfos = listOf(
-            TableInfo(
-                schema = "Schema",
-                kclass = Entity::class,
-                primaryKey = primaryColumnBad,
-                foreignKeys = listOf(),
-                otherColumns = listOf(),
-                serializers = listOf()
-            )
-        )
-        val e = assertThrows<SerializerException> {
-            repo.testMapper()
-        }
-        assertContains(
-            charSequence = e.message.toString(),
-            other = "Primary key 'Schema.Entity.pk' of type 'VARCHAR' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'",
-            message = e.toString()
         )
     }
 

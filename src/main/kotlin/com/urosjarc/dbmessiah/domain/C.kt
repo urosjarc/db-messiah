@@ -8,4 +8,4 @@ package com.urosjarc.dbmessiah.domain
  * @property CASCADE_UPDATE Constraint that represents a column that cascades updates.
  * @property CASCADE_DELETE Constraint that represents a column that cascades deletes.
  */
-public enum class C { AUTO_INC, NOT_NULL, UNIQUE, CASCADE_UPDATE, CASCADE_DELETE }
+public enum class C { UNIQUE, CASCADE_UPDATE, CASCADE_DELETE }

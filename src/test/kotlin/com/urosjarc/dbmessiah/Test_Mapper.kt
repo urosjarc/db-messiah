@@ -246,7 +246,6 @@ class Test_Mapper {
                 schema = "main",
                 kclass = Parent::class,
                 primaryKey = PrimaryColumn(
-                    autoIncrement = true,
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,
@@ -265,7 +264,6 @@ class Test_Mapper {
                 schema = "main",
                 kclass = Parent::class,
                 primaryKey = PrimaryColumn(
-                    autoIncrement = true,
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,

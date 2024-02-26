@@ -170,9 +170,9 @@ public class Mapper(
      * @param isProcedure Specifies whether the [kclass] is a procedure or not.
      * @throws SerializerException if the association maps cannot be filled for the table.
      */
-    private fun <T : Any> fillAssociationMaps(
+    private fun fillAssociationMaps(
         kclass: KClass<*>,
-        columnSerializers: List<Pair<KProperty1<out T, *>, TypeSerializer<*>>> = listOf(),
+        columnSerializers: Map<out KProperty1<out Any, Any?>, TypeSerializer<out Any>> = mapOf(),
         serializers: List<TypeSerializer<*>>,
         isProcedure: Boolean = false
     ) {
@@ -195,7 +195,7 @@ public class Mapper(
         kprops.forEach { p ->
 
             //Priority is on column serializers
-            val serializer = columnSerializers.firstOrNull { it.first == p }?.second
+            val serializer = columnSerializers[p]
 
             //If exists first set this guy
             if (serializer != null)
@@ -219,14 +219,14 @@ public class Mapper(
                 this.fillAssociationMaps(table = t, serializers = (t.serializers + s.serializers + this.globalSerializers))
             }
             s.procedures.forEach {
-                this.fillAssociationMaps<Any>(kclass = it, serializers = s.serializers + this.globalSerializers, isProcedure = true)
+                this.fillAssociationMaps(kclass = it, serializers = s.serializers + this.globalSerializers, isProcedure = true)
             }
         }
         (this.globalInputs + this.globalOutputs).forEach {
-            this.fillAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers)
+            this.fillAssociationMaps(kclass = it, serializers = this.globalSerializers)
         }
         this.globalProcedures.forEach {
-            this.fillAssociationMaps<Any>(kclass = it, serializers = this.globalSerializers, isProcedure = true)
+            this.fillAssociationMaps(kclass = it, serializers = this.globalSerializers, isProcedure = true)
         }
     }
 
@@ -246,17 +246,13 @@ public class Mapper(
             //Test uniqueness
             it.`2-th Test - If schema registered multiple times`()
             it.`3-th Test - If schemas table registered multiple times`()
-            it.`4-th Test - If schemas table foreign key registered multiple times`()
-            it.`5-th Test - If schemas table constraints registered multiple times`()
             it.`6-th Test - If schema serializers registered multiple times`()
             it.`7-th Test - If schemas table serializers registered multiple times`()
             //Test connectivity
             it.`8-th Test - If schemas table foreign keys are pointing to wrong table`()
             //Test validity
             it.`9-th Test - If schemas table constraints are valid`()
-            it.`10-th Test - If all primary keys that are autoincrement have integer dbType`()
             //Test serializability
-            it.`11-th Test - If all input classes have imutable and not null properties`()
             it.`12-th Test - If all output classes have no default values`()
             //Test global object by uniqueness
             it.`13-th Test - If global procedure registered multiple times`()
@@ -378,9 +374,8 @@ public class Mapper(
 
         //Primary columns
         val pkSerializer = getSerializer(table.primaryKey)
-        val pkcons = table.primaryKeyConstraints
+
         val pkColumn = PrimaryColumn(
-            autoIncrement = pkcons.contains(C.AUTO_INC),
             kprop = table.primaryKey as KMutableProperty1<Any, Any?>, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
             encoder = pkSerializer.encoder, decoder = pkSerializer.decoder
         )
@@ -389,7 +384,7 @@ public class Mapper(
         val fkColumns = mutableListOf<ForeignColumn>()
         for ((fromProp, toKClass) in table.foreignKeys) {
             val serializer = this.getSerializer(fromProp)
-            val fkcons = table.constraintsFor(kprop = fromProp)
+            val fkcons = table.constraints[fromProp] ?: listOf()
             val column = ForeignColumn(
                 kprop = fromProp as KProperty1<Any, Any?>,
                 dbType = serializer.dbType, jdbcType = serializer.jdbcType,
@@ -407,7 +402,7 @@ public class Mapper(
         val javaFields = this.getKProps(kclass = table.kclass)
         javaFields.filter { !pkFkProperties.contains(it) }.forEach {
             val serializer = this.getSerializer(it)
-            val constraints = table.constraintsFor(kprop = it)
+            val constraints = table.constraints[it] ?: listOf()
             val column = OtherColumn(
                 kprop = it as KProperty1<Any, Any?>, dbType = serializer.dbType, jdbcType = serializer.jdbcType,
                 encoder = serializer.encoder, decoder = serializer.decoder, unique = constraints.contains(C.UNIQUE)
