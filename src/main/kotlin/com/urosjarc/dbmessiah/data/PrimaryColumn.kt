@@ -11,7 +11,7 @@ import kotlin.reflect.KProperty1
  *
  * @property getAutoIncrement Determines if the primary column has auto-increment enabled.
  */
-internal class PrimaryColumn(
+public class PrimaryColumn(
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -25,5 +25,5 @@ internal class PrimaryColumn(
     decoder = decoder
 ) {
 
-    val autoInc: Boolean = false !in listOf(kprop.ext_isWholeNumber, kprop.ext_isMutable, kprop.ext_canBeNull)
+    public val autoInc: Boolean = false !in listOf(kprop.ext_isWholeNumber, kprop.ext_isMutable, kprop.ext_canBeNull)
 }

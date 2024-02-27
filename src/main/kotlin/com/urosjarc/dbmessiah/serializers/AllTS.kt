@@ -13,7 +13,7 @@ public object AllTS {
     public val basic: List<TypeSerializer<out Any>> = listOf(
         BooleanTS.all,
         CharTS.all,
-        FloatTS.all,
+        DecimalTS.all,
         NumberTS.all,
         StringTS.all,
         UNumber.all

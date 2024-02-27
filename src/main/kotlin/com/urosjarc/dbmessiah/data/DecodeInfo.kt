@@ -11,6 +11,6 @@ import kotlin.reflect.KParameter
  * @property kparam The parameter which holds value to be decoded.
  */
 public class DecodeInfo(
-    internal val kclass: KClass<*>,
-    internal val kparam: KParameter,
+    public val kclass: KClass<*>,
+    public val kparam: KParameter,
 )

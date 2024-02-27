@@ -424,7 +424,7 @@ public class Mapper(
      * @return The [Procedure] object.
      * @throws SerializingException If the [Procedure] for the object cannot be found.
      */
-    internal fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
+    public fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
 
     /**
      * Retrieves the [Procedure] object based on the provided [kclass].
@@ -433,7 +433,7 @@ public class Mapper(
      * @return The [Procedure] object.
      * @throws SerializingException If the [Procedure] for the class cannot be found.
      */
-    internal fun getProcedure(kclass: KClass<*>): Procedure =
+    public fun getProcedure(kclass: KClass<*>): Procedure =
         this.procedureKClass_to_procedure[kclass] ?: throw SerializingException("Could not find procedure for kclass: '${kclass.simpleName}'")
 
     /**
@@ -443,7 +443,7 @@ public class Mapper(
      * @return The [TableInfo] object for the given table class.
      * @throws SerializingException if the table info for the table cannot be found.
      */
-    internal fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
+    public fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
         this.tableKClass_to_tableInfo[kclass] ?: throw SerializingException("Could not find table info for table: '${kclass.simpleName}'")
 
     /**
@@ -453,7 +453,7 @@ public class Mapper(
      * @return The TableInfo object for the given table class or object.
      * @throws SerializingException if the table info for the table cannot be found.
      */
-    internal fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
+    public fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
 
     /**
      * Decodes the result set into a list of objects of the specified output classes.

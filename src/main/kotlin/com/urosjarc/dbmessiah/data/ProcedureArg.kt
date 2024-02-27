@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty1
  * @property encoder The [Encoder] used to encode the argument value.
  * @property decoder The [Decoder] used to decode the argument value.
  */
-internal class ProcedureArg(
+public class ProcedureArg(
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -33,7 +33,7 @@ internal class ProcedureArg(
     /**
      * [Procedure] instant who is parent or the owner of this [ProcedureArg].
      */
-    lateinit var procedure: Procedure
+    internal lateinit var procedure: Procedure
 
     /**
      * Determines if [ProcedureArg] has been initialized.

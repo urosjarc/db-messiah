@@ -12,17 +12,17 @@ import java.sql.JDBCType
  * @property encoder The [Encoder] used to serialize the value.
  */
 public data class QueryValue(
-    internal val name: String,
-    internal val value: Any?,
-    internal val jdbcType: JDBCType,
-    internal val encoder: Encoder<*>
+    public val name: String,
+    public val value: Any?,
+    public val jdbcType: JDBCType,
+    public val encoder: Encoder<*>
 ) {
 
 
     /**
      * Represents [value] that will be escaped.
      */
-    internal val escapped
+    public val escapped: String
         get() = when (this.value) {
             is String -> "'$value'"
             is Char -> "'$value'"

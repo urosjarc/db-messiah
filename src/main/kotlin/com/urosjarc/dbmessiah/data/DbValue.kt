@@ -19,21 +19,21 @@ import kotlin.reflect.KProperty1
  * @property path The full path of [DbValue] location.
  * @property name The name of the [DbValue] property.
  */
-internal abstract class DbValue(
-    val kprop: KProperty1<Any, Any?>,
-    val dbType: String,
-    val jdbcType: JDBCType,
-    val encoder: Encoder<*>,
-    val decoder: Decoder<*>,
+public abstract class DbValue(
+    public val kprop: KProperty1<Any, Any?>,
+    public val dbType: String,
+    public val jdbcType: JDBCType,
+    internal val encoder: Encoder<*>,
+    internal val decoder: Decoder<*>,
 ) {
-    abstract val inited: Boolean
-    abstract val path: String
-    abstract val name: String
+    internal abstract val inited: Boolean
+    public abstract val path: String
+    public abstract val name: String
 
     /**
      * Source class in which [kprop] is located.
      */
-    val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
+    public val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
 
     /**
      * Important method which extracts appropriate [QueryValue] from [obj] instance that this [DbValue] represents.
@@ -41,7 +41,7 @@ internal abstract class DbValue(
      * @param obj The object from which to generate the [QueryValue].
      * @return The generated [QueryValue].
      */
-    fun queryValue(obj: Any): QueryValue =
+    public fun queryValue(obj: Any): QueryValue =
         QueryValue(name = this.name, value = this.getValue(obj = obj), jdbcType = this.jdbcType, encoder = this.encoder)
 
     /**
@@ -51,7 +51,7 @@ internal abstract class DbValue(
      * @param value The value to set on the [obj] property.
      * @throws DbValueException if the property is immutable, if types are incompatible, if this [DbValue] does not belong to the [obj].
      */
-    fun setValue(obj: Any, value: Any?) {
+    public fun setValue(obj: Any, value: Any?) {
         try {
             val kp = this.kprop as KMutableProperty1<Any, Any?>
             try {
@@ -78,7 +78,7 @@ internal abstract class DbValue(
      * @return The value of the property, or null if the property does not exist or cannot be retrieved.
      * @throws DbValueException if there is an error retrieving the value from the object.
      */
-    fun getValue(obj: Any): Any? {
+    public fun getValue(obj: Any): Any? {
         try {
             return this.kprop.get(receiver = obj)
         } catch (e: Throwable) {
@@ -93,7 +93,7 @@ internal abstract class DbValue(
     }
 
     /** @suppress */
-    val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
+    private val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
 
     /** @suppress */
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()

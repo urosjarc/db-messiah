@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty1
  * @property encoder The [Encoder] used to encode the value.
  * @property decoder The [Decoder] used to decode the value.
  */
-internal open class Column(
+public open class Column(
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -29,13 +29,13 @@ internal open class Column(
     /**
      * [TableInfo] instant who is parent or the owner of this [Column].
      */
-    lateinit var table: TableInfo
+    public lateinit var table: TableInfo
 
 
     /**
      * Determines if [Column] has been initialized.
      */
-    override val inited get() = this::table.isInitialized
+    override val inited: Boolean get() = this::table.isInitialized
 
     /**
      * Represents the name of a [Column].

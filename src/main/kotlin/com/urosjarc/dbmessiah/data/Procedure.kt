@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
  * @property kclass The Kotlin class representing this [Procedure].
  * @property args The list of procedure arguments.
  */
-internal data class Procedure(
+public data class Procedure(
     val schema: String?,
     val kclass: KClass<*>,
     val args: List<ProcedureArg>,
@@ -36,7 +36,7 @@ internal data class Procedure(
      * @param separator The separator to use between argument placeholders. Defaults to ", ".
      * @return A string containing the SQL arguments. Example: `?, ?, ?`.
      */
-    fun sqlArguments(separator: String = ", "): String =
+    public fun sqlArguments(separator: String = ", "): String =
         this.args.joinToString(separator = separator) { "?" }
 
     /**
@@ -46,7 +46,7 @@ internal data class Procedure(
      * @param obj The object to query values from.
      * @return An array of [QueryValue] objects representing extracted values from the object.
      */
-    fun queryValues(obj: Any): Array<out QueryValue> = this.args
+    public fun queryValues(obj: Any): Array<out QueryValue> = this.args
         .map { QueryValue(name = it.name, value = it.getValue(obj = obj), jdbcType = it.jdbcType, encoder = it.encoder) }
         .toTypedArray()
 

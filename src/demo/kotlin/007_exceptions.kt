@@ -1,4 +1,6 @@
 import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.exceptions.ConnectionException
+import com.urosjarc.dbmessiah.exceptions.base.UnknownException
 import com.urosjarc.dbmessiah.exceptions.base.WarningException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.serializers.AllTS
@@ -52,15 +54,29 @@ fun main_007() {
     assertContains(exception1.stackTraceToString(), "USER WARNING: Missing schema or it has no registered table")
 
     /**
+     * WarningException: You want to create table for class that is not registered inside database...
+     */
+    service0.autocommit {
+        val exception2 = assertThrows<WarningException> {
+            it.table.create(table = String::class)
+        }
+        assertContains(exception2.stackTraceToString(), "USER WARNING: Could not find table info for table: 'String'")
+    }
+
+    /**
      * There are many, many, many more warning exceptions that can happen the library will be really strict on any inconsistency
      * that is found in the database schema and it will safe guard user as much as possible.
      */
-
     service0.autocommit {
-        it.table.create(table = Parent0::class)
-        val exception2 = assertThrows<Error> {
-            it.table.create(table = Parent0::class)
+        /**
+         * System will try to log directly into the exception message all important informations so that developer
+         * will never need to check logs what happened.
+         */
+        val exception3 = assertThrows<UnknownException> {
+            it.run.query { """SELECT * FROM XXX""" }
         }
-        assertContains(exception2.stackTraceToString(), "USER WARNING: Missing schema or it has no registered table")
+        assertContains(exception3.stackTraceToString(), "Failed to return query results from: \n\nSELECT * FROM XXX")
+        assertContains(exception3.stackTraceToString(), "[SQLITE_ERROR] SQL error or missing database (no such table: XXX)")
+
     }
 }

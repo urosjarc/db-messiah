@@ -8,8 +8,8 @@ import kotlin.reflect.KProperty1
  *
  * @property unique Determines whether the column values should be unique.
  */
-internal open class OtherColumn(
-    val unique: Boolean,
+public open class OtherColumn(
+    public val unique: Boolean,
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -26,5 +26,5 @@ internal open class OtherColumn(
     /**
      * If values in this column can be null or not.
      */
-    val notNull: Boolean = !this.kprop.returnType.isMarkedNullable
+    public val notNull: Boolean = !this.kprop.returnType.isMarkedNullable
 }

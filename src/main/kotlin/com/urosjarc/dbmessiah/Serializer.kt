@@ -18,7 +18,7 @@ import kotlin.reflect.KClass
  * @param globalInputs A list of [KClass] objects representing global input classes that can be used by the serializer.
  * @param globalOutputs A list of [KClass] objects representing global output classes that can be used by the serializer.
  * @param globalProcedures A list of [KClass] objects representing global procedures that can be used by the serializer.
- * @property mapper An internal [Mapper] object used for mapping objects to and from the database.
+ * @property mapper An public [Mapper] object used for mapping objects to and from the database.
  */
 public abstract class Serializer(
     private val schemas: List<Schema>,
@@ -28,7 +28,7 @@ public abstract class Serializer(
     globalProcedures: List<KClass<*>> = listOf()
 ) {
 
-    internal val mapper = Mapper(
+    public val mapper: Mapper = Mapper(
         schemas = schemas.toList(),
         globalSerializers = globalSerializers,
         globalInputs = globalInputs,
@@ -42,7 +42,7 @@ public abstract class Serializer(
      *
      * @property selectLastId The last id selected from the database.
      */
-    internal open val selectLastId: String? = null
+    public open val selectLastId: String? = null
 
 
     /**
@@ -106,7 +106,7 @@ public abstract class Serializer(
      * @param schema The schema object representing the schema to be created.
      * @return The [String] to create the schema.
      */
-    internal open fun createSchema(schema: Schema) = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
+    public open fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
 
     /**
      * Creates a SQL string representing a drop query for the given schema.
@@ -114,7 +114,7 @@ public abstract class Serializer(
      * @param schema The schema to be dropped.
      * @return The [String] representing the drop query.
      */
-    internal fun dropSchema(schema: Schema) = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
+    public fun dropSchema(schema: Schema): Query = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
 
     /**
      * Creates a SQL string to drop a database table.
@@ -123,7 +123,7 @@ public abstract class Serializer(
      * @param cascade Flag indicating whether to drop the table cascade (i.e., also drop dependent objects).
      * @return The [Query] object representing the drop query.
      */
-    internal open fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean = false): Query {
+    public open fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         val cascadeSql = if (cascade) " CASCADE" else ""
         return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql")
@@ -135,7 +135,7 @@ public abstract class Serializer(
      * @param table The Kotlin class representing the database table to which the row will be created.
      * @return The [Query] object representing the SQL query.
      */
-    internal abstract fun <T : Any> createTable(table: KClass<T>): Query
+    public abstract fun <T : Any> createTable(table: KClass<T>): Query
 
     /**
      * Creates a SQL string for deleting all rows from the specified table.
@@ -143,7 +143,7 @@ public abstract class Serializer(
      * @param table The Kotlin class representing the table to delete records from.
      * @return The [Query] object representing the delete query.
      */
-    internal fun <T : Any> deleteTable(table: KClass<T>): Query {
+    public fun <T : Any> deleteTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DELETE FROM ${T.path}")
     }
@@ -154,7 +154,7 @@ public abstract class Serializer(
      * @param row The object representing the table from which row to be deleted.
      * @return The [Query] object representing the delete query.
      */
-    internal fun deleteRow(row: Any): Query {
+    public fun deleteRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?",
@@ -169,7 +169,7 @@ public abstract class Serializer(
      * @param batch A flag indicating whether to use batch insertion. Default is false.
      * @return The [Query] object representing the SQL insert query.
      */
-    internal open fun insertRow(row: Any, batch: Boolean): Query {
+    public open fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
@@ -183,7 +183,7 @@ public abstract class Serializer(
      * @param row The object representing the row to be updated.
      * @return The [Query] object representing the SQL update query.
      */
-    internal fun updateRow(row: Any): Query {
+    public fun updateRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?",
@@ -198,7 +198,7 @@ public abstract class Serializer(
      * @param table The Kotlin class or table to query.
      * @return The Query object representing the SELECT query.
      */
-    internal fun <T : Any> selectTable(table: KClass<T>): Query {
+    public fun <T : Any> selectTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path}")
     }
@@ -210,7 +210,7 @@ public abstract class Serializer(
      * @param page the pagination details.
      * @return a Query object representing the executed database query.
      */
-    internal open fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
+    public open fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ${page.order} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
@@ -222,7 +222,7 @@ public abstract class Serializer(
      * @param cursor the cursor object containing query parameters such as order by, order and limit
      * @return a Query object representing the executed query
      */
-    internal open fun <T : Any, V : Comparable<V>> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
+    public open fun <T : Any, V : Comparable<V>> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         val lge = when (cursor.order) {
             Order.ASC -> ">="
@@ -238,7 +238,7 @@ public abstract class Serializer(
      * @param pk The primary key value of the record to query.
      * @return A `Query` object representing the SQL query to fetch the record.
      */
-    internal fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
+    public fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
     }
@@ -250,7 +250,7 @@ public abstract class Serializer(
      * @param getSql A function that returns the user provided SQL statement to be executed.
      * @return A [Query] object representing the SQL query and its values.
      */
-    internal fun query(getSql: () -> String): Query = Query(sql = getSql())
+    public fun query(getSql: () -> String): Query = Query(sql = getSql())
 
     /**
      * Creates [Query] from user defined SQL string with inputs.
@@ -259,7 +259,7 @@ public abstract class Serializer(
      * @param getSql A function that takes a QueryBuilder and returns the SQL string for the query.
      * @return A Query object representing the generated query.
      */
-    internal fun <IN : Any> query(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
+    public fun <IN : Any> query(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
         val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
         return qBuilder.build(sql = getSql(qBuilder))
     }

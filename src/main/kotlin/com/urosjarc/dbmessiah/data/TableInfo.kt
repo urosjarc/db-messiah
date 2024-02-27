@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * @param otherColumns The list of [OtherColumn] for this table.
  * @param serializers The list of [TypeSerializer] which will help in serialization process.
  */
-internal data class TableInfo(
+public data class TableInfo(
     val schema: String,
     val kclass: KClass<*>,
     val primaryKey: PrimaryColumn,
@@ -27,15 +27,15 @@ internal data class TableInfo(
     /**
      * Represents the name of this table.
      */
-    val name = this.kclass.simpleName!!
+    val name: String = this.kclass.simpleName!!
 
     /**
      * Full path where this table is located.
      */
-    val path = listOf(this.schema, this.name).joinToString(".")
+    val path: String = listOf(this.schema, this.name).joinToString(".")
 
     /** @suppress */
-    val hash = this.path.hashCode()
+    private val hash = this.path.hashCode()
 
     init {
         //Init late init parent connection
@@ -48,8 +48,8 @@ internal data class TableInfo(
      * Represents a list of columns that can be modified by the user in `UPDATE` statement.
      * This includes the [ForeignColumn] and [OtherColumn], as well as the [PrimaryColumn] if it is not marked auto-increment.
      */
-    val userControlledColumns
-        get(): List<Column> {
+    public val userControlledColumns: List<Column>
+        get() {
             val columns: MutableList<Column> = (this.foreignKeys + this.otherColumns).toMutableList()
             if (!this.primaryKey.autoInc) columns.add(this.primaryKey)
             return columns
@@ -62,7 +62,7 @@ internal data class TableInfo(
      * @param separator The separator to use between column names. Default is ", ".
      * @return The SQL string with the column names.
      */
-    fun sqlInsertColumns(separator: String = ", "): String =
+    public fun sqlInsertColumns(separator: String = ", "): String =
         this.userControlledColumns.joinToString(separator = separator) { it.name }
 
     /**
@@ -72,7 +72,7 @@ internal data class TableInfo(
      * @param separator The separator to use between question marks. Default is ", ".
      * @return The SQL string with the question marks.
      */
-    fun sqlInsertQuestions(separator: String = ", "): String =
+    public fun sqlInsertQuestions(separator: String = ", "): String =
         this.userControlledColumns.joinToString(separator = separator) { "?" }
 
     /**
@@ -83,7 +83,7 @@ internal data class TableInfo(
      * @param zipper The string to use between column names and values. The default is " = ".
      * @return The SQL string with the column names and values.
      */
-    fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = "): String =
+    public fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = "): String =
         this.userControlledColumns.joinToString(separator = separator) { it.name + "$zipper?" }
 
     /**
@@ -103,7 +103,7 @@ internal data class TableInfo(
      * @param obj The object from which to retrieve the list of [QueryValue].
      * @return An array of [QueryValue] objects representing the values of the object.
      */
-    fun queryValues(obj: Any): Array<out QueryValue> = this.userControlledColumns
+    public fun queryValues(obj: Any): Array<out QueryValue> = this.userControlledColumns
         .map { QueryValue(name = it.name, value = it.getValue(obj = obj), jdbcType = it.jdbcType, encoder = it.encoder) }
         .toTypedArray()
 

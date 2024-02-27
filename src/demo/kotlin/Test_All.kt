@@ -24,5 +24,7 @@ class Test_All {
     @Test
     fun `test exceptions`() = main_007()
     @Test
-    fun `test custom type serializers`() = main_008()
+    fun `test custom type serializer`() = main_008()
+    @Test
+    fun `test custom database serializer`() = main_009()
 }

@@ -6,7 +6,7 @@ import java.sql.JDBCType
 /**
  * Represents a class that provides type serializers for Float and Double values.
  */
-public object FloatTS {
+public object DecimalTS {
 
     public val float: TypeSerializer<Float> = TypeSerializer(
         kclass = Float::class,

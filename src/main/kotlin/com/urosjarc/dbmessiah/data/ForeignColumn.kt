@@ -10,10 +10,10 @@ import kotlin.reflect.KProperty1
  * @property cascadeUpdate Determines whether the update operation cascades.
  * @property foreignTable The [TableInfo] instant of the foreign table.
  */
-internal class ForeignColumn(
+public class ForeignColumn(
     unique: Boolean,
-    val cascadeDelete: Boolean,
-    val cascadeUpdate: Boolean,
+    public val cascadeDelete: Boolean,
+    public val cascadeUpdate: Boolean,
     kprop: KProperty1<Any, Any?>,
     dbType: String,
     jdbcType: JDBCType,
@@ -27,10 +27,10 @@ internal class ForeignColumn(
     encoder = encoder,
     decoder = decoder
 ) {
-    lateinit var foreignTable: TableInfo
+    public lateinit var foreignTable: TableInfo
 
     /**
      * Represents a boolean flag indicating whether the [ForeignColumn] has been initialized.
      */
-    override val inited get() = super.inited && this::foreignTable.isInitialized
+    override val inited: Boolean get() = super.inited && this::foreignTable.isInitialized
 }
