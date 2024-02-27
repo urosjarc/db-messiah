@@ -76,12 +76,6 @@ class Test_ProcedureArg {
         assertEquals(expected = Int::class, actual = pArg0.kclass)
     }
 
-
-    @Test
-    fun `test hash`() {
-        assertEquals(expected = pArg0.hash, actual = pArg0.hashCode())
-    }
-
     @Test
     fun `test equals`() {
         assertEquals(expected = pArg0, actual = pArg0Copy)

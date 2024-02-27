@@ -115,13 +115,6 @@ class Test_Column {
     }
 
     @Test
-    fun `test hash`() {
-        assertEquals(expected = otherColumn.hash, actual = foreignColumn.hash)
-        assertNotEquals(illegal = otherColumn.hash, actual = primaryColumn.hash)
-        assertNotEquals(illegal = foreignColumn.hash, actual = primaryColumn.hash)
-    }
-
-    @Test
     fun `test hashCode()`() {
         assertEquals(expected = otherColumn.hashCode(), actual = foreignColumn.hashCode())
         assertNotEquals(illegal = otherColumn.hashCode(), actual = primaryColumn.hashCode())
