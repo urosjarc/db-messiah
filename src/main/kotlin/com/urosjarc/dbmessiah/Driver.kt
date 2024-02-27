@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.data.Encoder
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import com.urosjarc.dbmessiah.exceptions.base.ReportIssue
+import com.urosjarc.dbmessiah.exceptions.base.IssueException
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
 
@@ -140,7 +140,7 @@ public open class Driver(private val conn: Connection) {
      * @param decodeIdResultSet The function to decode primary ID from the ResultSet.
      * @return The generated primary ID if the insert was successful, or null if no rows were affected.
      * @throws DriverException If there is an error processing the insert query.
-     * @throws ReportIssue If the inserted primary ID couldn't be retrieved normally or with force.
+     * @throws IssueException If the inserted primary ID couldn't be retrieved normally or with force.
      */
     internal fun <T> insert(query: Query, onGeneratedKeysFail: String? = null, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
         var ps: PreparedStatement? = null
@@ -201,7 +201,7 @@ public open class Driver(private val conn: Connection) {
             }
         }
 
-        throw ReportIssue(msg = "Could not retrieve inserted id normally nor with force from: $query")
+        throw IssueException(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 
     /**
