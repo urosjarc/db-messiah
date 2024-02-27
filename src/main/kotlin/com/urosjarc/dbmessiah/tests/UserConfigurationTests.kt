@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 
@@ -20,7 +20,7 @@ internal class UserConfigurationTests(val mapper: Mapper) {
      * CHECK FOR EMPTYNESS
      */
     fun `1-th Test - If at least one table exist`() {
-        this.mapper.schemas.getOrNull(0)?.tables?.getOrNull(0) ?: throw SerializerException("Missing schema or it has no registered table")
+        this.mapper.schemas.getOrNull(0)?.tables?.getOrNull(0) ?: throw SerializingException("Missing schema or it has no registered table")
     }
 
     /**
@@ -28,13 +28,13 @@ internal class UserConfigurationTests(val mapper: Mapper) {
      */
     fun `2-th Test - If schema registered multiple times`() {
         val notUnique = this.mapper.schemas.ext_notUnique
-        if (notUnique.isNotEmpty()) throw SerializerException("Schemas registered multiple times: ${notUnique.keys}")
+        if (notUnique.isNotEmpty()) throw SerializingException("Schemas registered multiple times: ${notUnique.keys}")
     }
 
     fun `3-th Test - If schemas table registered multiple times`() {
         this.mapper.schemas.forEach {
             val notUnique = it.tables.ext_notUnique
-            if (notUnique.isNotEmpty()) throw SerializerException("Schema $it has tables ${notUnique.keys} registered multiple times")
+            if (notUnique.isNotEmpty()) throw SerializingException("Schema $it has tables ${notUnique.keys} registered multiple times")
         }
     }
 
@@ -44,7 +44,7 @@ internal class UserConfigurationTests(val mapper: Mapper) {
     fun `6-th Test - If schema serializers registered multiple times`() {
         this.mapper.schemas.forEach {
             val notUnique = it.serializers.ext_notUnique
-            if (notUnique.isNotEmpty()) throw SerializerException("Schema ${it} has serializers ${notUnique.keys} registered multiple times")
+            if (notUnique.isNotEmpty()) throw SerializingException("Schema ${it} has serializers ${notUnique.keys} registered multiple times")
         }
     }
 
@@ -52,7 +52,7 @@ internal class UserConfigurationTests(val mapper: Mapper) {
         this.mapper.schemas.forEach { schema ->
             schema.tables.forEach { table ->
                 val notUnique = table.serializers.ext_notUnique
-                if (notUnique.isNotEmpty()) throw SerializerException("Table ${schema}.${table} has serializers ${notUnique.keys} registered multiple times")
+                if (notUnique.isNotEmpty()) throw SerializingException("Table ${schema}.${table} has serializers ${notUnique.keys} registered multiple times")
             }
         }
     }
@@ -73,11 +73,11 @@ internal class UserConfigurationTests(val mapper: Mapper) {
                 table.foreignKeys.forEach { fk ->
 
                     val schema_fkTable = schemas_tables.firstOrNull { fk.value == it.second.kclass }
-                        ?: throw SerializerException("Foreign key ${schema}.${table}.'${fk.key.name}' points to unregistered class '${fk.value.simpleName}'")
+                        ?: throw SerializingException("Foreign key ${schema}.${table}.'${fk.key.name}' points to unregistered class '${fk.value.simpleName}'")
 
                     val fkKClass = fk.key.returnType.classifier as KClass<*>
                     if (schema_fkTable.second.primaryKey.returnType.classifier != fkKClass)
-                        throw SerializerException(
+                        throw SerializingException(
                             "Foreign key ${schema}.${table}.'${fk.key.name}' is type of '${fkKClass.simpleName}' " +
                                     "but it points to incompatible primary key ${schema_fkTable.first}.${schema_fkTable.second}.'${schema_fkTable.second.primaryKey.name}'"
                         )
@@ -97,9 +97,9 @@ internal class UserConfigurationTests(val mapper: Mapper) {
                     if (prop == table.primaryKey) {
                         prop_const.value.forEach {
                             when (it) {
-                                C.UNIQUE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
-                                C.CASCADE_UPDATE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
-                                C.CASCADE_DELETE -> throw SerializerException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
+                                C.UNIQUE -> throw SerializingException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
+                                C.CASCADE_UPDATE -> throw SerializingException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
+                                C.CASCADE_DELETE -> throw SerializingException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
                             }
                         }
                     }
@@ -125,7 +125,7 @@ internal class UserConfigurationTests(val mapper: Mapper) {
             val constructor = this.mapper.getConstructor(kclass = input)
             val defaultParams = constructor.parameters.filter { p -> p.isOptional }.map { "'${it.name}'" }
             if (defaultParams.isNotEmpty())
-                throw SerializerException("Output class '${input.simpleName}' have primary constructor with optional arguments $defaultParams, which is not allowed on any output class!")
+                throw SerializingException("Output class '${input.simpleName}' have primary constructor with optional arguments $defaultParams, which is not allowed on any output class!")
         }
     }
 
@@ -134,22 +134,22 @@ internal class UserConfigurationTests(val mapper: Mapper) {
      */
     fun `13-th Test - If global procedure registered multiple times`() {
         val notUnique = this.mapper.globalProcedures.ext_notUnique
-        if (notUnique.isNotEmpty()) throw SerializerException("Global procedures registered multiple times: ${notUnique.keys}")
+        if (notUnique.isNotEmpty()) throw SerializingException("Global procedures registered multiple times: ${notUnique.keys}")
     }
 
     fun `14-th Test - If global outputs registered multiple times`() {
         val notUnique = this.mapper.globalOutputs.ext_notUnique
-        if (notUnique.isNotEmpty()) throw SerializerException("Global outputs registered multiple times: ${notUnique.keys}")
+        if (notUnique.isNotEmpty()) throw SerializingException("Global outputs registered multiple times: ${notUnique.keys}")
     }
 
     fun `15-th Test - If global inputs registered multiple times`() {
         val notUnique = this.mapper.globalInputs.ext_notUnique
-        if (notUnique.isNotEmpty()) throw SerializerException("Global inputs registered multiple times: ${notUnique.keys}")
+        if (notUnique.isNotEmpty()) throw SerializingException("Global inputs registered multiple times: ${notUnique.keys}")
     }
 
     fun `16-th Test - If global serializers registered multiple times`() {
         val notUnique = this.mapper.globalInputs.ext_notUnique
-        if (notUnique.isNotEmpty()) throw SerializerException("Global serializers registered multiple times: ${notUnique.keys}")
+        if (notUnique.isNotEmpty()) throw SerializingException("Global serializers registered multiple times: ${notUnique.keys}")
     }
 
 }

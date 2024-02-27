@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.extend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class Test_List_ext {
+class Test_List {
 
     @Test
     fun `test getValue()`() {

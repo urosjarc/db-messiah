@@ -10,24 +10,27 @@ import kotlin.test.*
  * Define your domain classes (tables)...
  */
 data class Parent0(
-    var pk: Int? = null, // Primary keys should be mutable if you want them to be auto-incremental...
+    var pk: Int? = null, // Parent auto-incremental primary key (Int?, Uint?)
     var value: String
 )
 
 data class Child0(
-    var pk: Int, // Primary keys should be immutable if you don't want them to be auto-incremental...
-    val parent_pk: Int, // Foreign key pointing to parent primary key...
+    var pk: String, // Child non auto-incremental primary key
+    val parent_pk: Int,
     var value: String
 )
 
 /**
  * Create database serializer and explain database structure...
- * If primary key is mutable system will automatically mark primary key as auto-incremental.
- * If primary key is immutable system will leave primary key initialization to the user.
+ * If primary key is mutable and of type Int? or Uint? system will automatically mark primary key as auto-incremental,
+ * user don't have to do anything. If primary key is anything else than Int? or Uint? the initialization of the primary key
+ * will be left to the user to define primary keys on application level. This is preferred
+ * in case of having UUID for primary key identification.
+ * Note that every table MUST have primary key, tables without primary key are considered a bad practice and they are not supported by this library.
  */
 val ser0 = SqliteSerializer(
     tables = listOf(
-        Table(Parent0::pk), //Pass primary key reference to table to register `Parent` as db table and mark `pk` as primary key.
+        Table(Parent0::pk), // Pass primary key reference to table to register `Parent` as db table and mark `pk` as primary key.
         Table(
             Child0::pk, foreignKeys = listOf(
                 Child0::parent_pk to Parent0::class // Define mapping from foreign key to parent table.

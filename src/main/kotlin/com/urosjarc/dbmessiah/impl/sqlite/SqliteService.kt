@@ -13,7 +13,7 @@ import java.util.*
 /**
  * This class represents a service for interacting with an SQLite database.
  */
-public class SqliteService : Service {
+public class SqliteService : Service<Serializer> {
     public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
     public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 

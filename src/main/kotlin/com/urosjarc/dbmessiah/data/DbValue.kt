@@ -35,9 +35,6 @@ internal abstract class DbValue(
      */
     val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
 
-    /** @suppress */
-    val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
-
     /**
      * Important method which extracts appropriate [QueryValue] from [obj] instance that this [DbValue] represents.
      *
@@ -94,6 +91,9 @@ internal abstract class DbValue(
         }
 
     }
+
+    /** @suppress */
+    val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
 
     /** @suppress */
     override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()

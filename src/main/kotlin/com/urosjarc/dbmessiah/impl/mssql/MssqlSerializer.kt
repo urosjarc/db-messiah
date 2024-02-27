@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.mssql
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.Serializer
+import com.urosjarc.dbmessiah.SerializerWithProcedure
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
@@ -13,7 +13,7 @@ public open class MssqlSerializer(
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     globalProcedures: List<KClass<*>> = listOf()
-) : Serializer(
+) : SerializerWithProcedure(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -30,26 +30,26 @@ public open class MssqlSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "IDENTITY(1,1)" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
+        val autoIncrement = if (T.primaryKey.autoInc) " IDENTITY(1,1)" else ""
+        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
 
         //Foreign keys
         T.foreignKeys.forEach {
-            val isNull = if (it.notNull) "NOT NULL" else ""
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
-            val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
+            val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
             )
         }
 
         //Other columns
         T.otherColumns.forEach {
-            val isNull = if (it.notNull) "" else "NOT NULL"
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
@@ -85,7 +85,7 @@ public open class MssqlSerializer(
      * @return A [Query] object representing the SQL query.
      * @throws SerializerException if the [Procedure] for the object cannot be found.
      */
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         val args = P.args.map { "@${it.name} ${it.dbType}" }.joinToString(", ")
         return Query(

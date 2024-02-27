@@ -8,9 +8,9 @@ import java.util.*
  * @property conn The connection pool for creating query or transactional connections.
  * @property ser The serializer for serializing and deserializing data.
  * */
-public abstract class Service {
+public abstract class Service<SER: Any> {
     internal val conn: ConnectionPool
-    internal val ser: Serializer
+    internal val ser: SER
 
     /**
      * This class represents a Service that provides query and transactional operations on a database.
@@ -19,7 +19,7 @@ public abstract class Service {
      * is then directly passed to [HikariCP](https://github.com/brettwooldridge/HikariCP).
      * @param ser The serializer for serializing and deserializing data.
      */
-    public constructor(config: Properties, ser: Serializer) {
+    public constructor(config: Properties, ser: SER) {
         this.ser = ser
         this.conn = ConnectionPool(config)
     }
@@ -31,7 +31,7 @@ public abstract class Service {
      * that is then directly passed to [HikariCP](https://github.com/brettwooldridge/HikariCP).
      * @param ser The serializer for serializing and deserializing data.
      */
-    public constructor(configPath: String, ser: Serializer) {
+    public constructor(configPath: String, ser: SER) {
         this.ser = ser
         this.conn = ConnectionPool(configPath)
     }

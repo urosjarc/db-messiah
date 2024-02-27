@@ -1,8 +1,8 @@
 package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
-import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import kotlin.reflect.KClass
 
 /**
@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  * @param driver The database driver to be used for executing queries.
  */
 public class ProcedureQueries(
-    private val ser: Serializer,
+    private val ser: SerializerWithProcedure,
     private val driver: Driver
 ) {
 
@@ -29,7 +29,7 @@ public class ProcedureQueries(
         }
 
         if (results.size != outputs.size)
-            throw SerializerException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+            throw SerializingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
 
         return results
     }

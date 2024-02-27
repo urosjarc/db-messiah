@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import com.urosjarc.dbmessiah.tests.MapperTests
 import com.urosjarc.dbmessiah.tests.UserConfigurationTests
 import java.sql.ResultSet
@@ -168,7 +168,7 @@ public class Mapper(
      * @param columnSerializers The list of column serializers for the table.
      * @param serializers The list of [TypeSerializer] for the table.
      * @param isProcedure Specifies whether the [kclass] is a procedure or not.
-     * @throws SerializerException if the association maps cannot be filled for the table.
+     * @throws SerializingException if the association maps cannot be filled for the table.
      */
     private fun fillAssociationMaps(
         kclass: KClass<*>,
@@ -180,9 +180,9 @@ public class Mapper(
         val kprops = kclass.memberProperties.filter { it.javaField != null }
 
         if (kparams == null)
-            throw SerializerException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+            throw SerializingException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
         if (kparams.isEmpty() && !isProcedure)
-            throw SerializerException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
+            throw SerializingException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
 
         this.kclass_to_constructor[kclass] = kclass.primaryConstructor
         this.kclass_to_constructorParameters[kclass] = kparams
@@ -190,7 +190,7 @@ public class Mapper(
 
         kparams.forEach { p ->
             kparam_to_serializer[p] = serializers.firstOrNull { it.kclass == p.type.classifier }
-                ?: throw SerializerException("Could not find serializer for primary constructor parameter '${kclass.simpleName}'.'${p.name}'")
+                ?: throw SerializingException("Could not find serializer for primary constructor parameter '${kclass.simpleName}'.'${p.name}'")
         }
         kprops.forEach { p ->
 
@@ -203,7 +203,7 @@ public class Mapper(
             //If not search for serializer in other table, schema, global serializers.
             else
                 kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
-                    ?: throw SerializerException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
+                    ?: throw SerializingException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
         }
     }
 
@@ -422,7 +422,7 @@ public class Mapper(
      *
      * @param obj The object for which to retrieve the [Procedure].
      * @return The [Procedure] object.
-     * @throws SerializerException If the [Procedure] for the object cannot be found.
+     * @throws SerializingException If the [Procedure] for the object cannot be found.
      */
     internal fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
 
@@ -431,27 +431,27 @@ public class Mapper(
      *
      * @param kclass The Kotlin [KClass] representing the [Procedure].
      * @return The [Procedure] object.
-     * @throws SerializerException If the [Procedure] for the class cannot be found.
+     * @throws SerializingException If the [Procedure] for the class cannot be found.
      */
     internal fun getProcedure(kclass: KClass<*>): Procedure =
-        this.procedureKClass_to_procedure[kclass] ?: throw SerializerException("Could not find procedure for kclass: '${kclass.simpleName}'")
+        this.procedureKClass_to_procedure[kclass] ?: throw SerializingException("Could not find procedure for kclass: '${kclass.simpleName}'")
 
     /**
      * Retrieves the [TableInfo] object for the given table class.
      *
      * @param kclass The Kotlin class representing the table.
      * @return The [TableInfo] object for the given table class.
-     * @throws SerializerException if the table info for the table cannot be found.
+     * @throws SerializingException if the table info for the table cannot be found.
      */
     internal fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
-        this.tableKClass_to_tableInfo[kclass] ?: throw SerializerException("Could not find table info for table: '${kclass.simpleName}'")
+        this.tableKClass_to_tableInfo[kclass] ?: throw SerializingException("Could not find table info for table: '${kclass.simpleName}'")
 
     /**
      * Retrieves the [TableInfo] object for the given table class or object.
      *
      * @param obj The table class or object for which to retrieve the [TableInfo].
      * @return The TableInfo object for the given table class or object.
-     * @throws SerializerException if the table info for the table cannot be found.
+     * @throws SerializingException if the table info for the table cannot be found.
      */
     internal fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
 
@@ -462,14 +462,14 @@ public class Mapper(
      * @param i The index of the output class in the vararg list.
      * @param outputs The vararg list of output classes.
      * @return The list of decoded objects.
-     * @throws SerializerException If there are missing output classes.
+     * @throws SerializingException If there are missing output classes.
      */
     internal fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
         val output = outputs.getOrNull(i)
         val objs = mutableListOf<Any>()
 
         if (output != null) while (resultSet.next()) objs.add(this.decode(resultSet, output))
-        else throw SerializerException("Missing output classes, because there are more queries listed in the query: ${outputs.map { it.simpleName }}")
+        else throw SerializingException("Missing output classes, because there are more queries listed in the query: ${outputs.map { it.simpleName }}")
 
         return objs
     }

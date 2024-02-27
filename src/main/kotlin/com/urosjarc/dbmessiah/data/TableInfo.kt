@@ -51,7 +51,7 @@ internal data class TableInfo(
     val userControlledColumns
         get(): List<Column> {
             val columns: MutableList<Column> = (this.foreignKeys + this.otherColumns).toMutableList()
-            if (!this.primaryKey.autoIncrement) columns.add(this.primaryKey)
+            if (!this.primaryKey.autoInc) columns.add(this.primaryKey)
             return columns
         }
 

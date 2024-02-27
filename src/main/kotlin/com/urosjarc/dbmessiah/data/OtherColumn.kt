@@ -26,5 +26,5 @@ internal open class OtherColumn(
     /**
      * If values in this column can be null or not.
      */
-    val notNull: Boolean get() = !this.kprop.returnType.isMarkedNullable
+    val notNull: Boolean = !this.kprop.returnType.isMarkedNullable
 }

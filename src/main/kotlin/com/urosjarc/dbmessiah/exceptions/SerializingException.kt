@@ -10,4 +10,4 @@ import com.urosjarc.dbmessiah.exceptions.base.UserWarning
  *
  * @throws UserWarning if a serialization error occurs.
  */
-internal class SerializerException(msg: String, cause: Throwable? = null) : UserWarning(msg = msg, cause = cause)
+internal class SerializingException(msg: String, cause: Throwable? = null) : UserWarning(msg = msg, cause = cause)

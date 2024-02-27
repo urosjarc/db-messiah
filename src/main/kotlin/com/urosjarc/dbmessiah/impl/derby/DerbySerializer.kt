@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.derby
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.Serializer
+import com.urosjarc.dbmessiah.SerializerWithProcedure
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
@@ -14,7 +14,7 @@ public open class DerbySerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-) : Serializer(
+) : SerializerWithProcedure(
     schemas = listOf(Schema(name = "main", tables = tables)),
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -29,26 +29,26 @@ public open class DerbySerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoIncrement) "GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY ${autoIncrement}")
+        val autoIncrement = if (T.primaryKey.autoInc) " GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)" else ""
+        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
 
         //Foreign keys
         T.foreignKeys.forEach {
-            val isNull = if (it.notNull) "NOT NULL" else ""
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
-            val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
+            val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
             )
         }
 
         //Other columns
         T.otherColumns.forEach {
-            val isNull = if (it.notNull) "" else "NOT NULL"
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string

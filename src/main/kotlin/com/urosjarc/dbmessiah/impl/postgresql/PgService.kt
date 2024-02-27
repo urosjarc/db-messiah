@@ -11,7 +11,7 @@ import java.util.*
 /**
  * Represents a PostgreSQL service that provides methods for interacting with a PostgreSQL database.
  */
-public open class PgService : Service {
+public open class PgService : Service<Serializer> {
     public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
     public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
 

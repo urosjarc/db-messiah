@@ -40,7 +40,7 @@ internal open class Column(
     /**
      * Represents the name of a [Column].
      */
-    override val name: String get() = this.kprop.name
+    override val name: String = this.kprop.name
 
     /**
      * Represents the full path of [Column] location.

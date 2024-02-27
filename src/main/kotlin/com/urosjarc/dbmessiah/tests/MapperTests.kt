@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
 /**
@@ -73,12 +73,12 @@ internal class MapperTests(val mapper: Mapper) {
 
     fun `8-th Test - If all primary keys that have auto inc are of type integer`() {
         nextTable@ for (T in this.mapper.tableInfos) {
-            if (T.primaryKey.autoIncrement) {
+            if (T.primaryKey.autoInc) {
                 for (it in listOf("INT", "INTEGER")) {
                     val dbType = T.primaryKey.dbType.split("(").first()
                     if (dbType == it) continue@nextTable
                 }
-                throw SerializerException("Primary key '${T.primaryKey.path}' of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
+                throw SerializingException("Primary key '${T.primaryKey.path}' of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
             }
         }
     }

@@ -136,8 +136,6 @@ public abstract class Serializer(
      * @return The [Query] object representing the SQL query.
      */
     internal abstract fun <T : Any> createTable(table: KClass<T>): Query
-    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query
-    internal abstract fun <T : Any> callProcedure(procedure: T): Query
 
     /**
      * Creates a SQL string for deleting all rows from the specified table.

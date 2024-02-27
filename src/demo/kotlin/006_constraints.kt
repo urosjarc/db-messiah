@@ -13,7 +13,8 @@ import kotlin.test.assertTrue
  */
 data class Parent6(
     var pk: Int? = null,
-    var uniqueValue: String
+    var uniqueValue: String, // Any column that is subtype of Any will be marked as non nullable column.
+    var nullableValue: String? // Any column that is subtype of Any? will be marked as column that can be nullable.
 )
 
 /**
@@ -54,14 +55,15 @@ fun main_006() {
         /**
          * Insert some rows with unique columns..
          */
-        val isInserted = it.row.insert(row = Parent6(uniqueValue = "asdf"))
+        val isInserted = it.row.insert(row = Parent6(uniqueValue = "asdf", nullableValue = null))
         assertTrue(isInserted)
 
         /**
          * Lets test if column can be inserted again with the same unique value...
+         * And lets test if we can insert nullable value.
          */
         val exception = assertThrows<Throwable> {
-            it.row.insert(row = Parent6(uniqueValue = "asdf"))
+            it.row.insert(row = Parent6(uniqueValue = "asdf", nullableValue = null))
         }
 
         /**

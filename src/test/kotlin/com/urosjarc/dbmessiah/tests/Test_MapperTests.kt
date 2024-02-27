@@ -5,7 +5,6 @@ import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializerException
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows

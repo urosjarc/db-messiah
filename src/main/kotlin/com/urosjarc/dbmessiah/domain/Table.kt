@@ -1,9 +1,8 @@
 package com.urosjarc.dbmessiah.domain
 
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
-import org.apache.logging.log4j.kotlin.logger
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.extensionReceiverParameter
@@ -46,8 +45,6 @@ public class Table<T : Any>(
         this.columnSerializers = columnSerializers.toMap()
     }
 
-    private val log = this.logger()
-
     /**
      * The name of the table.
      */
@@ -58,7 +55,7 @@ public class Table<T : Any>(
      * Kotlin class that represents this [Table].
      */
     public val kclass: KClass<*> =
-        (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializerException("Could not found enclosing class for primary key"))
+        (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializingException("Could not found enclosing class for primary key"))
 
     /** @suppress */
     private val hash = this.name.hashCode()

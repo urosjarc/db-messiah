@@ -26,26 +26,26 @@ public open class PgSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val serial = if (T.primaryKey.autoIncrement) "SERIAL" else ""
-        col.add("${T.primaryKey.name} $serial PRIMARY KEY")
+        val serial = if (T.primaryKey.autoInc) " SERIAL" else ""
+        col.add("${T.primaryKey.name}$serial PRIMARY KEY")
 
         //Foreign keys
         T.foreignKeys.forEach {
-            val isNull = if (it.notNull) "NOT NULL" else ""
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            val isDeleteCascade = if (it.cascadeDelete) "ON DELETE CASCADE" else ""
-            val isUpdateCascade = if (it.cascadeUpdate) "ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
+            val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name}) $isUpdateCascade $isDeleteCascade"
+                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
             )
         }
 
         //Other columns
         T.otherColumns.forEach {
-            val isNull = if (it.notNull) "" else "NOT NULL"
-            val isUnique = if (it.unique) "UNIQUE" else ""
-            col.add("${it.name} ${it.dbType} $isNull $isUnique")
+            val notNull = if (it.notNull) " NOT NULL" else ""
+            val unique = if (it.unique) " UNIQUE" else ""
+            col.add("${it.name} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
@@ -53,14 +53,6 @@ public open class PgSerializer(
 
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
-    }
-
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
-    }
-
-    override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
     }
 
     override fun insertRow(row: Any, batch: Boolean): Query {

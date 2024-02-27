@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.domain
 
-import com.urosjarc.dbmessiah.exceptions.SerializerException
+import com.urosjarc.dbmessiah.exceptions.SerializingException
 import kotlin.reflect.KProperty1
 
 /**
@@ -26,7 +26,7 @@ public data class Cursor<T : Any, V : Comparable<V>>(
      * @param orderBy The index property to order and limit the results by.
      * @param limit The maximum number of results to return (default is 20).
      * @param order The order in which the results should be sorted (default is ASC).
-     * @throws SerializerException if the property value cannot be extracted from the [row] object.
+     * @throws SerializingException if the property value cannot be extracted from the [row] object.
      */
     public constructor(
         row: T,
@@ -34,7 +34,7 @@ public data class Cursor<T : Any, V : Comparable<V>>(
         limit: Int = 20,
         order: Order = Order.ASC
     ) : this(
-        index = orderBy.get(row) ?: throw SerializerException("Could not extract property '$orderBy' from row: $row"),
+        index = orderBy.get(row) ?: throw SerializingException("Could not extract property '$orderBy' from row: $row"),
         orderBy = orderBy,
         limit = limit,
         order = order
