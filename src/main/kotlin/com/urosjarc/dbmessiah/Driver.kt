@@ -167,25 +167,25 @@ public open class Driver(private val conn: Connection) {
             throw DriverException(msg = "Failed to process insert results from: $query", cause = e)
         }
 
-        //Try fetching ids normaly
-        try {
-            rs = ps.generatedKeys
-            if (rs.next()) {
-                val data = decodeIdResultSet(rs, 1)
-                this.closeAll(ps = ps, rs = rs)
-                return data
-            }
-        } catch (e: SQLException) {
-            //Auto reurn id is probably not supported
-            //Continue with execution
-            rs?.close()
-        } catch (e: Throwable) {
-            this.closeAll(ps = ps, rs = rs)
-            throw DriverException(msg = "Failed to process id results from: $query", cause = e)
-        }
-
-        //Try fetching ids with force
         if (onGeneratedKeysFail != null) {
+            //Try fetching ids normaly
+            try {
+                rs = ps.generatedKeys
+                if (rs.next()) {
+                    val data = decodeIdResultSet(rs, 1)
+                    this.closeAll(ps = ps, rs = rs)
+                    return data
+                }
+            } catch (e: SQLException) {
+                //Auto reurn id is probably not supported
+                //Continue with execution
+                rs?.close()
+            } catch (e: Throwable) {
+                this.closeAll(ps = ps, rs = rs)
+                throw DriverException(msg = "Failed to process id results from: $query", cause = e)
+            }
+
+            //Try fetching ids with force
             try {
                 rs2 = ps.connection.prepareStatement(onGeneratedKeysFail).executeQuery()
                 if (rs2.next()) {

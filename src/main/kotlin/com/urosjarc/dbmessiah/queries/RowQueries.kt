@@ -41,18 +41,22 @@ public open class RowQueries(
         val T = this.ser.mapper.getTableInfo(obj = row)
 
         //If object has pk then reject it since its allready identified
-        if (T.primaryKey.getValue(obj = row) != null) return false //Only objects who doesnt have primary key can be inserted!!!
+        if (T.primaryKey.autoInc && T.primaryKey.getValue(obj = row) != null) return false //Only objects who doesnt have primary key can be inserted!!!
 
         //Insert it
         val query = this.ser.insertRow(row = row, batch = false)
-        val selectLastId = this.ser.selectLastId
-        val pk = this.driver.insert(query = query, onGeneratedKeysFail = selectLastId) { rs, i -> rs.getInt(i) }
 
-        //If pk didn't retrieved insert didn't happend
-        if (pk == null) return false
+        if (T.primaryKey.autoInc) {
+            val pk = this.driver.insert(query = query, onGeneratedKeysFail = this.ser.selectLastId) { rs, i -> rs.getInt(i) }
 
-        //Set primary key on object
-        T.primaryKey.setValue(obj = row, value = pk)
+            //If pk didn't retrieved insert didn't happend
+            if (pk == null) return false
+
+            //Set primary key on object
+            T.primaryKey.setValue(obj = row, value = pk)
+        } else {
+            this.driver.insert(query = query, onGeneratedKeysFail = null) { rs, i -> rs.getInt(i) }
+        }
 
         //Return success
         return true

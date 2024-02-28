@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * @constructor Creates a new Schema instance.
  */
 public open class Schema(
-    internal val name: String,
+    public val name: String,
     internal var tables: List<Table<*>>,
     internal val serializers: List<TypeSerializer<out Any>> = listOf(),
     internal val procedures: List<KClass<*>> = listOf()

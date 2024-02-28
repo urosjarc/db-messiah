@@ -27,7 +27,7 @@ open class Test_Mssql : Test_Contract {
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
-                    ), constraints = listOf(
+                        Child::fk to Parent::class
                     )
                 )
             ),
