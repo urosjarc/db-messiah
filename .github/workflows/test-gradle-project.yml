@@ -79,3 +79,8 @@ jobs:
           ORACLE_PWD: root
         ports:
           - 1521:1521
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 20s
+          --health-timeout 10s
+          --health-retries 10
