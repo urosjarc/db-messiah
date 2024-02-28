@@ -2,6 +2,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
+import java.io.File
 import java.util.*
 import kotlin.test.*
 
@@ -58,6 +59,14 @@ val config0 = Properties().apply {
 val service0 = SqliteService(config = config0, ser = ser0)
 
 fun main_000() {
+    /**
+     * To visualize database structure you can use plantUML extractor...
+     * IntelliJ has plugin to support ".plantuml" extensions.
+     * For more informations visit plantUML website:
+     * > https://plantuml.com/
+     */
+    File("db.plantuml").writeText(ser0.plantUML())
+
     /**
      *  When you want to query database, you will be provided with available db connection (SqliteQueryConn) from the connection pool.
      *  Creating new database connection is expensive operation that's why db-messiah uses
