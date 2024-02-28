@@ -42,7 +42,7 @@ public abstract class Serializer(
      *
      * @property selectLastId The last id selected from the database.
      */
-    public open val selectLastId: String? = null
+    public abstract val selectLastId: String?
 
 
     /**
@@ -261,8 +261,7 @@ public abstract class Serializer(
         return qBuilder.build(sql = getSql(qBuilder))
     }
 
-    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query
-
+    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query
     internal abstract fun <T : Any> callProcedure(procedure: T): Query
     internal abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
 

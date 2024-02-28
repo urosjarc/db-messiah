@@ -58,14 +58,14 @@ public open class MysqlSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         val args = P.args.map { "${it.name} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
                 CREATE PROCEDURE IF NOT EXISTS ${P.path} ($args)
                 BEGIN
-                    ${body()}
+                    $sql
                 END;
             """.trimIndent()
         )

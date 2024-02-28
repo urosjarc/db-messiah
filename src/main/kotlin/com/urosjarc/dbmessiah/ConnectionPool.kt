@@ -99,7 +99,7 @@ public open class ConnectionPool {
 
         } catch (e: Throwable) {
             this.close(conn = conn)
-            throw ConnectionException("Query was interrupted by unhandled exception", e)
+            throw ConnectionException("Autocommit was interrupted by unhandled exception", e)
         }
     }
 

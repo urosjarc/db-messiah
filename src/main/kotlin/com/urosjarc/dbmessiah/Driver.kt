@@ -1,13 +1,11 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.data.BatchQuery
-import com.urosjarc.dbmessiah.data.Encoder
-import com.urosjarc.dbmessiah.data.Query
-import com.urosjarc.dbmessiah.data.QueryValue
+import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.exceptions.base.IssueException
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
+
 
 /**
  * A class representing a database driver.
@@ -142,7 +140,7 @@ public open class Driver(private val conn: Connection) {
      * @throws DriverException If there is an error processing the insert query.
      * @throws IssueException If the inserted primary ID couldn't be retrieved normally or with force.
      */
-    internal fun <T> insert(query: Query, onGeneratedKeysFail: String? = null, decodeIdResultSet: ((rs: ResultSet, i: Int) -> T)): T? {
+    internal fun insert(query: Query, primaryKey: PrimaryColumn, onGeneratedKeysFail: String?): Int? {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -150,7 +148,7 @@ public open class Driver(private val conn: Connection) {
         //Execute query
         try {
             //Prepare statement
-            ps = conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS)
+            ps = conn.prepareStatement(query.sql, arrayOf(primaryKey.name))
             this.prepareQuery(ps = ps, query = query)
 
             //Get info
@@ -167,40 +165,41 @@ public open class Driver(private val conn: Connection) {
             throw DriverException(msg = "Failed to process insert results from: $query", cause = e)
         }
 
-        if (onGeneratedKeysFail != null) {
-            //Try fetching ids normaly
-            try {
-                rs = ps.generatedKeys
-                if (rs.next()) {
-                    val data = decodeIdResultSet(rs, 1)
-                    this.closeAll(ps = ps, rs = rs)
-                    return data
-                }
-            } catch (e: SQLException) {
-                //Auto reurn id is probably not supported
-                //Continue with execution
-                rs?.close()
-            } catch (e: Throwable) {
+        //Try fetching ids normaly
+        try {
+            rs = ps.generatedKeys
+            if (rs.next()) {
+                val data = rs.getInt(1)
                 this.closeAll(ps = ps, rs = rs)
-                throw DriverException(msg = "Failed to process id results from: $query", cause = e)
+                return data
             }
+        } catch (e: SQLException) {
+            this.log.warn(e.message.toString())
+            //Auto reurn id is probably not supported
+            //Continue with execution
+            rs?.close()
+        } catch (e: Throwable) {
+            this.closeAll(ps = ps, rs = rs)
+            throw DriverException(msg = "Failed to process id results from: $query", cause = e)
+        }
 
-            //Try fetching ids with force
-            try {
+
+        //Try fetching ids with force if onGeneragedKeysFail sql is not null!!!
+        try {
+            if (onGeneratedKeysFail != null) {
                 rs2 = ps.connection.prepareStatement(onGeneratedKeysFail).executeQuery()
                 if (rs2.next()) {
-                    val data = decodeIdResultSet(rs2, 1)
+                    val data = rs2.getInt(1)
                     this.closeAll(ps = ps, rs = rs2)
                     return data
                 }
-            } catch (e: Throwable) {
-                this.closeAll(ps = ps, rs = rs2)
-                throw DriverException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
-            } finally {
-                this.closeAll(ps = ps, rs = rs2)
             }
+        } catch (e: Throwable) {
+            this.closeAll(ps = ps, rs = rs2)
+            throw DriverException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
         }
 
+        this.closeAll(ps = ps, rs = rs2)
         throw IssueException(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 

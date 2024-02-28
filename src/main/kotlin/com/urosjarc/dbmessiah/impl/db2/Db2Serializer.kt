@@ -70,7 +70,7 @@ public open class Db2Serializer(
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         var args = P.args.map { it.dbType }.joinToString(", ")
-        if(P.args.isNotEmpty()) args = "($args)"
+        if (P.args.isNotEmpty()) args = "($args)"
         return Query(sql = "DROP PROCEDURE ${P.path}$args")
     }
 
@@ -81,14 +81,14 @@ public open class Db2Serializer(
      * @return A [Query] object representing the SQL query.
      * @throws SerializerException if the [Procedure] for the object cannot be found.
      */
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         val args = P.args.map { "${it.name} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
                 CREATE OR REPLACE PROCEDURE ${P.path}($args)
                 BEGIN
-                    ${body()}
+                    $sql
                 END
             """.trimIndent()
         )

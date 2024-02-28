@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  * @param ser The serializer to be used for object serialization.
  * @param driver The database driver to be used for executing queries.
  */
-public class ProcedureQueries(
+public open class ProcedureQueries(
     private val ser: Serializer,
     private val driver: Driver
 ) {
@@ -26,8 +26,8 @@ public class ProcedureQueries(
         }
     }
 
-    public fun <T : Any> create(procedure: KClass<T>, throws: Boolean = true, body: () -> String): Int {
-        val query = this.ser.createProcedure(procedure = procedure, body = body)
+    public open fun <T : Any> create(procedure: KClass<T>, throws: Boolean = true, body: () -> String): Int {
+        val query = this.ser.createProcedure(procedure = procedure, sql = body())
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {

@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.impl.maria
 
 import com.urosjarc.dbmessiah.Driver
-import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.domain.Rollback
@@ -11,11 +10,11 @@ import java.util.*
 /**
  * The `MariaService` class provides functionality to interact with a MariaDB database.
  */
-public open class MariaService : Service<Serializer> {
-    public constructor(config: Properties, ser: Serializer) : super(config = config, ser = ser)
-    public constructor(configPath: String, ser: Serializer) : super(configPath = configPath, ser = ser)
+public open class MariaService : Service<MariaSerializer> {
+    public constructor(config: Properties, ser: MariaSerializer) : super(config = config, ser = ser)
+    public constructor(configPath: String, ser: MariaSerializer) : super(configPath = configPath, ser = ser)
 
-    public open class Connection(conn: java.sql.Connection, ser: Serializer) {
+    public open class Connection(conn: java.sql.Connection, ser: MariaSerializer) {
         private val driver = Driver(conn = conn)
         public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
@@ -35,7 +34,7 @@ public open class MariaService : Service<Serializer> {
     public fun autocommit(body: (conn: Connection) -> Unit): Unit =
         this.conn.autocommit { body(Connection(conn = it, ser = ser)) }
 
-    public class Transaction(conn: java.sql.Connection, ser: Serializer) : Connection(conn = conn, ser = ser) {
+    public class Transaction(conn: java.sql.Connection, ser: MariaSerializer) : Connection(conn = conn, ser = ser) {
         public val roolback: Rollback = Rollback(conn = conn)
     }
 

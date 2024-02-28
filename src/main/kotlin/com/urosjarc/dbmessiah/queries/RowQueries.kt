@@ -47,19 +47,20 @@ public open class RowQueries(
         val query = this.ser.insertRow(row = row, batch = false)
 
         if (T.primaryKey.autoInc) {
-            val pk = this.driver.insert(query = query, onGeneratedKeysFail = this.ser.selectLastId) { rs, i -> rs.getInt(i) }
+            val pk = this.driver.insert(query = query, primaryKey = T.primaryKey, onGeneratedKeysFail = this.ser.selectLastId)
 
             //If pk didn't retrieved insert didn't happend
             if (pk == null) return false
 
             //Set primary key on object
             T.primaryKey.setValue(obj = row, value = pk)
-        } else {
-            this.driver.insert(query = query, onGeneratedKeysFail = null) { rs, i -> rs.getInt(i) }
-        }
 
-        //Return success
-        return true
+            //Insert happend
+            return true
+        } else {
+            //If we don't need to retrieve id joust update table
+            return this.driver.update(query = query) == 1
+        }
     }
 
     /**

@@ -81,6 +81,7 @@ testing {
                 runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
                 runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
+                runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
             }
         }
 

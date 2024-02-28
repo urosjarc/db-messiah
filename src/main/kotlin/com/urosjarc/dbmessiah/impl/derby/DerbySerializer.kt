@@ -63,14 +63,15 @@ public open class DerbySerializer(
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH FIRST ${page.limit} ROWS ONLY")
     }
 
+    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+        TODO("Not implemented")
+    }
+
     override fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DROP TABLE ${T.path}")
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not implemented")
-    }
 
     override fun <T : Any> callProcedure(procedure: T): Query {
         TODO("Not implemented")
