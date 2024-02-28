@@ -3,6 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
+import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import kotlin.reflect.KClass
 
 /**
@@ -47,7 +48,17 @@ public open class RowQueries(
         val query = this.ser.insertRow(row = row, batch = false)
 
         if (T.primaryKey.autoInc) {
-            val pk = this.driver.insert(query = query, primaryKey = T.primaryKey, onGeneratedKeysFail = this.ser.selectLastId)
+            val pk =
+                /**
+                 * Derby and every database (not oracle) supports only Statement.RETURN_GENERATED_KEYS
+                 */
+                if (this.ser is DerbySerializer)
+                    this.driver.insert(query = query, primaryKey = null, onGeneratedKeysFail = this.ser.selectLastId)
+                /**
+                 * Oracle and every database (not derby) supports returning columns by name directly.
+                 */
+                else
+                    this.driver.insert(query = query, primaryKey = T.primaryKey, onGeneratedKeysFail = this.ser.selectLastId)
 
             //If pk didn't retrieved insert didn't happend
             if (pk == null) return false

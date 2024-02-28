@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
@@ -28,6 +29,9 @@ open class Test_Mssql : Test_Contract {
                 Table(
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
+                    ),
+                    constraints = listOf(
+                        Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 )
             ),
@@ -131,7 +135,8 @@ open class Test_Mssql : Test_Contract {
 
         //Drop
         it.table.delete(table = Child::class)
-        it.table.drop(table = Parent::class)
+        it.table.drop(table = Child::class)
+        it.table.drop(table = Parent::class, throws = false)
 
         //You can't select on droped table
         this.assertTableNotExists(q = it, kclass = Parent::class)
@@ -154,6 +159,8 @@ open class Test_Mssql : Test_Contract {
 
         //Drop
         it.table.delete(table = Parent::class)
+        it.table.delete(table = Child::class)
+        it.table.drop(table = Child::class)
         assertEquals(actual = it.table.drop(table = Parent::class), expected = 0)
 
         //Select will create error
