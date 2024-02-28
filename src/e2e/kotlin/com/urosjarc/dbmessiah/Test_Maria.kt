@@ -23,15 +23,19 @@ open class Test_Maria : Test_Contract {
         private lateinit var service: MariaService
 
         val schema = MariaSchema(
-                name = "main", tables = listOf(
-                    Table(Parent::pk),
-                    Table(
-                        Child::pk, foreignKeys = listOf(
-                            Child::fk to Parent::class
-                        )
+            name = "main", tables = listOf(
+                Table(Parent::pk),
+                Table(
+                    Child::pk, foreignKeys = listOf(
+                        Child::fk to Parent::class
                     )
                 )
+            ),
+            procedures = listOf(
+                TestProcedure::class,
+                TestProcedureEmpty::class
             )
+        )
 
         @JvmStatic
         @BeforeAll
@@ -94,23 +98,19 @@ open class Test_Maria : Test_Contract {
 
         //Create procedures and disable foreign checks
         service.autocommit {
-            it.run.query {
+            it.procedure.drop(procedure = TestProcedure::class, throws = false)
+            it.procedure.create(procedure = TestProcedure::class) {
                 """
-                        CREATE OR REPLACE PROCEDURE main.TestProcedure(parent_pk INT)
-                        BEGIN
-                            SELECT * FROM main.Parent WHERE pk = parent_pk;
-                            SELECT * FROM main.Parent WHERE pk = parent_pk1;
-                        END;
-                    """.trimIndent()
+                    SELECT * FROM main.Parent WHERE pk = parent_pk AND col = parent_col;
+                    SELECT * FROM main.Parent WHERE pk = 1;
+                """
             }
-            it.run.query {
+            it.procedure.drop(procedure = TestProcedureEmpty::class, throws = false)
+            it.procedure.create(procedure = TestProcedureEmpty::class) {
                 """
-                        CREATE OR REPLACE PROCEDURE main.TestProcedureEmpty()
-                        BEGIN
-                            SELECT * FROM main.Parent WHERE pk = 2;
-                            SELECT * FROM main.Parent WHERE pk = 2;
-                        END;
-                    """.trimIndent()
+                    SELECT * FROM main.Parent WHERE pk = 1;
+                    SELECT * FROM main.Parent WHERE pk = 2;
+                """
             }
         }
 
@@ -700,5 +700,27 @@ open class Test_Maria : Test_Contract {
                 assertEquals(actual = children3, expected = children0)
             }
         }
+    }
+
+
+    @Test
+    override fun `test procedure call without input`() = service.autocommit {
+        val results = it.procedure.call(procedure = TestProcedureEmpty(), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>).map { it.pk }
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(2))
+    }
+
+    @Test
+    override fun `test procedure call with input`() = service.autocommit {
+        val parent = it.table.select(Parent::class).first()
+        val results = it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>)
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(parent))
     }
 }

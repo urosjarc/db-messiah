@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.impl.db2
 
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
@@ -12,7 +13,7 @@ public open class Db2Serializer(
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     globalProcedures: List<KClass<*>> = listOf()
-) : SerializerWithProcedure(
+) : Serializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -57,19 +58,65 @@ public open class Db2Serializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
-    }
-
-    override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
-    }
-
     override fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
             *T.queryValues(obj = row),
+        )
+    }
+
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        var args = P.args.map { it.dbType }.joinToString(", ")
+        if(P.args.isNotEmpty()) args = "($args)"
+        return Query(sql = "DROP PROCEDURE ${P.path}$args")
+    }
+
+    /**
+     * Generates SQL string for calling stored procedure.
+     *
+     * @param obj The input object representing the stored procedure to be called.
+     * @return A [Query] object representing the SQL query.
+     * @throws SerializerException if the [Procedure] for the object cannot be found.
+     */
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        val args = P.args.map { "${it.name} ${it.dbType}" }.joinToString(", ")
+        return Query(
+            sql = """
+                CREATE OR REPLACE PROCEDURE ${P.path}($args)
+                BEGIN
+                    ${body()}
+                END
+            """.trimIndent()
+        )
+    }
+
+    public override fun <T : Any> callProcedure(procedure: T): Query {
+        val P = this.mapper.getProcedure(obj = procedure)
+
+        return Query(
+            sql = "CALL ${P.path}(${P.sqlArguments()})",
+            *P.queryValues(obj = procedure)
+        )
+    }
+
+    /**
+     * Creates a new database schema if it does not already exist.
+     *
+     * @param schema The [Schema] object representing the schema to be created.
+     * @return A [Query] object representing the SQL query to create the schema.
+     */
+    override fun createSchema(schema: Schema): Query {
+        return Query(
+            sql = """
+                IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '${schema.name}')
+                BEGIN
+                    EXEC( 'CREATE SCHEMA ${schema.name}' );
+                END
+            """
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.impl.maria
 
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Serializer
+import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
@@ -12,7 +13,7 @@ public open class MariaSerializer(
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     globalProcedures: List<KClass<*>> = listOf()
-) : SerializerWithProcedure(
+) : Serializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -58,11 +59,30 @@ public open class MariaSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        val args = P.args.map { "${it.name} ${it.dbType}" }.joinToString(", ")
+        return Query(
+            sql = """
+                CREATE OR REPLACE PROCEDURE ${P.path}($args)
+                BEGIN
+                    ${body()}
+                END;
+            """.trimIndent()
+        )
     }
 
-    override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
+    public override fun <T : Any> callProcedure(procedure: T): Query {
+        val P = this.mapper.getProcedure(obj = procedure)
+
+        return Query(
+            sql = "CALL ${P.path}(${P.sqlArguments()})",
+            *P.queryValues(obj = procedure)
+        )
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        return Query(sql = "DROP PROCEDURE IF EXISTS ${P.path}")
     }
 }

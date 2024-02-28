@@ -679,4 +679,10 @@ open class Test_Sqlite : Test_Contract {
             }
         }
     }
+
+    override fun `test procedure call without input`() {
+    }
+
+    override fun `test procedure call with input`() {
+    }
 }

@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.h2
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Table
@@ -13,7 +13,7 @@ public open class H2Serializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-) : SerializerWithProcedure(
+) : Serializer(
     schemas = listOf(Schema(name = "main", tables = tables)),
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -58,10 +58,14 @@ public open class H2Serializer(
     }
 
     override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
+        TODO("Not implemented")
     }
 
     override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
+        TODO("Not implemented")
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        TODO("Not implemented")
     }
 }

@@ -1,6 +1,6 @@
 package com.urosjarc.dbmessiah.impl.mysql
 
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
@@ -12,7 +12,7 @@ public open class MysqlSerializer(
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     globalProcedures: List<KClass<*>> = listOf()
-): SerializerWithProcedure(
+) : Serializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -59,10 +59,29 @@ public open class MysqlSerializer(
     }
 
     public override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
+        val P = this.mapper.getProcedure(kclass = procedure)
+        val args = P.args.map { "${it.name} ${it.dbType}" }.joinToString(", ")
+        return Query(
+            sql = """
+                CREATE PROCEDURE IF NOT EXISTS ${P.path} ($args)
+                BEGIN
+                    ${body()}
+                END;
+            """.trimIndent()
+        )
     }
 
-    public override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
+    public override fun <T : Any> callProcedure(obj: T): Query {
+        val P = this.mapper.getProcedure(obj = obj)
+
+        return Query(
+            sql = "CALL ${P.path}(${P.sqlArguments()})",
+            *P.queryValues(obj = obj)
+        )
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        return Query(sql = "DROP PROCEDURE IF EXISTS ${P.path}")
     }
 }

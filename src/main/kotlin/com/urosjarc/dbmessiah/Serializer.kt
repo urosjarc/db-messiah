@@ -52,9 +52,7 @@ public abstract class Serializer(
      */
     public fun plantUML(): String {
         val text = mutableListOf(
-            "@startuml",
-            "skinparam backgroundColor darkgray",
-            "skinparam ClassBackgroundColor lightgray"
+            "@startuml", "skinparam backgroundColor darkgray", "skinparam ClassBackgroundColor lightgray"
         )
 
         val relationships = mutableMapOf<String, String>()
@@ -157,8 +155,7 @@ public abstract class Serializer(
     public fun deleteRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?",
-            T.primaryKey.queryValue(row)
+            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?", T.primaryKey.queryValue(row)
         )
     }
 
@@ -263,4 +260,10 @@ public abstract class Serializer(
         val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
         return qBuilder.build(sql = getSql(qBuilder))
     }
+
+    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query
+
+    internal abstract fun <T : Any> callProcedure(procedure: T): Query
+    internal abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
+
 }

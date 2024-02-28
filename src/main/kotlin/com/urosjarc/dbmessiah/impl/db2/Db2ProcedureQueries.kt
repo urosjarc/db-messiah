@@ -1,9 +1,8 @@
-package com.urosjarc.dbmessiah.queries
+package com.urosjarc.dbmessiah.impl.db2
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import com.urosjarc.dbmessiah.exceptions.SerializingException
 import kotlin.reflect.KClass
 
 /**
@@ -12,7 +11,7 @@ import kotlin.reflect.KClass
  * @param ser The serializer to be used for object serialization.
  * @param driver The database driver to be used for executing queries.
  */
-public class ProcedureQueries(
+public class Db2ProcedureQueries(
     private val ser: Serializer,
     private val driver: Driver
 ) {
@@ -36,24 +35,8 @@ public class ProcedureQueries(
         }
     }
 
-    public fun <T : Any> call(procedure: T, vararg outputs: KClass<*>): MutableList<List<Any>> {
+    public fun <T : Any> call(procedure: T) {
         val query = this.ser.callProcedure(procedure = procedure)
-
-        val results = this.driver.call(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
-        }
-
-        if (results.size != outputs.size)
-            throw SerializingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
-
-        return results
-    }
-
-    public fun <T : Any, OUT : Any> call(procedure: T, output: KClass<OUT>): List<OUT> {
-        val query = this.ser.callProcedure(procedure = procedure)
-
-        return this.driver.call(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = arrayOf(output))
-        }.firstOrNull() as List<OUT>
+        this.driver.update(query = query)
     }
 }

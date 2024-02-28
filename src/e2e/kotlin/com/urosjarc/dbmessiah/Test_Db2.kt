@@ -7,6 +7,7 @@ import com.urosjarc.dbmessiah.impl.db2.Db2Schema
 import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
+import jdk.incubator.vector.VectorOperators
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,7 +33,11 @@ open class Test_Db2 : Test_Contract {
                     ), constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
-                )
+                ),
+            ),
+            procedures = listOf(
+                TestProcedure::class,
+                TestProcedureEmpty::class
             )
         )
 
@@ -95,29 +100,20 @@ open class Test_Db2 : Test_Contract {
         }
 
         //Create procedures and disable foreign checks
-//        service.query {
-//            it.query {
-//                """
-//                CREATE OR REPLACE FUNCTION main.TestProcedure(parent_pk INT)
-//                RETURNS SETOF main.Parent AS $$
-//                BEGIN
-//                  RETURN QUERY SELECT * FROM main.Parent WHERE pk = parent_pk;
-//                END;
-//                $$ language plpgsql;
-//                """.trimIndent()
-//            }
-//            it.query {
-//                """
-//                CREATE OR REPLACE FUNCTION main.TestProcedureEmpty()
-//                RETURNS SETOF main.Parent AS $$
-//                BEGIN
-//                    RETURN QUERY SELECT * FROM main.Parent WHERE pk = 2;
-//                END;
-//                $$ language plpgsql;
-//                """.trimIndent()
-//            }
-//        }
-
+        service.autocommit {
+            it.procedure.drop(procedure = TestProcedureEmpty::class, throws = false)
+            it.procedure.create(procedure = TestProcedureEmpty::class) {
+                """
+                    INSERT INTO main.Parent (pk, col) VALUES (1234, 'new parent from procedure');
+                """
+            }
+            it.procedure.drop(procedure = TestProcedure::class, throws = false)
+            it.procedure.create(procedure = TestProcedure::class) {
+                """
+                    INSERT INTO main.Parent (pk, col) VALUES (parent_pk, parent_col);
+                """
+            }
+        }
     }
 
     private fun assertTableNotExists(q: Db2Service.Connection, kclass: KClass<*>) {
@@ -704,5 +700,21 @@ open class Test_Db2 : Test_Contract {
                 assertEquals(actual = children3, expected = children0)
             }
         }
+    }
+
+    @Test
+    override fun `test procedure call without input`() = service.autocommit {
+        val parent = Parent(pk = 1234, col = "new parent from procedure")
+        assertEquals(expected = null, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        it.procedure.call(procedure = TestProcedureEmpty())
+        assertEquals(expected = parent, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+    }
+
+    @Test
+    override fun `test procedure call with input`() = service.autocommit {
+        val parent = Parent.get(pk = 1000, seed = 0)
+        assertEquals(expected = null, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col))
+        assertEquals(expected = parent, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
     }
 }

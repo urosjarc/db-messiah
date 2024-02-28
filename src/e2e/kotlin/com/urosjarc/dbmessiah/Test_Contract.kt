@@ -1,5 +1,8 @@
 package com.urosjarc.dbmessiah
 
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+
 interface Test_Contract {
     fun prepare()
 
@@ -45,4 +48,10 @@ interface Test_Contract {
     fun `test transaction with exception`()
 
     fun `test transaction with roolback snapshot`()
+
+    @Test
+    fun `test procedure call without input`()
+
+    @Test
+    fun `test procedure call with input`()
 }

@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.mssql
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
@@ -13,7 +13,7 @@ public open class MssqlSerializer(
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
     globalProcedures: List<KClass<*>> = listOf()
-) : SerializerWithProcedure(
+) : Serializer(
     schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -73,9 +73,14 @@ public open class MssqlSerializer(
         val P = this.mapper.getProcedure(obj = obj)
         val args = P.args.map { "@${it.name} = ?" }.joinToString(", ")
         return Query(
-            sql = "EXEC ${P.name} $args",
+            sql = "EXEC ${P.path} $args",
             *P.queryValues(obj = obj)
         )
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        val P = this.mapper.getProcedure(kclass = procedure)
+        return Query(sql = "DROP PROCEDURE IF EXISTS ${P.path}")
     }
 
     /**

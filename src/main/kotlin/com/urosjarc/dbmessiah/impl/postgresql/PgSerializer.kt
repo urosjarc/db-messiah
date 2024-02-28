@@ -65,4 +65,17 @@ public open class PgSerializer(
         )
     }
 
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        TODO("Not implemented")
+    }
+
+    override fun <T : Any> callProcedure(procedure: T): Query {
+        TODO("Not implemented")
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        TODO("Not implemented")
+    }
+
+
 }

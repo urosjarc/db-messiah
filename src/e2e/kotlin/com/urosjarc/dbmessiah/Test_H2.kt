@@ -691,4 +691,10 @@ open class Test_H2 : Test_Contract {
             }
         }
     }
+
+    override fun `test procedure call without input`() {
+    }
+
+    override fun `test procedure call with input`() {
+    }
 }

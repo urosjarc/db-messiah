@@ -731,4 +731,10 @@ open class Test_Postgresql : Test_Contract {
             }
         }
     }
+
+    override fun `test procedure call without input`() {
+    }
+
+    override fun `test procedure call with input`() {
+    }
 }

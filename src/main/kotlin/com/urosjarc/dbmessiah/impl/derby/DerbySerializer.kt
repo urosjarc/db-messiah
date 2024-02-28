@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.impl.derby
 
 import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.SerializerWithProcedure
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
@@ -14,7 +14,7 @@ public open class DerbySerializer(
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
-) : SerializerWithProcedure(
+) : Serializer(
     schemas = listOf(Schema(name = "main", tables = tables)),
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
@@ -58,14 +58,6 @@ public open class DerbySerializer(
         return Query(sql = "CREATE TABLE ${T.path} ($columns)")
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
-        TODO("Not yet implemented")
-    }
-
-    override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not yet implemented")
-    }
-
     override fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH FIRST ${page.limit} ROWS ONLY")
@@ -74,5 +66,17 @@ public open class DerbySerializer(
     override fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DROP TABLE ${T.path}")
+    }
+
+    override fun <T : Any> createProcedure(procedure: KClass<T>, body: () -> String): Query {
+        TODO("Not implemented")
+    }
+
+    override fun <T : Any> callProcedure(procedure: T): Query {
+        TODO("Not implemented")
+    }
+
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
+        TODO("Not implemented")
     }
 }
