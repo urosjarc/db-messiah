@@ -498,9 +498,7 @@ open class Test_Derby : Test_Contract {
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query {
-            "delete from main.Parent where pk = 1"
-        }
+        it.run.query { """delete from "main"."Parent" where "pk" = 1""" }
 
         //Check for deletion
         val postParent2 = it.row.select(table = Parent::class, pk = 2)
@@ -517,7 +515,7 @@ open class Test_Derby : Test_Contract {
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.run.query(Parent::class) { "select * from main.Parent where pk < 3" }
+        val objs = it.run.query(Parent::class) { """select * from "main"."Parent" where "pk" < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
@@ -537,9 +535,9 @@ open class Test_Derby : Test_Contract {
         val objs = it.run.query(Child::class, input = input) {
             """
                 select *
-                from main.Child C
-                join main.Parent P on C.fk = P.pk
-                where P.pk = ${it.put(Input::parent_pk)}
+                from "main"."Child" C
+                join "main"."Parent" P on C."fk" = P."pk"
+                where P."pk" = ${it.put(Input::parent_pk)}
             """
         }
 

@@ -94,37 +94,13 @@ open class Test_Postgresql : Test_Contract {
                 throw Exception("Test state does not match with expected state")
         }
 
-        //Create procedures and disable foreign checks
-        service.autocommit {
-            it.run.query {
-                """
-                CREATE OR REPLACE FUNCTION main.TestProcedure(parent_pk INT)
-                RETURNS SETOF main.Parent AS $$
-                BEGIN
-                  RETURN QUERY SELECT * FROM main.Parent WHERE pk = parent_pk;
-                END;
-                $$ language plpgsql;
-                """.trimIndent()
-            }
-            it.run.query {
-                """
-                CREATE OR REPLACE FUNCTION main.TestProcedureEmpty()
-                RETURNS SETOF main.Parent AS $$
-                BEGIN
-                    RETURN QUERY SELECT * FROM main.Parent WHERE pk = 2;
-                END;
-                $$ language plpgsql;
-                """.trimIndent()
-            }
-        }
-
     }
 
     private fun assertTableNotExists(q: PgService.Connection, kclass: KClass<*>) {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """relation "main.parent" does not exist""",
+            other = """relation "main.Parent" does not exist""",
             message = e.stackTraceToString()
         )
     }
@@ -543,8 +519,8 @@ open class Test_Postgresql : Test_Contract {
         //Get current all parents
         it.run.query {
             """
-            delete from main.Parent where pk = 1;
-            delete from main.Parent where pk = 2;
+            delete from "main"."Parent" where pk = 1;
+            delete from "main"."Parent" where pk = 2;
             """
         }
 
@@ -565,9 +541,9 @@ open class Test_Postgresql : Test_Contract {
 
         val objs = it.run.query(Parent::class, Parent::class) {
             """
-                    select * from main.Parent where pk < 3;
-                    select * from main.Parent where pk = 1;
-                    delete from main.Parent where pk = 1;
+                    select * from "main"."Parent" where pk < 3;
+                    select * from "main"."Parent" where pk = 1;
+                    delete from "main"."Parent" where pk = 1;
                 """.trimIndent()
         }
 
@@ -592,13 +568,13 @@ open class Test_Postgresql : Test_Contract {
         val objs = it.run.query(Child::class, Child::class, input = input) {
             """
                     select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
+                    from "main"."Child" C
+                    join "main"."Parent" P on C.fk = P.pk
                     where P.pk = ${it.put(Input::parent_pk)};
                     
                     select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
+                    from "main"."Child" C
+                    join "main"."Parent" P on C.fk = P.pk
                     where P.pk = ${it.put(Input::parent_pk)}
                 """.trimIndent()
         }

@@ -72,7 +72,8 @@ public open class MssqlSerializer(
 
     public override fun <T : Any> callProcedure(obj: T): Query {
         val P = this.mapper.getProcedure(obj = obj)
-        val args = P.args.map { "@${escaped(it.name)} = ?" }.joinToString(", ")
+        // Here we don't escape arguments since @ signs is responsible for escaping argument
+        val args = P.args.map { "@${it.name} = ?" }.joinToString(", ")
         return Query(
             sql = "EXEC ${escaped(P)} $args",
             *P.queryValues(obj = obj)
@@ -93,7 +94,8 @@ public open class MssqlSerializer(
      */
     public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
-        val args = P.args.map { "@${escaped(it.name)} ${it.dbType}" }.joinToString(", ")
+        // Here we don't escape arguments since @ signs is responsible for escaping argument
+        val args = P.args.map { "@${it.name} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
                 CREATE OR ALTER PROCEDURE ${escaped(P)} $args

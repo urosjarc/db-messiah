@@ -93,7 +93,7 @@ open class Test_H2 : Test_Contract {
         val e = assertThrows<Throwable> { q.table.select(table = kclass) }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """ Table "PARENT" not found""",
+            other = """ Table "Parent" not found""",
             message = e.stackTraceToString()
         )
     }
@@ -512,8 +512,8 @@ open class Test_H2 : Test_Contract {
         //Get current all parents
         it.run.query {
             """
-            delete from main.Parent where pk = 1;
-            delete from main.Parent where pk = 2;
+            delete from "main"."Parent" where "pk" = 1;
+            delete from "main"."Parent" where "pk" = 2;
             """
         }
 
@@ -534,9 +534,9 @@ open class Test_H2 : Test_Contract {
 
         val objs = it.run.query(Parent::class) {
             """
-                    select * from main.Parent where pk < 3;
-                    select * from main.Parent where pk = 1;
-                    delete from main.Parent where pk = 1;
+                    select * from "main"."Parent" where "pk" < 3;
+                    select * from "main"."Parent" where "pk" = 1;
+                    delete from "main"."Parent" where "pk" = 1;
                 """.trimIndent()
         }
 
@@ -561,14 +561,14 @@ open class Test_H2 : Test_Contract {
         val objs = it.run.query(Child::class, input = input) {
             """
                     select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.put(Input::parent_pk)};
+                    from "main"."Child" C
+                    join "main"."Parent" P on C."fk" = P."pk"
+                    where P."pk" = ${it.put(Input::parent_pk)};
                     
                     select *
-                    from main.Child C
-                    join main.Parent P on C.fk = P.pk
-                    where P.pk = ${it.put(Input::parent_pk)}
+                    from "main"."Child" C
+                    join "main"."Parent" P on C."fk" = P."pk"
+                    where P."pk" = ${it.put(Input::parent_pk)}
                 """.trimIndent()
         }
 

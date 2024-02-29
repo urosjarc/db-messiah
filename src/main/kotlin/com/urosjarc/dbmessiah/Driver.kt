@@ -140,7 +140,7 @@ public open class Driver(private val conn: Connection) {
      * @throws DriverException If there is an error processing the insert query.
      * @throws IssueException If the inserted primary ID couldn't be retrieved normally or with force.
      */
-    internal fun insert(query: Query, primaryKey: PrimaryColumn? = null, onGeneratedKeysFail: String?): Int? {
+    internal fun insert(query: Query, primaryKey: String? = null, onGeneratedKeysFail: String?): Int? {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -150,7 +150,7 @@ public open class Driver(private val conn: Connection) {
             //Prepare statement
             ps = if (primaryKey == null)
                 conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS)
-            else conn.prepareStatement(query.sql, arrayOf(primaryKey.name))
+            else conn.prepareStatement(query.sql, arrayOf(primaryKey))
 
             this.prepareQuery(ps = ps, query = query)
 

@@ -223,7 +223,7 @@ public abstract class Serializer(
         val T = this.mapper.getTableInfo(obj = row)
         val escapedColumns = T.sqlUpdateColumns { escaped(it) }
         return Query(
-            sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${T.primaryKey.path} = ?",
+            sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${escaped(T.primaryKey)} = ?",
             *T.queryValues(obj = row),
             T.primaryKey.queryValue(obj = row)
         )

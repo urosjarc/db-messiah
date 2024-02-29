@@ -100,7 +100,7 @@ public open class Db2Serializer(
         val P = this.mapper.getProcedure(obj = procedure)
 
         return Query(
-            sql = "CALL ${escaped(P.path)}(${P.sqlArguments()})",
+            sql = "CALL ${escaped(P)}(${P.sqlArguments()})",
             *P.queryValues(obj = procedure)
         )
     }

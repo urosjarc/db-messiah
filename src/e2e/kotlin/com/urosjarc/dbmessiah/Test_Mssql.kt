@@ -104,15 +104,15 @@ open class Test_Mssql : Test_Contract {
             it.procedure.drop(procedure = TestProcedure::class, throws = false)
             it.procedure.create(procedure = TestProcedure::class) {
                 """
-                    SELECT * FROM main.Parent WHERE pk = @parent_pk AND col = @parent_col;
-                    SELECT * FROM main.Parent WHERE pk = 1;
+                    SELECT * FROM "main"."Parent" WHERE pk = @parent_pk AND col = @parent_col;
+                    SELECT * FROM "main"."Parent" WHERE pk = 1;
                 """
             }
             it.procedure.drop(procedure = TestProcedureEmpty::class, throws = false)
             it.procedure.create(procedure = TestProcedureEmpty::class) {
                 """
-                    SELECT * FROM main.Parent WHERE pk = 1;
-                    SELECT * FROM main.Parent WHERE pk = 2;
+                    SELECT * FROM "main"."Parent" WHERE "pk" = 1;
+                    SELECT * FROM "main"."Parent" WHERE "pk" = 2;
                 """
             }
         }

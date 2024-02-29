@@ -4,6 +4,7 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
+import com.urosjarc.dbmessiah.impl.h2.H2Serializer
 import kotlin.reflect.KClass
 
 /**
@@ -51,14 +52,15 @@ public open class RowQueries(
             val pk =
                 /**
                  * Derby and every database (not oracle) supports only Statement.RETURN_GENERATED_KEYS
+                 * H2 don't have option to escape columns that JDBC needs to return so we will use Statement.RETURN_GENERATED_KEYS instead.
                  */
-                if (this.ser is DerbySerializer)
+                if (this.ser is DerbySerializer || this.ser is H2Serializer)
                     this.driver.insert(query = query, primaryKey = null, onGeneratedKeysFail = this.ser.selectLastId)
                 /**
                  * Oracle and every database (not derby) supports returning columns by name directly.
                  */
                 else
-                    this.driver.insert(query = query, primaryKey = T.primaryKey, onGeneratedKeysFail = this.ser.selectLastId)
+                    this.driver.insert(query = query, primaryKey = this.ser.escaped(T.primaryKey.name), onGeneratedKeysFail = this.ser.selectLastId)
 
             //If pk didn't retrieved insert didn't happend
             if (pk == null) return false
