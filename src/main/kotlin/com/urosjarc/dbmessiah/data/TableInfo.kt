@@ -32,7 +32,7 @@ public data class TableInfo(
     /**
      * Full path where this table is located.
      */
-    private val path: String = listOf(this.schema, this.name).joinToString(".")
+    public val path: String = listOf(this.schema, this.name).joinToString(".")
 
     /** @suppress */
     private val hash = this.path.hashCode()

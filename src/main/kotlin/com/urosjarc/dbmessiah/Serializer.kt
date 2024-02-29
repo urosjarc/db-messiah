@@ -34,7 +34,7 @@ public abstract class Serializer(
             it.`Global outputs must have at least 1 property and primary constructor with required non-optional parameters`()
             it.`Global procedures must have primary constructor with non-optional parameters`()
             it.`Schemas procedures must have primary constructor with non-optional parameters`()
-            it.`Tables must have non-empty primary constructor`()
+            it.`Tables must have non-empty primary constructor and columns`()
         }
         SerializerTests.UniquenessTests(ser = this).also {
             it.`Schemas must be unique`()
@@ -49,6 +49,7 @@ public abstract class Serializer(
             it.`Column constraints must be unique`()
         }
         SerializerTests.TableTests(ser = this).also {
+            it.`Tables foreign keys must not contain primary key`()
             it.`Tables foreign keys must point to registered table with primary key of same type`()
             it.`Tables constraints must be valid for specific column`()
         }

@@ -79,16 +79,16 @@ internal class SerializerTests {
         /**
          * Table level
          */
-        fun `Tables must have non-empty primary constructor`() {
+        fun `Tables must have non-empty primary constructor and columns`() {
             this.ser.schemas.forEach { schema: Schema ->
                 schema.tables.forEach {
                     val ki = KClassInfo(it.kclass)
                     ki.constructor ?: throw SerializerTestsException("Table ${schema.name}.$it must have primary constructor")
-                    if (ki.optionalKParams.isNotEmpty()) throw SerializerTestsException("Global procedure ${schema.name}.$it must have primary constructor with non-optional parameters: ${ki.optionalKParams}")
+                    if (ki.kparams.isEmpty()) throw SerializerTestsException("Table ${schema.name}.$it must have non-empty primary constructor")
+                    if (ki.kprops.isEmpty()) throw SerializerTestsException("Table ${schema.name}.$it must have columns")
                 }
             }
         }
-
     }
 
     class UniquenessTests(val ser: Serializer) {
@@ -173,6 +173,14 @@ internal class SerializerTests {
     }
 
     class TableTests(val ser: Serializer) {
+        fun `Tables foreign keys must not contain primary key`(){
+            this.ser.schemas.forEach { schema ->
+                schema.tables.forEach { table ->
+                    if(table.foreignKeys.keys.contains(table.primaryKey))
+                        throw SerializerTestsException("Foreign keys must not contain primary key for table: $table")
+                }
+            }
+        }
         fun `Tables foreign keys must point to registered table with primary key of same type`() {
             val schemas_tables = mutableListOf<Pair<Schema, Table<*>>>()
 

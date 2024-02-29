@@ -41,13 +41,13 @@ public class Table<T : Any>(
         val constDuplicates = constraints.map { it.first }.ext_notUnique
         val columnSerializersDuplicates = columnSerializers.map { it.first }.ext_notUnique
 
-        if (fkDuplicates.isEmpty())
+        if (fkDuplicates.isNotEmpty())
             throw SerializerTestsException("Table $name has foreign keys registered multiple times: $fkDuplicates")
 
-        if (constDuplicates.isEmpty())
+        if (constDuplicates.isNotEmpty())
             throw SerializerTestsException("Table $name has constraints registered multiple times: $constDuplicates")
 
-        if (columnSerializersDuplicates.isEmpty())
+        if (columnSerializersDuplicates.isNotEmpty())
             throw SerializerTestsException("Table $name has column serializers registered multiple times: $columnSerializersDuplicates")
 
         this.foreignKeys = foreignKeys.toMap()
