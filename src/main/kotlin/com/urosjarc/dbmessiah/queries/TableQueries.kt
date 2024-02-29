@@ -71,7 +71,7 @@ public open class TableQueries(
     public fun <T : Any> select(table: KClass<T>): List<T> {
         val query = this.ser.selectTable(table = table)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
         }
     }
 
@@ -86,7 +86,7 @@ public open class TableQueries(
     public fun <T : Any> select(table: KClass<T>, page: Page<T>): List<T> {
         val query = this.ser.selectTable(table = table, page = page)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
         }
     }
 
@@ -101,7 +101,7 @@ public open class TableQueries(
     public fun <T: Any, V: Comparable<V>> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
         val query = this.ser.selectTable(table = table, cursor = cursor)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
         }
     }
 }

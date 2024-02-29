@@ -7,6 +7,7 @@ import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.exceptions.MapperException
+import com.urosjarc.dbmessiah.tests.SerializerTests
 import kotlin.reflect.KClass
 
 /**
@@ -21,12 +22,42 @@ import kotlin.reflect.KClass
  * @property mapper An public [Mapper] object used for mapping objects to and from the database.
  */
 public abstract class Serializer(
-    private val schemas: List<Schema>,
-    globalSerializers: List<TypeSerializer<*>>,
-    globalInputs: List<KClass<*>>,
-    globalOutputs: List<KClass<*>>,
-    globalProcedures: List<KClass<*>> = listOf()
+    internal val schemas: List<Schema>,
+    internal val globalSerializers: List<TypeSerializer<*>>,
+    internal val globalInputs: List<KClass<*>>,
+    internal val globalOutputs: List<KClass<*>>,
+    internal val globalProcedures: List<KClass<*>> = listOf()
 ) {
+
+    init {
+        SerializerTests.EmptinessTests(ser = this).also {
+            it.`At least one table must exist`()
+            it.`Global inputs must have at least 1 property and primary constructor with required non-optional parameters`()
+            it.`Global outputs must have at least 1 property and primary constructor with required non-optional parameters`()
+            it.`Global procedures must have primary constructor with non-optional parameters`()
+            it.`Schemas procedures must have primary constructor with non-optional parameters`()
+            it.`Tables must have non-empty primary constructor`()
+        }
+        SerializerTests.UniquenessTests(ser = this).also {
+            it.`Schemas must be unique`()
+            it.`Global serializers must be unique`()
+            it.`Global inputs must be unique`()
+            it.`Global outputs must be unique`()
+            it.`Global procedures must be unique`()
+            it.`Schemas serializers must be unique`()
+            it.`Schemas procedures must be unique`()
+            it.`Tables must be unique`()
+            it.`Tables serializers keys must be unique`()
+            it.`Column constraints must be unique`()
+        }
+        SerializerTests.TableTests(ser = this).also {
+            it.`Tables foreign keys must point to registered table with primary key of same type`()
+            it.`Tables constraints must be valid for specific column`()
+        }
+        SerializerTests.SerializationTests(ser = this).also {
+            it.`All database values must have excactly one matching type serializer`()
+        }
+    }
 
     public val mapper: Mapper = Mapper(
         schemas = schemas.toList(),
@@ -44,6 +75,7 @@ public abstract class Serializer(
      */
     public abstract val selectLastId: String?
 
+    public abstract fun escape(name: String)
 
     /**
      * Generates [PlantUML class diagram](https://plantuml.com/class-diagram) representing database arhitecture.

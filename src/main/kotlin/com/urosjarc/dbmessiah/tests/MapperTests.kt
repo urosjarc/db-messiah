@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 
 /**
@@ -78,7 +78,7 @@ internal class MapperTests(val mapper: Mapper) {
                     val dbType = T.primaryKey.dbType.split("(").first()
                     if (dbType == it) continue@nextTable
                 }
-                throw SerializingException("Primary key '${T.primaryKey.path}' of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
+                throw MappingException("Primary key '${T.primaryKey.path}' of type '${T.primaryKey.dbType}' has constrain 'AUTO_INC' so then it should be of type: 'INT' or 'INTEGER'")
             }
         }
     }

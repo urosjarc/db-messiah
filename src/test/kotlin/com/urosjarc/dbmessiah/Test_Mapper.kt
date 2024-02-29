@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.data.ProcedureArg
 import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.serializers.AllTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
@@ -161,7 +161,7 @@ class Test_Mapper {
     @Test
     fun `test createAssociationMaps()`() {
 
-        val e0 = assertThrows<SerializingException> {
+        val e0 = assertThrows<MappingException> {
             this.mapper = Mapper(
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Empty::pk)))),
                 globalOutputs = listOf(),
@@ -176,7 +176,7 @@ class Test_Mapper {
             message = e0.toString()
         )
 
-        val e1 = assertThrows<SerializingException> {
+        val e1 = assertThrows<MappingException> {
             this.mapper = Mapper(
                 schemas = listOf(Schema(name = "main", tables = listOf(Table(primaryKey = Exotic::pk)))),
                 globalOutputs = listOf(),
@@ -228,7 +228,7 @@ class Test_Mapper {
             )
         )
 
-        val e = assertThrows<SerializingException> {
+        val e = assertThrows<MappingException> {
             this.mapper.getProcedure(kclass = ProcedureNotRegistered::class)
         }
         assertContains(
@@ -275,7 +275,7 @@ class Test_Mapper {
                 serializers = listOf()
             )
         )
-        val e = assertThrows<SerializingException> {
+        val e = assertThrows<MappingException> {
             this.mapper.getTableInfo(kclass = String::class)
         }
         assertContains(charSequence = e.message.toString(), other = "Could not find table info for table: 'String'", message = e.toString())

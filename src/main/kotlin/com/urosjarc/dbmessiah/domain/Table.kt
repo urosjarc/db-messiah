@@ -1,7 +1,8 @@
 package com.urosjarc.dbmessiah.domain
 
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
+import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -27,6 +28,10 @@ public class Table<T : Any>(
     columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<*>>> = listOf()
 ) {
 
+    public val name: String =
+        ((primaryKey.instanceParameter ?: primaryKey.extensionReceiverParameter)!!.type.classifier as KClass<*>).simpleName.toString()
+
+
     public val foreignKeys: Map<KProperty1<T, *>, KClass<*>>
     internal val constraints: Map<KProperty1<T, *>, List<C>>
     internal val columnSerializers: Map<KProperty1<T, *>, TypeSerializer<*>>
@@ -36,9 +41,14 @@ public class Table<T : Any>(
         val constDuplicates = constraints.map { it.first }.ext_notUnique
         val columnSerializersDuplicates = columnSerializers.map { it.first }.ext_notUnique
 
-        require(fkDuplicates.isEmpty()) { "Foreign keys contain duplicates: $fkDuplicates" }
-        require(constDuplicates.isEmpty()) { "Constraints contain duplicates: $constDuplicates" }
-        require(columnSerializersDuplicates.isEmpty()) { "Column serializers contain duplicates: $columnSerializersDuplicates" }
+        if (fkDuplicates.isEmpty())
+            throw SerializerTestsException("Table $name has foreign keys registered multiple times: $fkDuplicates")
+
+        if (constDuplicates.isEmpty())
+            throw SerializerTestsException("Table $name has constraints registered multiple times: $constDuplicates")
+
+        if (columnSerializersDuplicates.isEmpty())
+            throw SerializerTestsException("Table $name has column serializers registered multiple times: $columnSerializersDuplicates")
 
         this.foreignKeys = foreignKeys.toMap()
         this.constraints = constraints.toMap()
@@ -46,16 +56,10 @@ public class Table<T : Any>(
     }
 
     /**
-     * The name of the table.
-     */
-    public val name: String =
-        ((primaryKey.instanceParameter ?: primaryKey.extensionReceiverParameter)!!.type.classifier as KClass<*>).simpleName.toString()
-
-    /**
      * Kotlin class that represents this [Table].
      */
     public val kclass: KClass<*> =
-        (primaryKey.javaField?.declaringClass?.kotlin ?: throw SerializingException("Could not found enclosing class for primary key"))
+        (primaryKey.javaField?.declaringClass?.kotlin ?: throw MappingException("Could not found enclosing class for primary key"))
 
     /** @suppress */
     private val hash = this.name.hashCode()

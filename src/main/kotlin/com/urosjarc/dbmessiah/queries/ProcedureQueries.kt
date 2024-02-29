@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
 /**
@@ -44,7 +44,7 @@ public open class ProcedureQueries(
         }
 
         if (results.size != outputs.size)
-            throw SerializingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+            throw MappingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
 
         return results
     }

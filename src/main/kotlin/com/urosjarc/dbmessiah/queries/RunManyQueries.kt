@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.QueryBuilder
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
 /**
@@ -24,7 +24,7 @@ public class RunManyQueries(
      * @param outputs the list of all tables from which rows will be fetched in the same order.
      * @param getSql the function that returns the SQL string for the query.
      * @return the object matrix, where each row represents list of objects from one query.
-     * @throws SerializingException if the number of database results does not match the number of output classes.
+     * @throws MappingException if the number of database results does not match the number of output classes.
      */
     public fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
@@ -34,7 +34,7 @@ public class RunManyQueries(
         }
 
         if (results.size != outputs.size)
-            throw SerializingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+            throw MappingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
 
         return results
     }
@@ -47,7 +47,7 @@ public class RunManyQueries(
      * @param input The input object used to privide injected values to SQL statements.
      * @param getSql The lambda function used to generate the SQL query string.
      * @return A list of lists containing the results of the query.
-     * @throws SerializingException If the number of results does not match the number of output classes.
+     * @throws MappingException If the number of results does not match the number of output classes.
      */
     public fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
         val query = this.ser.query(input = input, getSql = getSql)
@@ -57,7 +57,7 @@ public class RunManyQueries(
         }
 
         if (results.size != outputs.size)
-            throw SerializingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
+            throw MappingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
 
         return results
     }

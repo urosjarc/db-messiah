@@ -4,9 +4,8 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.tests.MapperTests
-import com.urosjarc.dbmessiah.tests.UserConfigurationTests
 import java.sql.ResultSet
 import kotlin.reflect.*
 import kotlin.reflect.full.memberProperties
@@ -42,6 +41,27 @@ public class Mapper(
     internal var globalOutputs: List<KClass<*>>,
     internal var globalProcedures: List<KClass<*>>
 ) {
+
+    init {
+        this.fillReflectionMaps()
+        this.fillTablesInfos()
+        this.fillProcedures()
+
+        MapperTests(mapper = this).also {
+            //Test emptiness
+            it.`1-th Test - If at least one table has been created`()
+            //Test uniqueness
+            it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
+            it.`4-th Test - If all columns are unique`()
+            //Test validity
+            it.`5-th Test - If all tables own their columns`()
+            it.`6-th Test - If all foreign columns are connected to registered table`()
+            it.`7-th Test - If all columns have been inited and connected with parent table`()
+            it.`8-th Test - If all primary keys that have auto inc are of type integer`()
+            it.`9-th Test - If all procedures arguments have been inited and connected with its owner`()
+            it.`10-th Test - If all procedures own their arguments`()
+        }
+    }
 
     //All table informations
     internal var tableInfos = listOf<TableInfo>()
@@ -80,7 +100,7 @@ public class Mapper(
     private val kprop_to_serializer = mutableMapOf<KProperty1<out Any, Any?>, TypeSerializer<out Any>>()
 
     /**
-     * Checks if the given class is registered or associated by the [Mapper] with [fillAssociationMaps].
+     * Checks if the given class is registered or associated by the [Mapper] with [fillReflectionMaps].
      *
      * @param kclass The class to check for.
      * @return True if the class is associated, False otherwise.
@@ -143,22 +163,14 @@ public class Mapper(
     private fun getConstructorParameters(kclass: KClass<*>): List<KParameter> =
         this.kclass_to_constructorParameters[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
-    init {
-        this.fillAssociationMaps()
-        this.testConfiguration()
-        this.fillTablesInfos()
-        this.fillProcedures()
-        this.testMapper()
-    }
-
     /**
      * Fill association maps for a provided table and its serializers.
      *
      * @param table The table for which to create association maps.
      * @param serializers The list of serializers for the table.
      */
-    private fun fillAssociationMaps(table: Table<*>, serializers: List<TypeSerializer<*>>): Unit =
-        this.fillAssociationMaps(kclass = table.kclass, serializers = serializers, columnSerializers = table.columnSerializers)
+    private fun fillReflectionMaps(table: Table<*>, serializers: List<TypeSerializer<*>>): Unit =
+        this.fillReflectionMaps(kclass = table.kclass, serializers = serializers, columnSerializers = table.columnSerializers)
 
     /**
      * Fills the association maps for a given table class.
@@ -168,9 +180,9 @@ public class Mapper(
      * @param columnSerializers The list of column serializers for the table.
      * @param serializers The list of [TypeSerializer] for the table.
      * @param isProcedure Specifies whether the [kclass] is a procedure or not.
-     * @throws SerializingException if the association maps cannot be filled for the table.
+     * @throws MappingException if the association maps cannot be filled for the table.
      */
-    private fun fillAssociationMaps(
+    private fun fillReflectionMaps(
         kclass: KClass<*>,
         columnSerializers: Map<out KProperty1<out Any, Any?>, TypeSerializer<out Any>> = mapOf(),
         serializers: List<TypeSerializer<*>>,
@@ -180,9 +192,9 @@ public class Mapper(
         val kprops = kclass.memberProperties.filter { it.javaField != null }
 
         if (kparams == null)
-            throw SerializingException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
+            throw MappingException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
         if (kparams.isEmpty() && !isProcedure)
-            throw SerializingException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
+            throw MappingException("Table '${kclass.simpleName}' have empty primary constructor, which is not allowed!")
 
         this.kclass_to_constructor[kclass] = kclass.primaryConstructor
         this.kclass_to_constructorParameters[kclass] = kparams
@@ -190,7 +202,7 @@ public class Mapper(
 
         kparams.forEach { p ->
             kparam_to_serializer[p] = serializers.firstOrNull { it.kclass == p.type.classifier }
-                ?: throw SerializingException("Could not find serializer for primary constructor parameter '${kclass.simpleName}'.'${p.name}'")
+                ?: throw MappingException("Could not find serializer for primary constructor parameter '${kclass.simpleName}'.'${p.name}'")
         }
         kprops.forEach { p ->
 
@@ -203,7 +215,7 @@ public class Mapper(
             //If not search for serializer in other table, schema, global serializers.
             else
                 kprop_to_serializer[p] = serializers.firstOrNull { it.kclass == p.returnType.classifier }
-                    ?: throw SerializingException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
+                    ?: throw MappingException("Could not find serializer for property '${kclass.simpleName}.${p.name}'")
         }
     }
 
@@ -213,54 +225,21 @@ public class Mapper(
      * @param table The table for which to create association maps.
      * @param serializers The list of [TypeSerializer] for the table.
      */
-    private fun fillAssociationMaps() {
+    private fun fillReflectionMaps() {
         this.schemas.forEach { s ->
             s.tables.forEach { t ->
-                this.fillAssociationMaps(table = t, serializers = (t.serializers + s.serializers + this.globalSerializers))
+                this.fillReflectionMaps(table = t, serializers = (t.serializers + s.serializers + this.globalSerializers))
             }
             s.procedures.forEach {
-                this.fillAssociationMaps(kclass = it, serializers = s.serializers + this.globalSerializers, isProcedure = true)
+                this.fillReflectionMaps(kclass = it, serializers = s.serializers + this.globalSerializers, isProcedure = true)
             }
         }
         (this.globalInputs + this.globalOutputs).forEach {
-            this.fillAssociationMaps(kclass = it, serializers = this.globalSerializers)
+            this.fillReflectionMaps(kclass = it, serializers = this.globalSerializers)
         }
         this.globalProcedures.forEach {
-            this.fillAssociationMaps(kclass = it, serializers = this.globalSerializers, isProcedure = true)
+            this.fillReflectionMaps(kclass = it, serializers = this.globalSerializers, isProcedure = true)
         }
-    }
-
-    /**
-     * This method is used to test the configuration. It performs various tests on the
-     * configuration to ensure database type safety. The tests include checking for emptiness, uniqueness, connectivity,
-     * validity, and serializability.
-     *
-     * @see [UserConfigurationTests]
-     *
-     * @throws Exception if an error occurs during the configuration tests.
-     */
-    private fun testConfiguration() {
-        UserConfigurationTests(mapper = this).also {
-            //Test emptiness
-            it.`1-th Test - If at least one table exist`()
-            //Test uniqueness
-            it.`2-th Test - If schema registered multiple times`()
-            it.`3-th Test - If schemas table registered multiple times`()
-            it.`6-th Test - If schema serializers registered multiple times`()
-            it.`7-th Test - If schemas table serializers registered multiple times`()
-            //Test connectivity
-            it.`8-th Test - If schemas table foreign keys are pointing to wrong table`()
-            //Test validity
-            it.`9-th Test - If schemas table constraints are valid`()
-            //Test serializability
-            it.`12-th Test - If all output classes have no default values`()
-            //Test global object by uniqueness
-            it.`13-th Test - If global procedure registered multiple times`()
-            it.`14-th Test - If global outputs registered multiple times`()
-            it.`15-th Test - If global inputs registered multiple times`()
-            it.`16-th Test - If global serializers registered multiple times`()
-        }
-
     }
 
     /**
@@ -310,33 +289,6 @@ public class Mapper(
             }
         }
         this.procedures = procedures
-    }
-
-    /**
-     * The testMapper method is used to test the final state of the Mapper.
-     * It performs various tests on the configuration to ensure database type safety.
-     * The tests include checking for emptiness, uniqueness, connectivity, validity, and serializability.
-     *
-     * @see UserConfigurationTests
-     *
-     * @throws Exception if an error occurs during the configuration tests.
-     */
-    internal fun testMapper() {
-        //Test registered tables
-        MapperTests(mapper = this).also {
-            //Test emptiness
-            it.`1-th Test - If at least one table has been created`()
-            //Test uniqueness
-            it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
-            it.`4-th Test - If all columns are unique`()
-            //Test validity
-            it.`5-th Test - If all tables own their columns`()
-            it.`6-th Test - If all foreign columns are connected to registered table`()
-            it.`7-th Test - If all columns have been inited and connected with parent table`()
-            it.`8-th Test - If all primary keys that have auto inc are of type integer`()
-            it.`9-th Test - If all procedures arguments have been inited and connected with its owner`()
-            it.`10-th Test - If all procedures own their arguments`()
-        }
     }
 
     /**
@@ -422,7 +374,7 @@ public class Mapper(
      *
      * @param obj The object for which to retrieve the [Procedure].
      * @return The [Procedure] object.
-     * @throws SerializingException If the [Procedure] for the object cannot be found.
+     * @throws MappingException If the [Procedure] for the object cannot be found.
      */
     public fun <T : Any> getProcedure(obj: T): Procedure = this.getProcedure(kclass = obj::class)
 
@@ -431,27 +383,27 @@ public class Mapper(
      *
      * @param kclass The Kotlin [KClass] representing the [Procedure].
      * @return The [Procedure] object.
-     * @throws SerializingException If the [Procedure] for the class cannot be found.
+     * @throws MappingException If the [Procedure] for the class cannot be found.
      */
     public fun getProcedure(kclass: KClass<*>): Procedure =
-        this.procedureKClass_to_procedure[kclass] ?: throw SerializingException("Could not find procedure for kclass: '${kclass.simpleName}'")
+        this.procedureKClass_to_procedure[kclass] ?: throw MappingException("Could not find procedure for kclass: '${kclass.simpleName}'")
 
     /**
      * Retrieves the [TableInfo] object for the given table class.
      *
      * @param kclass The Kotlin class representing the table.
      * @return The [TableInfo] object for the given table class.
-     * @throws SerializingException if the table info for the table cannot be found.
+     * @throws MappingException if the table info for the table cannot be found.
      */
     public fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
-        this.tableKClass_to_tableInfo[kclass] ?: throw SerializingException("Could not find table info for table: '${kclass.simpleName}'")
+        this.tableKClass_to_tableInfo[kclass] ?: throw MappingException("Could not find table info for table: '${kclass.simpleName}'")
 
     /**
      * Retrieves the [TableInfo] object for the given table class or object.
      *
      * @param obj The table class or object for which to retrieve the [TableInfo].
      * @return The TableInfo object for the given table class or object.
-     * @throws SerializingException if the table info for the table cannot be found.
+     * @throws MappingException if the table info for the table cannot be found.
      */
     public fun <T : Any> getTableInfo(obj: T): TableInfo = this.getTableInfo(kclass = obj::class)
 
@@ -462,14 +414,14 @@ public class Mapper(
      * @param i The index of the output class in the vararg list.
      * @param outputs The vararg list of output classes.
      * @return The list of decoded objects.
-     * @throws SerializingException If there are missing output classes.
+     * @throws MappingException If there are missing output classes.
      */
     internal fun decodeMany(resultSet: ResultSet, i: Int, vararg outputs: KClass<*>): List<Any> {
         val output = outputs.getOrNull(i)
         val objs = mutableListOf<Any>()
 
-        if (output != null) while (resultSet.next()) objs.add(this.decode(resultSet, output))
-        else throw SerializingException("Missing output classes, because there are more queries listed in the query: ${outputs.map { it.simpleName }}")
+        if (output != null) while (resultSet.next()) objs.add(this.decodeOne(resultSet, output))
+        else throw MappingException("Missing output classes, because there are more queries listed in the query: ${outputs.map { it.simpleName }}")
 
         return objs
     }
@@ -482,7 +434,7 @@ public class Mapper(
      * @return The decoded object of type [T].
      * @throws MapperException if there is an error during decoding.
      */
-    internal fun <T : Any> decode(resultSet: ResultSet, kclass: KClass<T>): T {
+    internal fun <T : Any> decodeOne(resultSet: ResultSet, kclass: KClass<T>): T {
 
         val constructor = this.getConstructor(kclass = kclass)
         val constructorParameters = this.getConstructorParameters(kclass = kclass)

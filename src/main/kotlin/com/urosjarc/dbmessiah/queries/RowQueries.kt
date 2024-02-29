@@ -26,7 +26,7 @@ public open class RowQueries(
     public fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
         val query = this.ser.selectTable(table = table, pk = pk)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
         }.firstOrNull()
     }
 

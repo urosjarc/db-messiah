@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.data
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.serializers.AllTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
@@ -56,7 +56,7 @@ class Test_QueryBuilder {
 
     @Test
     fun `test init {}`() {
-        val e0 = assertThrows<SerializingException> {
+        val e0 = assertThrows<MappingException> {
             QueryBuilder(
                 input = input,
                 mapper = Mapper(

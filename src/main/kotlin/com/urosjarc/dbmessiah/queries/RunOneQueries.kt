@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.QueryBuilder
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
 /**
@@ -36,12 +36,12 @@ public open class RunOneQueries(
      * @param output the table from which rows will be fetched.
      * @param getSql the function that returns the SQL string for the query.
      * @return fetched rows from [output] table.
-     * @throws SerializingException if the number of database results does not match the number of output classes.
+     * @throws MappingException if the number of database results does not match the number of output classes.
      */
     public fun <OUT : Any> query(output: KClass<OUT>, getSql: () -> String): List<OUT> {
         val query = this.ser.query(getSql = getSql)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, output)
+            this.ser.mapper.decodeOne(resultSet = it, output)
         }
     }
 
@@ -52,12 +52,12 @@ public open class RunOneQueries(
      * @param input The input object used to privide injected values to SQL statements.
      * @param getSql A function that takes a query builder and returns the SQL query as a string.
      * @return A list of query results of type [OUT].
-     * @throws SerializingException if the query does not return any results.
+     * @throws MappingException if the query does not return any results.
      */
     public fun <IN : Any, OUT : Any> query(output: KClass<OUT>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
         val query = this.ser.query(input = input, getSql = getSql)
         return this.driver.query(query = query) {
-            this.ser.mapper.decode(resultSet = it, output)
+            this.ser.mapper.decodeOne(resultSet = it, output)
         }
     }
 }

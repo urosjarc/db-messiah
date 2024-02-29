@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.exceptions.SerializingException
+import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KProperty1
 
 
@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty1
  * @property input The class where input values will be located.
  * @property mapper The [Mapper] object to help in serialization process.
  *
- * @throws SerializingException if the [input] class is not registered in global inputs.
+ * @throws MappingException if the [input] class is not registered in global inputs.
  */
 public open class QueryBuilder<IN : Any>(
     public val input: IN,
@@ -28,7 +28,7 @@ public open class QueryBuilder<IN : Any>(
 
     init {
         if (!this.mapper.isRegistered(kclass = this.input::class))
-            throw SerializingException("Input class '${this.input::class.simpleName}' is not registered in global inputs")
+            throw MappingException("Input class '${this.input::class.simpleName}' is not registered in global inputs")
     }
 
     /**

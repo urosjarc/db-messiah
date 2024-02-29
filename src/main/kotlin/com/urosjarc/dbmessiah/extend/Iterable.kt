@@ -6,4 +6,4 @@ package com.urosjarc.dbmessiah.extend
  *
  * @return a map containing elements that are not unique in the list
  */
-internal val List<*>.ext_notUnique: Map<Any?, Int> get() = this.groupingBy { it }.eachCount().filter { it.value > 1 }
+internal val Iterable<*>.ext_notUnique: Map<Any?, Int> get() = this.groupingBy { it }.eachCount().filter { it.value > 1 }
