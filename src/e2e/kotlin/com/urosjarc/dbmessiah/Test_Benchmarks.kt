@@ -87,4 +87,10 @@ class Test_Benchmarks {
         Test_Sqlite.init()
         this.benchmarkCycle(Test_Sqlite())
     }
+
+    @Test
+    fun oracle() {
+        Test_Oracle.init()
+        this.benchmarkCycle(Test_Oracle())
+    }
 }
