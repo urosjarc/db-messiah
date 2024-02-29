@@ -41,28 +41,6 @@ public class Mapper(
     internal var globalOutputs: List<KClass<*>>,
     internal var globalProcedures: List<KClass<*>>
 ) {
-
-    init {
-        this.fillReflectionMaps()
-        this.fillTablesInfos()
-        this.fillProcedures()
-
-        MapperTests(mapper = this).also {
-            //Test emptiness
-            it.`1-th Test - If at least one table has been created`()
-            //Test uniqueness
-            it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
-            it.`4-th Test - If all columns are unique`()
-            //Test validity
-            it.`5-th Test - If all tables own their columns`()
-            it.`6-th Test - If all foreign columns are connected to registered table`()
-            it.`7-th Test - If all columns have been inited and connected with parent table`()
-            it.`8-th Test - If all primary keys that have auto inc are of type integer`()
-            it.`9-th Test - If all procedures arguments have been inited and connected with its owner`()
-            it.`10-th Test - If all procedures own their arguments`()
-        }
-    }
-
     //All table informations
     internal var tableInfos = listOf<TableInfo>()
     internal var procedures = listOf<Procedure>()
@@ -98,6 +76,27 @@ public class Mapper(
 
     //Link table property to serializer
     private val kprop_to_serializer = mutableMapOf<KProperty1<out Any, Any?>, TypeSerializer<out Any>>()
+
+    init {
+        this.fillReflectionMaps()
+        this.fillTablesInfos()
+        this.fillProcedures()
+
+        MapperTests(mapper = this).also {
+            //Test emptiness
+            it.`1-th Test - If at least one table has been created`()
+            //Test uniqueness
+            it.`3-th Test - If all tables have unique path, kclass, primaryKey`()
+            it.`4-th Test - If all columns are unique`()
+            //Test validity
+            it.`5-th Test - If all tables own their columns`()
+            it.`6-th Test - If all foreign columns are connected to registered table`()
+            it.`7-th Test - If all columns have been inited and connected with parent table`()
+            it.`8-th Test - If all primary keys that have auto inc are of type integer`()
+            it.`9-th Test - If all procedures arguments have been inited and connected with its owner`()
+            it.`10-th Test - If all procedures own their arguments`()
+        }
+    }
 
     /**
      * Checks if the given class is registered or associated by the [Mapper] with [fillReflectionMaps].
