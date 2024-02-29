@@ -1,8 +1,6 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.data.Query
-import com.urosjarc.dbmessiah.data.QueryBuilder
-import com.urosjarc.dbmessiah.data.TypeSerializer
+import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
@@ -74,8 +72,14 @@ public abstract class Serializer(
      * @property selectLastId The last id selected from the database.
      */
     public abstract val selectLastId: String?
+    public abstract fun escaped(name: String): String
+    public fun escaped(schema: Schema): String = escaped(name = schema.name)
+    public fun escaped(procedure: Procedure): String =
+        listOf(procedure.schema, procedure.name).filterNotNull().joinToString(".") { escaped(name = it) }
 
-    public abstract fun escape(name: String)
+    public fun escaped(tableInfo: TableInfo): String = listOf(tableInfo.schema, tableInfo.name).joinToString(".") { escaped(name = it) }
+    public fun escaped(column: Column): String =
+        listOf(column.table.schema, column.table.name, column.name).joinToString(".") { escaped(name = it) }
 
     /**
      * Generates [PlantUML class diagram](https://plantuml.com/class-diagram) representing database arhitecture.
@@ -136,7 +140,7 @@ public abstract class Serializer(
      * @param schema The schema object representing the schema to be created.
      * @return The [String] to create the schema.
      */
-    public open fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${schema.name}")
+    public open fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${escaped(schema)}")
 
     /**
      * Creates a SQL string representing a drop query for the given schema.
@@ -144,7 +148,7 @@ public abstract class Serializer(
      * @param schema The schema to be dropped.
      * @return The [String] representing the drop query.
      */
-    public fun dropSchema(schema: Schema): Query = Query(sql = "DROP SCHEMA IF EXISTS ${schema.name}")
+    public fun dropSchema(schema: Schema): Query = Query(sql = "DROP SCHEMA IF EXISTS ${escaped(schema)}")
 
     /**
      * Creates a SQL string to drop a database table.
@@ -156,7 +160,7 @@ public abstract class Serializer(
     public open fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean = false): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         val cascadeSql = if (cascade) " CASCADE" else ""
-        return Query(sql = "DROP TABLE IF EXISTS ${T.path}$cascadeSql")
+        return Query(sql = "DROP TABLE IF EXISTS ${escaped(T)}$cascadeSql")
     }
 
     /**
@@ -175,7 +179,7 @@ public abstract class Serializer(
      */
     public fun <T : Any> deleteTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "DELETE FROM ${T.path}")
+        return Query(sql = "DELETE FROM ${escaped(T)}")
     }
 
     /**
@@ -187,7 +191,8 @@ public abstract class Serializer(
     public fun deleteRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
-            sql = "DELETE FROM ${T.path} WHERE ${T.primaryKey.path} = ?", T.primaryKey.queryValue(row)
+            sql = "DELETE FROM ${escaped(T)} WHERE ${escaped(T.primaryKey)} = ?",
+            T.primaryKey.queryValue(row)
         )
     }
 
@@ -200,8 +205,9 @@ public abstract class Serializer(
      */
     public open fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
+        val escapedColumns = T.sqlInsertColumns { escaped(it) }
         return Query(
-            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
+            sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${T.sqlInsertQuestions()})",
             *T.queryValues(obj = row),
         )
     }
@@ -214,8 +220,9 @@ public abstract class Serializer(
      */
     public fun updateRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
+        val escapedColumns = T.sqlUpdateColumns { escaped(it) }
         return Query(
-            sql = "UPDATE ${T.path} SET ${T.sqlUpdateColumns()} WHERE ${T.primaryKey.path} = ?",
+            sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${T.primaryKey.path} = ?",
             *T.queryValues(obj = row),
             T.primaryKey.queryValue(obj = row)
         )
@@ -229,7 +236,7 @@ public abstract class Serializer(
      */
     public fun <T : Any> selectTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${T.path}")
+        return Query(sql = "SELECT * FROM ${escaped(T)}")
     }
 
     /**
@@ -241,7 +248,7 @@ public abstract class Serializer(
      */
     public open fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} ${page.order} LIMIT ${page.limit} OFFSET ${page.offset}")
+        return Query(sql = "SELECT * FROM ${escaped(T)} ORDER BY ${escaped(page.orderBy.name)} ${page.order} LIMIT ${page.limit} OFFSET ${page.offset}")
     }
 
     /**
@@ -257,7 +264,7 @@ public abstract class Serializer(
             Order.ASC -> ">="
             Order.DESC -> "<="
         }
-        return Query(sql = "SELECT * FROM ${T.path} WHERE ${cursor.orderBy.name} $lge ${cursor.index} ORDER BY ${cursor.orderBy.name} ${cursor.order} LIMIT ${cursor.limit}")
+        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(cursor.orderBy.name)} $lge ${cursor.index} ORDER BY ${escaped(cursor.orderBy.name)} ${cursor.order} LIMIT ${cursor.limit}")
     }
 
     /**
@@ -269,7 +276,7 @@ public abstract class Serializer(
      */
     public fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${T.path} WHERE ${T.primaryKey.path}=$pk")
+        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryKey)} = $pk")
     }
 
 

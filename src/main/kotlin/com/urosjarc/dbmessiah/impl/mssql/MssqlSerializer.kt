@@ -22,6 +22,7 @@ public open class MssqlSerializer(
 ) {
 
     override val selectLastId: String = "SELECT SCOPE_IDENTITY()"
+    override fun escaped(name: String): String = "[$name]"
 
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
@@ -31,7 +32,7 @@ public open class MssqlSerializer(
 
         //Primary key
         val autoIncrement = if (T.primaryKey.autoInc) " IDENTITY(1,1)" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -39,9 +40,9 @@ public open class MssqlSerializer(
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
             )
         }
 
@@ -49,38 +50,38 @@ public open class MssqlSerializer(
         T.otherColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE ${T.path} ($columns)")
+        return Query(sql = "CREATE TABLE ${escaped(T)} ($columns)")
     }
 
     override fun <T : Any> selectTable(table: KClass<T>, page: Page<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${T.path} ORDER BY ${page.orderBy.name} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY")
+        return Query(sql = "SELECT * FROM ${escaped(T)} ORDER BY ${escaped(page.orderBy.name)} OFFSET ${page.offset} ROWS FETCH NEXT ${page.limit} ROWS ONLY")
     }
 
     override fun <T : Any> dropTable(table: KClass<T>, cascade: Boolean): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "DROP TABLE IF EXISTS ${T.path}")
+        return Query(sql = "DROP TABLE IF EXISTS ${escaped(T)}")
     }
 
     public override fun <T : Any> callProcedure(obj: T): Query {
         val P = this.mapper.getProcedure(obj = obj)
-        val args = P.args.map { "@${it.name} = ?" }.joinToString(", ")
+        val args = P.args.map { "@${escaped(it.name)} = ?" }.joinToString(", ")
         return Query(
-            sql = "EXEC ${P.path} $args",
+            sql = "EXEC ${escaped(P)} $args",
             *P.queryValues(obj = obj)
         )
     }
 
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
-        return Query(sql = "DROP PROCEDURE IF EXISTS ${P.path}")
+        return Query(sql = "DROP PROCEDURE IF EXISTS ${escaped(P)}")
     }
 
     /**
@@ -92,10 +93,10 @@ public open class MssqlSerializer(
      */
     public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
-        val args = P.args.map { "@${it.name} ${it.dbType}" }.joinToString(", ")
+        val args = P.args.map { "@${escaped(it.name)} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
-                CREATE OR ALTER PROCEDURE ${P.path} $args
+                CREATE OR ALTER PROCEDURE ${escaped(P)} $args
                 AS BEGIN
                     $sql
                 END;
@@ -114,7 +115,7 @@ public open class MssqlSerializer(
             sql = """
                 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '${schema.name}')
                 BEGIN
-                    EXEC( 'CREATE SCHEMA ${schema.name}' );
+                    EXEC( 'CREATE SCHEMA ${escaped(schema.name)}' );
                 END
             """
         )

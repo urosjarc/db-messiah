@@ -20,6 +20,7 @@ public open class SqliteSerializer(
     globalOutputs = globalOutputs
 ) {
     override val selectLastId: String = "SELECT LAST_INSERT_ROWID();"
+    override fun escaped(name: String): String = "\"$name\""
 
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)

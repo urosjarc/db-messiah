@@ -32,7 +32,7 @@ public data class TableInfo(
     /**
      * Full path where this table is located.
      */
-    val path: String = listOf(this.schema, this.name).joinToString(".")
+    private val path: String = listOf(this.schema, this.name).joinToString(".")
 
     /** @suppress */
     private val hash = this.path.hashCode()
@@ -62,8 +62,8 @@ public data class TableInfo(
      * @param separator The separator to use between column names. Default is ", ".
      * @return The SQL string with the column names.
      */
-    public fun sqlInsertColumns(separator: String = ", "): String =
-        this.userControlledColumns.joinToString(separator = separator) { it.name }
+    public fun sqlInsertColumns(separator: String = ", ", escaped: (String) -> String): String =
+        this.userControlledColumns.joinToString(separator = separator) { escaped(it.name) }
 
     /**
      * Helper method to generate a SQL string with the values as question marks which should be used in second part of `INSERT` statement.
@@ -83,8 +83,8 @@ public data class TableInfo(
      * @param zipper The string to use between column names and values. The default is " = ".
      * @return The SQL string with the column names and values.
      */
-    public fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = "): String =
-        this.userControlledColumns.joinToString(separator = separator) { it.name + "$zipper?" }
+    public fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = ", escaped: (String) -> String): String =
+        this.userControlledColumns.joinToString(separator = separator) { escaped(it.name) + "$zipper?" }
 
     /**
      * Represents a list of JDBC types derived from the [userControlledColumns].

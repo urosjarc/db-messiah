@@ -18,6 +18,7 @@ public open class PgSerializer(
     globalOutputs = globalOutputs,
 ) {
     override val selectLastId: String? = null
+    override fun escaped(name: String): String = "\"$name\""
 
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
@@ -27,7 +28,7 @@ public open class PgSerializer(
 
         //Primary key
         val serial = if (T.primaryKey.autoInc) " SERIAL" else ""
-        col.add("${T.primaryKey.name}$serial PRIMARY KEY")
+        col.add("${escaped(T.primaryKey.name)}$serial PRIMARY KEY")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -35,9 +36,9 @@ public open class PgSerializer(
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.path} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${it.name}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
             )
         }
 
@@ -45,37 +46,30 @@ public open class PgSerializer(
         T.otherColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.path} ($columns)")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns)")
     }
 
     override fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
-        var sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})"
-        sql += if (!batch) " RETURNING ${T.primaryKey.name}" else ""
+        val escapedColumns = T.sqlInsertColumns { escaped(it) }
+        var sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${T.sqlInsertQuestions()})"
+        sql += if (!batch) " RETURNING ${escaped(T.primaryKey.name)}" else ""
         return Query(
             sql = sql,
             *T.queryValues(obj = row),
         )
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
-        TODO("Not implemented")
-    }
-
-    override fun <T : Any> callProcedure(procedure: T): Query {
-        TODO("Not implemented")
-    }
-
-    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query {
-        TODO("Not implemented")
-    }
+    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query = TODO("Not implemented")
+    override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")
+    override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not implemented")
 
 
 }

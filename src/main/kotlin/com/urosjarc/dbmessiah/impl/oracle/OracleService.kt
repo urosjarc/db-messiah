@@ -17,7 +17,6 @@ public open class OracleService : Service<OracleSerializer> {
 
     public open class Connection(conn: java.sql.Connection, ser: OracleSerializer) {
         private val driver = Driver(conn = conn)
-        public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
         public val table: TableCascadeQueries = TableCascadeQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
