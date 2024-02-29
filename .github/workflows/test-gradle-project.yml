@@ -72,11 +72,9 @@ jobs:
           - 1433:1433
 
       oracle:
-        image: container-registry.oracle.com/database/express:latest
+        image: gvenzl/oracle-xe:18-slim
         env:
-          ORACLE_SID: XE
-          ORACLE_PDB: main
-          ORACLE_PWD: root
+          ORACLE_PASSWORD: root
         ports:
           - 1521:1521
         options: >-
