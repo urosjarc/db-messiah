@@ -25,6 +25,13 @@ repositories {
 testlogger {
     this.setTheme("mocha")
 }
+
+koverReport {
+    filters {
+        excludes { classes("*.Test_*") }
+        includes { classes("com.urosjarc.dbmessiah.*") }
+    }
+}
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.tasks = listOf("test", "tutorials", "chinook", "e2e")
@@ -106,10 +113,6 @@ testing {
                 // koin
                 implementation("io.insert-koin:koin-core:3.3.0")
                 implementation("io.insert-koin:koin-test-junit5:3.3.0")
-
-                implementation("org.apache.logging.log4j:log4j-core:2.17.1")
-                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
-                implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
             }
         }
     }
