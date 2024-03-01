@@ -27,7 +27,7 @@ testlogger {
 }
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
-    this.tasks = listOf("test", "demo", "e2e")
+    this.tasks = listOf("test", "tutorials", "chinook", "e2e")
 }
 
 tasks.dokkaHtml {
@@ -85,7 +85,7 @@ testing {
             }
         }
 
-        register<JvmTestSuite>("demo") {
+        register<JvmTestSuite>("tutorials") {
             dependencies {
                 implementation(project())
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
@@ -93,6 +93,23 @@ testing {
                 runtimeOnly("org.postgresql:postgresql:42.7.1")
                 runtimeOnly("org.apache.derby:derby:10.17.1.0")
                 runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
+            }
+        }
+
+        register<JvmTestSuite>("chinook") {
+            dependencies {
+                implementation(project())
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+                runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
+                runtimeOnly("org.postgresql:postgresql:42.7.1")
+
+                // koin
+                implementation("io.insert-koin:koin-core:3.3.0")
+                implementation("io.insert-koin:koin-test-junit5:3.3.0")
+
+                implementation("org.apache.logging.log4j:log4j-core:2.17.1")
+                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+                implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
             }
         }
     }

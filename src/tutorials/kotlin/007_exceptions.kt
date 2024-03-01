@@ -43,7 +43,7 @@ fun main_007() {
             globalSerializers = AllTS.basic //Pass list of all basic kotlin serializers to be used by serializer (PS: Its super easy to define your own custom serializer).
         )
     }
-    assertContains(exception0.stackTraceToString(), "USER WARNING: Schema 'main' has tables ['Parent0'] registered multiple times")
+    assertContains(exception0.stackTraceToString(), "USER WARNING: Schema 'main' has tables registered multiple times: ['Parent0']")
 
     /**
      * WarningException: Database schema is empty...

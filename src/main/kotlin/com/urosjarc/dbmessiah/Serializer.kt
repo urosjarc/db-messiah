@@ -125,7 +125,7 @@ public abstract class Serializer(
 
         text.add("")
         relationships.forEach { t, u ->
-            text.add("$t -down-> $u")
+            text.add("$u -down-> $t")
         }
 
         text.add("")

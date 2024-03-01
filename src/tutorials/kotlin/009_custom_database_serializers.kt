@@ -59,7 +59,7 @@ open class MyOwnSqliteSerializer(
          * All informations about primary key...
          */
         val autoIncrement = if (T.primaryKey.autoInc) " AUTOINCREMENT" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
 
         /**
          * Fill all informations about foreign keys...
@@ -69,9 +69,9 @@ open class MyOwnSqliteSerializer(
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable.name)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
             )
         }
 
@@ -81,14 +81,14 @@ open class MyOwnSqliteSerializer(
         T.otherColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns);")
     }
 
     /**
@@ -108,7 +108,7 @@ open class MyOwnSqliteSerializer(
          * Now lets return new values back...
          */
         return Query(
-            sql = "INSERT INTO ${T.path} (${T.sqlInsertColumns()}) VALUES (${T.sqlInsertQuestions()})",
+            sql = "INSERT INTO ${escaped(T)} (${T.sqlInsertColumns { escaped(it) }}) VALUES (${T.sqlInsertQuestions()})",
             *newValues.toTypedArray(),
         )
     }

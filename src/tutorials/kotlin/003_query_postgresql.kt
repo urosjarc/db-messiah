@@ -73,19 +73,19 @@ fun main_003() {
          */
         it.run.query {
             """
-            INSERT INTO main.Parent3 (pk, value) VALUES (1, 'parent_1');
-            INSERT INTO main.Parent3 (pk, value) VALUES (2, 'parent_2');
-            INSERT INTO main.Parent3 (pk, value) VALUES (3, 'parent_3');
-            INSERT INTO main.Parent3 (pk, value) VALUES (4, 'parent_4');
+            INSERT INTO "main"."Parent3" ("pk", "value") VALUES (1, 'parent_1');
+            INSERT INTO "main"."Parent3" ("pk", "value") VALUES (2, 'parent_2');
+            INSERT INTO "main"."Parent3" ("pk", "value") VALUES (3, 'parent_3');
+            INSERT INTO "main"."Parent3" ("pk", "value") VALUES (4, 'parent_4');
             """
         }
 
         it.run.query {
             """
-            INSERT INTO main.Child3 (pk, parent_pk, value) VALUES (1, 1, 'child_1');
-            INSERT INTO main.Child3 (pk, parent_pk, value) VALUES (2, 1, 'child_2');
-            INSERT INTO main.Child3 (pk, parent_pk, value) VALUES (3, 2, 'child_3');
-            INSERT INTO main.Child3 (pk, parent_pk, value) VALUES (4, 2, 'child_4');
+            INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (1, 1, 'child_1');
+            INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (2, 1, 'child_2');
+            INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (3, 2, 'child_3');
+            INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (4, 2, 'child_4');
             """
         }
 
@@ -113,8 +113,8 @@ fun main_003() {
          */
         val matrix1 = it.run.query(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
             """
-            SELECT * FROM main.Parent3 WHERE pk = ${it.put(Input3::parent_pk)};
-            SELECT * FROM main.Child3 WHERE pk = 2  
+            SELECT * FROM "main"."Parent3" WHERE "pk" = ${it.put(Input3::parent_pk)};
+            SELECT * FROM "main"."Child3" WHERE "pk" = 2  
             """
         }
         val parent0 = matrix1[0][0] as Parent3

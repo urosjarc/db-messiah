@@ -97,7 +97,9 @@ internal class SerializerTests {
          */
         fun `Schemas must be unique`() {
             val notUnique = this.ser.schemas.ext_notUnique
-            if (notUnique.isNotEmpty()) throw SerializerTestsException("Schemas registered multiple times: ${notUnique.keys}")
+            if (notUnique.isNotEmpty()) {
+                throw SerializerTestsException("Schemas registered multiple times: ${notUnique.keys}")
+            }
         }
 
         fun `Global serializers must be unique`() {

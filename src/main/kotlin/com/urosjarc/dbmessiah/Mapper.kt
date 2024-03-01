@@ -81,7 +81,10 @@ public class Mapper(
         this.fillReflectionMaps()
         this.fillTablesInfos()
         this.fillProcedures()
+        this.test()
+    }
 
+    public fun test(){
         MapperTests(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
@@ -327,7 +330,7 @@ public class Mapper(
         val pkSerializer = getSerializer(table.primaryKey)
 
         val pkColumn = PrimaryColumn(
-            kprop = table.primaryKey as KMutableProperty1<Any, Any?>, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
+            kprop = table.primaryKey as KProperty1<Any, Any?>, dbType = pkSerializer.dbType, jdbcType = pkSerializer.jdbcType,
             encoder = pkSerializer.encoder, decoder = pkSerializer.decoder
         )
 

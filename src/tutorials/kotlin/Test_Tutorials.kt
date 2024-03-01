@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Test
 
-class Test_All {
+class Test_Tutorials {
     @Test
     fun `test basic sqlite`() = main_000()
 

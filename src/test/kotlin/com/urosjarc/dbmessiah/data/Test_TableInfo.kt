@@ -73,7 +73,7 @@ class Test_TableInfo {
 
     @Test
     fun `test sqlInsertColumns()`() {
-        assertEquals(actual = this.tableInfo.sqlInsertColumns(), expected = "fk, col")
+        assertEquals(actual = this.tableInfo.sqlInsertColumns { "`$it`"}, expected = "`fk`, `col`")
     }
 
     @Test
@@ -83,7 +83,7 @@ class Test_TableInfo {
 
     @Test
     fun `test sqlUpdateColumns()`() {
-        assertEquals(actual = this.tableInfo.sqlUpdateColumns(), expected = "fk = ?, col = ?")
+        assertEquals(actual = this.tableInfo.sqlUpdateColumns {"`$it`"}, expected = "`fk` = ?, `col` = ?")
     }
 
     @Test
