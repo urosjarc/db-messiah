@@ -12,8 +12,8 @@ import kotlin.reflect.KClass
  * It takes a Serializer and a Driver as dependencies, which are used for query generation and execution.
  */
 public open class TableQueries(
-    protected val ser: Serializer,
-    protected val driver: Driver
+    public val ser: Serializer,
+    public val driver: Driver
 ) {
     /**
      * Drops a database table.
@@ -23,8 +23,8 @@ public open class TableQueries(
      *               The default value is true.
      * @return The number of affected rows.
      */
-    public open fun <T : Any> drop(table: KClass<T>, throws: Boolean = true): Int {
-        val query = this.ser.dropTable(table = table)
+    public inline fun <reified T : Any> drop(throws: Boolean = true): Int {
+        val query = this.ser.dropTable(table = T::class)
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {
@@ -41,8 +41,8 @@ public open class TableQueries(
      *               The default value is true.
      * @return The number of affected rows.
      */
-    public open fun <T : Any> create(table: KClass<T>, throws: Boolean = true): Int {
-        val query = this.ser.createTable(table = table)
+    public inline fun <reified T : Any> create(throws: Boolean = true): Int {
+        val query = this.ser.createTable(table = T::class)
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {
@@ -57,8 +57,8 @@ public open class TableQueries(
      * @param table the table to delete records from
      * @return the number of records deleted
      */
-    public fun <T : Any> delete(table: KClass<T>): Int {
-        val query = this.ser.deleteTable(table = table)
+    public inline fun <reified T : Any> delete(): Int {
+        val query = this.ser.deleteTable(table = T::class)
         return this.driver.update(query = query)
     }
 
@@ -68,10 +68,10 @@ public open class TableQueries(
      * @param table the class representing the table to select from
      * @return a list of objects representing the selected rows
      */
-    public fun <T : Any> select(table: KClass<T>): List<T> {
-        val query = this.ser.selectTable(table = table)
+    public inline fun <reified T : Any> select(): List<T> {
+        val query = this.ser.selectTable(table = T::class)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)
         }
     }
 
@@ -83,10 +83,10 @@ public open class TableQueries(
      * @param page The page configuration for fetching items.
      * @return A list of objects representing the selected page.
      */
-    public fun <T : Any> select(table: KClass<T>, page: Page<T>): List<T> {
-        val query = this.ser.selectTable(table = table, page = page)
+    public inline fun <reified T : Any> select(page: Page<T>): List<T> {
+        val query = this.ser.selectTable(table = T::class, page = page)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)
         }
     }
 
@@ -98,10 +98,11 @@ public open class TableQueries(
      * @param cursor The cursor configuration for fetching items.
      * @return A list of objects representing the selected rows.
      */
-    public fun <T: Any, V: Comparable<V>> select(table: KClass<T>, cursor: Cursor<T, V>): List<T> {
-        val query = this.ser.selectTable(table = table, cursor = cursor)
+    public inline fun <reified T: Any, V: Comparable<V>> select(cursor: Cursor<T, V>): List<T> {
+        val query = this.ser.selectTable(table = T::class, cursor = cursor)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)
         }
     }
+
 }

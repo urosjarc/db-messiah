@@ -111,14 +111,7 @@ public open class Db2Serializer(
      * @param schema The [Schema] object representing the schema to be created.
      * @return A [Query] object representing the SQL query to create the schema.
      */
-    override fun createSchema(schema: Schema): Query {
-        return Query(
-            sql = """
-                IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '${schema.name}')
-                BEGIN
-                    EXEC( 'CREATE SCHEMA ${escaped(schema)}' );
-                END
-            """
-        )
-    }
+    override fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA ${schema.name}")
+
+    override fun dropSchema(schema: Schema, cascade: Boolean): Query = Query(sql = "DROP SCHEMA ${schema.name} RESTRICT")
 }

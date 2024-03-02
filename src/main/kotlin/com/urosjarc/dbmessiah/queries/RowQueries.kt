@@ -14,8 +14,8 @@ import kotlin.reflect.KClass
  * @param driver The database driver to use for executing queries.
  */
 public open class RowQueries(
-    private val ser: Serializer,
-    private val driver: Driver
+    public val ser: Serializer,
+    public val driver: Driver
 ) {
     /**
      * Retrieves a single object from the specified table based on the primary key.
@@ -24,10 +24,10 @@ public open class RowQueries(
      * @param pk The primary key value of the object to retrieve.
      * @return The object retrieved from the table, or null if no matching object is found.
      */
-    public fun <T : Any, K : Any> select(table: KClass<T>, pk: K): T? {
-        val query = this.ser.selectTable(table = table, pk = pk)
+    public inline fun <reified T : Any> select(pk: Any): T? {
+        val query = this.ser.selectTable(table = T::class, pk = pk)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, kclass = table)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)
         }.firstOrNull()
     }
 

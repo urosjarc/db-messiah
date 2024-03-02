@@ -93,7 +93,7 @@ public abstract class Serializer(
             "@startuml", "skinparam backgroundColor darkgray", "skinparam ClassBackgroundColor lightgray"
         )
 
-        val relationships = mutableListOf<Pair<String, String>>()
+        val relationships = mutableListOf<String>()
         val kclass_to_path = mutableMapOf<KClass<*>, String>()
 
         this.schemas.forEach { s ->
@@ -116,7 +116,7 @@ public abstract class Serializer(
                     val kclass = it.value
                     val toClass = kclass_to_path[kclass] ?: throw MapperException("Could not find path for kclass: ${kclass.simpleName}.")
                     val fromClass = "${s.name}.${t.name}"
-                    relationships.add(toClass to fromClass)
+                    relationships.add("${fromClass} -down-> ${toClass}")
                     text.add("\t\t $fk: ${kclass.simpleName}")
                 }
 
@@ -126,10 +126,7 @@ public abstract class Serializer(
         }
 
         text.add("")
-        relationships.forEach {
-            text.add("${it.second} -down-> ${it.first}")
-        }
-
+        text.addAll(relationships)
         text.add("")
         text.add("@enduml")
 
@@ -292,7 +289,7 @@ public abstract class Serializer(
      * @param getSql A function that returns the user provided SQL statement to be executed.
      * @return A [Query] object representing the SQL query and its values.
      */
-    public fun query(getSql: () -> String): Query = Query(sql = getSql())
+    public fun query(getSql: (QueryEscaper) -> String): Query = Query(sql = getSql(QueryEscaper(ser = this)))
 
     /**
      * Creates [Query] from user defined SQL string with inputs.
@@ -301,13 +298,13 @@ public abstract class Serializer(
      * @param getSql A function that takes a QueryBuilder and returns the SQL string for the query.
      * @return A Query object representing the generated query.
      */
-    public fun <IN : Any> query(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
-        val qBuilder = QueryBuilder(mapper = this.mapper, input = input)
+    public fun <IN : Any> queryWithInput(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
+        val qBuilder = QueryBuilder(input = input, ser = this)
         return qBuilder.build(sql = getSql(qBuilder))
     }
 
-    internal abstract fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query
-    internal abstract fun <T : Any> callProcedure(procedure: T): Query
-    internal abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
+    public abstract fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query
+    public abstract fun <T : Any> callProcedure(procedure: T): Query
+    public abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
 
 }

@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.data
 
 import java.sql.JDBCType
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 /**
  * Represents the metadata of a database table.
@@ -43,6 +44,9 @@ public data class TableInfo(
             it.table = this
         }
     }
+
+    public fun getColumn(kprop: KProperty1<*, *>): Column? =
+        (listOf(this.primaryKey) + this.foreignKeys + this.otherColumns).firstOrNull { it.kprop == kprop }
 
     /**
      * Represents a list of columns that can be modified by the user in `UPDATE` statement.

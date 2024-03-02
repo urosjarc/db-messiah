@@ -436,7 +436,7 @@ public class Mapper(
      * @return The decoded object of type [T].
      * @throws MapperException if there is an error during decoding.
      */
-    internal fun <T : Any> decodeOne(resultSet: ResultSet, kclass: KClass<T>): T {
+    public fun <T : Any> decodeOne(resultSet: ResultSet, kclass: KClass<T>): T {
 
         val constructor = this.getConstructor(kclass = kclass)
         val constructorParameters = this.getConstructorParameters(kclass = kclass)

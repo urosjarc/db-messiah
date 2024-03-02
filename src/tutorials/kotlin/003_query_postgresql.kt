@@ -113,7 +113,7 @@ fun main_003() {
          */
         val matrix1 = it.run.query(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
             """
-            SELECT * FROM "main"."Parent3" WHERE "pk" = ${it.put(Input3::parent_pk)};
+            SELECT * FROM "main"."Parent3" WHERE "pk" = ${it.input(Input3::parent_pk)};
             SELECT * FROM "main"."Child3" WHERE "pk" = 2  
             """
         }

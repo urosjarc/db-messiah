@@ -17,8 +17,8 @@ public class TableCascadeQueries(ser: Serializer, driver: Driver) : TableQueries
      * @param table The table to be dropped.
      * @return The number of rows affected by the drop operation.
      */
-    public fun <T : Any> dropCascade(table: KClass<T>): Int {
-        val query = this.ser.dropTable(table = table, cascade = true)
+    public inline fun <reified T : Any> dropCascade(): Int {
+        val query = this.ser.dropTable(table = T::class, cascade = true)
         return this.driver.update(query = query)
     }
 }

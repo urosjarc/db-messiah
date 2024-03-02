@@ -579,7 +579,7 @@ open class Test_Mysql : Test_Contract {
                 select *
                 from main.Child C
                 join main.Parent P on C.fk = P.pk
-                where P.pk = ${it.put(Input::parent_pk)}
+                where P.pk = ${it.input(Input::parent_pk)}
             """
         }
 

@@ -5,17 +5,16 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
-import com.urosjarc.dbmessiah.domain.Table
 import kotlin.reflect.KClass
 
 
 public open class DerbySerializer(
-    tables: List<Table<*>> = listOf(),
+    schemas: List<DerbySchema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
 ) : Serializer(
-    schemas = listOf(Schema(name = "main", tables = tables)),
+    schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs
@@ -69,6 +68,18 @@ public open class DerbySerializer(
         val T = this.mapper.getTableInfo(kclass = table)
         return Query(sql = "DROP TABLE ${escaped(T)}")
     }
+
+
+    public override fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA ${escaped(schema)}")
+
+    /**
+     * Creates a SQL string representing a drop query for the given schema.
+     *
+     * @param schema The schema to be dropped.
+     * @return The [String] representing the drop query.
+     */
+    public override fun dropSchema(schema: Schema, cascade: Boolean): Query = Query(sql = "DROP SCHEMA ${escaped(schema)}")
+
 
     override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query = TODO("Not implemented")
     override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")

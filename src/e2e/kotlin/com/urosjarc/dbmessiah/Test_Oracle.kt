@@ -577,7 +577,7 @@ open class Test_Oracle : Test_Contract {
                 select *
                 from "SYSTEM"."Child" C
                 join "SYSTEM"."Parent" P on C."fk" = P."pk"
-                where P."pk" = ${it.put(Input::parent_pk)}
+                where P."pk" = ${it.input(Input::parent_pk)}
             """
         }
 

@@ -107,7 +107,7 @@ public open class Driver(private val conn: Connection) {
      * @return The number of rows affected by the update.
      * @throws DriverException If there is an error processing the update query.
      */
-    internal fun update(query: Query): Int {
+    public fun update(query: Query): Int {
         var ps: PreparedStatement? = null
 
         try {
@@ -255,7 +255,7 @@ public open class Driver(private val conn: Connection) {
      * @return A list of objects of type T, obtained by decoding each row of the result set.
      * @throws DriverException if there is an error executing the query or decoding the result set.
      */
-    internal fun <T> query(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
+    public fun <T> query(query: Query, decodeResultSet: (rs: ResultSet) -> T): List<T> {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
 

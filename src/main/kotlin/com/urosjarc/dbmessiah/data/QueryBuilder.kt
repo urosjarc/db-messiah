@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.Mapper
+import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KProperty1
 
@@ -16,18 +17,18 @@ import kotlin.reflect.KProperty1
  */
 public open class QueryBuilder<IN : Any>(
     public val input: IN,
-    private val mapper: Mapper
-) {
+    ser: Serializer
+) : QueryEscaper(ser = ser) {
 
     /**
      * Used within the class to accumulate query values while the custom SQL query is being built by the user.
-     * It is populated through the [put] function, which takes a [KProperty1] object representing a property of the input class,
+     * It is populated through the [input] function, which takes a [KProperty1] object representing a property of the input class,
      * and maps it to a corresponding [QueryValue].
      */
     private val queryValues: MutableList<QueryValue> = mutableListOf()
 
     init {
-        if (!this.mapper.isRegistered(kclass = this.input::class))
+        if (!this.ser.mapper.isRegistered(kclass = this.input::class))
             throw MappingException("Input class '${this.input::class.simpleName}' is not registered in global inputs")
     }
 
@@ -46,8 +47,8 @@ public open class QueryBuilder<IN : Any>(
      * @param kp The [KProperty1] which should be injected in SQL string.
      * @return The placeholder character "?" indicating the serialized value will be replaced by [QueryValue] in the [queryValues].
      */
-    public fun put(kp: KProperty1<IN, *>): String {
-        val ser = this.mapper.getSerializer(kp)
+    public fun input(kp: KProperty1<IN, *>): String {
+        val ser = this.ser.mapper.getSerializer(kp)
 
         val qv = QueryValue(
             name = kp.name,

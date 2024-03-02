@@ -1,5 +1,8 @@
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.db2.Db2Schema
+import com.urosjarc.dbmessiah.impl.derby.DerbySchema
+import com.urosjarc.dbmessiah.impl.h2.H2Schema
 import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
@@ -24,8 +27,10 @@ fun <T : Any> extractForeignKeys(primaryKey: KProperty1<T, *>): MutableList<Pair
     return fkMap
 }
 
-fun <T : Any> createTable(primaryKey: KProperty1<T, *>): Table<T> =
-    Table(primaryKey = primaryKey, foreignKeys = extractForeignKeys(primaryKey = primaryKey))
+fun <T : Any> createTable(primaryKey: KProperty1<T, *>): Table<T> {
+    val foreignKeys = extractForeignKeys(primaryKey = primaryKey)
+    return Table(primaryKey = primaryKey, foreignKeys = foreignKeys, constraints = foreignKeys.map { it.first to listOf(C.CASCADE_DELETE) })
+}
 
 inline fun <reified T> name(): String = "\"${T::class.simpleName.toString()}\""
 val music_tables = listOf(
@@ -49,10 +54,20 @@ val people_tables = listOf(
     createTable(Customer::id),
 )
 
+//H2
+val h2_music_schema = H2Schema(name = "music", tables = music_tables)
+val h2_billing_schema = H2Schema(name = "billing", tables = billing_tables)
+val h2_people_schema = H2Schema(name = "people", tables = people_tables)
+
 //Db2
 val db2_music_schema = Db2Schema(name = "music", tables = music_tables)
 val db2_billing_schema = Db2Schema(name = "billing", tables = billing_tables)
 val db2_people_schema = Db2Schema(name = "people", tables = people_tables)
+
+//Derby
+val derby_music_schema = DerbySchema(name = "music", tables = music_tables)
+val derby_billing_schema = DerbySchema(name = "billing", tables = billing_tables)
+val derby_people_schema = DerbySchema(name = "people", tables = people_tables)
 
 //Maria
 val maria_music_schema = MariaSchema(name = "music", tables = music_tables)
@@ -70,9 +85,7 @@ val mysql_billing_schema = MysqlSchema(name = "billing", tables = billing_tables
 val mysql_people_schema = MysqlSchema(name = "people", tables = people_tables)
 
 //Oracle
-val oracle_music_schema = OracleSchema(name = "music", tables = music_tables)
-val oracle_billing_schema = OracleSchema(name = "billing", tables = billing_tables)
-val oracle_people_schema = OracleSchema(name = "people", tables = people_tables)
+val oracle_system_schema = OracleSchema(name = "SYSTEM", tables = music_tables + billing_tables + people_tables)
 
 //Postgresql
 val pg_music_schema = PgSchema(name = "music", tables = music_tables)

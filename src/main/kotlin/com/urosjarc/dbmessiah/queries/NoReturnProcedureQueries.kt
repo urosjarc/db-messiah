@@ -3,7 +3,6 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import kotlin.reflect.KClass
 
 /**
  * Class responsible for executing database queries related to calling stored procedures.
@@ -12,11 +11,11 @@ import kotlin.reflect.KClass
  * @param driver The database driver to be used for executing queries.
  */
 public open class NoReturnProcedureQueries(
-    private val ser: Serializer,
-    private val driver: Driver
+    public val ser: Serializer,
+    public val driver: Driver
 ) {
-    public fun <T : Any> drop(procedure: KClass<T>, throws: Boolean = true): Int {
-        val query = this.ser.dropProcedure(procedure = procedure)
+    public inline fun <reified T : Any> drop(throws: Boolean = true): Int {
+        val query = this.ser.dropProcedure(procedure = T::class)
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {
@@ -25,8 +24,8 @@ public open class NoReturnProcedureQueries(
         }
     }
 
-    public fun <T : Any> create(procedure: KClass<T>, throws: Boolean = true, body: () -> String): Int {
-        val query = this.ser.createProcedure(procedure = procedure, sql = body())
+    public inline fun <reified T : Any> create(throws: Boolean = true, body: () -> String): Int {
+        val query = this.ser.createProcedure(procedure = T::class, sql = body())
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {

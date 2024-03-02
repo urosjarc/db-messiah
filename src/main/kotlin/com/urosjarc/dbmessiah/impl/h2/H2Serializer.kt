@@ -4,17 +4,16 @@ import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import com.urosjarc.dbmessiah.domain.Table
 import kotlin.reflect.KClass
 
 
 public open class H2Serializer(
-    tables: List<Table<*>> = listOf(),
+    schemas: List<H2Schema> = listOf(),
     globalSerializers: List<TypeSerializer<*>> = listOf(),
     globalInputs: List<KClass<*>> = listOf(),
     globalOutputs: List<KClass<*>> = listOf(),
 ) : Serializer(
-    schemas = listOf(Schema(name = "main", tables = tables)),
+    schemas = schemas,
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs
@@ -57,7 +56,6 @@ public open class H2Serializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns);")
     }
-
     override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query = TODO("Not implemented")
     override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not implemented")

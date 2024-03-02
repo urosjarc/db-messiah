@@ -9,14 +9,11 @@ import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import java.util.*
 
-/*
-val db2 = Db2Service(
+val h2 = H2Service(
     config = Properties().apply {
-        this["jdbcUrl"] = "jdbc:db2://localhost:50000/main"
-        this["username"] = "db2inst1"
-        this["password"] = "root"
+        this["jdbcUrl"] = "jdbc:h2:mem:main"
     },
-    ser = db2_serializer
+    ser = h2_serializer
 )
 val derby = DerbyService(
     config = Properties().apply {
@@ -24,11 +21,13 @@ val derby = DerbyService(
     },
     ser = derby_serializer
 )
-val h2 = H2Service(
+val db2 = Db2Service(
     config = Properties().apply {
-        this["jdbcUrl"] = "jdbc:h2:mem:main"
+        this["jdbcUrl"] = "jdbc:db2://localhost:50000/main"
+        this["username"] = "db2inst1"
+        this["password"] = "root"
     },
-    ser = h2_serializer
+    ser = db2_serializer
 )
 val maria = MariaService(
     config = Properties().apply {
@@ -62,7 +61,6 @@ val oracle = OracleService(
     },
     ser = oracle_serializer
 )
-*/
 val pg = PgService(
     config = Properties().apply {
         this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"

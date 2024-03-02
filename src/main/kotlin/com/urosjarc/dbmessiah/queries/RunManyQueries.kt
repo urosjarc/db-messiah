@@ -2,7 +2,9 @@ package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
+import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryBuilder
+import com.urosjarc.dbmessiah.data.QueryEscaper
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -14,8 +16,8 @@ import kotlin.reflect.KClass
  * @property driver The driver used to execute queries on the database.
  */
 public class RunManyQueries(
-    private val ser: Serializer,
-    private val driver: Driver
+    override val ser: Serializer,
+    override val driver: Driver
 ) : RunOneQueries(ser = ser, driver = driver) {
 
     /**
@@ -26,17 +28,9 @@ public class RunManyQueries(
      * @return the object matrix, where each row represents list of objects from one query.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public fun query(vararg outputs: KClass<*>, getSql: () -> String): List<List<Any>> {
+    public fun query(vararg outputs: KClass<*>, getSql: (QueryEscaper) -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
-
-        val results = this.driver.execute(query = query) { i, rs ->
-            this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
-        }
-
-        if (results.size != outputs.size)
-            throw MappingException("Number of results '${results.size}' does not match with number of output classes '${outputs.size}'")
-
-        return results
+        return this.executeQuery(query = query, outputs = outputs)
     }
 
     /**
@@ -50,8 +44,11 @@ public class RunManyQueries(
      * @throws MappingException If the number of results does not match the number of output classes.
      */
     public fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
-        val query = this.ser.query(input = input, getSql = getSql)
+        val query = this.ser.queryWithInput(input = input, getSql = getSql)
+        return this.executeQuery(query = query, outputs = outputs)
+    }
 
+    private fun executeQuery(query: Query, vararg outputs: KClass<*>): MutableList<List<Any>> {
         val results = this.driver.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i, outputs = outputs)
         }

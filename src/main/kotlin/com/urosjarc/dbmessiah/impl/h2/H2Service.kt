@@ -17,7 +17,7 @@ public open class H2Service : Service<H2Serializer> {
 
     public open class Connection(conn: java.sql.Connection, ser: H2Serializer) {
         private val driver = Driver(conn = conn)
-        public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
+        public val schema: SchemaCascadeQueries = SchemaCascadeQueries(ser = ser, driver = driver)
         public val table: TableCascadeQueries = TableCascadeQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)

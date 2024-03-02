@@ -3,6 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.QueryBuilder
+import com.urosjarc.dbmessiah.data.QueryEscaper
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -14,8 +15,8 @@ import kotlin.reflect.KClass
  * @param driver The driver used to execute the SQL queries.
  */
 public open class RunOneQueries(
-    private val ser: Serializer,
-    private val driver: Driver
+    public open val ser: Serializer,
+    public open val driver: Driver
 ) {
 
     /**
@@ -23,7 +24,7 @@ public open class RunOneQueries(
      *
      * @param getSql A function that returns the user provided SQL statement to be executed.
      */
-    public fun query(getSql: () -> String) {
+    public fun query(getSql: (QueryEscaper) -> String) {
         val query = this.ser.query(getSql = getSql)
         this.driver.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i)
@@ -38,10 +39,10 @@ public open class RunOneQueries(
      * @return fetched rows from [output] table.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public fun <OUT : Any> query(output: KClass<OUT>, getSql: () -> String): List<OUT> {
+    public inline fun <reified OUT : Any> query(noinline getSql: (QueryEscaper) -> String): List<OUT> {
         val query = this.ser.query(getSql = getSql)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, output)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = OUT::class)
         }
     }
 
@@ -54,10 +55,10 @@ public open class RunOneQueries(
      * @return A list of query results of type [OUT].
      * @throws MappingException if the query does not return any results.
      */
-    public fun <IN : Any, OUT : Any> query(output: KClass<OUT>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
-        val query = this.ser.query(input = input, getSql = getSql)
+    public inline fun <IN : Any, reified OUT : Any> query(input: IN, noinline getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
+        val query = this.ser.queryWithInput(input = input, getSql = getSql)
         return this.driver.query(query = query) {
-            this.ser.mapper.decodeOne(resultSet = it, output)
+            this.ser.mapper.decodeOne(resultSet = it, kclass = OUT::class)
         }
     }
 }

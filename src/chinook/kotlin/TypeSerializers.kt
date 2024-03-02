@@ -11,6 +11,14 @@ val localDate_type_serializer = TypeSerializer(
     encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x.atStartOfDayIn(timeZone = TimeZone.UTC).toJavaInstant())) }
 )
 
+val mssql_localDate_type_serializer = TypeSerializer(
+    kclass = LocalDate::class,
+    dbType = "DATETIME",
+    jdbcType = JDBCType.TIMESTAMP,
+    decoder = { rs, i, info -> rs.getTimestamp(i).toInstant().toKotlinInstant().toLocalDateTime(TimeZone.UTC).date },
+    encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x.atStartOfDayIn(timeZone = TimeZone.UTC).toJavaInstant())) }
+)
+
 val id_serializer = TypeSerializer(
     kclass = Id::class,
     dbType = "INTEGER",

@@ -88,7 +88,7 @@ fun main_002() {
             output = Parent2::class,
             input = Child2(value = "parent_asdf") // For our input we can also use the same table but lets use different so that it's not confusing...
         ) { q: QueryBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
-            """SELECT * FROM Parent2 WHERE value = ${q.put(Child2::value)}
+            """SELECT * FROM Parent2 WHERE value = ${q.input(Child2::value)}
                 
             -- q.put() will return '?' character back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
             -- to read more about magic '?' character please refer to this link: https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html
@@ -115,7 +115,7 @@ fun main_002() {
                 p.value AS ${Output2::parent_value.name} 
             FROM Child2 c
                 JOIN Parent2 p ON c.parent_pk = p.pk
-            WHERE p.pk = ${it.put(Input2::parent_pk)}
+            WHERE p.pk = ${it.input(Input2::parent_pk)}
             """
         }
 

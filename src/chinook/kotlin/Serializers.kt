@@ -14,11 +14,11 @@ val db2_serializer = Db2Serializer(
     globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
 )
 val derby_serializer = DerbySerializer(
-    tables = listOf(music_tables, billing_tables, people_tables).flatten(),
+    schemas = listOf(derby_people_schema, derby_music_schema, derby_billing_schema),
     globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
 )
 val h2_serializer = H2Serializer(
-    tables = listOf(music_tables, billing_tables, people_tables).flatten(),
+    schemas = listOf(h2_people_schema, h2_music_schema, h2_billing_schema),
     globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
 )
 val maria_serializer = MariaSerializer(
@@ -27,14 +27,14 @@ val maria_serializer = MariaSerializer(
 )
 val mssql_serializer = MssqlSerializer(
     schemas = listOf(mssql_people_schema, mssql_music_schema, mssql_billing_schema),
-    globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
+    globalSerializers = AllTS.basic + listOf(mssql_localDate_type_serializer, id_serializer)
 )
 val mysql_serializer = MysqlSerializer(
     schemas = listOf(mysql_people_schema, mysql_music_schema, mysql_billing_schema),
     globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
 )
 val oracle_serializer = OracleSerializer(
-    schemas = listOf(oracle_people_schema, oracle_music_schema, oracle_billing_schema),
+    schemas = listOf(oracle_system_schema),
     globalSerializers = AllTS.basic + listOf(localDate_type_serializer, id_serializer)
 )
 
