@@ -2,17 +2,18 @@ package com.urosjarc.dbmessiah.extend
 
 import kotlin.reflect.*
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.javaField
 
-private val KType.isWholeNumber: Boolean get() = listOf(typeOf<Int>(), typeOf<UInt>(), typeOf<Int?>(), typeOf<UInt?>()).contains(this)
-public val <T : Any> KProperty1<T, *>.ext_canBeNull: Boolean get() = this.returnType.isMarkedNullable
+private val KType.ext_isWholeNumber: Boolean get() = listOf(typeOf<Int>(), typeOf<UInt>(), typeOf<Int?>(), typeOf<UInt?>()).contains(this)
+public val <T : Any> KProperty1<T, *>.ext_owner: KClass<out Any>? get() = this.javaField?.declaringClass?.kotlin
 public val <T : Any> KProperty1<T, *>.ext_isMutable: Boolean get() = this is KMutableProperty1<T, *>
-public val <T : Any> KProperty1<T, *>.ext_isWholeNumber: Boolean get() = this.returnType.isWholeNumber
+public val <T : Any> KProperty1<T, *>.ext_isWholeNumber: Boolean get() = this.returnType.ext_isWholeNumber
 public val <T : Any> KProperty1<T, *>.ext_isInlineWholeNumber: Boolean
     get() {
         val kclass = this.returnType.classifier as KClass<*>
         if (kclass.isValue) {
             val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
-            return firstParam?.type?.isWholeNumber == true
+            return firstParam?.type?.ext_isWholeNumber == true
         }
         return false
     }

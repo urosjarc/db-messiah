@@ -1,7 +1,9 @@
-package core.domain
+package domain
+
+import Id
 
 data class Album(
-    val albumId: Id<Album>? = null,
+    var id: Id<Album>? = null,
     val title: String,
     val artistId: Id<Artist>
 )

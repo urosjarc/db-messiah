@@ -1,5 +1,4 @@
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.urosjarc.dbmessiah.exceptions.base.UnknownException
 import com.urosjarc.dbmessiah.exceptions.base.WarningException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer

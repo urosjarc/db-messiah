@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.data
 
-import com.urosjarc.dbmessiah.extend.ext_canBeNull
 import com.urosjarc.dbmessiah.extend.ext_isInlineWholeNumber
 import com.urosjarc.dbmessiah.extend.ext_isMutable
 import com.urosjarc.dbmessiah.extend.ext_isWholeNumber
@@ -26,5 +25,10 @@ public class PrimaryColumn(
     decoder = decoder
 ) {
 
-    public val autoInc: Boolean = false !in listOf(kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber, kprop.ext_isMutable, kprop.ext_canBeNull)
+    public val autoInc: Boolean
+        get() {
+            val isWholeNumber = kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber
+            val flags = listOf(isWholeNumber, kprop.ext_isMutable, kprop.returnType.isMarkedNullable)
+            return false !in flags
+        }
 }

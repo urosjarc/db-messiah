@@ -27,8 +27,8 @@ public open class PgSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val serial = if (T.primaryKey.autoInc) " SERIAL" else ""
-        col.add("${escaped(T.primaryKey.name)}$serial PRIMARY KEY")
+        val type = if (T.primaryKey.autoInc) " SERIAL" else " INTEGER"
+        col.add("${escaped(T.primaryKey.name)}$type PRIMARY KEY")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -38,7 +38,7 @@ public open class PgSerializer(
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
             col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
             )
         }
 

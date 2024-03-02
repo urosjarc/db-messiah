@@ -1,7 +1,4 @@
-package app.data
-
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import core.domain.Id
 import kotlinx.datetime.*
 import java.sql.JDBCType
 import java.sql.Timestamp

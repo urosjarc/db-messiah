@@ -4,11 +4,11 @@ import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
+import com.urosjarc.dbmessiah.extend.ext_owner
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.extensionReceiverParameter
 import kotlin.reflect.full.instanceParameter
-import kotlin.reflect.jvm.javaField
 
 /**
  * A class representing a table in a database or schema.
@@ -58,8 +58,7 @@ public class Table<T : Any>(
     /**
      * Kotlin class that represents this [Table].
      */
-    public val kclass: KClass<*> =
-        (primaryKey.javaField?.declaringClass?.kotlin ?: throw MappingException("Could not found enclosing class for primary key"))
+    public val kclass: KClass<*> = (primaryKey.ext_owner ?: throw MappingException("Could not found enclosing class for primary key: $primaryKey"))
 
     /** @suppress */
     private val hash = this.name.hashCode()

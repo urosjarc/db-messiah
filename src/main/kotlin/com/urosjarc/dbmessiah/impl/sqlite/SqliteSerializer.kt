@@ -30,7 +30,7 @@ public open class SqliteSerializer(
 
         //Primary key
         val autoIncrement = if (T.primaryKey.autoInc) " AUTOINCREMENT" else ""
-        col.add("${T.primaryKey.name} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -38,9 +38,9 @@ public open class SqliteSerializer(
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${it.name}) REFERENCES ${it.foreignTable.name} (${it.foreignTable.primaryKey.name})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable.name)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
             )
         }
 
@@ -48,14 +48,14 @@ public open class SqliteSerializer(
         T.otherColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
-            col.add("${it.name} ${it.dbType}$notNull$unique")
+            col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
         }
 
         //Connect all column definitions to one string
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${T.name} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T.name)} ($columns);")
     }
 
     override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {

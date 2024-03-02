@@ -16,7 +16,7 @@ public open class PgService : Service<PgSerializer> {
 
     public open class Connection(conn: java.sql.Connection, ser: PgSerializer) {
         private val driver = Driver(conn = conn)
-        public val schema: SchemaQueries = SchemaQueries(ser = ser, driver = driver)
+        public val schema: SchemaCascadeQueries = SchemaCascadeQueries(ser = ser, driver = driver)
         public val table: TableCascadeQueries = TableCascadeQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)

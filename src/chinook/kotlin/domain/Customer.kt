@@ -1,7 +1,9 @@
-package core.domain
+package domain
+
+import Id
 
 data class Customer(
-    val customerId: Id<Customer>? = null,
+    var id: Id<Customer>? = null,
     val firstName: String,
     val lastName: String,
  // val company: String,

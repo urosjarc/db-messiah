@@ -49,6 +49,7 @@ public abstract class Serializer(
             it.`Column constraints must be unique`()
         }
         SerializerTests.TableTests(ser = this).also {
+            it.`Tables primary keys must not be imutable and optional at the same time`()
             it.`Tables foreign keys must not contain primary key`()
             it.`Tables foreign keys must point to registered table with primary key of same type`()
             it.`Tables constraints must be valid for specific column`()
@@ -92,8 +93,9 @@ public abstract class Serializer(
             "@startuml", "skinparam backgroundColor darkgray", "skinparam ClassBackgroundColor lightgray"
         )
 
-        val relationships = mutableMapOf<String, String>()
+        val relationships = mutableListOf<Pair<String, String>>()
         val kclass_to_path = mutableMapOf<KClass<*>, String>()
+
         this.schemas.forEach { s ->
             s.tables.forEach { t ->
                 kclass_to_path[t.kclass] = "${s.name}.${t.name}"
@@ -114,7 +116,7 @@ public abstract class Serializer(
                     val kclass = it.value
                     val toClass = kclass_to_path[kclass] ?: throw MapperException("Could not find path for kclass: ${kclass.simpleName}.")
                     val fromClass = "${s.name}.${t.name}"
-                    relationships[toClass] = fromClass
+                    relationships.add(toClass to fromClass)
                     text.add("\t\t $fk: ${kclass.simpleName}")
                 }
 
@@ -124,8 +126,8 @@ public abstract class Serializer(
         }
 
         text.add("")
-        relationships.forEach { t, u ->
-            text.add("$u -down-> $t")
+        relationships.forEach {
+            text.add("${it.second} -down-> ${it.first}")
         }
 
         text.add("")
@@ -149,7 +151,10 @@ public abstract class Serializer(
      * @param schema The schema to be dropped.
      * @return The [String] representing the drop query.
      */
-    public fun dropSchema(schema: Schema): Query = Query(sql = "DROP SCHEMA IF EXISTS ${escaped(schema)}")
+    public open fun dropSchema(schema: Schema, cascade: Boolean = false): Query {
+        val cascadeSql = if (cascade) " CASCADE" else ""
+        return Query(sql = "DROP SCHEMA IF EXISTS ${escaped(schema)}$cascadeSql")
+    }
 
     /**
      * Creates a SQL string to drop a database table.

@@ -8,6 +8,7 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
+import com.urosjarc.dbmessiah.extend.ext_isMutable
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -175,14 +176,24 @@ internal class SerializerTests {
     }
 
     class TableTests(val ser: Serializer) {
-        fun `Tables foreign keys must not contain primary key`(){
+        fun `Tables primary keys must not be imutable and optional at the same time`() {
             this.ser.schemas.forEach { schema ->
                 schema.tables.forEach { table ->
-                    if(table.foreignKeys.keys.contains(table.primaryKey))
+                    if (table.primaryKey.returnType.isMarkedNullable && !table.primaryKey.ext_isMutable)
+                        throw SerializerTestsException("Primary key must not be imutable and optional at the same time: ${table.primaryKey}")
+                }
+            }
+        }
+
+        fun `Tables foreign keys must not contain primary key`() {
+            this.ser.schemas.forEach { schema ->
+                schema.tables.forEach { table ->
+                    if (table.foreignKeys.keys.contains(table.primaryKey))
                         throw SerializerTestsException("Foreign keys must not contain primary key for table: $table")
                 }
             }
         }
+
         fun `Tables foreign keys must point to registered table with primary key of same type`() {
             val schemas_tables = mutableListOf<Pair<Schema, Table<*>>>()
 

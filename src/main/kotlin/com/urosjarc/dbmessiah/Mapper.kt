@@ -5,12 +5,12 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.exceptions.MappingException
+import com.urosjarc.dbmessiah.extend.ext_kparams
+import com.urosjarc.dbmessiah.extend.ext_kprops
 import com.urosjarc.dbmessiah.tests.MapperTests
 import java.sql.ResultSet
 import kotlin.reflect.*
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.javaField
 
 
 /**
@@ -84,7 +84,7 @@ public class Mapper(
         this.test()
     }
 
-    public fun test(){
+    public fun test() {
         MapperTests(mapper = this).also {
             //Test emptiness
             it.`1-th Test - If at least one table has been created`()
@@ -190,8 +190,8 @@ public class Mapper(
         serializers: List<TypeSerializer<*>>,
         isProcedure: Boolean = false
     ) {
-        val kparams = kclass.primaryConstructor?.parameters?.filter { it.kind == KParameter.Kind.VALUE } // { INSTANCE, EXTENSION_RECEIVER, VALUE }
-        val kprops = kclass.memberProperties.filter { it.javaField != null }
+        val kparams = kclass.ext_kparams
+        val kprops = kclass.ext_kprops
 
         if (kparams == null)
             throw MappingException("Could not get primary constructor parameters for table '${kclass.simpleName}'")
