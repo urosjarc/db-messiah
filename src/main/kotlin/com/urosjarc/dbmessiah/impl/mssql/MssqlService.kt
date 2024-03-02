@@ -20,7 +20,7 @@ public open class MssqlService : Service<MssqlSerializer> {
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val run: RunManyQueries = RunManyQueries(ser = ser, driver = driver)
+        public val query: GetManyQueries = GetManyQueries(ser = ser, driver = driver)
         public val procedure: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 

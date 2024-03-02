@@ -20,7 +20,7 @@ public open class MariaService : Service<MariaSerializer> {
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val query: GetOneQueries = GetOneQueries(ser = ser, driver = driver)
         public val procedure: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 

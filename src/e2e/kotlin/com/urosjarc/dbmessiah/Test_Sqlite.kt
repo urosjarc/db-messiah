@@ -505,7 +505,7 @@ open class Test_Sqlite : Test_Contract {
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query {
+        it.run.execute {
             """
             delete from main.Parent where pk = 1;
             delete from main.Parent where pk = 2;
@@ -527,7 +527,7 @@ open class Test_Sqlite : Test_Contract {
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.run.query(Parent::class) {
+        val objs = it.run.execute(Parent::class) {
             """
                     select * from main.Parent where pk < 3;
                     select * from main.Parent where pk = 1;
@@ -553,7 +553,7 @@ open class Test_Sqlite : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.run.query(output = Child::class, input = input) {
+        val objs = it.run.execute(output = Child::class, input = input) {
             """
                 select *
                 from main.Child C

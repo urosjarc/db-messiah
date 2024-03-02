@@ -21,7 +21,7 @@ public open class H2Service : Service<H2Serializer> {
         public val table: TableCascadeQueries = TableCascadeQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val query: GetOneQueries = GetOneQueries(ser = ser, driver = driver)
         public val procedure: ProcedureQueries = ProcedureQueries(ser = ser, driver = driver)
     }
 

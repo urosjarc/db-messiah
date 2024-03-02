@@ -72,8 +72,8 @@ class Test_QueryBuilder {
 
     @Test
     fun `test get(), build()`() {
-        assertEquals(expected = "?", actual = queryBuilder.input(Input::id))
-        assertEquals(expected = "?", actual = queryBuilder.input(Input::property))
+        assertEquals(expected = "?", actual = queryBuilder.value(Input::id))
+        assertEquals(expected = "?", actual = queryBuilder.value(Input::property))
         val sql = "SELECT * FROM Input"
         val actual: Query = queryBuilder.build(sql = sql)
         val expected = Query(

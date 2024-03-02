@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.test.*
 
 
@@ -64,10 +63,10 @@ open class Test_Db2 : Test_Contract {
         //Reseting tables
         service.autocommit {
             it.schema.create(schema = schema, throws = false)
-            it.table.drop(Child::class)
-            it.table.drop(Parent::class)
-            it.table.create(Parent::class)
-            it.table.create(Child::class)
+            it.table.drop<Child>()
+            it.table.drop<Parent>()
+            it.table.create<Parent>()
+            it.table.create<Child>()
         }
 
         val numParents = 5
@@ -91,8 +90,8 @@ open class Test_Db2 : Test_Contract {
             }
 
             //Testing current state
-            val insertedParents = it.table.select(table = Parent::class)
-            val insertedChildren = it.table.select(table = Child::class)
+            val insertedParents = it.table.select<Parent>()
+            val insertedChildren = it.table.select<Child>()
 
             if (insertedChildren != children || insertedParents != parents)
                 throw Exception("Test state does not match with expected state")
@@ -100,23 +99,29 @@ open class Test_Db2 : Test_Contract {
 
         //Create procedures and disable foreign checks
         service.autocommit {
-            it.procedure.drop(procedure = TestProcedureEmpty::class, throws = false)
-            it.procedure.create(procedure = TestProcedureEmpty::class) {
+            it.procedure.drop<TestProcedureEmpty>(throws = false)
+            it.procedure.create<TestProcedureEmpty> {
                 """
-                    INSERT INTO "main"."Parent" ("pk", "col") VALUES (1234, 'new parent from procedure');
+                    INSERT INTO ${it.table<Parent>()} 
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (1234, 'new parent from procedure');
                 """
             }
-            it.procedure.drop(procedure = TestProcedure::class, throws = false)
-            it.procedure.create(procedure = TestProcedure::class) {
+            it.procedure.drop<TestProcedure>(throws = false)
+            it.procedure.create<TestProcedure> {
                 """
-                    INSERT INTO "main"."Parent" ("pk", "col") VALUES ("parent_pk", "parent_col");
+                    INSERT INTO ${it.table<Parent>()}
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (${it.name(TestProcedure::parent_pk)}, ${it.name(TestProcedure::parent_col)});
                 """
             }
         }
     }
 
-    private fun assertTableNotExists(q: Db2Service.Connection, kclass: KClass<*>) {
-        val e = assertThrows<Throwable> { q.table.select(table = kclass) }
+    private inline fun <reified T : Any> assertTableNotExists(q: Db2Service.Connection) {
+        val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
             other = """SQLERRMC=main.Parent""",
@@ -127,105 +132,105 @@ open class Test_Db2 : Test_Contract {
     @Test
     override fun `test table drop`() = service.autocommit {
         //You can select
-        it.table.select(table = Parent::class)
+        it.table.select<Parent>()
 
         //Drop
-        it.table.drop(table = Parent::class)
+        it.table.drop<Parent>()
 
         //You can't select on droped table
-        this.assertTableNotExists(q = it, kclass = Parent::class)
+        this.assertTableNotExists<Parent>(q = it)
     }
 
     @Test
     override fun `test table create`() = service.autocommit {
         //Get pre create state
-        val preParents = it.table.select(table = Parent::class)
+        val preParents = it.table.select<Parent>()
         assertTrue(actual = preParents.isNotEmpty())
 
         //Create table if allready created should not throw error
-        assertEquals(actual = it.table.create(table = Parent::class), expected = 0)
+        assertEquals(actual = it.table.create<Parent>(), expected = 0)
 
         //Create table should not change previous state
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.table.drop(Parent::class), expected = 0)
+        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
 
         //Select will create error
-        this.assertTableNotExists(q = it, kclass = Parent::class)
+        this.assertTableNotExists<Parent>(q = it)
 
         //Recreate table
-        assertEquals(actual = it.table.create(table = Parent::class), expected = 0)
+        assertEquals(actual = it.table.create<Parent>(), expected = 0)
 
         //Now we can get elements
-        assertTrue(it.table.select(table = Parent::class).isEmpty())
+        assertTrue(it.table.select<Parent>().isEmpty())
     }
 
     @Test
     override fun `test table delete`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Check if number of deletes matches original size
         assertTrue(parents.isNotEmpty())
-        assertEquals(expected = parents.size, actual = it.table.delete(table = Parent::class))
+        assertEquals(expected = parents.size, actual = it.table.delete<Parent>())
 
         //Check if no parent is left
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
         assertTrue(actual = postParents.isEmpty())
 
         //If again delete return 0
-        assertEquals(expected = 0, actual = it.table.delete(table = Parent::class))
+        assertEquals(expected = 0, actual = it.table.delete<Parent>())
     }
 
     @Test
     override fun `test table select`() = service.autocommit {
         //It should be equal to inserted parents
-        val selected0 = it.table.select(table = Parent::class)
+        val selected0 = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = selected0)
 
         //It should be consistent
-        val selected1 = it.table.select(table = Parent::class)
+        val selected1 = it.table.select<Parent>()
         assertEquals(expected = selected0, actual = selected1)
     }
 
     @Test
     override fun `test table select page`() = service.autocommit {
         // Select first 5
-        val select0 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 5))
+        val select0 = it.table.select<Child>(page = Page(number = 0, orderBy = Child::pk, limit = 5))
         assertEquals(expected = this.children.subList(0, 5), actual = select0)
 
         // Select first 7
-        val select1 = it.table.select(table = Child::class, page = Page(number = 0, orderBy = Child::pk, limit = 7))
+        val select1 = it.table.select<Child>(page = Page(number = 0, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(0, 7), actual = select1)
 
         // Select 3 page of 7
-        val select2 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 7))
+        val select2 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(14, 14 + 7), actual = select2)
 
         // Select 3 page of 4
-        val select3 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
+        val select3 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = this.children.subList(8, 8 + 4), actual = select3)
 
         // It should be consistent
-        val select4 = it.table.select(table = Child::class, page = Page(number = 2, orderBy = Child::pk, limit = 4))
+        val select4 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = select3, actual = select4)
     }
 
     @Test
     override fun `test row select pk`() = service.autocommit {
         //Should return expected
-        val parent0 = it.row.select(table = Parent::class, pk = 1)
+        val parent0 = it.row.select<Parent>(pk = 1)
         assertEquals(expected = this.parents[0], actual = parent0)
 
         //It should be consistent
-        val parent1 = it.row.select(table = Parent::class, pk = 1)
+        val parent1 = it.row.select<Parent>(pk = 1)
         assertEquals(expected = parent0, actual = parent1)
 
         //Should differ
-        val parent2 = it.row.select(table = Parent::class, pk = 2)
+        val parent2 = it.row.select<Parent>(pk = 2)
         assertEquals(expected = this.parents[1], actual = parent2)
         assertNotEquals(illegal = parent1, actual = parent2)
     }
@@ -233,7 +238,7 @@ open class Test_Db2 : Test_Contract {
     @Test
     override fun `test row insert`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Create new object
@@ -252,7 +257,7 @@ open class Test_Db2 : Test_Contract {
         assertTrue(actual = newObj.pk!! > 0)
 
         //Get parents ad check if new object is contained inside
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
         assertTrue(actual = postParents.contains(newObj))
 
         //Check if table has not been change while inserting
@@ -264,14 +269,14 @@ open class Test_Db2 : Test_Contract {
         assertFalse(actual = it.row.insert(row = newObj))
 
         //Parents really stayed as they were before
-        val postParents2 = it.table.select(table = Parent::class)
+        val postParents2 = it.table.select<Parent>()
         assertEquals(actual = postParents2, expected = postParents)
     }
 
     @Test
     override fun `test row update`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Update first
@@ -279,7 +284,7 @@ open class Test_Db2 : Test_Contract {
         assertTrue(it.row.update(row = parents[0]))
 
         //Get current all parents
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
         assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents.sortedBy { it.pk })
 
         //Object should not be updated if has no primary key
@@ -288,14 +293,14 @@ open class Test_Db2 : Test_Contract {
         assertFalse(it.row.update(row = parents[1]))
 
         //Update should not change anything in db
-        val postParents2 = it.table.select(table = Parent::class)
+        val postParents2 = it.table.select<Parent>()
         assertEquals(expected = postParents, actual = postParents2)
     }
 
     @Test
     override fun `test row delete`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Check if primary exists and is greater than 0
@@ -308,7 +313,7 @@ open class Test_Db2 : Test_Contract {
         assertEquals(actual = parents[0].pk, expected = null)
 
         //Get current all parents
-        val postParents = it.table.select(table = Parent::class).toMutableList()
+        val postParents = it.table.select<Parent>().toMutableList()
 
         //Check if the parent was removed
         assertEquals(expected = parents.size, actual = postParents.size + 1)
@@ -322,7 +327,7 @@ open class Test_Db2 : Test_Contract {
         assertFalse(it.row.delete(row = parents[1]))
 
         //Update should not change anything in db
-        val postParents2 = it.table.select(table = Parent::class)
+        val postParents2 = it.table.select<Parent>()
         assertEquals(expected = postParents, actual = postParents2)
     }
 
@@ -330,14 +335,14 @@ open class Test_Db2 : Test_Contract {
     override fun `test rows insert`() = service.autocommit {
 
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Trying to insert empty array does nothing
         assertEquals(actual = it.row.insert(rows = listOf()), expected = listOf())
 
         //State is the same as before
-        assertEquals(expected = this.parents, actual = it.table.select(table = Parent::class))
+        assertEquals(expected = this.parents, actual = it.table.select<Parent>())
 
         //New object is not contained inside parents
         val newObj0 = Parent(col = "NEW0")
@@ -357,7 +362,7 @@ open class Test_Db2 : Test_Contract {
         assertTrue(actual = newObj2.pk != null)
 
         //Get updated parents
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
 
         //Check if new parents have 2 more elements because other was allready inserted because of its pk allrady set
         assertEquals(expected = parents.size + 2, actual = postParents.size)
@@ -370,13 +375,13 @@ open class Test_Db2 : Test_Contract {
         assertEquals(actual = it.row.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(false, false, false))
 
         //This will not change anything
-        assertEquals(actual = it.table.select(table = Parent::class), expected = postParents)
+        assertEquals(actual = it.table.select<Parent>(), expected = postParents)
     }
 
     @Test
     override fun `test rows update`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         parents[0].col = "UPDATE0"
@@ -386,20 +391,20 @@ open class Test_Db2 : Test_Contract {
         assertEquals(expected = listOf(true, true), actual = it.row.update(rows = listOf(parents[0], parents[1])))
 
         //List should be equal
-        val postParents0 = it.table.select(table = Parent::class)
+        val postParents0 = it.table.select<Parent>()
         assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //If you update not allready inserted element it should reject
         assertEquals(expected = listOf(false, false), actual = it.row.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.table.select(table = Parent::class), expected = parents)
+        assertEquals(actual = it.table.select<Parent>(), expected = parents)
     }
 
     @Test
     override fun `test rows delete`() = service.autocommit {
         //Get current all parents
-        val children = it.table.select(table = Child::class)
+        val children = it.table.select<Child>()
         assertEquals(expected = this.children, actual = children)
 
         //Delete
@@ -410,7 +415,7 @@ open class Test_Db2 : Test_Contract {
         assertEquals(actual = children[1].pk, expected = null)
 
         //List should not be equal
-        val postChildren0 = it.table.select(table = Child::class)
+        val postChildren0 = it.table.select<Child>()
         assertEquals(expected = children.size, actual = postChildren0.size + 2)
         val filteredChildren = children.drop(2)
         assertEquals(expected = filteredChildren, actual = postChildren0)
@@ -419,14 +424,14 @@ open class Test_Db2 : Test_Contract {
         assertEquals(expected = listOf(false, false), actual = it.row.delete(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
 
         //And database should stay the same
-        assertEquals(actual = it.table.select(table = Parent::class), expected = parents)
+        assertEquals(actual = it.table.select<Parent>(), expected = parents)
     }
 
 
     @Test
     override fun `test rows insertBatch`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         //Create new object
@@ -446,7 +451,7 @@ open class Test_Db2 : Test_Contract {
         assertEquals(expected = null, actual = newObj0.pk)
         assertEquals(expected = null, actual = newObj1.pk)
 
-        val postParents = it.table.select(table = Parent::class)
+        val postParents = it.table.select<Parent>()
         assertEquals(expected = parents.size + 2, actual = postParents.size)
         val last2Parents = postParents.takeLast(2).map {
             it.pk = null
@@ -459,11 +464,11 @@ open class Test_Db2 : Test_Contract {
         newObj1.pk = 0
 
         //Get snapshot of parents before trying to insert
-        val postParents2 = it.table.select(table = Parent::class)
+        val postParents2 = it.table.select<Parent>()
         assertEquals(actual = it.batch.insert(rows = listOf(newObj0, newObj1)), expected = 0)
 
         //Parents really stayed as they were before
-        val postParents3 = it.table.select(table = Parent::class)
+        val postParents3 = it.table.select<Parent>()
 
         //Check if post and pre matches
         assertEquals(actual = postParents2, expected = postParents3)
@@ -472,7 +477,7 @@ open class Test_Db2 : Test_Contract {
     @Test
     override fun `test rows updateBatch`() = service.autocommit {
         //Get current all parents
-        val parents = it.table.select(table = Parent::class)
+        val parents = it.table.select<Parent>()
         assertEquals(expected = this.parents, actual = parents)
 
         parents[0].col = "UPDATE0"
@@ -482,7 +487,7 @@ open class Test_Db2 : Test_Contract {
         assertEquals(expected = 2, actual = it.batch.update(rows = listOf(parents[0], parents[1])))
 
         //List should be equal
-        val postParents0 = it.table.select(table = Parent::class)
+        val postParents0 = it.table.select<Parent>()
         assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //Insert without primary key
@@ -490,18 +495,18 @@ open class Test_Db2 : Test_Contract {
         postParents0[3].pk = null
 
         //Create snapshot before inserting for comparison
-        val postParents1 = it.table.select(table = Parent::class)
+        val postParents1 = it.table.select<Parent>()
         assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postParents0[2], postParents0[3])))
 
         //List should be equal
-        val postParents2 = it.table.select(table = Parent::class)
+        val postParents2 = it.table.select<Parent>()
         assertEquals(expected = postParents1, actual = postParents2)
     }
 
     @Test
     override fun `test rows deleteBatch`() = service.autocommit {
         //Get current all parents
-        val children = it.table.select(table = Child::class)
+        val children = it.table.select<Child>()
         assertEquals(expected = this.children, actual = children)
 
         //Delete
@@ -512,7 +517,7 @@ open class Test_Db2 : Test_Contract {
         assertEquals(actual = children[1].pk, expected = null)
 
         //List should not be equal
-        val postChildren0 = it.table.select(table = Child::class)
+        val postChildren0 = it.table.select<Child>()
         assertEquals(expected = children.size, actual = postChildren0.size + 2)
         val filteredChildren = children.drop(2)
         assertEquals(expected = filteredChildren, actual = postChildren0)
@@ -522,25 +527,25 @@ open class Test_Db2 : Test_Contract {
         postChildren0[3].pk = null
 
         //Create snapshot before inserting for comparison
-        val postChildren1 = it.table.select(table = Child::class)
+        val postChildren1 = it.table.select<Child>()
         assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
 
         //List should be equal
-        val postChildren2 = it.table.select(table = Child::class)
+        val postChildren2 = it.table.select<Child>()
         assertEquals(expected = postChildren1, actual = postChildren2)
     }
 
     @Test
     override fun `test query`() = service.autocommit {
-        it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something...")
-        val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
+        it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something...")
+        val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query { """delete from "main"."Parent" where "pk" = 1""" }
+        it.query.run { """delete from ${it.table<Parent>()} where ${it.column(Parent::pk)} = 1""" }
 
         //Check for deletion
-        val postParent2 = it.row.select(table = Parent::class, pk = 2)
-        val postParent1 = it.row.select(table = Parent::class, pk = 1)
+        val postParent2 = it.row.select<Parent>(pk = 2)
+        val postParent1 = it.row.select<Parent>(pk = 1)
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
@@ -550,35 +555,35 @@ open class Test_Db2 : Test_Contract {
     @Test
     override fun `test query(outputs)`() = service.autocommit {
         //Get current all parents
-        val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-        val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
+        val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
+        val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.run.query(Parent::class) { """select * from "main"."Parent" where "pk" < 3""" }
+        val objs = it.query.get<Parent> { """select * from ${it.table<Parent>()} where ${it.column(Parent::pk)} < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
 
         //Also If multiple results are not supported then it should not delete the 1 parent also
-        assertEquals(actual = it.row.select(table = Parent::class, pk = 1), expected = parent1)
+        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = parent1)
     }
 
     @Test
     override fun `test query(outputs, input)`() = service.autocommit {
         //Get current all parents
-        val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
-        it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
+        val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
+        it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
         //Test pre state
         assertNotEquals(illegal = Parent(pk = 1, col = "XXX"), actual = parent1)
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.run.query(Child::class, input = input) {
+        val objs = it.query.get(Child::class, input = input) {
             """
                 select *
-                from "main"."Child" C
-                join "main"."Parent" P on C."fk" = P."pk"
-                where P."pk" = ${it.input(Input::parent_pk)}
+                from ${it.table<Child>()} 
+                join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                where ${it.column(Parent::pk)} = ${it.value(Input::parent_pk)}
             """
         }
 
@@ -599,21 +604,21 @@ open class Test_Db2 : Test_Contract {
     override fun `test transaction with rollback all`() {
         service.transaction {
             //Get state snapshot
-            val parents0 = it.table.select(table = Parent::class)
+            val parents0 = it.table.select<Parent>()
             assertTrue(parents0.isNotEmpty())
 
             //Delete all table
-            it.table.delete(table = Parent::class)
+            it.table.delete<Parent>()
 
             //Check if table is deleted
-            val parents1 = it.table.select(table = Parent::class)
+            val parents1 = it.table.select<Parent>()
             assertTrue(parents1.isEmpty())
 
             //Rollback changes
             it.roolback.all()
 
             //Check if rollback revert changes
-            val parents2 = it.table.select(table = Parent::class)
+            val parents2 = it.table.select<Parent>()
             assertTrue(parents2.isNotEmpty())
             assertEquals(actual = parents2, expected = parents0)
         }
@@ -625,14 +630,14 @@ open class Test_Db2 : Test_Contract {
         val e = assertThrows<Throwable> {
             service.transaction {
                 //Get state snapshot
-                parents0 = it.table.select(table = Parent::class)
+                parents0 = it.table.select<Parent>()
                 assertTrue(parents0.isNotEmpty())
 
                 //Delete table
-                it.table.delete(table = Parent::class)
+                it.table.delete<Parent>()
 
                 //Check if table is really deleted
-                val parents1 = it.table.select(table = Parent::class)
+                val parents1 = it.table.select<Parent>()
                 assertTrue(parents1.isEmpty())
 
                 //Raise exception
@@ -644,7 +649,7 @@ open class Test_Db2 : Test_Contract {
 
         //Check if transaction did not finished
         service.autocommit {
-            val parents2 = it.table.select(table = Parent::class)
+            val parents2 = it.table.select<Parent>()
             assertTrue(parents2.isNotEmpty())
             assertEquals(actual = parents2, expected = parents0)
         }
@@ -658,8 +663,8 @@ open class Test_Db2 : Test_Contract {
         assertThrows<Throwable> {
             service.transaction {
                 //Get state snapshot
-                parents0 = it.table.select(table = Parent::class)
-                children0 = it.table.select(table = Child::class)
+                parents0 = it.table.select<Parent>()
+                children0 = it.table.select<Child>()
 
                 //Check if both tables are filled
                 assertTrue(parents0.isNotEmpty())
@@ -668,33 +673,33 @@ open class Test_Db2 : Test_Contract {
                 val save0 = it.roolback.savePoint()
 
                 //Delete child table
-                it.table.delete(table = Child::class)
+                it.table.delete<Child>()
 
                 //Save point
                 val save1 = it.roolback.savePoint()
 
                 //Delete parent table
-                it.table.delete(table = Parent::class)
+                it.table.delete<Parent>()
 
                 //Get final state of the system
-                val parents1 = it.table.select(table = Parent::class)
-                val children1 = it.table.select(table = Child::class)
+                val parents1 = it.table.select<Parent>()
+                val children1 = it.table.select<Child>()
                 assertTrue(parents1.isEmpty())
                 assertTrue(children1.isEmpty())
 
                 it.roolback.to(point = save1)
 
                 //Get roolback state 1 snapshot
-                val parents2 = it.table.select(table = Parent::class)
-                val children2 = it.table.select(table = Child::class)
+                val parents2 = it.table.select<Parent>()
+                val children2 = it.table.select<Child>()
                 assertTrue(parents2.isEmpty())
                 assertEquals(actual = children2, expected = children0)
 
                 it.roolback.to(point = save0)
 
                 //Get roolback state 1 snapshot
-                val parents3 = it.table.select(table = Parent::class)
-                val children3 = it.table.select(table = Child::class)
+                val parents3 = it.table.select<Parent>()
+                val children3 = it.table.select<Child>()
                 assertEquals(actual = parents3, expected = parents0)
                 assertEquals(actual = children3, expected = children0)
             }
@@ -704,16 +709,16 @@ open class Test_Db2 : Test_Contract {
     @Test
     override fun `test procedure call without input`() = service.autocommit {
         val parent = Parent(pk = 1234, col = "new parent from procedure")
-        assertEquals(expected = null, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        assertEquals(expected = null, actual = it.row.select<Parent>(pk = parent.pk!!))
         it.procedure.call(procedure = TestProcedureEmpty())
-        assertEquals(expected = parent, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        assertEquals(expected = parent, actual = it.row.select<Parent>(pk = parent.pk!!))
     }
 
     @Test
     override fun `test procedure call with input`() = service.autocommit {
         val parent = Parent.get(pk = 1000, seed = 0)
-        assertEquals(expected = null, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        assertEquals(expected = null, actual = it.row.select<Parent>(pk = parent.pk!!))
         it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col))
-        assertEquals(expected = parent, actual = it.row.select(table = Parent::class, pk = parent.pk!!))
+        assertEquals(expected = parent, actual = it.row.select<Parent>(pk = parent.pk!!))
     }
 }

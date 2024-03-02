@@ -3,7 +3,6 @@ import domain.Customer
 import domain.Invoice
 import domain.Track
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -14,12 +13,21 @@ class Test_Chinook {
         @JvmStatic
         @BeforeAll
         fun seed(): Unit {
+            /**
+             * We will seed all databases with 20 rows for each table.
+             */
             Seed.all(num = 20)
         }
     }
 
     @Test
     fun plantUML() {
+        /**
+         * For all databases we will create platUML diagram
+         * showing database structure. To see image of compiled plantuml
+         * diagram you have to install awesome
+         * [PlantUML Integration](https://plugins.jetbrains.com/plugin/7017-plantuml-integration)
+         */
         File("db2.plantuml").writeText(db2_serializer.plantUML())
         File("derby.plantuml").writeText(derby_serializer.plantUML())
         File("h2.plantuml").writeText(h2_serializer.plantUML())
@@ -35,29 +43,54 @@ class Test_Chinook {
     fun `test db2`() {
         db2.autocommit { aconn ->
 
-            val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = aconn.run.query<Invoice> {
+            /**
+             * Lets see how we can retrieve all invoices for customer with primary key 3...
+             * First we will use RAW SQL to show how will SQL query looked like when we
+             * will use type safe function for injecting table names etc...
+             */
+            val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
                     WHERE "people"."Customer"."id" = 3
                 """
             }
+
+            /**
+             * We confirm that list of invoices are indeed selected.
+             */
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = aconn.run.query<Invoice> {
+            /**
+             * The query that we joust perform is not type safe we can to better by using
+             * extraction functions that will help us extract information about the element
+             * and wrapp names with quotation characters. Final result will be the same as
+             * first query that we performed.
+             */
+            val customer_id = 3
+            val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
+                    WHERE ${it.column(Customer::id)} = $customer_id
                 """
             }
+            /**
+             * We confirm that list of invoices are indeed selected.
+             */
             assertTrue(invoices1.isNotEmpty())
 
+            /**
+             * And indeed list of invoices are for both queries the same!
+             */
             assertEquals(invoices1, invoices0)
         }
     }
+
+    /**
+     * We repeat this for all databases.
+     */
 
     @Test
     fun `test derby`() {
@@ -66,7 +99,7 @@ class Test_Chinook {
 
             val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found")
 
-            val invoices0 = it.run.query<Invoice> {
+            val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
@@ -75,7 +108,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = it.run.query<Invoice> {
+            val invoices1 = it.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -95,7 +128,7 @@ class Test_Chinook {
 
             val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found")
 
-            val invoices0 = it.run.query<Invoice> {
+            val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
@@ -104,7 +137,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = it.run.query<Invoice> {
+            val invoices1 = it.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -123,7 +156,7 @@ class Test_Chinook {
 
             val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = aconn.run.query<Invoice> {
+            val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM `billing`.`Invoice`
                     INNER JOIN `people`.`Customer` ON `people`.`Customer`.`id` = `billing`.`Invoice`.`customerId`
@@ -132,7 +165,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = aconn.run.query<Invoice> {
+            val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -151,7 +184,7 @@ class Test_Chinook {
 
             val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = aconn.run.query<Invoice> {
+            val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM `billing`.`Invoice`
                     INNER JOIN `people`.`Customer` ON `people`.`Customer`.`id` = `billing`.`Invoice`.`customerId`
@@ -160,7 +193,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = aconn.run.query<Invoice> {
+            val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -179,7 +212,7 @@ class Test_Chinook {
 
             val album = aconn.row.select<Album>(pk = 3) ?: throw Exception("Album not found!")
 
-            val tracks0 = aconn.run.query<Track> {
+            val tracks0 = aconn.query.get<Track> {
                 """
                     SELECT * FROM "music"."Track"
                     INNER JOIN "music"."Album" ON "music"."Album"."artistId" = "music"."Track"."id"
@@ -188,7 +221,7 @@ class Test_Chinook {
             }
             assertTrue(tracks0.isNotEmpty())
 
-            val tracks1 = aconn.run.query<Track> {
+            val tracks1 = aconn.query.get<Track> {
                 """
                     SELECT * FROM ${it.table<Track>()}
                     INNER JOIN ${it.table<Album>()} ON ${it.column(Album::artistId)} = ${it.column(Track::id)}
@@ -207,7 +240,7 @@ class Test_Chinook {
 
             val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = aconn.run.query<Invoice> {
+            val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
@@ -216,7 +249,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = aconn.run.query<Invoice> {
+            val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -235,7 +268,7 @@ class Test_Chinook {
 
             val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = aconn.run.query<Invoice> {
+            val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM "SYSTEM"."Invoice"
                     INNER JOIN "SYSTEM"."Customer" ON "SYSTEM"."Customer"."id" = "SYSTEM"."Invoice"."customerId"
@@ -244,7 +277,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = aconn.run.query<Invoice> {
+            val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
@@ -264,7 +297,7 @@ class Test_Chinook {
 
             val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
-            val invoices0 = it.run.query<Invoice> {
+            val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "Invoice"
                     INNER JOIN "Customer" ON "Customer"."id" = "Invoice"."customerId"
@@ -273,7 +306,7 @@ class Test_Chinook {
             }
             assertTrue(invoices0.isNotEmpty())
 
-            val invoices1 = it.run.query<Invoice> {
+            val invoices1 = it.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}

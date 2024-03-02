@@ -7,7 +7,7 @@ import com.urosjarc.dbmessiah.domain.Rollback
 import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.urosjarc.dbmessiah.queries.BatchQueries
 import com.urosjarc.dbmessiah.queries.RowQueries
-import com.urosjarc.dbmessiah.queries.RunOneQueries
+import com.urosjarc.dbmessiah.queries.GetOneQueries
 import com.urosjarc.dbmessiah.queries.TableQueries
 import java.util.*
 
@@ -24,7 +24,7 @@ public class SqliteService : Service<SqliteSerializer> {
         public val table: TableQueries = TableQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val query: GetOneQueries = GetOneQueries(ser = ser, driver = driver)
     }
 
     /**

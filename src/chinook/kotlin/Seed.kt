@@ -4,6 +4,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.random.Random
 
+/**
+ * The [Seed] class is responsible for populating the database with sample data,
+ * that is the same as famous [chinook sample database](https://github.com/lerocha/chinook-database).
+ */
 object Seed {
     fun all(num: Int) {
         val artist = arrayOfNulls<Album>(num).mapIndexed { i, _ -> Artist(name = "name_$i") }
@@ -21,7 +25,7 @@ object Seed {
                 hireDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date,
             )
         )
-        repeat(19) { i ->
+        repeat(num) { i ->
             employee.add(
                 Employee(
                     firstName = "firstName_$i",
@@ -372,7 +376,6 @@ object Seed {
             it.batch.insert(playlistTrack)
             it.batch.insert(invoiceLine)
         }
-
         oracle.autocommit {
             it.table.drop<InvoiceLine>()
             it.table.drop<PlaylistTrack>()
@@ -410,7 +413,6 @@ object Seed {
             it.batch.insert(playlistTrack)
             it.batch.insert(invoiceLine)
         }
-
     }
 
 }

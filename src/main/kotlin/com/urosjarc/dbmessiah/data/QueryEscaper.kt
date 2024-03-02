@@ -19,6 +19,9 @@ import kotlin.reflect.KProperty1
 public open class QueryEscaper(
     public val ser: Serializer
 ) {
+    public fun <T : Any> name(column: KProperty1<T, *>): String {
+        return ser.escaped(name = column.name)
+    }
 
     public fun <T : Any> column(kprop: KProperty1<T, *>): String {
         val owner = kprop.ext_owner

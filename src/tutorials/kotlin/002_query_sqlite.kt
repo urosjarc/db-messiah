@@ -68,14 +68,14 @@ fun main_002() {
          * to the SQL string and execute it directly in the editor to check SQL validity!!!
          * > https://www.jetbrains.com/help/idea/using-language-injections.html
          */
-        it.run.query { "INSERT INTO Parent2 (pk, value) VALUES (1, 'parent_asdf')" }
-        it.run.query { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (1, 1, 'child_asdf')" }
+        it.run.execute { "INSERT INTO Parent2 (pk, value) VALUES (1, 'parent_asdf')" }
+        it.run.execute { "INSERT INTO Child2 (pk, parent_pk, value) VALUES (1, 1, 'child_asdf')" }
 
         /**
          * Write custom query with output.
          */
-        val output0 = it.run.query(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 1" }
-        val output1 = it.run.query(output = Child2::class) { "SELECT * FROM Child2" }
+        val output0 = it.run.execute(output = Parent2::class) { "SELECT * FROM Parent2 WHERE pk = 1" }
+        val output1 = it.run.execute(output = Child2::class) { "SELECT * FROM Child2" }
         assertEquals(output0[0].pk, 1)
         assertEquals(output1.size, 1)
 
@@ -84,11 +84,11 @@ fun main_002() {
          * For input objects you can use any table registered in serializer, if you use custom objects (not tables)
          * you will have to defined them to globalInputs in the serializer constructor to ensure type safety.
          */
-        val output2 = it.run.query(
+        val output2 = it.run.execute(
             output = Parent2::class,
             input = Child2(value = "parent_asdf") // For our input we can also use the same table but lets use different so that it's not confusing...
         ) { q: QueryBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
-            """SELECT * FROM Parent2 WHERE value = ${q.input(Child2::value)}
+            """SELECT * FROM Parent2 WHERE value = ${q.value(Child2::value)}
                 
             -- q.put() will return '?' character back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
             -- to read more about magic '?' character please refer to this link: https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html
@@ -105,7 +105,7 @@ fun main_002() {
          * Those who use JetBrains please don't forget to inject sql string with reference so that you can directly test sql string on your database.
          * > https://youtrack.jetbrains.com/issue/DBE-20046/Support-for-in-code-SQL-execution-on-string-templates-with
          */
-        val output3 = it.run.query(
+        val output3 = it.run.execute(
             output = Output2::class,
             input = Input2(parent_pk = 1)
         ) {

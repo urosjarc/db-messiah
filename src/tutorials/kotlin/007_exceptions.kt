@@ -72,7 +72,7 @@ fun main_007() {
          * will never need to check logs what happened.
          */
         val exception3 = assertThrows<UnknownException> {
-            it.run.query { """SELECT * FROM XXX""" }
+            it.run.execute { """SELECT * FROM XXX""" }
         }
         assertContains(exception3.stackTraceToString(), "Failed to return query results from: \n\nSELECT * FROM XXX")
         assertContains(exception3.stackTraceToString(), "[SQLITE_ERROR] SQL error or missing database (no such table: XXX)")

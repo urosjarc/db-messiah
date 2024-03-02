@@ -15,10 +15,10 @@ import kotlin.reflect.KClass
  * @property ser The serializer used to encode and decode objects.
  * @property driver The driver used to execute queries on the database.
  */
-public class RunManyQueries(
+public class GetManyQueries(
     override val ser: Serializer,
     override val driver: Driver
-) : RunOneQueries(ser = ser, driver = driver) {
+) : GetOneQueries(ser = ser, driver = driver) {
 
     /**
      * Executes a database query with outputs using the provided SQL string.
@@ -28,7 +28,7 @@ public class RunManyQueries(
      * @return the object matrix, where each row represents list of objects from one query.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public fun query(vararg outputs: KClass<*>, getSql: (QueryEscaper) -> String): List<List<Any>> {
+    public fun get(vararg outputs: KClass<*>, getSql: (QueryEscaper) -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
         return this.executeQuery(query = query, outputs = outputs)
     }
@@ -43,7 +43,7 @@ public class RunManyQueries(
      * @return A list of lists containing the results of the query.
      * @throws MappingException If the number of results does not match the number of output classes.
      */
-    public fun <IN : Any> query(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
+    public fun <IN : Any> get(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
         val query = this.ser.queryWithInput(input = input, getSql = getSql)
         return this.executeQuery(query = query, outputs = outputs)
     }

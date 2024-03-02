@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.impl.oracle
 
 import com.urosjarc.dbmessiah.Driver
-import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.Service
 import com.urosjarc.dbmessiah.domain.Isolation
 import com.urosjarc.dbmessiah.domain.Rollback
@@ -20,7 +19,7 @@ public open class OracleService : Service<OracleSerializer> {
         public val table: TableCascadeQueries = TableCascadeQueries(ser = ser, driver = driver)
         public val row: RowQueries = RowQueries(ser = ser, driver = driver)
         public val batch: BatchQueries = BatchQueries(ser = ser, driver = driver)
-        public val run: RunOneQueries = RunOneQueries(ser = ser, driver = driver)
+        public val query: GetOneQueries = GetOneQueries(ser = ser, driver = driver)
         public val procedure: NoReturnProcedureQueries = NoReturnProcedureQueries(ser = ser, driver = driver)
     }
 

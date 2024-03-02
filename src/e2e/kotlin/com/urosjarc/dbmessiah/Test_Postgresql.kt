@@ -517,7 +517,7 @@ open class Test_Postgresql : Test_Contract {
         it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query {
+        it.run.execute {
             """
             delete from "main"."Parent" where pk = 1;
             delete from "main"."Parent" where pk = 2;

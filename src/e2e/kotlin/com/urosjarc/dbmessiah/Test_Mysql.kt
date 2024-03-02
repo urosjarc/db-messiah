@@ -61,7 +61,7 @@ open class Test_Mysql : Test_Contract {
         //Reseting tables
         service.autocommit {
             it.schema.create(schema = schema)
-            it.run.query { "SET FOREIGN_KEY_CHECKS=0;" }
+            it.run.execute { "SET FOREIGN_KEY_CHECKS=0;" }
             it.table.drop(Child::class)
             it.table.drop(Parent::class)
             it.table.create(Parent::class)
@@ -537,7 +537,7 @@ open class Test_Mysql : Test_Contract {
         val preParent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.run.query { "delete from main.Parent where pk = 1" }
+        it.run.execute { "delete from main.Parent where pk = 1" }
 
         //Check for deletion
         val postParent2 = it.row.select(table = Parent::class, pk = 2)
@@ -554,7 +554,7 @@ open class Test_Mysql : Test_Contract {
         val parent1 = it.row.select(table = Parent::class, pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select(table = Parent::class, pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.run.query(Parent::class) { "select * from main.Parent where pk < 3" }
+        val objs = it.run.execute(Parent::class) { "select * from main.Parent where pk < 3" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
@@ -574,7 +574,7 @@ open class Test_Mysql : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.run.query(Child::class, input = input) {
+        val objs = it.run.execute(Child::class, input = input) {
             """
                 select *
                 from main.Child C

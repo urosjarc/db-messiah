@@ -71,7 +71,7 @@ fun main_003() {
          * Sqlite driver support only one query per database call,
          * Postgresql driver on other hand supports many queries per db call...
          */
-        it.run.query {
+        it.run.execute {
             """
             INSERT INTO "main"."Parent3" ("pk", "value") VALUES (1, 'parent_1');
             INSERT INTO "main"."Parent3" ("pk", "value") VALUES (2, 'parent_2');
@@ -80,7 +80,7 @@ fun main_003() {
             """
         }
 
-        it.run.query {
+        it.run.execute {
             """
             INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (1, 1, 'child_1');
             INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (2, 1, 'child_2');

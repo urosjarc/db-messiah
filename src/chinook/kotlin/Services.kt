@@ -9,6 +9,9 @@ import com.urosjarc.dbmessiah.impl.postgresql.PgService
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import java.util.*
 
+/**
+ * Lets create database services with jdbcUrl as defined in docker compose file.
+ */
 val h2 = H2Service(
     config = Properties().apply {
         this["jdbcUrl"] = "jdbc:h2:mem:main"
