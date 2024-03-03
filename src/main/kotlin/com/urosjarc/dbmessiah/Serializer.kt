@@ -6,7 +6,6 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
-import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.tests.SerializerTests
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -167,7 +166,7 @@ public abstract class Serializer(
                 t.foreignKeys.forEach {
                     val fk = it.key.name
                     val kclass = it.value
-                    val toClass = kclass_to_path[kclass] ?: throw MapperException("Could not find path for kclass: ${kclass.simpleName}.")
+                    val toClass = kclass_to_path[kclass]!!
                     val fromClass = "${s.name}.${t.name}"
                     relationships.add("${fromClass} -down-> ${toClass}")
                     text.add("\t\t $fk: ${kclass.simpleName}")

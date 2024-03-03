@@ -2,7 +2,6 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import com.urosjarc.dbmessiah.exceptions.base.IssueException
 import org.apache.logging.log4j.kotlin.logger
 import java.sql.*
 
@@ -206,7 +205,7 @@ public open class Driver(private val conn: Connection) {
         }
 
         this.closeAll(ps = ps, rs = rs2)
-        throw IssueException(msg = "Could not retrieve inserted id normally nor with force from: $query")
+        throw DriverException(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 
     /**
