@@ -290,24 +290,24 @@ public abstract class Serializer(
     /**
      * Creates [Query] from user defined SQL string
      *
-     * @param getSql A function that returns the user provided SQL statement to be executed.
+     * @param buildSql A function that returns the user provided SQL statement to be executed.
      * @return A [Query] object representing the SQL query and its values.
      */
-    public fun query(getSql: (SqlBuilder) -> String): Query = Query(sql = getSql(SqlBuilder(ser = this)))
+    public fun query(buildSql: (SqlBuilder) -> String): Query = Query(sql = buildSql(SqlBuilder(ser = this)))
 
     /**
      * Creates [Query] from user defined SQL string with inputs.
      *
      * @param input The input object used to generate the query.
-     * @param getSql A function that takes a QueryBuilder and returns the SQL string for the query.
+     * @param buildSql A function that takes a QueryBuilder and returns the SQL string for the query.
      * @return A Query object representing the generated query.
      */
-    public fun <IN : Any> queryWithInput(input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
+    public fun <IN : Any> queryWithInput(input: IN, buildSql: (queryBuilder: QueryBuilder<IN>) -> String): Query {
         val qBuilder = QueryBuilder(input = input, ser = this)
-        return qBuilder.build(sql = getSql(qBuilder))
+        return qBuilder.build(sql = buildSql(qBuilder))
     }
 
-    public abstract fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query
+    public abstract fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query
     public abstract fun <T : Any> callProcedure(procedure: T): Query
     public abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
 

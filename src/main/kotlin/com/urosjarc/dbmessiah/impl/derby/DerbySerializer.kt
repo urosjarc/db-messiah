@@ -81,7 +81,7 @@ public open class DerbySerializer(
     public override fun dropSchema(schema: Schema, cascade: Boolean): Query = Query(sql = "DROP SCHEMA ${escaped(schema)}")
 
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query = TODO("Not implemented")
+    override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query = TODO("Not implemented")
     override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not implemented")
 }

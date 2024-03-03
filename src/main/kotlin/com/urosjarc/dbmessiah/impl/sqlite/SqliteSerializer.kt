@@ -58,7 +58,7 @@ public open class SqliteSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T.name)} ($columns);")
     }
 
-    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+    override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         TODO("Not implemented")
     }
 

@@ -93,7 +93,7 @@ public open class MssqlSerializer(
      * @return A [Query] object representing the SQL query.
      * @throws SerializerException if the [Procedure] for the object cannot be found.
      */
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         // Here we don't escape arguments since @ signs is responsible for escaping argument
         val args = P.args.map { "@${it.name} ${it.dbType}" }.joinToString(", ")
@@ -101,7 +101,7 @@ public open class MssqlSerializer(
             sql = """
                 CREATE OR ALTER PROCEDURE ${escaped(P)} $args
                 AS BEGIN
-                    $sql
+                    $procedureBody
                 END;
             """.trimIndent()
         )

@@ -56,7 +56,7 @@ public open class H2Serializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns);")
     }
-    override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query = TODO("Not implemented")
+    override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query = TODO("Not implemented")
     override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not implemented")
 }

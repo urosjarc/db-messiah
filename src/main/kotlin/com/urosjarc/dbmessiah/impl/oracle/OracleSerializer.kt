@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.impl.oracle
 
-import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
@@ -94,7 +93,7 @@ public open class OracleSerializer(
      * @return A [Query] object representing the SQL query.
      * @throws SerializerException if the [Procedure] for the object cannot be found.
      */
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         var args = P.args.map { "${escaped(it.name)} ${it.dbType.split("(").first()}" }.joinToString(", ")
         args = if (P.args.isEmpty()) "" else "($args)"
@@ -102,7 +101,7 @@ public open class OracleSerializer(
             sql = """
                 CREATE OR REPLACE PROCEDURE ${escaped(P)}$args
                 AS BEGIN
-                    $sql
+                    $procedureBody
                 END;
             """.trimIndent()
         )

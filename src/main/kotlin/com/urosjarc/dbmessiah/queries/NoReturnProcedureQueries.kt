@@ -26,7 +26,7 @@ public open class NoReturnProcedureQueries(
     }
 
     public inline fun <reified T : Any> create(throws: Boolean = true, body: (ProcedureBuilder<T>) -> String): Int {
-        val query = this.ser.createProcedure(procedure = T::class, sql = body(ProcedureBuilder(ser = ser, procedure = T::class)))
+        val query = this.ser.createProcedure(procedure = T::class, procedureBody = body(ProcedureBuilder(ser = ser, procedure = T::class)))
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {

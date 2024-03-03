@@ -25,27 +25,27 @@ public class GetManyQueries(
      * Executes a database query with outputs using the provided SQL string.
      *
      * @param outputs the list of all tables from which rows will be fetched in the same order.
-     * @param getSql the function that returns the SQL string for the query.
+     * @param buildSql the function that returns the SQL string for the query.
      * @return the object matrix, where each row represents list of objects from one query.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public fun get(vararg outputs: KClass<*>, getSql: (SqlBuilder) -> String): List<List<Any>> {
-        val query = this.ser.query(getSql = getSql)
+    public fun get(vararg outputs: KClass<*>, buildSql: (SqlBuilder) -> String): List<List<Any>> {
+        val query = this.ser.query(buildSql = buildSql)
         return this.executeQuery(query = query, outputs = outputs)
     }
 
     /**
      * Executes a custom SQL query with input and outputs.
-     * Important is [getSql] function which provides [ProcedureBuilder] to help you inject input value properties to returned SQL string.
+     * Important is [buildSql] function which provides [ProcedureBuilder] to help you inject input value properties to returned SQL string.
      *
      * @param outputs the list of all tables from which rows will be fetched in the same order.
      * @param input The input object used to privide injected values to SQL statements.
-     * @param getSql The lambda function used to generate the SQL query string.
+     * @param buildSql The lambda function used to generate the SQL query string.
      * @return A list of lists containing the results of the query.
      * @throws MappingException If the number of results does not match the number of output classes.
      */
-    public fun <IN : Any> get(vararg outputs: KClass<*>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
-        val query = this.ser.queryWithInput(input = input, getSql = getSql)
+    public fun <IN : Any> get(vararg outputs: KClass<*>, input: IN, buildSql: (queryBuilder: QueryBuilder<IN>) -> String): List<List<Any>> {
+        val query = this.ser.queryWithInput(input = input, buildSql = buildSql)
         return this.executeQuery(query = query, outputs = outputs)
     }
 

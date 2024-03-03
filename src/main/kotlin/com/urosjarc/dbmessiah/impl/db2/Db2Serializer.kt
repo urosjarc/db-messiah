@@ -82,14 +82,14 @@ public open class Db2Serializer(
      * @return A [Query] object representing the SQL query.
      * @throws SerializerException if the [Procedure] for the object cannot be found.
      */
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         val args = P.args.map { "${escaped(it.name)} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
                 CREATE OR REPLACE PROCEDURE ${escaped(P)}($args)
                 BEGIN
-                    $sql
+                    $procedureBody
                 END
             """.trimIndent()
         )

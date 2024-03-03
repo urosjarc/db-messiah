@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.impl.maria
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import kotlin.reflect.KClass
@@ -60,14 +59,14 @@ public open class MariaSerializer(
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns)")
     }
 
-    public override fun <T : Any> createProcedure(procedure: KClass<T>, sql: String): Query {
+    public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         val args = P.args.map { "${escaped(it.name)} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
                 CREATE OR REPLACE PROCEDURE ${escaped(P)}($args)
                 BEGIN
-                    $sql
+                    $procedureBody
                 END;
             """.trimIndent()
         )
