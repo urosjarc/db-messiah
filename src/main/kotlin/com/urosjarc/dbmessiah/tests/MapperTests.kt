@@ -9,7 +9,8 @@ import com.urosjarc.dbmessiah.extend.ext_notUnique
 
 /**
  * This class contains the post init tests for the [Mapper].
- * They are responsible for test [Mapper] internal structure.
+ * They are responsible for test [Mapper] internal structure
+ * joust in case something went wrong in processing user serializer.
  */
 internal class MapperTests(val mapper: Mapper) {
     /**

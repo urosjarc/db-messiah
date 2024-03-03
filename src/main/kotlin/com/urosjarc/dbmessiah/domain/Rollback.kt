@@ -5,9 +5,9 @@ import java.sql.Savepoint
 
 
 /**
- * The API for managing transactional connections.
+ * The wrapper around [Connection] API for managing transactional connections.
  *
- * @property conn The Connection object to manage transactions on.
+ * @property conn The [Connection] object to manage transactions on.
  */
 public class Rollback(private val conn: Connection) {
 

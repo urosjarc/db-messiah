@@ -21,7 +21,6 @@ public open class SchemaQueries(
      * @param schema The schema to be dropped.
      * @param throws Flag indicating whether to throw an exception on error. Default is true.
      * @return The number of rows affected.
-     * @throws DriverException If there is an error processing the drop query.
      */
     public fun drop(schema: Schema, throws: Boolean = true): Int {
         val query = this.ser.dropSchema(schema = schema)
@@ -39,7 +38,6 @@ public open class SchemaQueries(
      * @param schema The schema object representing the schema to be created.
      * @param throws Flag indicating whether to throw an exception on error or not. Default is true.
      * @return The number of rows affected.
-     * @throws DriverException If there is an error processing the update query.
      */
     public fun create(schema: Schema, throws: Boolean = true): Int {
         val query = this.ser.createSchema(schema = schema)

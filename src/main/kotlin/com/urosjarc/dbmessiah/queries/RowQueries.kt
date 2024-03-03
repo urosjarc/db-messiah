@@ -3,9 +3,9 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.DriverException
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import com.urosjarc.dbmessiah.impl.h2.H2Serializer
-import kotlin.reflect.KClass
 
 /**
  * Class that provides various row queries for a database table.
@@ -18,11 +18,10 @@ public open class RowQueries(
     public val driver: Driver
 ) {
     /**
-     * Retrieves a single object from the specified table based on the primary key.
+     * Retrieves a row from the database table based on the primary key.
      *
-     * @param table The class representing the table to select from.
-     * @param pk The primary key value of the object to retrieve.
-     * @return The object retrieved from the table, or null if no matching object is found.
+     * @param pk The primary key value of the row.
+     * @return The retrieved row as an object of type [T], or null if the row does not exist.
      */
     public inline fun <reified T : Any> select(pk: Any): T? {
         val query = this.ser.selectTable(table = T::class, pk = pk)
@@ -33,8 +32,7 @@ public open class RowQueries(
 
     /**
      * Inserts a row into the table.
-     *
-     * If [row] does not exists in the table its primary key will be inited with the assigned database value.
+     * Function will update row's primary key if it's marked as auto-increment.
      *
      * @param row The object representing the row to be inserted.
      * @return true if the row was successfully inserted, false otherwise.
@@ -42,10 +40,7 @@ public open class RowQueries(
     public open fun <T : Any> insert(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
-        //If object has pk then reject it since its allready identified
-        if (T.primaryKey.autoInc && T.primaryKey.getValue(obj = row) != null) return false //Only objects who doesnt have primary key can be inserted!!!
-
-        //Insert it
+        //Create SQL select statement
         val query = this.ser.insertRow(row = row, batch = false)
 
         if (T.primaryKey.autoInc) {
@@ -81,15 +76,19 @@ public open class RowQueries(
      *
      * @param row The object representing the row to be updated.
      * @return true if the row was successfully updated, false otherwise.
-     * @throws DriverException if there is an error executing the update query.
      */
     public fun <T : Any> update(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
-        //If object has not pk then reject since it must be first created
-        if (T.primaryKey.getValue(obj = row) == null) return false //Only objects who doesnt have primary key can be inserted!!!
+        /**
+         * The user code that prepares things for updating has some secret flaw that user does not see,
+         * that's why he is trying to update row with invalid primary key. It's better to
+         * message the user about problems that are needing to be resolved from his side.
+         */
+        if (T.primaryKey.getValue(obj = row) == null)
+            throw QueryException("Row can't be updated with invalid primary key value: $row")
 
-        //Update object
+        //Create SQL update statement
         val query = this.ser.updateRow(row = row)
 
         //Return number of updates
@@ -98,24 +97,27 @@ public open class RowQueries(
         //Success if only 1
         if (count == 1) return true
         else if (count == 0) return false
-        else throw DriverException("Number of updated rows must be 1 or 0 but number of updated rows was: $count")
+        else throw QueryException("Number of updated rows must be 1 or 0 but number of updated rows was: $count")
     }
 
     /**
      * Deletes a row from the table. By its primary key.
-     * If row is deleted the primary key will reset to null value.
      *
      * @param row The object representing the row to be deleted.
      * @return true if the row was successfully deleted, false otherwise.
-     * @throws DriverException if there is an error executing the delete query.
      */
     public fun <T : Any> delete(row: T): Boolean {
         val T = this.ser.mapper.getTableInfo(obj = row)
 
-        //If object has not pk then reject since it must be first created
-        if (T.primaryKey.getValue(obj = row) == null) return false //Only objects who doesnt have primary key can be inserted!!!
+        /**
+         * The user code that prepares things for deleting has some secret flaw that user does not see,
+         * that's why he is trying to delete row with invalid primary key. It's better to
+         * message the user about problems that are needing to be resolved from his side.
+         */
+        if (T.primaryKey.getValue(obj = row) == null)
+            throw QueryException("Row can't be deleted with invalid primary key value: $row")
 
-        //Delete object if primary key exists
+        //Create SQL delete statement
         val query = this.ser.deleteRow(row = row)
 
         //Update rows and get change count
@@ -123,10 +125,8 @@ public open class RowQueries(
 
         //Success if only 1
         if (count == 0) return false
-        else if (count == 1) {
-            T.primaryKey.setValue(obj = row, value = null)
-            return true
-        } else throw DriverException("Number of deleted rows must be 1 or 0 but number of updated rows was: $count")
+        else if (count == 1) return true
+        else throw QueryException("Number of deleted rows must be 1 or 0 but number of updated rows was: $count")
     }
 
     /**
@@ -150,7 +150,6 @@ public open class RowQueries(
 
     /**
      * Deletes rows in the table by its primary key with method [delete]. It should not be confused with batch delete!
-     * Primary keys will be reseted to null values in the process!
      *
      * @param rows The objects representing the rows to be updated.
      * @return A list of booleans indicating whether each row was successfully updated or not.

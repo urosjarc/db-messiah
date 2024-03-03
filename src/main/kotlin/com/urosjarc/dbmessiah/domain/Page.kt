@@ -17,5 +17,10 @@ public data class Page<T : Any>(
     val limit: Int = 20,
     val order: Order = Order.ASC
 ) {
+
+    /**
+     * Property that calculates from which row to start the page base on
+     * [limit] and page [number].
+     */
     public val offset: Int get() = this.limit * this.number
 }

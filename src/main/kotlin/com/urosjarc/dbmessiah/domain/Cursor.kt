@@ -1,11 +1,13 @@
 package com.urosjarc.dbmessiah.domain
 
 import com.urosjarc.dbmessiah.exceptions.MappingException
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import kotlin.reflect.KProperty1
 
 /**
  * Represents a pagination cursor.
  *
+ * @param T The type of the table object.
  * @param V The type of the cursor value, which must be a comparable type.
  * @property index The current value of the cursor.
  * @property orderBy The property to order the results by.
@@ -19,14 +21,14 @@ public data class Cursor<T : Any, V : Comparable<V>>(
     val limit: Int = 20,
     val order: Order = Order.ASC
 ) {
+
     /**
      * Alternative constructor which provides more type safety to pagination cursor.
      *
      * @param row The row object from which the [orderBy] value will be extracted.
-     * @param orderBy The index property to order and limit the results by.
+     * @param orderBy The index property to [order] and [limit] the results by.
      * @param limit The maximum number of results to return (default is 20).
      * @param order The order in which the results should be sorted (default is ASC).
-     * @throws MappingException if the property value cannot be extracted from the [row] object.
      */
     public constructor(
         row: T,
@@ -34,7 +36,7 @@ public data class Cursor<T : Any, V : Comparable<V>>(
         limit: Int = 20,
         order: Order = Order.ASC
     ) : this(
-        index = orderBy.get(row) ?: throw MappingException("Could not extract property '$orderBy' from row: $row"),
+        index = orderBy.get(row)!!,
         orderBy = orderBy,
         limit = limit,
         order = order

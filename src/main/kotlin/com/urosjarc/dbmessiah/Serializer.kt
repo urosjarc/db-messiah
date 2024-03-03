@@ -14,13 +14,15 @@ import kotlin.reflect.KProperty1
 /**
  * Serializer is an abstract class that provides functionality for serializing objects to various string like formats.
  * This class should be implemented and overriden by specific database implementation.
+ * On class initialization all internal structure provided by the user will be heavily tested for any
+ * inconsistency or error provided by the user mistake. These tests are trying to provide security, reliability and
+ * ultimately trust to the end user.
  *
  * @param schemas A list of [Schema] objects representing the database schemas that the serializer will work with.
  * @param globalSerializers A list of [TypeSerializer] objects representing global serializers to be used by the serializer.
  * @param globalInputs A list of [KClass] objects representing global input classes that can be used by the serializer.
  * @param globalOutputs A list of [KClass] objects representing global output classes that can be used by the serializer.
  * @param globalProcedures A list of [KClass] objects representing global procedures that can be used by the serializer.
- * @property mapper An public [Mapper] object used for mapping objects to and from the database.
  */
 public abstract class Serializer(
     internal val schemas: List<Schema>,
@@ -62,6 +64,12 @@ public abstract class Serializer(
         }
     }
 
+    /**
+     * Variable representing an instance of the [Mapper] class.
+     * This instance will help us map object from database to user space and back.
+     *
+     * @property mapper The instance of the [Mapper] class.
+     */
     public val mapper: Mapper = Mapper(
         schemas = schemas.toList(),
         globalSerializers = globalSerializers,
@@ -77,13 +85,54 @@ public abstract class Serializer(
      * @property selectLastId The last id selected from the database.
      */
     public abstract val selectLastId: String?
+
+    /**
+     * Escapes the given string with database specific escaping quotation.
+     *
+     * @param name The string to be escaped.
+     * @return The escaped string.
+     */
     public abstract fun escaped(name: String): String
+
+    /**
+     * Escapes the given [Schema] name with database specific escaping quotation.
+     *
+     * @param name The string to be escaped.
+     * @return The escaped string.
+     */
     public fun escaped(schema: Schema): String = escaped(name = schema.name)
+
+    /**
+     * Escapes the given [Procedure] path with database specific escaping quotation.
+     *
+     * @param procedure The [Procedure] object representing the procedure.
+     * @return The escaped string.
+     */
     public fun escaped(procedure: Procedure): String =
         listOf(procedure.schema, procedure.name).filterNotNull().joinToString(".") { escaped(name = it) }
 
+    /**
+     * Escapes the given procedure argument name with database specific escaping quotation.
+     *
+     * @param procedureArg The property representing the column to be escaped.
+     * @return The escaped string.
+     */
     public open fun <T : Any> escaped(procedureArg: KProperty1<T, *>): String = escaped(name = procedureArg.name)
+
+    /**
+     * Escapes the given table path with database specific escaping quotation.
+     *
+     * @param tableInfo The TableInfo object representing the table information.
+     * @return The escaped string representation of the table info.
+     */
     public fun escaped(tableInfo: TableInfo): String = listOf(tableInfo.schema, tableInfo.name).joinToString(".") { escaped(name = it) }
+
+    /**
+     * Escapes the given column name with database specific escaping quotation.
+     *
+     * @param column The column whose name needs to be escaped.
+     * @return The escaped column name.
+     */
     public fun escaped(column: Column): String =
         listOf(column.table.schema, column.table.name, column.name).joinToString(".") { escaped(name = it) }
 
@@ -139,7 +188,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Creates a SQL string to create a schema in the database.
+     * Creates [Query] for creating a schema in the database.
      *
      * @param schema The schema object representing the schema to be created.
      * @return The [String] to create the schema.
@@ -147,7 +196,7 @@ public abstract class Serializer(
     public open fun createSchema(schema: Schema): Query = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${escaped(schema)}")
 
     /**
-     * Creates a SQL string representing a drop query for the given schema.
+     * Creates [Query] for dropping specific schema.
      *
      * @param schema The schema to be dropped.
      * @return The [String] representing the drop query.
@@ -158,7 +207,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Creates a SQL string to drop a database table.
+     * Makes [Query] for dropping a database table.
      *
      * @param table The Kotlin class representing the table to be dropped.
      * @param cascade Flag indicating whether to drop the table cascade (i.e., also drop dependent objects).
@@ -171,7 +220,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Creates a SQL string to create new table.
+     * Makes [Query] for creating new table.
      *
      * @param table The Kotlin class representing the database table to which the row will be created.
      * @return The [Query] object representing the SQL query.
@@ -179,7 +228,7 @@ public abstract class Serializer(
     public abstract fun <T : Any> createTable(table: KClass<T>): Query
 
     /**
-     * Creates a SQL string for deleting all rows from the specified table.
+     * Makes [Query] for deleting all rows from the specified table.
      *
      * @param table The Kotlin class representing the table to delete records from.
      * @return The [Query] object representing the delete query.
@@ -190,7 +239,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Creates a SQL string to deletes specific row by id from the database table.
+     * Makes [Query] for deleting specific row by id from the database table.
      *
      * @param row The object representing the table from which row to be deleted.
      * @return The [Query] object representing the delete query.
@@ -204,7 +253,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates an SQL string for inserting new row.
+     * Makes [Query] for inserting new row.
      *
      * @param row The object to be inserted into the database.
      * @param batch A flag indicating whether to use batch insertion. Default is false.
@@ -220,7 +269,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates an SQL string to update a row by specific id in the database table.
+     * Makes [Query] for updating row by specific id in the database table.
      *
      * @param row The object representing the row to be updated.
      * @return The [Query] object representing the SQL update query.
@@ -236,7 +285,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates SQL string for selecting all rows from table.
+     * Makes [Query] for selecting all rows from table.
      *
      * @param table The Kotlin class or table to query.
      * @return The Query object representing the SELECT query.
@@ -247,7 +296,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates SQL string for selecting rows from table with offset pagination.
+     * Makes [Query] for selecting rows from table with offset pagination.
      *
      * @param table the Kotlin class to query from.
      * @param page the pagination details.
@@ -259,7 +308,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates SQL string for selecting rows from table with cursor pagination.
+     * Makes [Query] for selecting rows from table with cursor pagination.
      *
      * @param table the Kotlin class representing the table to be queried
      * @param cursor the cursor object containing query parameters such as order by, order and limit
@@ -275,7 +324,7 @@ public abstract class Serializer(
     }
 
     /**
-     * Generates SQL string for a specific row based on the primary key value.
+     * Makes [Query] for a specific row based on the primary key value.
      *
      * @param table The class representing the table in the database.
      * @param pk The primary key value of the record to query.
@@ -288,7 +337,7 @@ public abstract class Serializer(
 
 
     /**
-     * Creates [Query] from user defined SQL string
+     * Makes [Query] from user defined SQL string
      *
      * @param buildSql A function that returns the user provided SQL statement to be executed.
      * @return A [Query] object representing the SQL query and its values.
@@ -307,8 +356,29 @@ public abstract class Serializer(
         return qBuilder.build(sql = buildSql(qBuilder))
     }
 
+    /**
+     * Makes [Query] for creating a stored procedure in the database.
+     *
+     * @param procedure The Kotlin class representing the stored procedure.
+     * @param procedureBody The string representing the body of the stored procedure.
+     * @return A [Query] object representing the SQL query to create the stored procedure.
+     */
     public abstract fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query
+
+    /**
+     * Makes [Query] for calling stored procedure.
+     *
+     * @param procedure The stored procedure object to be executed.
+     * @return A [Query] object representing the executed query.
+     */
     public abstract fun <T : Any> callProcedure(procedure: T): Query
+
+    /**
+     * Makes [Query] for dropping a stored procedure from the database.
+     *
+     * @param procedure The Kotlin class representing the stored procedure to be dropped.
+     * @return A [Query] object representing the SQL query to drop the stored procedure.
+     */
     public abstract fun <T : Any> dropProcedure(procedure: KClass<T>): Query
 
 }

@@ -16,23 +16,13 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * A class that maps Kotlin classes to their associated database tables, procedures, and serializers and vice versa.
  * Mapper is responsible to use kotlin reflection to inspects all user data and create maps from provided information.
- * Kotlin reflection is CPU expensive so reflection is used only when building database configuration after that no reflection is used by the sistem.
+ * Kotlin's reflection is CPU expensive so reflection is used only on initialization of building database configuration after that no reflection is used by the sistem.
  *
  * @property schemas A list of all the schemas.
  * @property globalSerializers A list of all the global serializers.
  * @property globalInputs A list of all the global inputs.
  * @property globalOutputs A list of all the global outputs.
  * @property globalProcedures A list of all the global procedures.
- * @property tableInfos A map of table classes linked to their corresponding table information.
- * @property procedures A map of procedure classes linked to their corresponding procedures.
- * @property tableKClass_to_tableInfo A map of table classes linked to their corresponding table information.
- * @property fkColumn_to_tableKClass A map of foreign key columns linked to their corresponding table classes.
- * @property procedureKClass_to_procedure A map of procedure classes linked to their corresponding procedures.
- * @property kclass_to_constructor A map of classes linked to their constructors.
- * @property kclass_to_constructorParameters A map of classes linked to their constructor parameters.
- * @property kclass_to_kprops A map of classes linked to their KProperty1 objects.
- * @property kparam_to_serializer A map of constructor parameters linked to their serializers.
- * @property kprop_to_serializer A map of KProperty1 objects linked to their serializers.
  */
 public class Mapper(
     internal var schemas: List<Schema>,
@@ -41,40 +31,56 @@ public class Mapper(
     internal var globalOutputs: List<KClass<*>>,
     internal var globalProcedures: List<KClass<*>>
 ) {
-    //All table informations
+    /**
+     * Represents a list of [TableInfo] where all database table information is located.
+     */
     internal var tableInfos = listOf<TableInfo>()
+
+    /**
+     * List of [Procedure] where all database procedure information is located.
+     */
     internal var procedures = listOf<Procedure>()
 
-    /**
-     * LINKED LISTS
-     */
 
-    //Link table to table info
+    /**
+     * Map that associates [KClass] with a [TableInfo] object.
+     */
     private val tableKClass_to_tableInfo = mutableMapOf<KClass<*>, TableInfo>()
 
-    //Link foreign column to foreign table
+    /**
+     * Represents a mapping between a [ForeignColumn] and its corresponding table [KClass].
+     */
     private val fkColumn_to_tableKClass = mutableMapOf<ForeignColumn, KClass<*>>()
 
-    //Link procedure kclass to procedure
+    /**
+     * Represents a mapping between a [KClass] and its corresponding [Procedure].
+     */
     private val procedureKClass_to_procedure = mutableMapOf<KClass<*>, Procedure>()
 
-    /**
-     * MAPPERS
-     */
 
-    //Link table kclass to primary constructor
+    /**
+     * Represents a mapping between a [KClass] and its corresponding constructor as [KFunction].
+     */
     private val kclass_to_constructor = mutableMapOf<KClass<*>, KFunction<Any>?>()
 
-    //Link table kclass to list of constructor parameters
+    /**
+     * Represents a mapping between a [KClass] and its corresponding list of primary constructor parameters as [KParameter].
+     */
     private val kclass_to_constructorParameters = mutableMapOf<KClass<*>, List<KParameter>>()
 
-    //Link table kclass to internal fields
+    /**
+     * Represents a mapping between a [KClass] and its corresponding list of properties as [KProperty1].
+     */
     private val kclass_to_kprops = mutableMapOf<KClass<*>, List<KProperty1<out Any, *>>>()
 
-    //Link table constructor parameter to serializer
+    /**
+     * Represents a mapping between a [KParameter] and its corresponding [TypeSerializer].
+     */
     private val kparam_to_serializer = mutableMapOf<KParameter, TypeSerializer<out Any>>()
 
-    //Link table property to serializer
+    /**
+     * Represents a mapping between a [KProperty1] and its corresponding [TypeSerializer].
+     */
     private val kprop_to_serializer = mutableMapOf<KProperty1<out Any, Any?>, TypeSerializer<out Any>>()
 
     init {
@@ -84,6 +90,12 @@ public class Mapper(
         this.test()
     }
 
+    /**
+     * This method runs a series of tests on the [Mapper] object.
+     * This tests if mapper made some errors inside mapping process where
+     * user configuration from [Serializer] was scanned with reflection and then mapped to
+     * more appropriate form.
+     */
     public fun test() {
         MapperTests(mapper = this).also {
             //Test emptiness
@@ -115,7 +127,7 @@ public class Mapper(
     }
 
     /**
-     * Retrieves the list of properties (KProperty1) for a given class (KClass).
+     * Retrieves the list of properties [KProperty1] for given [KClass] primary constructor.
      *
      * @param kclass The class for which to retrieve the properties.
      * @return The list of properties for the given class.
@@ -146,7 +158,7 @@ public class Mapper(
     }
 
     /**
-     * Retrieves the primary constructor for a given class.
+     * Retrieves the primary constructor for a given [KClass].
      *
      * @param kclass The class for which to retrieve the primary constructor.
      * @return The primary constructor for the given class.
@@ -156,7 +168,7 @@ public class Mapper(
         this.kclass_to_constructor[kclass] ?: throw MapperException("Could not find primary constructor of kclass '${kclass.simpleName}'")
 
     /**
-     * Retrieves the list of constructor parameters (KParameter) for a given class (KClass).
+     * Retrieves the list of constructor parameters [KParameter] for a given class [KClass].
      *
      * @param kclass The class for which to retrieve the constructor parameters.
      * @return The list of constructor parameters for the given class.
@@ -391,7 +403,7 @@ public class Mapper(
         this.procedureKClass_to_procedure[kclass] ?: throw MappingException("Could not find procedure for kclass: '${kclass.simpleName}'")
 
     /**
-     * Retrieves the [TableInfo] object for the given table class.
+     * Retrieves the [TableInfo] object for the given [kclass].
      *
      * @param kclass The Kotlin class representing the table.
      * @return The [TableInfo] object for the given table class.
@@ -401,7 +413,7 @@ public class Mapper(
         this.tableKClass_to_tableInfo[kclass] ?: throw MappingException("Could not find table info for table: '${kclass.simpleName}'")
 
     /**
-     * Retrieves the [TableInfo] object for the given table class or object.
+     * Retrieves the [TableInfo] object for the given table object.
      *
      * @param obj The table class or object for which to retrieve the [TableInfo].
      * @return The TableInfo object for the given table class or object.

@@ -22,7 +22,6 @@ public open class SchemaCascadeQueries(
      * @param schema The schema to be dropped.
      * @param throws Flag indicating whether to throw an exception on error. Default is true.
      * @return The number of rows affected.
-     * @throws DriverException If there is an error processing the drop query.
      */
     public fun dropCascade(schema: Schema, throws: Boolean = true): Int {
         val query = this.ser.dropSchema(schema = schema, cascade = true)

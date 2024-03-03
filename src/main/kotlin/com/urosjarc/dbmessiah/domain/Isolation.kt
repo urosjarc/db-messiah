@@ -2,7 +2,8 @@ package com.urosjarc.dbmessiah.domain
 
 /**
  * An enum class representing the isolation levels for database transactions.
- * This enum was created only to hide HikariCP API!
+ * This enum was created only to hide HikariCP API, so that
+ * user don't have to include whole library to get this functionality.
  *
  * @property levelId The ID of the isolation level.
  */

@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.builders
 
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.exceptions.MappingException
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.extend.ext_owner
 import kotlin.reflect.KProperty1
 
@@ -52,7 +53,7 @@ public open class SqlBuilder(
     public fun <T : Any> column(kprop: KProperty1<T, *>): String {
         val owner = kprop.ext_owner
         val T = this.ser.mapper.getTableInfo(kclass = owner)
-        val C = T.getColumn(kprop = kprop) ?: throw MappingException("Table $T does not have registered column property: $kprop")
+        val C = T.getColumn(kprop = kprop) ?: throw QueryException("Table $T does not have registered column property: $kprop")
         return this.ser.escaped(column = C)
     }
 

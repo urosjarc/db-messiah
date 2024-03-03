@@ -130,15 +130,18 @@ public open class Driver(private val conn: Connection) {
     }
 
     /**
-     * Inserts a record into the database based on the provided query and returns the generated primary ID.
-     * Method will try to fetch generated primary ID normally over JDBC or by creating new database call with SQL provided by [onGeneratedKeysFail].
+     * Inserts a record into the database based on the provided query and returns the generated primary key.
+     * Method will try to fetch generated primary key normally over JDBC. If fetching primary key fails
+     * or is not supported by database driver by some reason, new additional database call will be made which will try to
+     * fetch primary key by force. SQL query that will try to fetch primary key by force is defined for each database
+     * separately inside specific database [Serializer] which overrides [Serializer.selectLastId] string.
      *
      * @param query The [Query] object representing the SQL query and its values.
-     * @param onGeneratedKeysFail The SQL statement to execute if retrieving the generated primary ID fails.
+     * @param onGeneratedKeysFail The SQL statement to retrieve the generated primary by force.
      * @param decodeIdResultSet The function to decode primary ID from the ResultSet.
      * @return The generated primary ID if the insert was successful, or null if no rows were affected.
      * @throws DriverException If there is an error processing the insert query.
-     * @throws IssueException If the inserted primary ID couldn't be retrieved normally or with force.
+     * @throws IssueException If the inserted primary ID couldn't be retrieved normally nor by force.
      */
     internal fun insert(query: Query, primaryKey: String? = null, onGeneratedKeysFail: String?): Int? {
         var ps: PreparedStatement? = null
@@ -285,6 +288,15 @@ public open class Driver(private val conn: Connection) {
         }
     }
 
+    /**
+     * Executes a procedure call with the given query and a function to decode the result set.
+     *
+     * @param query The [Query] object representing the SQL query where procedure call is happening and its argument values.
+     * @param decodeResultSet The function used to decode result set rows into a list of objects (rows).
+     *                        It accepts the index of the executed query and the result set for that specific query.
+     * @return The result of the query as a mutable list of lists, where each inner list represents a row of the result set.
+     * @throws DriverException If there is an error executing the query.
+     */
     internal fun call(query: Query, decodeResultSet: (i: Int, rs: ResultSet) -> List<Any>): MutableList<List<Any>> {
         var ps: CallableStatement? = null
         var rs: ResultSet? = null

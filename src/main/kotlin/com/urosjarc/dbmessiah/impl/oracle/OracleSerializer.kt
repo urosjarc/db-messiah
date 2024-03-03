@@ -86,13 +86,6 @@ public open class OracleSerializer(
         return Query(sql = "DROP PROCEDURE ${escaped(P)}")
     }
 
-    /**
-     * Generates SQL string for calling stored procedure.
-     *
-     * @param obj The input object representing the stored procedure to be called.
-     * @return A [Query] object representing the SQL query.
-     * @throws SerializerException if the [Procedure] for the object cannot be found.
-     */
     public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         var args = P.args.map { "${escaped(it.name)} ${it.dbType.split("(").first()}" }.joinToString(", ")

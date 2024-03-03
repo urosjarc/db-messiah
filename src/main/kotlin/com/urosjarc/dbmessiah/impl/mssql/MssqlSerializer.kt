@@ -86,13 +86,6 @@ public open class MssqlSerializer(
         return Query(sql = "DROP PROCEDURE IF EXISTS ${escaped(P)}")
     }
 
-    /**
-     * Generates SQL string for calling stored procedure.
-     *
-     * @param obj The input object representing the stored procedure to be called.
-     * @return A [Query] object representing the SQL query.
-     * @throws SerializerException if the [Procedure] for the object cannot be found.
-     */
     public override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {
         val P = this.mapper.getProcedure(kclass = procedure)
         // Here we don't escape arguments since @ signs is responsible for escaping argument
@@ -107,12 +100,6 @@ public open class MssqlSerializer(
         )
     }
 
-    /**
-     * Creates a new database schema if it does not already exist.
-     *
-     * @param schema The [Schema] object representing the schema to be created.
-     * @return A [Query] object representing the SQL query to create the schema.
-     */
     override fun createSchema(schema: Schema): Query {
         return Query(
             sql = """

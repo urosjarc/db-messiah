@@ -9,7 +9,7 @@ import kotlin.reflect.KClass
 
 /**
  * Class used to execute single query in one database call.
- * Note that some database supports only one SQL statment per call.
+ * For executing multiple `SELECT` queries per call use [GetManyQueries].
  *
  * @param ser The serializer used to map objects to SQL queries.
  * @param driver The driver used to execute the SQL queries.
@@ -34,10 +34,8 @@ public open class GetOneQueries(
     /**
      * Executes a custom SQL query with output using the provided SQL string.
      *
-     * @param output the table from which rows will be fetched.
-     * @param buildSql the function that returns the SQL string for the query.
-     * @return fetched rows from [output] table.
-     * @throws MappingException if the number of database results does not match the number of output classes.
+     * @param buildSql A function that takes a [SqlBuilder] and returns the user provided SQL statement to be executed.
+     * @return A [List] of objects of type [OUT], obtained by decoding each row of the result set.
      */
     public inline fun <reified OUT : Any> get(noinline buildSql: (SqlBuilder) -> String): List<OUT> {
         val query = this.ser.query(buildSql = buildSql)
@@ -48,14 +46,15 @@ public open class GetOneQueries(
 
     /**
      * Executes a custom SQL query with input and output.
+     * This function is not inline like other [get] function because kotlin compiler
+     * does not know how to recognize type of generic argument from the usage.
+     * The problem was already [reported to JetBrains team.](https://youtrack.jetbrains.com/issue/KT-66286/Diamond-operator-becomes-too-big-for-inline-reified-functions).
      *
-     * @param output the table from which rows will be fetched.
-     * @param input The input object used to privide injected values to SQL statements.
-     * @param buildSql A function that takes a query builder and returns the SQL query as a string.
-     * @return A list of query results of type [OUT].
-     * @throws MappingException if the query does not return any results.
+     * @param output The [KClass] representing the desired class of the objects in the result list.
+     * @param input The input object used to generate the query.
+     * @param buildSql A function that takes a [QueryBuilder] and returns the user provided SQL statement to be executed.
+     * @return A list of objects of type [OUT], obtained by decoding each row of the result set.
      */
-    // https://youtrack.jetbrains.com/issue/KT-66286/Diamond-operator-becomes-too-big-for-inline-reified-functions
     public fun <IN : Any, OUT : Any> get(output: KClass<OUT>, input: IN, buildSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
         val query = this.ser.queryWithInput(input = input, buildSql = buildSql)
         return this.driver.query(query = query) {

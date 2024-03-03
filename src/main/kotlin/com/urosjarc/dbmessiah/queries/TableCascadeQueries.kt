@@ -12,9 +12,9 @@ import com.urosjarc.dbmessiah.exceptions.DriverException
  */
 public class TableCascadeQueries(ser: Serializer, driver: Driver) : TableQueries(ser = ser, driver = driver) {
     /**
-     * Drops the specified table with cascading enabled.
+     * Drops a database table with cascade option.
      *
-     * @param table The table to be dropped.
+     * @param throws Flag indicating whether to throw [DriverException] when an exception occurs. Default is true.
      * @return The number of rows affected by the drop operation.
      */
     public inline fun <reified T : Any> dropCascade(throws: Boolean = true): Int {

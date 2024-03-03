@@ -12,13 +12,12 @@ import kotlin.reflect.full.instanceParameter
 
 /**
  * A class representing a table in a database or schema.
+ * This class is intermediate structure created by the user which is
+ * then converted by the [Mapper] to more appropriate [TableInfo] structure.
  *
  * @param T the type that represents database table.
  * @property primaryKey the primary key of the table.
- * @property foreignKeys the foreign keys of the table that points to foreign table (optional).
- * @property constraints the constraints of the table (optional).
  * @property serializers the serializers which will overrides global and schema serializer that will help serialize table columns (optional).
- * @property columnSerializers the serializers which will overrides global, schema and table serializers (optional).
  */
 public class Table<T : Any>(
     public val primaryKey: KProperty1<T, *>,
@@ -28,12 +27,27 @@ public class Table<T : Any>(
     columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<*>>> = listOf()
 ) {
 
+    /**
+     * Unescaped name of the [Table].
+     */
     public val name: String =
         ((primaryKey.instanceParameter ?: primaryKey.extensionReceiverParameter)!!.type.classifier as KClass<*>).simpleName.toString()
 
-
+    /**
+     * Map of [Table] foreign keys that points to specific foreign class.
+     */
     public val foreignKeys: Map<KProperty1<T, *>, KClass<*>>
+
+    /**
+     * Map of [Table] column constraints.
+     */
     internal val constraints: Map<KProperty1<T, *>, List<C>>
+
+    /**
+     * Represents a map of column serializers.
+     * This serializer have the highest priority over all other serializers defined
+     * inside database serializer.
+     */
     internal val columnSerializers: Map<KProperty1<T, *>, TypeSerializer<*>>
 
     init {
