@@ -1,5 +1,7 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.builders.QueryBuilder
+import com.urosjarc.dbmessiah.builders.QueryEscaper
 import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
@@ -7,6 +9,7 @@ import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.exceptions.MapperException
 import com.urosjarc.dbmessiah.tests.SerializerTests
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 /**
  * Serializer is an abstract class that provides functionality for serializing objects to various string like formats.
@@ -78,7 +81,7 @@ public abstract class Serializer(
     public fun escaped(schema: Schema): String = escaped(name = schema.name)
     public fun escaped(procedure: Procedure): String =
         listOf(procedure.schema, procedure.name).filterNotNull().joinToString(".") { escaped(name = it) }
-
+    public open fun <T : Any> escaped(procedureArg: KProperty1<T, *>): String = escaped(name = procedureArg.name)
     public fun escaped(tableInfo: TableInfo): String = listOf(tableInfo.schema, tableInfo.name).joinToString(".") { escaped(name = it) }
     public fun escaped(column: Column): String =
         listOf(column.table.schema, column.table.name, column.name).joinToString(".") { escaped(name = it) }

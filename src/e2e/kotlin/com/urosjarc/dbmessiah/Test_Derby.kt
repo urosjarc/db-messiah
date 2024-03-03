@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.test.*
 
 open class Test_Derby : Test_Contract {
@@ -59,8 +58,8 @@ open class Test_Derby : Test_Contract {
         //Reseting tables
         service.autocommit {
             it.schema.create(schema = schema, throws = false)
-            it.table.drop<Child>()
-            it.table.drop<Parent>()
+            it.table.drop<Child>(throws = false)
+            it.table.drop<Parent>(throws = false)
             it.table.create<Parent>()
             it.table.create<Child>()
         }
@@ -99,7 +98,7 @@ open class Test_Derby : Test_Contract {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """ 'PARENT' already exists""",
+            other = """Table/View 'main.Parent' does not exist.""",
             message = e.stackTraceToString()
         )
     }
@@ -110,7 +109,8 @@ open class Test_Derby : Test_Contract {
         it.table.select<Parent>()
 
         //Drop
-        it.table.drop<Parent>()
+        it.table.drop<Child>(throws = false)
+        it.table.drop<Parent>(throws = false)
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -162,23 +162,23 @@ open class Test_Derby : Test_Contract {
     @Test
     override fun `test table select page`() = service.autocommit {
         // Select first 5
-        val select0 = it.table.select<Child>()
+        val select0 = it.table.select<Child>(page = Page(number = 0, orderBy = Child::pk, limit = 5))
         assertEquals(expected = this.children.subList(0, 5), actual = select0)
 
         // Select first 7
-        val select1 = it.table.select<Child>()
+        val select1 = it.table.select<Child>(page = Page(number = 0, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(0, 7), actual = select1)
 
         // Select 3 page of 7
-        val select2 = it.table.select<Child>()
+        val select2 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 7))
         assertEquals(expected = this.children.subList(14, 14 + 7), actual = select2)
 
         // Select 3 page of 4
-        val select3 = it.table.select<Child>()
+        val select3 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = this.children.subList(8, 8 + 4), actual = select3)
 
         // It should be consistent
-        val select4 = it.table.select<Child>()
+        val select4 = it.table.select<Child>(page = Page(number = 2, orderBy = Child::pk, limit = 4))
         assertEquals(expected = select3, actual = select4)
     }
 
@@ -504,7 +504,7 @@ open class Test_Derby : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run { """delete from ${it.table<Parent>()} where "pk" = 1""" }
+        it.query.run { """${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1""" }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -521,7 +521,7 @@ open class Test_Derby : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> { """select * from ${it.table<Parent>()} where ${it.column(Parent::pk)} < 3""" }
+        val objs = it.query.get<Parent> { """${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
@@ -540,10 +540,9 @@ open class Test_Derby : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(Child::class, input = input) {
             """
-                select *
-                from ${it.table<Child>()} 
+                ${it.SELECT<Child>()} 
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                where ${it.column(Parent::pk)} = ${it.value(Input::parent_pk)}
+                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
             """
         }
 

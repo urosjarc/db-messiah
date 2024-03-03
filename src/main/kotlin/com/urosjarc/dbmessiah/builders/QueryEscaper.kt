@@ -1,4 +1,4 @@
-package com.urosjarc.dbmessiah.data
+package com.urosjarc.dbmessiah.builders
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
@@ -29,7 +29,16 @@ public open class QueryEscaper(
         val C = T.getColumn(kprop = kprop) ?: throw MappingException("Table $T does not have registered column property: $kprop")
         return ser.escaped(column = C)
     }
+    public inline fun <reified T: Any> INSERT(): String {
+        return "INSERT INTO ${this.table<T>()}"
+    }
 
+    public inline fun <reified T: Any> SELECT(): String {
+        return "SELECT * FROM ${this.table<T>()}"
+    }
+    public inline fun <reified T: Any> DELETE(): String {
+        return "DELETE FROM ${this.table<T>()}"
+    }
 
     public inline fun <reified T : Any> table(): String {
         val T = ser.mapper.getTableInfo(kclass = T::class)

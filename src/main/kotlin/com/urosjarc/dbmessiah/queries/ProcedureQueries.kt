@@ -2,7 +2,7 @@ package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.data.QueryEscaper
+import com.urosjarc.dbmessiah.builders.ProcedureBuilder
 import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
@@ -27,8 +27,8 @@ public open class ProcedureQueries(
         }
     }
 
-    public inline fun <reified T : Any> create(throws: Boolean = true, body: (QueryEscaper) -> String): Int {
-        val query = this.ser.createProcedure(procedure = T::class, sql = body(QueryEscaper(ser = ser)))
+    public inline fun <reified T : Any> create(throws: Boolean = true, body: (ProcedureBuilder<T>) -> String): Int {
+        val query = this.ser.createProcedure(procedure = T::class, sql = body(ProcedureBuilder(ser = ser, procedure = T::class)))
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {

@@ -1,4 +1,4 @@
-import com.urosjarc.dbmessiah.data.QueryBuilder
+import com.urosjarc.dbmessiah.builders.ProcedureBuilder
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
@@ -87,8 +87,8 @@ fun main_002() {
         val output2 = it.run.execute(
             output = Parent2::class,
             input = Child2(value = "parent_asdf") // For our input we can also use the same table but lets use different so that it's not confusing...
-        ) { q: QueryBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
-            """SELECT * FROM Parent2 WHERE value = ${q.value(Child2::value)}
+        ) { q: ProcedureBuilder<Child2> ->            // If you are using input you will be provided with query builder to help you ensure type safety and prevent SQL injections...
+            """SELECT * FROM Parent2 WHERE value = ${q.input(Child2::value)}
                 
             -- q.put() will return '?' character back, so that JDBC can replace '?' with proper values to prevent SQL injection attacks...
             -- to read more about magic '?' character please refer to this link: https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html

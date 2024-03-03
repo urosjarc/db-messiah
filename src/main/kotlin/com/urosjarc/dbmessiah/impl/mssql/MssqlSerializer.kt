@@ -6,6 +6,7 @@ import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Page
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
 public open class MssqlSerializer(
     schemas: List<MssqlSchema> = listOf(),
@@ -23,7 +24,7 @@ public open class MssqlSerializer(
 
     override val selectLastId: String = "SELECT SCOPE_IDENTITY()"
     override fun escaped(name: String): String = "[$name]"
-
+    override fun <T: Any> escaped(procedureArg: KProperty1<T, *>): String  = "@${procedureArg.name}"
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
 

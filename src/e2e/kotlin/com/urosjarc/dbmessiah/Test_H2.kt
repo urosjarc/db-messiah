@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.test.*
 
 open class Test_H2 : Test_Contract {
@@ -517,8 +516,8 @@ open class Test_H2 : Test_Contract {
         //Get current all parents
         it.query.run {
             """
-            delete from "main"."Parent" where "pk" = 1;
-            delete from "main"."Parent" where "pk" = 2;
+            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
+            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 2;
             """
         }
 
@@ -539,9 +538,9 @@ open class Test_H2 : Test_Contract {
 
         val objs = it.query.get<Parent> {
             """
-                    select * from "main"."Parent" where "pk" < 3;
-                    select * from "main"."Parent" where "pk" = 1;
-                    delete from "main"."Parent" where "pk" = 1;
+                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
+                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
+                    ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
                 """.trimIndent()
         }
 
@@ -565,15 +564,13 @@ open class Test_H2 : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(Child::class, input = input) {
             """
-                    select *
-                    from "main"."Child" C
-                    join "main"."Parent" P on C."fk" = P."pk"
-                    where P."pk" = ${it.value(Input::parent_pk)};
+                    ${it.SELECT<Child>()}
+                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)};
                     
-                    select *
-                    from "main"."Child" C
-                    join "main"."Parent" P on C."fk" = P."pk"
-                    where P."pk" = ${it.value(Input::parent_pk)}
+                    ${it.SELECT<Child>()}
+                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
                 """.trimIndent()
         }
 

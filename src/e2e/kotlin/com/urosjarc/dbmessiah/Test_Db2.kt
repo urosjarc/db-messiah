@@ -102,7 +102,7 @@ open class Test_Db2 : Test_Contract {
             it.procedure.drop<TestProcedureEmpty>(throws = false)
             it.procedure.create<TestProcedureEmpty> {
                 """
-                    INSERT INTO ${it.table<Parent>()} 
+                    ${it.INSERT<Parent>()} 
                         (${it.name(Parent::pk)}, ${it.name(Parent::col)})
                     VALUES
                         (1234, 'new parent from procedure');
@@ -111,10 +111,10 @@ open class Test_Db2 : Test_Contract {
             it.procedure.drop<TestProcedure>(throws = false)
             it.procedure.create<TestProcedure> {
                 """
-                    INSERT INTO ${it.table<Parent>()}
+                    ${it.INSERT<Parent>()}
                         (${it.name(Parent::pk)}, ${it.name(Parent::col)})
                     VALUES
-                        (${it.name(TestProcedure::parent_pk)}, ${it.name(TestProcedure::parent_col)});
+                        (${it.arg(TestProcedure::parent_pk)}, ${it.arg(TestProcedure::parent_col)});
                 """
             }
         }
@@ -541,7 +541,7 @@ open class Test_Db2 : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run { """delete from ${it.table<Parent>()} where ${it.column(Parent::pk)} = 1""" }
+        it.query.run { """${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1""" }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -558,7 +558,7 @@ open class Test_Db2 : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> { """select * from ${it.table<Parent>()} where ${it.column(Parent::pk)} < 3""" }
+        val objs = it.query.get<Parent> { """${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
@@ -580,10 +580,9 @@ open class Test_Db2 : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(Child::class, input = input) {
             """
-                select *
-                from ${it.table<Child>()} 
+                ${it.SELECT<Child>()} 
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                where ${it.column(Parent::pk)} = ${it.value(Input::parent_pk)}
+                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
             """
         }
 

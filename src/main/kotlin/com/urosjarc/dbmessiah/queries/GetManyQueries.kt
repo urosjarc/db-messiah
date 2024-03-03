@@ -3,8 +3,9 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
-import com.urosjarc.dbmessiah.data.QueryBuilder
-import com.urosjarc.dbmessiah.data.QueryEscaper
+import com.urosjarc.dbmessiah.builders.ProcedureBuilder
+import com.urosjarc.dbmessiah.builders.QueryBuilder
+import com.urosjarc.dbmessiah.builders.QueryEscaper
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -35,7 +36,7 @@ public class GetManyQueries(
 
     /**
      * Executes a custom SQL query with input and outputs.
-     * Important is [getSql] function which provides [QueryBuilder] to help you inject input value properties to returned SQL string.
+     * Important is [getSql] function which provides [ProcedureBuilder] to help you inject input value properties to returned SQL string.
      *
      * @param outputs the list of all tables from which rows will be fetched in the same order.
      * @param input The input object used to privide injected values to SQL statements.

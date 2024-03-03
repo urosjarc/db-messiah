@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Schema
+import com.urosjarc.dbmessiah.builders.ProcedureBuilder
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.serializers.AllTS
@@ -38,13 +39,13 @@ class Test_QueryBuilder {
         )
     )
 
-    private lateinit var queryBuilder: QueryBuilder<Input>
+    private lateinit var queryBuilder: ProcedureBuilder<Input>
     private lateinit var input: Input
 
     @BeforeEach
     fun init() {
         this.input = Input(id = 123, property = "property1")
-        this.queryBuilder = QueryBuilder(
+        this.queryBuilder = ProcedureBuilder(
             input = input,
             mapper = Mapper(
                 schemas = listOf(testSchema), globalSerializers = AllTS.basic,
@@ -57,7 +58,7 @@ class Test_QueryBuilder {
     @Test
     fun `test init {}`() {
         val e0 = assertThrows<MappingException> {
-            QueryBuilder(
+            ProcedureBuilder(
                 input = input,
                 mapper = Mapper(
                     schemas = listOf(testSchema), globalSerializers = AllTS.basic,
@@ -72,8 +73,8 @@ class Test_QueryBuilder {
 
     @Test
     fun `test get(), build()`() {
-        assertEquals(expected = "?", actual = queryBuilder.value(Input::id))
-        assertEquals(expected = "?", actual = queryBuilder.value(Input::property))
+        assertEquals(expected = "?", actual = queryBuilder.input(Input::id))
+        assertEquals(expected = "?", actual = queryBuilder.input(Input::property))
         val sql = "SELECT * FROM Input"
         val actual: Query = queryBuilder.build(sql = sql)
         val expected = Query(

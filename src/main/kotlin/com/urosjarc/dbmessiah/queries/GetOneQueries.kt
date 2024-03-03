@@ -2,8 +2,8 @@ package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.data.QueryBuilder
-import com.urosjarc.dbmessiah.data.QueryEscaper
+import com.urosjarc.dbmessiah.builders.QueryBuilder
+import com.urosjarc.dbmessiah.builders.QueryEscaper
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -55,6 +55,7 @@ public open class GetOneQueries(
      * @return A list of query results of type [OUT].
      * @throws MappingException if the query does not return any results.
      */
+    // https://youtrack.jetbrains.com/issue/KT-66286/Diamond-operator-becomes-too-big-for-inline-reified-functions
     public fun <IN : Any, OUT : Any> get(output: KClass<OUT>, input: IN, getSql: (queryBuilder: QueryBuilder<IN>) -> String): List<OUT> {
         val query = this.ser.queryWithInput(input = input, getSql = getSql)
         return this.driver.query(query = query) {

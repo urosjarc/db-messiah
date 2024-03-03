@@ -22,7 +22,6 @@ public open class Db2Serializer(
 ) {
     override val selectLastId: String = "VALUES IDENTITY_VAL_LOCAL()"
     override fun escaped(name: String): String = "\"$name\""
-
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
 
