@@ -81,6 +81,7 @@ public abstract class Serializer(
     public fun escaped(schema: Schema): String = escaped(name = schema.name)
     public fun escaped(procedure: Procedure): String =
         listOf(procedure.schema, procedure.name).filterNotNull().joinToString(".") { escaped(name = it) }
+
     public open fun <T : Any> escaped(procedureArg: KProperty1<T, *>): String = escaped(name = procedureArg.name)
     public fun escaped(tableInfo: TableInfo): String = listOf(tableInfo.schema, tableInfo.name).joinToString(".") { escaped(name = it) }
     public fun escaped(column: Column): String =

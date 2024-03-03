@@ -25,29 +25,36 @@ public open class QueryEscaper(
 
     public fun <T : Any> column(kprop: KProperty1<T, *>): String {
         val owner = kprop.ext_owner
-        val T = ser.mapper.getTableInfo(kclass = owner)
+        val T = this.ser.mapper.getTableInfo(kclass = owner)
         val C = T.getColumn(kprop = kprop) ?: throw MappingException("Table $T does not have registered column property: $kprop")
-        return ser.escaped(column = C)
-    }
-    public inline fun <reified T: Any> INSERT(): String {
-        return "INSERT INTO ${this.table<T>()}"
+        return this.ser.escaped(column = C)
     }
 
-    public inline fun <reified T: Any> SELECT(): String {
+    public inline fun <reified T : Any> INSERT(vararg kprops: KProperty1<T, *>): String {
+        val columns = kprops.map { this.name(column = it) }.joinToString(", ")
+        return "INSERT INTO ${this.table<T>()} ($columns)"
+    }
+
+    public inline fun <reified T : Any> SELECT(): String {
         return "SELECT * FROM ${this.table<T>()}"
     }
-    public inline fun <reified T: Any> DELETE(): String {
+
+    public inline fun <reified T : Any> DELETE(): String {
         return "DELETE FROM ${this.table<T>()}"
     }
 
+    public inline fun <reified T : Any> UPDATE(): String {
+        return "UPDATE ${this.table<T>()}"
+    }
+
     public inline fun <reified T : Any> table(): String {
-        val T = ser.mapper.getTableInfo(kclass = T::class)
-        return ser.escaped(tableInfo = T)
+        val T = this.ser.mapper.getTableInfo(kclass = T::class)
+        return this.ser.escaped(tableInfo = T)
     }
 
     public inline fun <reified T : Any> procedure(): String {
-        val P = ser.mapper.getProcedure(kclass = T::class)
-        return ser.escaped(procedure = P)
+        val P = this.ser.mapper.getProcedure(kclass = T::class)
+        return this.ser.escaped(procedure = P)
     }
 
 }
