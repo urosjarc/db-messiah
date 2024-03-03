@@ -3,7 +3,7 @@ package com.urosjarc.dbmessiah.queries
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.builders.QueryBuilder
-import com.urosjarc.dbmessiah.builders.QueryEscaper
+import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -24,7 +24,7 @@ public open class GetOneQueries(
      *
      * @param getSql A function that returns the user provided SQL statement to be executed.
      */
-    public fun run(getSql: (QueryEscaper) -> String) {
+    public fun run(getSql: (SqlBuilder) -> String) {
         val query = this.ser.query(getSql = getSql)
         this.driver.execute(query = query) { i, rs ->
             this.ser.mapper.decodeMany(resultSet = rs, i = i)
@@ -39,7 +39,7 @@ public open class GetOneQueries(
      * @return fetched rows from [output] table.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public inline fun <reified OUT : Any> get(noinline getSql: (QueryEscaper) -> String): List<OUT> {
+    public inline fun <reified OUT : Any> get(noinline getSql: (SqlBuilder) -> String): List<OUT> {
         val query = this.ser.query(getSql = getSql)
         return this.driver.query(query = query) {
             this.ser.mapper.decodeOne(resultSet = it, kclass = OUT::class)

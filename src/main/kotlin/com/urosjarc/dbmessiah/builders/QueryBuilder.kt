@@ -20,7 +20,7 @@ import kotlin.reflect.KProperty1
 public open class QueryBuilder<IN : Any>(
     public val input: IN,
     ser: Serializer
-) : QueryEscaper(ser = ser) {
+) : SqlBuilder(ser = ser) {
 
     /**
      * Used within the class to accumulate query values while the custom SQL query is being built by the user.

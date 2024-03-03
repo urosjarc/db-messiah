@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.builders.ProcedureBuilder
 import com.urosjarc.dbmessiah.builders.QueryBuilder
-import com.urosjarc.dbmessiah.builders.QueryEscaper
+import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
@@ -29,7 +29,7 @@ public class GetManyQueries(
      * @return the object matrix, where each row represents list of objects from one query.
      * @throws MappingException if the number of database results does not match the number of output classes.
      */
-    public fun get(vararg outputs: KClass<*>, getSql: (QueryEscaper) -> String): List<List<Any>> {
+    public fun get(vararg outputs: KClass<*>, getSql: (SqlBuilder) -> String): List<List<Any>> {
         val query = this.ser.query(getSql = getSql)
         return this.executeQuery(query = query, outputs = outputs)
     }

@@ -105,14 +105,18 @@ open class Test_Oracle : Test_Contract {
             it.procedure.create<TestProcedureEmpty> {
                 """
                     ${it.INSERT<Parent>(Parent::pk, Parent::col)}
-                    VALUES (1234, 'new parent from procedure');
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (1234, 'new parent from procedure');
                 """
             }
             it.procedure.drop<TestProcedure>(throws = false)
             it.procedure.create<TestProcedure> {
                 """
-                    ${it.INSERT<Parent>(Parent::pk, Parent::col)}
-                    VALUES (${it.arg(TestProcedure::parent_pk)}, ${it.arg(TestProcedure::parent_col)});
+                    ${it.INSERT<Parent>()}
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (${it.arg(TestProcedure::parent_pk)}, ${it.arg(TestProcedure::parent_col)});
                 """
             }
         }

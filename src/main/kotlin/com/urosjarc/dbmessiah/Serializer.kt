@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.builders.QueryBuilder
-import com.urosjarc.dbmessiah.builders.QueryEscaper
+import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
@@ -293,7 +293,7 @@ public abstract class Serializer(
      * @param getSql A function that returns the user provided SQL statement to be executed.
      * @return A [Query] object representing the SQL query and its values.
      */
-    public fun query(getSql: (QueryEscaper) -> String): Query = Query(sql = getSql(QueryEscaper(ser = this)))
+    public fun query(getSql: (SqlBuilder) -> String): Query = Query(sql = getSql(SqlBuilder(ser = this)))
 
     /**
      * Creates [Query] from user defined SQL string with inputs.

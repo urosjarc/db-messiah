@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty1
 
 
 /**
- * The [QueryEscaper] class is responsible for building custom SQL [Query].
+ * The [SqlBuilder] class is responsible for building custom SQL [Query].
  *
  * @param IN The type of [input].
  * @property input The class where input values will be located.
@@ -16,11 +16,20 @@ import kotlin.reflect.KProperty1
  *
  * @throws MappingException if the [input] class is not registered in global inputs.
  */
-public open class QueryEscaper(
+public open class SqlBuilder(
     public val ser: Serializer
 ) {
-    public fun <T : Any> name(column: KProperty1<T, *>): String {
-        return ser.escaped(name = column.name)
+    public inline fun <reified T : Any> SELECT(): String {
+        return "SELECT * FROM ${this.table<T>()}"
+    }
+
+    public inline fun <reified T : Any> DELETE(): String {
+        return "DELETE FROM ${this.table<T>()}"
+    }
+
+    public inline fun <reified T : Any> table(): String {
+        val T = this.ser.mapper.getTableInfo(kclass = T::class)
+        return this.ser.escaped(tableInfo = T)
     }
 
     public fun <T : Any> column(kprop: KProperty1<T, *>): String {
@@ -30,26 +39,8 @@ public open class QueryEscaper(
         return this.ser.escaped(column = C)
     }
 
-    public inline fun <reified T : Any> INSERT(vararg kprops: KProperty1<T, *>): String {
-        val columns = kprops.map { this.name(column = it) }.joinToString(", ")
-        return "INSERT INTO ${this.table<T>()} ($columns)"
-    }
-
-    public inline fun <reified T : Any> SELECT(): String {
-        return "SELECT * FROM ${this.table<T>()}"
-    }
-
-    public inline fun <reified T : Any> DELETE(): String {
-        return "DELETE FROM ${this.table<T>()}"
-    }
-
-    public inline fun <reified T : Any> UPDATE(): String {
-        return "UPDATE ${this.table<T>()}"
-    }
-
-    public inline fun <reified T : Any> table(): String {
-        val T = this.ser.mapper.getTableInfo(kclass = T::class)
-        return this.ser.escaped(tableInfo = T)
+    public fun <T : Any> name(column: KProperty1<T, *>): String {
+        return ser.escaped(name = column.name)
     }
 
     public inline fun <reified T : Any> procedure(): String {

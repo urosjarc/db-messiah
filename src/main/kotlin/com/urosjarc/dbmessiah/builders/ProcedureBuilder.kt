@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 
-public open class ProcedureBuilder<T : Any>(ser: Serializer, public val procedure: KClass<T>) : QueryEscaper(ser = ser) {
+public open class ProcedureBuilder<T : Any>(ser: Serializer, public val procedure: KClass<T>) : SqlBuilder(ser = ser) {
 
     init {
         if (!this.ser.mapper.isRegistered(kclass = this.procedure))
