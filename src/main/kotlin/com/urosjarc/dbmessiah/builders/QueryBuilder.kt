@@ -9,13 +9,11 @@ import kotlin.reflect.KProperty1
 
 
 /**
- * The [ProcedureBuilder] class is responsible for building custom SQL [Query].
+ * The [QueryBuilder] represents a builder for creating SQL queries which needs kotlin values to be injected inside.
  *
- * @param IN The type of [input].
- * @property input The class where input values will be located.
- * @property mapper The [Mapper] object to help in serialization process.
- *
- * @throws MappingException if the [input] class is not registered in global inputs.
+ * @param IN the input type for the query builder.
+ * @property input the input object used for the query.
+ * @constructor Creates an instance of [QueryBuilder] with the specified input and serializer.
  */
 public open class QueryBuilder<IN : Any>(
     public val input: IN,
@@ -23,31 +21,23 @@ public open class QueryBuilder<IN : Any>(
 ) : SqlBuilder(ser = ser) {
 
     /**
-     * Used within the class to accumulate query values while the custom SQL query is being built by the user.
-     * It is populated through the [input] function, which takes a [KProperty1] object representing a property of the input class,
-     * and maps it to a corresponding [QueryValue].
+     * List of [QueryValue] which holds information about injected values.
      */
     private val queryValues: MutableList<QueryValue> = mutableListOf()
 
-    init {
-        if (!this.ser.mapper.isRegistered(kclass = this.input::class))
-            throw MappingException("Input class '${this.input::class.simpleName}' is not registered in global inputs")
-    }
-
     /**
-     * Final result of this [ProcedureBuilder] containing final SQL string and list of [QueryValue].
+     * Builds final SQL [Query] that needs to be executed.
      *
-     * @param sql The SQL query.
-     * @return The [Query] object created.
+     * @param sql The final SQL string for the query.
+     * @return A [Query] object representing the SQL query and its future injected values.
      */
     internal fun build(sql: String) = Query(sql = sql, values = this.queryValues.toTypedArray())
 
     /**
-     * Retrieve the serialized value of a [input] property and adds it as a [QueryValue] to the [queryValues].
-     * This method is to be used inside SQL template.
+     * User can use this function to specify which property wants to inject to SQL string.
      *
-     * @param kp The [KProperty1] which should be injected in SQL string.
-     * @return The placeholder character "?" indicating the serialized value will be replaced by [QueryValue] in the [queryValues].
+     * @param kp The [KProperty1] representing the property to be injected.
+     * @return The question mark placeholder representing the injected value in the SQL query.
      */
     public fun input(kp: KProperty1<IN, *>): String {
         val ser = this.ser.mapper.getSerializer(kp)

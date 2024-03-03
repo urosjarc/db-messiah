@@ -20,7 +20,7 @@ public data class QueryValue(
 
 
     /**
-     * Represents [value] that will be escaped.
+     * Represents [value] that will be escaped with quotations.
      */
     public val escapped: String
         get() = when (this.value) {

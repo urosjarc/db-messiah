@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
  * Represents a database procedure.
  *
  * @property schema The schema in which this [Procedure] is located.
- * @property kclass The Kotlin class representing this [Procedure].
+ * @property kclass Class representing this [Procedure].
  * @property args The list of procedure arguments.
  */
 public data class Procedure(

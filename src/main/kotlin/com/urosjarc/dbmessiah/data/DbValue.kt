@@ -7,17 +7,13 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
 /**
- * Represents a database value.
+ * Represents a database value for columns or procedure arguments.
  *
  * @property kprop The property reference where this value is located.
  * @property dbType The type of the database value.
  * @property jdbcType The JDBC type of the database value.
  * @property encoder The [Encoder] used to encode the database value.
  * @property decoder The [Decoder] used to decode the database value.
- *
- * @property inited Determines if the [DbValue] has been initialized.
- * @property path The full path of [DbValue] location.
- * @property name The name of the [DbValue] property.
  */
 public abstract class DbValue(
     public val kprop: KProperty1<Any, Any?>,
@@ -26,8 +22,20 @@ public abstract class DbValue(
     internal val encoder: Encoder<*>,
     internal val decoder: Decoder<*>,
 ) {
+
+    /**
+     * Represents whether the [DbValue] has been initialized or not.
+     */
     internal abstract val inited: Boolean
+
+    /**
+     * Unescaped path where this [DbValue] will be located.
+     */
     public abstract val path: String
+
+    /**
+     * Unescaped name for this [DbValue]
+     */
     public abstract val name: String
 
     /**

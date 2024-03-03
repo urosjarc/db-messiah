@@ -5,11 +5,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 /**
- * Represents the metadata of a database table.
+ * Represents the database table.
  * This class is final representation of database table defined by the user.
- * This class will be used internaly by the system.
+ * This class will be used internally by the system.
  *
- * @param schema The [Schema] that contains this table.
+ * @param schema The schema that contains this table.
  * @param kclass The class representing the table.
  * @param primaryKey The [PrimaryColumn] for this table.
  * @param foreignKeys The list of [ForeignColumn] for this table.
@@ -26,7 +26,7 @@ public data class TableInfo(
 ) {
 
     /**
-     * Represents the name of this table.
+     * Represents the unescaped table name.
      */
     val name: String = this.kclass.simpleName!!
 
@@ -38,19 +38,27 @@ public data class TableInfo(
     /** @suppress */
     private val hash = this.path.hashCode()
 
+    /**
+     * Assign [TableInfo] instance to all their children.
+     */
     init {
-        //Init late init parent connection
         (listOf(this.primaryKey) + this.foreignKeys + this.otherColumns).forEach {
             it.table = this
         }
     }
 
+    /**
+     * Retrieves the [Column] corresponding to the given [KProperty1].
+     *
+     * @param kprop The [KProperty1] representing the property.
+     * @return The corresponding [Column] or null if not found.
+     */
     public fun getColumn(kprop: KProperty1<*, *>): Column? =
         (listOf(this.primaryKey) + this.foreignKeys + this.otherColumns).firstOrNull { it.kprop == kprop }
 
     /**
-     * Represents a list of columns that can be modified by the user in `UPDATE` statement.
-     * This includes the [ForeignColumn] and [OtherColumn], as well as the [PrimaryColumn] if it is not marked auto-increment.
+     * Represents a list of columns that can be modified by the user in `INSERT` or `UPDATE` statement.
+     * This includes the [ForeignColumn] and [OtherColumn], as well as the [PrimaryColumn] if it is not marked as auto-increment.
      */
     public val userControlledColumns: List<Column>
         get() {

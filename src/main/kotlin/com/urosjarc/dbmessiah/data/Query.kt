@@ -4,7 +4,7 @@ package com.urosjarc.dbmessiah.data
  * A class representing a SQL query and its values.
  *
  * @param sql The SQL query template that may contains JDBC question marks.
- * @param values The array of [QueryValue] objects to be used in [sql] template as question marks replacement.
+ * @param values The array of [QueryValue] objects to be used in [sql] template as question marks replacements.
  */
 public class Query(
     public var sql: String,

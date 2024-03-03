@@ -4,13 +4,7 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 /**
- * Represents a column in a [TableInfo].
- *
- * @property kprop The reference to the class [KProperty1].
- * @property dbType The type of database value.
- * @property jdbcType The type of JDBC value.
- * @property encoder The [Encoder] used to encode the value.
- * @property decoder The [Decoder] used to decode the value.
+ * Represents a column in a database table.
  */
 public open class Column(
     kprop: KProperty1<Any, Any?>,
@@ -31,20 +25,10 @@ public open class Column(
      */
     public lateinit var table: TableInfo
 
-
-    /**
-     * Determines if [Column] has been initialized.
-     */
     override val inited: Boolean get() = this::table.isInitialized
 
-    /**
-     * Represents the name of a [Column].
-     */
     override val name: String = this.kprop.name
 
-    /**
-     * Represents the full path of [Column] location.
-     */
     override val path: String get() = listOf(this.table.schema, this.table.name, this.kprop.name).joinToString(".")
 
     /** @suppress */

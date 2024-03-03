@@ -4,7 +4,7 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 /**
- * Represents an other column in a [TableInfo].
+ * Represents an ordinary column that is not [PrimaryColumn] nor [ForeignColumn].
  *
  * @property unique Determines whether the column values should be unique.
  */

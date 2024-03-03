@@ -7,9 +7,7 @@ import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
 /**
- * Represents a column in a [TableInfo], specifically a primary column.
- *
- * @property getAutoIncrement Determines if the primary column has auto-increment enabled.
+ * Represents [PrimaryColumn] in a [TableInfo].
  */
 public class PrimaryColumn(
     kprop: KProperty1<Any, Any?>,
@@ -25,6 +23,9 @@ public class PrimaryColumn(
     decoder = decoder
 ) {
 
+    /**
+     * Represents whether a column is auto-increment.
+     */
     public val autoInc: Boolean
         get() {
             val isWholeNumber = kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber

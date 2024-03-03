@@ -8,7 +8,6 @@ import kotlin.reflect.KProperty1
  *
  * @property cascadeDelete Determines whether the delete operation cascades.
  * @property cascadeUpdate Determines whether the update operation cascades.
- * @property foreignTable The [TableInfo] instant of the foreign table.
  */
 public class ForeignColumn(
     unique: Boolean,
@@ -27,10 +26,10 @@ public class ForeignColumn(
     encoder = encoder,
     decoder = decoder
 ) {
+    /**
+     * Foreign table on which this foreign key is pointing at.
+     */
     public lateinit var foreignTable: TableInfo
 
-    /**
-     * Represents a boolean flag indicating whether the [ForeignColumn] has been initialized.
-     */
     override val inited: Boolean get() = super.inited && this::foreignTable.isInitialized
 }
