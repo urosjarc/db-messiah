@@ -8,6 +8,8 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
 import com.urosjarc.dbmessiah.extend.ext_isMutable
+import com.urosjarc.dbmessiah.extend.ext_kparams
+import com.urosjarc.dbmessiah.extend.ext_kprops
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -257,6 +259,119 @@ internal class SerializerTests {
     }
 
     /**
+     * The class is responsible for performing tests on element names.
+     * These tests are needed in case developer forgets to use escaping quotation
+     * while creating queries in [Serializer]. Database will create very strange
+     * exception messages which are really hard for the user to understand and to
+     * figure out where is the source of the problem. That's why we force naming
+     * convention of elements that will be used inside the database.
+     *
+     * @property ser The Serializer instance used for testing.
+     */
+    class NamingTests(val ser: Serializer) {
+
+        /**
+         * Regular expression pattern used to validate if a name is a valid C-like variable name.
+         */
+        private val isValidNameRegex = Regex("""/[a-zA-Z_][a-zA-Z0-9_]*/""")
+
+        /**
+         * Validates that the schema, tables, properties, and parameters have valid names.
+         *
+         * @throws SerializerTestsException if any name is not valid.
+         */
+        fun `Schema must have valid name`() {
+            this.ser.schemas.forEach { schema ->
+                this.assertValidName("Schema", schema.name)
+
+                schema.tables.forEach { table ->
+                    this.assertValidName("Table", table.name)
+
+                    table.kclass.ext_kprops.forEach { this.assertValidName(group = "Property $it", name = it.name) }
+                    table.kclass.ext_kparams?.forEach {
+                        val paramName = it.name ?: throw SerializerTestsException("Could not extract parameter name: $it")
+                        this.assertValidName(group = "Parameter $it", name = paramName)
+                    } ?: SerializerTestsException("Could not extract parameters from table: $table")
+
+
+                }
+            }
+        }
+
+        /**
+         * This method validates that global outputs have valid names with valid property and parameter names.
+         *
+         * @return Unit
+         */
+        fun `Global outputs must have valid name with valid property and parameter names`() =
+            this.ser.globalOutputs.forEach { this.assertValidKClass(group = "Global output", kclass = it) }
+
+        /**
+         * Global inputs must have valid name with valid property and parameter names.
+         *
+         * @throws SerializerTestsException if any name is not valid.
+         */
+        fun `Global inputs must have valid name with valid property and parameter names`() =
+            this.ser.globalInputs.forEach { this.assertValidKClass(group = "Global input", kclass = it) }
+
+        /**
+         * Checks if global procedures have valid names with valid property and parameter names.
+         */
+        fun `Global procedures must have valid name with valid property and parameter names`() =
+            this.ser.globalProcedures.forEach { this.assertValidKClass(group = "Global procedure", kclass = it) }
+
+        /**
+         * Validates that the Schemas tables have valid names with valid property and parameter names.
+         *
+         * @throws SerializerTestsException if any name is not valid.
+         */
+        fun `Schemas tables must have valid name with valid property and parameter names`() =
+            this.ser.schemas.forEach { schema ->
+                schema.tables.forEach {
+                    this.assertValidKClass(group = "Procedure from '${schema.name}' schema", kclass = it.kclass)
+                }
+            }
+        /**
+         * Validates that the procedures of all schemas have valid names with valid property and parameter names.
+         */
+        fun `Schemas procedures must have valid name with valid property and parameter names`() =
+            this.ser.schemas.forEach { schema ->
+                schema.procedures.forEach {
+                    this.assertValidKClass(group = "Procedure from '${schema.name}' schema", kclass = it)
+                }
+            }
+
+        /**
+         * Asserts that the given KClass has a valid name and that all properties and parameters also have valid names.
+         *
+         * @param group The group or context in which the KClass is being validated.
+         * @param kclass The KClass to be validated.
+         * @throws SerializerTestsException if any name is not valid.
+         */
+        private fun assertValidKClass(group: String, kclass: KClass<*>) {
+            this.assertValidName(group = group, kclass.simpleName.toString())
+            kclass.ext_kprops.forEach { this.assertValidName(group = "Property $it", name = it.name) }
+            kclass.ext_kparams?.forEach {
+                val paramName = it.name ?: throw SerializerTestsException("Could not extract parameter name: $it")
+                this.assertValidName(group = "Parameter $it", name = paramName)
+            } ?: SerializerTestsException("Could not extract parameters from: $kclass")
+        }
+
+        /**
+         * Asserts that the given name is a valid C-like variable name.
+         *
+         * @param group The group or context in which the name is being validated.
+         * @param name The name to be validated.
+         * @throws SerializerTestsException If the name is not a valid C-like variable name.
+         */
+        private fun assertValidName(group: String, name: String) {
+            if (isValidNameRegex.matchEntire(name) == null)
+                throw SerializerTestsException("$group '$name' must have C like variable name: ${isValidNameRegex.pattern}")
+        }
+
+    }
+
+    /**
      * Class for testing various constraints on table objects.
      *
      * @property ser The serializer used for testing.
@@ -391,6 +506,7 @@ internal class SerializerTests {
         val kparams: List<KParameter> = kclass.primaryConstructor?.parameters?.filter { it.kind == KParameter.Kind.VALUE } ?: listOf()
         val kprops: List<KProperty1<out Any, *>> = kclass.memberProperties.filter { it.javaField != null }
         val optionalKParams = kclass.primaryConstructor?.parameters?.filter { p -> p.isOptional }?.map { "'${it.name}'" } ?: listOf()
+
         /**
          * Checks if all properties and parameters have matching type serializers.
          *

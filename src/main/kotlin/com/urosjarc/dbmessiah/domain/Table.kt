@@ -72,7 +72,7 @@ public class Table<T : Any>(
     /**
      * Kotlin class that represents this [Table].
      */
-    public val kclass: KClass<*> = (primaryKey.ext_owner ?: throw MappingException("Could not found enclosing class for primary key: $primaryKey"))
+    public val kclass: KClass<*> = primaryKey.ext_owner ?: throw SerializerTestsException("Could not found enclosing class for primary key: $primaryKey"))
 
     /** @suppress */
     private val hash = this.name.hashCode()

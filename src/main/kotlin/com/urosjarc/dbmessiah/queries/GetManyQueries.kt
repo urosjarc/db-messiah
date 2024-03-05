@@ -6,7 +6,6 @@ import com.urosjarc.dbmessiah.builders.ProcedureBuilder
 import com.urosjarc.dbmessiah.builders.QueryBuilder
 import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.data.Query
-import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.exceptions.QueryException
 import kotlin.reflect.KClass
 

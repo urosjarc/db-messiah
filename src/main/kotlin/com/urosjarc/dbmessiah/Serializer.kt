@@ -26,8 +26,8 @@ import kotlin.reflect.KProperty1
 public abstract class Serializer(
     internal val schemas: List<Schema>,
     internal val globalSerializers: List<TypeSerializer<*>>,
-    internal val globalInputs: List<KClass<*>>,
-    internal val globalOutputs: List<KClass<*>>,
+    internal val globalInputs: List<KClass<*>> = listOf(),
+    internal val globalOutputs: List<KClass<*>> = listOf(),
     internal val globalProcedures: List<KClass<*>> = listOf()
 ) {
 
@@ -51,6 +51,14 @@ public abstract class Serializer(
             it.`Tables must be unique`()
             it.`Tables serializers keys must be unique`()
             it.`Column constraints must be unique`()
+        }
+        SerializerTests.NamingTests(ser = this).also {
+            it.`Schema must have valid name`()
+            it.`Global outputs must have valid name with valid property and parameter names`()
+            it.`Global inputs must have valid name with valid property and parameter names`()
+            it.`Global procedures must have valid name with valid property and parameter names`()
+            it.`Schemas tables must have valid name with valid property and parameter names`()
+            it.`Schemas procedures must have valid name with valid property and parameter names`()
         }
         SerializerTests.TableTests(ser = this).also {
             it.`Tables primary keys must not be imutable and optional at the same time`()
