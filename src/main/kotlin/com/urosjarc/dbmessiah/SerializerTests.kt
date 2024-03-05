@@ -1,8 +1,5 @@
-package com.urosjarc.dbmessiah.tests
+package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.Mapper
-import com.urosjarc.dbmessiah.Schema
-import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
@@ -22,8 +19,6 @@ import kotlin.reflect.jvm.javaField
  * Responsible for testing the user defined [Serializer] configuration.
  * Tests are responsible to provide strong type safety before database initialization.
  * It contains various tests to ensure the correctness of the database configuration.
- *
- * @param ser The [Mapper] instance to be tested.
  */
 internal class SerializerTests {
 

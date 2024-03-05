@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.builders
 
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.extend.ext_owner
 import kotlin.reflect.KProperty1

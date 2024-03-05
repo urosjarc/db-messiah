@@ -1,10 +1,8 @@
 package com.urosjarc.dbmessiah.builders
 
-import com.urosjarc.dbmessiah.Mapper
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
-import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KProperty1
 
 

@@ -4,7 +4,6 @@ import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.builders.QueryBuilder
 import com.urosjarc.dbmessiah.builders.SqlBuilder
-import com.urosjarc.dbmessiah.exceptions.MappingException
 import kotlin.reflect.KClass
 
 /**

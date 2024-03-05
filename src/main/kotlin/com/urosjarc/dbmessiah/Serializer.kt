@@ -6,7 +6,6 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
-import com.urosjarc.dbmessiah.tests.SerializerTests
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 

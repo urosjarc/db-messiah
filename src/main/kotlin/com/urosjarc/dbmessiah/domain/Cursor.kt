@@ -1,7 +1,5 @@
 package com.urosjarc.dbmessiah.domain
 
-import com.urosjarc.dbmessiah.exceptions.MappingException
-import com.urosjarc.dbmessiah.exceptions.QueryException
 import kotlin.reflect.KProperty1
 
 /**

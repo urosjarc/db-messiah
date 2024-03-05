@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.domain
 
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import com.urosjarc.dbmessiah.exceptions.MappingException
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
 import com.urosjarc.dbmessiah.extend.ext_notUnique
 import com.urosjarc.dbmessiah.extend.ext_owner
@@ -72,7 +71,7 @@ public class Table<T : Any>(
     /**
      * Kotlin class that represents this [Table].
      */
-    public val kclass: KClass<*> = primaryKey.ext_owner ?: throw SerializerTestsException("Could not found enclosing class for primary key: $primaryKey"))
+    public val kclass: KClass<*> = primaryKey.ext_owner
 
     /** @suppress */
     private val hash = this.name.hashCode()

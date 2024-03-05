@@ -17,7 +17,7 @@ private val KType.ext_isWholeNumber: Boolean get() = listOf(typeOf<Int>(), typeO
  *
  * @return The [KClass] object representing the owning class of the property.
  */
-public val <T : Any> KProperty1<T, *>.ext_owner: KClass<T>? get() = this.javaField?.declaringClass?.kotlin as KClass<T>?
+public val <T : Any> KProperty1<T, *>.ext_owner: KClass<T> get() = this.javaField?.declaringClass?.kotlin as KClass<T>
 
 /**
  * Determines whether the property is mutable or not.
