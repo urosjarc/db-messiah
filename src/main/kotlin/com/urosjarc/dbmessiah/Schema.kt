@@ -19,11 +19,8 @@ public open class Schema(
     internal val serializers: List<TypeSerializer<out Any>> = listOf(),
     internal val procedures: List<KClass<*>> = listOf()
 ) {
-    /** @suppress */
-    private val hash = this.name.hashCode()
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {

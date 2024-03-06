@@ -30,11 +30,7 @@ public data class QueryValue(
         }
 
     /** @suppress */
-
-    private val hash = this.name.hashCode()
-
-    /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = name.hashCode()//OK
 
     /** @suppress */
     override fun toString(): String {

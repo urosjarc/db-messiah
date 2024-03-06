@@ -32,5 +32,21 @@ public open class Column(
     override val path: String get() = listOf(this.table.schema, this.table.name, this.kprop.name).joinToString(".")
 
     /** @suppress */
+    override fun hashCode(): Int = 31 * super.hashCode() + path.hashCode() //OK
+
+    /** @suppress */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as Column
+
+        return path == other.path
+    }
+
+    /** @suppress */
     override fun toString(): String = "Column(name='${this.name}', dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
+
+
 }

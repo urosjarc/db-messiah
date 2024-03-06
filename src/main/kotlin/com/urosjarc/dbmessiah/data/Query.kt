@@ -10,11 +10,9 @@ public class Query(
     public var sql: String,
     public vararg val values: QueryValue
 ) {
-    /** @suppress */
-    private val hash = 31 * sql.hashCode() + values.contentHashCode()
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = 31 * sql.hashCode() + values.contentHashCode()//OK
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
@@ -38,4 +36,5 @@ public class Query(
         }
         return "\n\n$sql\n${values}"
     }
+
 }

@@ -32,4 +32,23 @@ public class ProcedureArg(
 
     /** @suppress */
     override fun toString(): String = "Arg(name='${this.name}', dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"
+
+
+    /** @suppress */
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + path.hashCode()
+        return result
+    }
+
+    /** @suppress */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+        other as ProcedureArg
+        return path == other.path
+    }
+
+
 }

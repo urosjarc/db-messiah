@@ -117,11 +117,9 @@ public data class TableInfo(
         .toTypedArray()
 
 
-    /** @suppress */
-    private val hash = this.path.hashCode()
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = path.hashCode()//OK
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {

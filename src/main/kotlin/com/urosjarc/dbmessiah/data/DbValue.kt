@@ -101,10 +101,7 @@ public abstract class DbValue(
     }
 
     /** @suppress */
-    private val hash = 31 * kprop.hashCode() + kclass.hashCode()
-
-    /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = 31 * kprop.hashCode() + kclass.hashCode() //OK
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {

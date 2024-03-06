@@ -51,11 +51,7 @@ public data class Procedure(
         .toTypedArray()
 
     /** @suppress */
-
-    private val hash = this.path.hashCode()
-
-    /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = path.hashCode()//OK
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
@@ -70,5 +66,7 @@ public data class Procedure(
         val argsNames = this.args.joinToString(", ") { "${it.name}: ${it.kclass.simpleName}" }
         return "${kclass.simpleName}($argsNames)"
     }
+
+
 
 }

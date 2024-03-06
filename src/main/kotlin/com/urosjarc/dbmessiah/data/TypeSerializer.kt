@@ -20,11 +20,9 @@ public data class TypeSerializer<T : Any>(
     val decoder: Decoder<T?>, //At decoding you can accept null values
     val encoder: Encoder<T> //When converting to db value you must handle null values differently in JDBC!!!
 ) {
-    /** @suppress */
-    private val hash = kclass.hashCode()
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun hashCode(): Int = kclass.hashCode()
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
