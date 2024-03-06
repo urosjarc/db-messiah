@@ -101,13 +101,20 @@ public abstract class DbValue(
     }
 
     /** @suppress */
-    private val hash = (this.kclass.simpleName + this.kprop.name).hashCode()
-
-    /** @suppress */
-    override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
+    private val hash = 31 * kprop.hashCode() + kclass.hashCode()
 
     /** @suppress */
     override fun hashCode(): Int = this.hash
+
+    /** @suppress */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as DbValue
+        if (kprop != other.kprop) return false
+        if (kclass != other.kclass) return false
+        return true
+    }
 
     /** @suppress */
     override fun toString(): String = "DbValue(name=${this.name}, dbType='${this.dbType}', jdbcType='${this.jdbcType.name}')"

@@ -31,7 +31,10 @@ public data class QueryValue(
 
     /** @suppress */
 
-    private val hash = this.toString().hashCode()
+    private val hash = this.name.hashCode()
+
+    /** @suppress */
+    override fun hashCode(): Int = this.hash
 
     /** @suppress */
     override fun toString(): String {
@@ -39,10 +42,12 @@ public data class QueryValue(
     }
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
-
-    /** @suppress */
     override fun equals(other: Any?): Boolean {
-        return this.hashCode() == other.hashCode()
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as QueryValue
+        return name == other.name
     }
+
+
 }

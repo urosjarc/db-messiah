@@ -24,10 +24,16 @@ public data class TypeSerializer<T : Any>(
     private val hash = kclass.hashCode()
 
     /** @suppress */
-    override fun equals(other: Any?): Boolean = this.hashCode() == other.hashCode()
+    override fun hashCode(): Int = this.hash
 
     /** @suppress */
-    override fun hashCode(): Int = this.hash
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as TypeSerializer<*>
+        return kclass == other.kclass
+    }
+
 
     /** @suppress */
     override fun toString(): String = "TS<${this.kclass.simpleName}>"

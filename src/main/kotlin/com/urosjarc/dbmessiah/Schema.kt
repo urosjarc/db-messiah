@@ -27,7 +27,10 @@ public open class Schema(
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
-        return this.hashCode() == other.hashCode()
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Schema
+        return name == other.name
     }
 
     /** @suppress */

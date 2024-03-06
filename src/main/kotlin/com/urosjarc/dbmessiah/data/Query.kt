@@ -11,14 +11,19 @@ public class Query(
     public vararg val values: QueryValue
 ) {
     /** @suppress */
-    private val hash = "$sql$values".hashCode()
+    private val hash = 31 * sql.hashCode() + values.contentHashCode()
 
     /** @suppress */
     override fun hashCode(): Int = this.hash
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
-        return this.hashCode() == other.hashCode()
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Query
+        if (sql != other.sql) return false
+        if (!values.contentEquals(other.values)) return false
+        return true
     }
 
     /** @suppress */

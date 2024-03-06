@@ -35,9 +35,6 @@ public data class TableInfo(
      */
     public val path: String = listOf(this.schema, this.name).joinToString(".")
 
-    /** @suppress */
-    private val hash = this.path.hashCode()
-
     /**
      * Assign [TableInfo] instance to all their children.
      */
@@ -121,11 +118,18 @@ public data class TableInfo(
 
 
     /** @suppress */
+    private val hash = this.path.hashCode()
+
+    /** @suppress */
     override fun hashCode(): Int = this.hash
 
     /** @suppress */
-    override fun equals(other: Any?): Boolean =
-        this.hashCode() == other.hashCode()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as TableInfo
+        return path == other.path
+    }
 
     /** @suppress */
     override fun toString(): String = this.path

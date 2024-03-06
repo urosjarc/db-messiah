@@ -58,12 +58,17 @@ public data class Procedure(
     override fun hashCode(): Int = this.hash
 
     /** @suppress */
-    override fun equals(other: Any?): Boolean =
-        this.hashCode() == other.hashCode()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Procedure
+        return path == other.path
+    }
 
     /** @suppress */
     override fun toString(): String {
         val argsNames = this.args.joinToString(", ") { "${it.name}: ${it.kclass.simpleName}" }
         return "${kclass.simpleName}($argsNames)"
     }
+
 }

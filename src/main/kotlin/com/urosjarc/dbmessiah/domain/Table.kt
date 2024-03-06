@@ -81,10 +81,12 @@ public class Table<T : Any>(
 
     /** @suppress */
     override fun equals(other: Any?): Boolean {
-        return this.hashCode() == other.hashCode()
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Table<*>
+        return name == other.name
     }
 
     /** @suppress */
     override fun toString(): String = "'${this.name}'"
-
 }
