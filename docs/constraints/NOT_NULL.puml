@@ -1,0 +1,10 @@
+
+
+@startuml
+start
+if (is column type marked with ?) then (true)
+else (false)
+  :Mark column "NOT NULL";
+endif
+stop
+@enduml

@@ -2,6 +2,7 @@
 
 ## Todo:
 
+* [ ] Add support for UUID types as primary key.
 * [ ] Popravi equals da ne bodo uporabljali hashe
 * [ ] Popravi exceptione da bodo uporabljeni pravi.
 * [ ] Popravi in dokonèaj mapper teste.

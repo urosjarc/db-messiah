@@ -1,0 +1,10 @@
+
+
+@startuml
+start
+if (column constraints contain "C.CASCADE_UPDATE") then (true)
+  :Mark column "CASCADE_UPDATE";
+else (false)
+endif
+stop
+@enduml

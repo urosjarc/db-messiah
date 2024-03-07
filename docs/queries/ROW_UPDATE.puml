@@ -1,0 +1,10 @@
+@startuml
+start
+    :Before ROW[S] UPDATE;
+if (primary key value is null) then(true)
+    :<color:red>QueryException;
+else (false)
+endif
+    :After ROW[S] UPDATE;
+stop
+@enduml

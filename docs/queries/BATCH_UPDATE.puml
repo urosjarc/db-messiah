@@ -1,0 +1,10 @@
+@startuml
+start
+    :Before BATCH UPDATE;
+if (primary key value is null) then(true)
+    :<color:red>QueryException;
+else (false)
+endif
+    :After BATCH UPDATE;
+stop
+@enduml

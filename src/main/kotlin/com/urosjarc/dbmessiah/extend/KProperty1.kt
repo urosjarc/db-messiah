@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah.extend
 
+import java.util.*
 import kotlin.reflect.*
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
@@ -10,6 +11,13 @@ import kotlin.reflect.jvm.javaField
  * @return True if the type is a whole number type, false otherwise.
  */
 private val KType.ext_isWholeNumber: Boolean get() = listOf(typeOf<Int>(), typeOf<UInt>(), typeOf<Int?>(), typeOf<UInt?>()).contains(this)
+
+/**
+ * Checks if the given type is a UUID.
+ *
+ * @return true if the type is a UUID, false otherwise.
+ */
+private val KType.ext_isUUID: Boolean get() = listOf(typeOf<UUID>()).contains(this)
 
 /**
  * The [ext_owner] property is an extension property for the [KProperty1] class.
@@ -34,6 +42,14 @@ public val <T : Any> KProperty1<T, *>.ext_isMutable: Boolean get() = this is KMu
 public val <T : Any> KProperty1<T, *>.ext_isWholeNumber: Boolean get() = this.returnType.ext_isWholeNumber
 
 /**
+ * Determines whether the property represents a UUID.
+ *
+ * @return true if the property is of type UUID, otherwise false.
+ */
+public val <T : Any> KProperty1<T, *>.ext_isUUID: Boolean get() = this.returnType.ext_isUUID
+
+
+/**
  * Represents whether the [KProperty1] is whole number.
  *
  * @return `true` if the [KProperty1] is an inline whole number, `false` otherwise.
@@ -44,6 +60,25 @@ public val <T : Any> KProperty1<T, *>.ext_isInlineWholeNumber: Boolean
         if (kclass.isValue) {
             val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
             return firstParam?.type?.ext_isWholeNumber == true
+        }
+        return false
+    }
+
+/**
+ * Checks if the property is an inline UUID.
+ *
+ * This property extension function is added to `KProperty1` objects, allowing you to determine
+ * whether the property is an inline UUID or not.
+ *
+ * @receiver The `KProperty1` object.
+ * @return `true` if the property is an inline UUID, `false` otherwise.
+ */
+public val <T : Any> KProperty1<T, *>.ext_isInlineUUID: Boolean
+    get() {
+        val kclass = this.returnType.classifier as KClass<*>
+        if (kclass.isValue) {
+            val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
+            return firstParam?.type?.ext_isUUID == true
         }
         return false
     }

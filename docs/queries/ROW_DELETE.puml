@@ -1,0 +1,14 @@
+@startuml
+start
+    :Before ROW[S] DELETE;
+if (primary key value is null) then(false)
+    :<color:red>QueryException;
+else (true)
+endif
+    :After ROW[S] DELETE;
+if (primary key is AUTO_INCREMENT or AUTO_UUID) then(true)
+    :<color:darkorange>Set primary key value to null;
+else (false)
+endif
+stop
+@enduml

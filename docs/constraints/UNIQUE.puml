@@ -1,0 +1,10 @@
+
+
+@startuml
+start
+if (column constraints contain "C.UNIQUE") then (true)
+  :Mark column "UNIQUE";
+else (false)
+endif
+stop
+@enduml
