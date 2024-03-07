@@ -31,5 +31,4 @@ public class ForeignColumn(
      */
     public lateinit var foreignTable: TableInfo
 
-    override val inited: Boolean get() = super.inited && this::foreignTable.isInitialized
 }

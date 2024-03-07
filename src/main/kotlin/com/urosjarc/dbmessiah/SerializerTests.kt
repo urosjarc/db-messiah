@@ -268,7 +268,7 @@ internal class SerializerTests {
         /**
          * Regular expression pattern used to validate if a name is a valid C-like variable name.
          */
-        private val isValidNameRegex = Regex("""/[a-zA-Z_][a-zA-Z0-9_]*/""")
+        private val isValidNameRegex = """[a-zA-Z_][a-zA-Z0-9_]*""".toRegex()
 
         /**
          * Validates that the schema, tables, properties, and parameters have valid names.

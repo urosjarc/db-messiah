@@ -60,7 +60,7 @@ class Test_TableInfo {
     @Test
     fun `test userControlledColumns`() {
         assertEquals(
-            actual = this.tableInfo.userControlledColumns, expected = listOf(
+            actual = this.tableInfo.getColumns, expected = listOf(
                 foreignColumn, otherColumn
             )
         )
