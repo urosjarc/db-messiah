@@ -24,7 +24,7 @@ public open class MssqlSerializer(
 
     override val selectLastId: String = "SELECT SCOPE_IDENTITY()"
     override fun escaped(name: String): String = "[$name]"
-    override fun <T: Any> escaped(procedureArg: KProperty1<T, *>): String  = "@${procedureArg.name}"
+    override fun <T : Any> escaped(procedureArg: KProperty1<T, *>): String = "@${procedureArg.name}"
     override fun <T : Any> createTable(table: KClass<T>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
 
@@ -32,8 +32,12 @@ public open class MssqlSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoInc) " IDENTITY(1,1)" else ""
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        val default =
+            if (T.primaryKey.autoInc) " IDENTITY(1,1)"
+            else if (T.primaryKey.autoUUID) " DEFAULT NEWID()"
+            else ""
+
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
         T.foreignKeys.forEach {

@@ -1,8 +1,6 @@
 package com.urosjarc.dbmessiah.data
 
-import com.urosjarc.dbmessiah.extend.ext_isInlineWholeNumber
-import com.urosjarc.dbmessiah.extend.ext_isMutable
-import com.urosjarc.dbmessiah.extend.ext_isWholeNumber
+import com.urosjarc.dbmessiah.extend.*
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
@@ -29,6 +27,21 @@ public class PrimaryColumn(
     public val autoInc: Boolean
         get() {
             val isWholeNumber = kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber
+            val flags = listOf(isWholeNumber, kprop.ext_isMutable, kprop.returnType.isMarkedNullable)
+            return false !in flags
+        }
+
+    /**
+     * Represents whether a column should generate an autoUUID value.
+     *
+     * This property is used to determine if a column in a database table should generate an auto-generated UUID value.
+     * The value is true if the column is configured to generate an autoUUID, and false otherwise.
+     *
+     * @return true if the column should generate an autoUUID value, false otherwise
+     */
+    public val autoUUID: Boolean
+        get() {
+            val isWholeNumber = kprop.ext_isUUID || kprop.ext_isInlineUUID
             val flags = listOf(isWholeNumber, kprop.ext_isMutable, kprop.returnType.isMarkedNullable)
             return false !in flags
         }

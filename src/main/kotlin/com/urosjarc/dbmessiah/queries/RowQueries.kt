@@ -2,7 +2,6 @@ package com.urosjarc.dbmessiah.queries
 
 import com.urosjarc.dbmessiah.Driver
 import com.urosjarc.dbmessiah.Serializer
-import com.urosjarc.dbmessiah.exceptions.DriverException
 import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import com.urosjarc.dbmessiah.impl.h2.H2Serializer

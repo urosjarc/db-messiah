@@ -2,7 +2,8 @@
 
 @startuml
 start
-if (column is primary key) then (false)
+if (database supports AUTO_UUID) then (false)
+(true) elseif (column is primary key) then (false)
 (true) elseif (is [inline] UUID) then (false)
 (true) elseif (is mutable) then (false)
 (true) elseif (is column type marked with ?) then (false)

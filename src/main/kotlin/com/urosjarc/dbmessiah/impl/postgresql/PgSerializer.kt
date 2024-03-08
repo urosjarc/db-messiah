@@ -26,9 +26,17 @@ public open class PgSerializer(
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
 
-        //Primary key
-        val type = if (T.primaryKey.autoInc) " SERIAL" else " INTEGER"
-        col.add("${escaped(T.primaryKey.name)}$type PRIMARY KEY")
+        //PRIMARY KEY
+        val type =
+            if (T.primaryKey.autoInc) " SERIAL"
+            else if (T.primaryKey.autoUUID) " UUID"
+            else " INTEGER"
+
+        val default =
+            if (T.primaryKey.autoUUID) " DEFAULT gen_random_uuid()"
+            else ""
+
+        col.add("${escaped(T.primaryKey.name)}$type PRIMARY KEY$default")
 
         //Foreign keys
         T.foreignKeys.forEach {

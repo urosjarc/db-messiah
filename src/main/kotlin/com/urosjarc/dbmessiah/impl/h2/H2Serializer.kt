@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah.impl.h2
 
-import com.urosjarc.dbmessiah.Schema
 import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.TypeSerializer
@@ -28,8 +27,12 @@ public open class H2Serializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoInc) " AUTO_INCREMENT" else ""
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        val default =
+            if (T.primaryKey.autoInc) " AUTO_INCREMENT"
+            else if (T.primaryKey.autoUUID) " DEFAULT RANDOM_UUID()"
+            else ""
+
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
         T.foreignKeys.forEach {
@@ -56,6 +59,7 @@ public open class H2Serializer(
         //Return created query
         return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns);")
     }
+
     override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query = TODO("Not implemented")
     override fun <T : Any> callProcedure(procedure: T): Query = TODO("Not implemented")
     override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not implemented")

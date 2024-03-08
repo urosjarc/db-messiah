@@ -29,9 +29,13 @@ public open class MysqlSerializer(
         val col = mutableListOf<String>()
         val constraints = mutableListOf<String>()
 
-        //Primary key
-        val autoIncrement = if (T.primaryKey.autoInc) " AUTO_INCREMENT" else ""
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        //PRIMARY KEY
+        val default =
+            if (T.primaryKey.autoInc) " AUTO_INCREMENT"
+            else if (T.primaryKey.autoUUID) " DEFAULT (uuid_to_bin(uuid()))"
+            else ""
+
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
         T.foreignKeys.forEach {

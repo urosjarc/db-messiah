@@ -30,8 +30,12 @@ public open class MariaSerializer(
         val constraints = mutableListOf<String>()
 
         //Primary key
-        val autoIncrement = if (T.primaryKey.autoInc) " AUTO_INCREMENT" else ""
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        val default =
+            if (T.primaryKey.autoInc) " AUTO_INCREMENT"
+            else if (T.primaryKey.autoUUID) " DEFAULT UUID()"
+            else ""
+
+        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
         T.foreignKeys.forEach {

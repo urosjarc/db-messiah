@@ -25,10 +25,10 @@ public object UUIDTS {
 
     public val oracle: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "RAW(16)",
-        jdbcType = JDBCType.BINARY,
-        decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
-        encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
+        dbType = "STRING",
+        jdbcType = JDBCType.CHAR,
+        decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
+        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val mysql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
@@ -39,14 +39,14 @@ public object UUIDTS {
 
     public val maria: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "BINARY(16)",
+        dbType = "UUID",
         jdbcType = JDBCType.BINARY,
         decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
         encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
 
     public val mssql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "uniqueidentifier",
+        dbType = "UNIQUEIDENTIFIER",
         jdbcType = JDBCType.CHAR,
         decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
         encoder = { ps, i, x -> ps.setString(i, x.toString()) })
