@@ -6,7 +6,7 @@ if (primary key value is null) then(false)
 else (true)
 endif
     :After BATCH DELETE;
-if (primary key is AUTO_INCREMENT or AUTO_UUID) then(true)
+if (primary key is marked with ?) then(true)
     :<color:darkorange>Set primary key value to null;
 else (false)
 endif
