@@ -245,16 +245,16 @@ class Test_Mapper {
             actual = ti0, expected = TableInfo(
                 schema = "main",
                 kclass = Parent::class,
-                primaryKey = PrimaryColumn(
+                primaryColumn = PrimaryColumn(
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,
                     encoder = NumberTS.int.encoder,
                     decoder = NumberTS.int.decoder
                 ),
-                foreignKeys = listOf(),
+                foreignColumns = listOf(),
                 otherColumns = listOf(),
-                serializers = listOf()
+                typeSerializers = listOf()
             )
         )
 
@@ -263,16 +263,16 @@ class Test_Mapper {
             actual = ti1, expected = TableInfo(
                 schema = "main",
                 kclass = Parent::class,
-                primaryKey = PrimaryColumn(
+                primaryColumn = PrimaryColumn(
                     kprop = Parent::pk as KMutableProperty1<Any, Any?>,
                     dbType = "INT",
                     jdbcType = JDBCType.INTEGER,
                     encoder = NumberTS.int.encoder,
                     decoder = NumberTS.int.decoder
                 ),
-                foreignKeys = listOf(),
+                foreignColumns = listOf(),
                 otherColumns = listOf(),
-                serializers = listOf()
+                typeSerializers = listOf()
             )
         )
         val e = assertThrows<MappingException> {

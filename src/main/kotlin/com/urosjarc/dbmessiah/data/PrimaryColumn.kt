@@ -24,25 +24,10 @@ public class PrimaryColumn(
     /**
      * Represents whether a column is auto-increment.
      */
-    public val autoInc: Boolean
-        get() {
-            val isWholeNumber = kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber
-            val flags = listOf(isWholeNumber, kprop.ext_isMutable, kprop.returnType.isMarkedNullable)
-            return false !in flags
-        }
+    public val autoInc: Boolean = kprop.ext_isAutoInc
 
     /**
-     * Represents whether a column should generate an autoUUID value.
-     *
-     * This property is used to determine if a column in a database table should generate an auto-generated UUID value.
-     * The value is true if the column is configured to generate an autoUUID, and false otherwise.
-     *
-     * @return true if the column should generate an autoUUID value, false otherwise
+     * Represents whether a column should generate an auto-generated UUID value.
      */
-    public val autoUUID: Boolean
-        get() {
-            val isWholeNumber = kprop.ext_isUUID || kprop.ext_isInlineUUID
-            val flags = listOf(isWholeNumber, kprop.ext_isMutable, kprop.returnType.isMarkedNullable)
-            return false !in flags
-        }
+    public val autoUUID: Boolean = kprop.ext_isAutoUUID
 }

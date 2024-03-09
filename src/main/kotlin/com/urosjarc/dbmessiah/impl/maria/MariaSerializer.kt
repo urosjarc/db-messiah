@@ -17,7 +17,8 @@ public open class MariaSerializer(
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
-    globalProcedures = globalProcedures
+    globalProcedures = globalProcedures,
+    allowAutoUUID = true
 ) {
 
     override val selectLastId: String = "SELECT LAST_INSERT_ID()"
@@ -31,21 +32,21 @@ public open class MariaSerializer(
 
         //Primary key
         val default =
-            if (T.primaryKey.autoInc) " AUTO_INCREMENT"
-            else if (T.primaryKey.autoUUID) " DEFAULT UUID()"
+            if (T.primaryColumn.autoInc) " AUTO_INCREMENT"
+            else if (T.primaryColumn.autoUUID) " DEFAULT UUID()"
             else ""
 
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
+        col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
-        T.foreignKeys.forEach {
+        T.foreignColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
             col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryColumn.name)})$updateCascade$deleteCascade"
             )
         }
 

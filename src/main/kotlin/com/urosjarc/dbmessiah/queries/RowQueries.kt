@@ -42,7 +42,7 @@ public open class RowQueries(
         //Create SQL select statement
         val query = this.ser.insertRow(row = row, batch = false)
 
-        if (T.primaryKey.autoInc) {
+        if (T.primaryColumn.autoInc) {
             val pk =
                 /**
                  * Derby and every database (not oracle) supports only Statement.RETURN_GENERATED_KEYS
@@ -54,13 +54,13 @@ public open class RowQueries(
                  * Oracle and every database (not derby) supports returning columns by name directly.
                  */
                 else
-                    this.driver.insert(query = query, primaryKey = this.ser.escaped(T.primaryKey.name), onGeneratedKeysFail = this.ser.selectLastId)
+                    this.driver.insert(query = query, primaryKey = this.ser.escaped(T.primaryColumn.name), onGeneratedKeysFail = this.ser.selectLastId)
 
             //If pk didn't retrieved insert didn't happend
             if (pk == null) return false
 
             //Set primary key on object
-            T.primaryKey.setValue(obj = row, value = pk)
+            T.primaryColumn.setValue(obj = row, value = pk)
 
             //Insert happend
             return true
@@ -84,7 +84,7 @@ public open class RowQueries(
          * that's why he is trying to update row with invalid primary key. It's better to
          * message the user about problems that are needing to be resolved from his side.
          */
-        if (T.primaryKey.getValue(obj = row) == null)
+        if (T.primaryColumn.getValue(obj = row) == null)
             throw QueryException("Row can't be updated with invalid primary key value: $row")
 
         //Create SQL update statement
@@ -113,7 +113,7 @@ public open class RowQueries(
          * that's why he is trying to delete row with invalid primary key. It's better to
          * message the user about problems that are needing to be resolved from his side.
          */
-        if (T.primaryKey.getValue(obj = row) == null)
+        if (T.primaryColumn.getValue(obj = row) == null)
             throw QueryException("Row can't be deleted with invalid primary key value: $row")
 
         //Create SQL delete statement

@@ -4,10 +4,7 @@ import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
-import com.urosjarc.dbmessiah.extend.ext_isMutable
-import com.urosjarc.dbmessiah.extend.ext_kparams
-import com.urosjarc.dbmessiah.extend.ext_kprops
-import com.urosjarc.dbmessiah.extend.ext_notUnique
+import com.urosjarc.dbmessiah.extend.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
@@ -326,6 +323,7 @@ internal class SerializerTests {
                     this.assertValidKClass(group = "Procedure from '${schema.name}' schema", kclass = it.kclass)
                 }
             }
+
         /**
          * Validates that the procedures of all schemas have valid names with valid property and parameter names.
          */
@@ -373,6 +371,24 @@ internal class SerializerTests {
      */
     class TableTests(val ser: Serializer) {
         /**
+         * Checks if the primary keys of all tables in the given schema can be AUTO_UUID if the database allows it.
+         * If AUTO_UUID primary keys are not allowed by the database, a `SerializerTestsException` is thrown.
+         *
+         * @throws SerializerTestsException If AUTO_UUID primary keys are not allowed by the database.
+         */
+        fun `Tables primary keys can be AUTO_UUID if database allows it`() {
+            if (!this.ser.allowAutoUUID) {
+                this.ser.schemas.forEach { schema ->
+                    schema.tables.forEach { table ->
+                        if (table.primaryKey.ext_isAutoUUID)
+                            throw SerializerTestsException("Db2 does not support AUTO_UUID primary keys: ${table.primaryKey}")
+                    }
+                }
+            }
+
+        }
+
+        /**
          * Checks if the primary keys of all tables in the given schema are not both immutable and optional.
          * If any table violates this constraint, a [SerializerTestsException] is thrown.
          */
@@ -381,6 +397,38 @@ internal class SerializerTests {
                 schema.tables.forEach { table ->
                     if (table.primaryKey.returnType.isMarkedNullable && !table.primaryKey.ext_isMutable)
                         throw SerializerTestsException("Primary key must not be imutable and optional at the same time: ${table.primaryKey}")
+                }
+            }
+        }
+
+        /**
+         * Checks if the primary keys of all tables in the given schema are not both immutable and optional.
+         * If any table violates this constraint, a [SerializerTestsException] is thrown.
+         */
+        fun `Tables primary keys must not be mutable and not optional at the same time`() {
+            this.ser.schemas.forEach { schema ->
+                schema.tables.forEach { table ->
+                    if (!table.primaryKey.returnType.isMarkedNullable && table.primaryKey.ext_isMutable)
+                        throw SerializerTestsException("Primary key must not be mutable and not optional at the same time: ${table.primaryKey}")
+                }
+            }
+        }
+
+        /**
+         * Checks if the primary keys of all tables in the given schema are either whole number or UUID.
+         * If any table violates this constraint, a [SerializerTestsException] is thrown.
+         */
+        fun `Tables primary keys can be only be whole number or UUID`() {
+            this.ser.schemas.forEach { schema ->
+                schema.tables.forEach { table ->
+                    val flags = listOf(
+                        table.primaryKey.ext_isWholeNumber,
+                        table.primaryKey.ext_isInlineWholeNumber,
+                        table.primaryKey.ext_isUUID,
+                        table.primaryKey.ext_isInlineUUID
+                    )
+                    if (!flags.contains(true))
+                        throw SerializerTestsException("Primary key type must be [inline] whole number or [inline] UUID: ${table.primaryKey}")
                 }
             }
         }

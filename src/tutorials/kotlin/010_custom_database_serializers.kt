@@ -58,20 +58,20 @@ open class MyOwnSqliteSerializer(
         /**
          * All informations about primary key...
          */
-        val autoIncrement = if (T.primaryKey.autoInc) " AUTOINCREMENT" else ""
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${autoIncrement}")
+        val autoIncrement = if (T.primaryColumn.autoInc) " AUTOINCREMENT" else ""
+        col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType} PRIMARY KEY${autoIncrement}")
 
         /**
          * Fill all informations about foreign keys...
          */
-        T.foreignKeys.forEach {
+        T.foreignColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
             col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable.name)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable.name)} (${escaped(it.foreignTable.primaryColumn.name)})$updateCascade$deleteCascade"
             )
         }
 

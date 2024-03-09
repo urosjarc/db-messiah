@@ -19,7 +19,8 @@ public open class MssqlSerializer(
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
-    globalProcedures = globalProcedures
+    globalProcedures = globalProcedures,
+    allowAutoUUID = true
 ) {
 
     override val selectLastId: String = "SELECT SCOPE_IDENTITY()"
@@ -33,21 +34,21 @@ public open class MssqlSerializer(
 
         //Primary key
         val default =
-            if (T.primaryKey.autoInc) " IDENTITY(1,1)"
-            else if (T.primaryKey.autoUUID) " DEFAULT NEWID()"
+            if (T.primaryColumn.autoInc) " IDENTITY(1,1)"
+            else if (T.primaryColumn.autoUUID) " DEFAULT NEWID()"
             else ""
 
-        col.add("${escaped(T.primaryKey.name)} ${T.primaryKey.dbType} PRIMARY KEY${default}")
+        col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType} PRIMARY KEY${default}")
 
         //Foreign keys
-        T.foreignKeys.forEach {
+        T.foreignColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
             col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryColumn.name)})$updateCascade$deleteCascade"
             )
         }
 

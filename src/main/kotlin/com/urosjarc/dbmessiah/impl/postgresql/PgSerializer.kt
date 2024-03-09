@@ -16,6 +16,7 @@ public open class PgSerializer(
     globalSerializers = globalSerializers,
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
+    allowAutoUUID = true
 ) {
     override val selectLastId: String? = null
     override fun escaped(name: String): String = "\"$name\""
@@ -28,25 +29,25 @@ public open class PgSerializer(
 
         //PRIMARY KEY
         val type =
-            if (T.primaryKey.autoInc) " SERIAL"
-            else if (T.primaryKey.autoUUID) " UUID"
+            if (T.primaryColumn.autoInc) " SERIAL"
+            else if (T.primaryColumn.autoUUID) " UUID"
             else " INTEGER"
 
         val default =
-            if (T.primaryKey.autoUUID) " DEFAULT gen_random_uuid()"
+            if (T.primaryColumn.autoUUID) " DEFAULT gen_random_uuid()"
             else ""
 
-        col.add("${escaped(T.primaryKey.name)}$type PRIMARY KEY$default")
+        col.add("${escaped(T.primaryColumn.name)}$type PRIMARY KEY$default")
 
         //Foreign keys
-        T.foreignKeys.forEach {
+        T.foreignColumns.forEach {
             val notNull = if (it.notNull) " NOT NULL" else ""
             val unique = if (it.unique) " UNIQUE" else ""
             val deleteCascade = if (it.cascadeDelete) " ON DELETE CASCADE" else ""
             val updateCascade = if (it.cascadeUpdate) " ON UPDATE CASCADE" else ""
             col.add("${escaped(it.name)} ${it.dbType}$notNull$unique")
             constraints.add(
-                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryKey.name)})$updateCascade$deleteCascade"
+                "FOREIGN KEY (${escaped(it.name)}) REFERENCES ${escaped(it.foreignTable)} (${escaped(it.foreignTable.primaryColumn.name)})$updateCascade$deleteCascade"
             )
         }
 
@@ -66,12 +67,13 @@ public open class PgSerializer(
 
     override fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
-        val escapedColumns = T.sqlInsertColumns { escaped(it) }
-        var sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${T.sqlInsertQuestions()})"
-        sql += if (!batch) " RETURNING ${escaped(T.primaryKey.name)}" else ""
+        val RB = T.getInsertRowBuilder()
+        val escapedColumns = RB.sqlColumns { escaped(it) }
+        var sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${RB.sqlQuestions()})"
+        sql += if (!batch) " RETURNING ${escaped(T.primaryColumn.name)}" else ""
         return Query(
             sql = sql,
-            *T.queryValues(obj = row),
+            *RB.queryValues(obj = row),
         )
     }
 

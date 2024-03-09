@@ -2,13 +2,11 @@
 
 ## Todo:
 
-* [ ] Add support for UUID types as primary key.
-* [ ] Popravi equals da ne bodo uporabljali hashe
-* [ ] Popravi exceptione da bodo uporabljeni pravi.
-* [ ] Popravi in dokonèaj mapper teste.
+* [ ] Add schema tests for testing support of AUTO_UUID!
+* [ ] Make queries exactly as written in docs
+* [ ] Add driver support for retrieving uuid from database back.
 * [ ] Dokonèaj komentarje v tutorials in jih naredi res fantastiène saj je od njih odvisno ali bo projekt uspešen.
 
 * [ ] Make readme
 * [ ] Update docs 
-* [ ] Make recommend arhitecture for sample db (repository based with tests)
 * [ ] Publish product on maven

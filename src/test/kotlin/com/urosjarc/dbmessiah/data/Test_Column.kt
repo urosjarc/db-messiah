@@ -75,10 +75,10 @@ class Test_Column {
         TableInfo(
             schema = "Schema",
             kclass = Entity::class,
-            primaryKey = primaryColumn,
-            foreignKeys = listOf(foreignColumn, foreignColumnCanBeNull),
+            primaryColumn = primaryColumn,
+            foreignColumns = listOf(foreignColumn, foreignColumnCanBeNull),
             otherColumns = listOf(otherColumn),
-            serializers = AllTS.basic
+            typeSerializers = AllTS.basic
         )
     }
 

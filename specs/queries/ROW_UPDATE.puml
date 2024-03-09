@@ -1,10 +1,15 @@
 @startuml
 start
-    :Before BATCH UPDATE;
+
+:Before ROW[S] UPDATE;
+
 if (primary key value is null) then(true)
     :<color:red>QueryException;
+    end
 else (false)
 endif
-    :After BATCH UPDATE;
+
+:After ROW[S] UPDATE;
+
 stop
 @enduml

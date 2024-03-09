@@ -1,0 +1,27 @@
+@startuml
+<style>
+
+note {
+    backgroundcolor white
+    shadowing 0
+    linecolor transparent
+}
+</style>
+note as Customer
+ |=     |= Int   |=  UInt |= Int?    |=  UInt?  |= UUID     |= UUID?               |= other |= other? |
+ |= val | MANUAL | MANUAL | <color:red>ERROR    | <color:red>ERROR    | MANUAL    | <color:red>ERROR                | <color:red>ERROR  | <color:red>ERROR   |
+ |= var | <color:red>ERROR  | <color:red>ERROR  | AUTO_INC | AUTO_INC | <color:red>ERROR     | AUTO_UUID \|\| <color:red>ERROR | <color:red>ERROR  | <color:red>ERROR   |
+end note
+
+note as Test
+    AUTO_UUID is supported on H2, Maria, MS SQL, MySql, Oracle, Postgresql
+    on other databases ERROR will be created.
+
+    <color:red>The same table is applied on inline types which are required to be in the form
+    <color:red>inline class Name(val value: Type)
+    <color:red>Note that inside value of inline class is val with non nullable type!
+
+end note
+
+Test -up-> Customer
+@enduml

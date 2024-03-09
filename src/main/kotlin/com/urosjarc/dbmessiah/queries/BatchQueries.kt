@@ -27,12 +27,13 @@ public class BatchQueries(
 
         //Get table information
         val T = this.ser.mapper.getTableInfo(obj = firstRow)
+        val RB = T.getInsertRowBuilder()
 
         //Get SQL statement for insertion
         val query = this.ser.insertRow(row = firstRow, batch = true)
 
         //Execute query
-        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = rows.map { T.queryValues(obj = it).toList() })
+        val batchQuery = BatchQuery(sql = query.sql, valueMatrix = rows.map { RB.queryValues(obj = it).toList() })
 
         //Return count of updated elements
         return this.driver.batch(batchQuery = batchQuery)
@@ -50,12 +51,13 @@ public class BatchQueries(
 
         //Get table information
         val T = this.ser.mapper.getTableInfo(obj = firstRow)
+        val RB = T.getUpdateRowBuilder()
 
         //Get SQL statement for updating
         val query = this.ser.updateRow(row = firstRow)
 
         //Build QueryValue matrix
-        val valueMatrix = rows.map { listOf(*T.queryValues(obj = it), T.primaryKey.queryValue(obj = it)) }
+        val valueMatrix = rows.map { listOf(*RB.queryValues(obj = it), T.primaryColumn.queryValue(obj = it)) }
 
         //Build batch query
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
@@ -81,7 +83,7 @@ public class BatchQueries(
         val query = this.ser.deleteRow(row = firstRow)
 
         //Build QueryValue matrix
-        val valueMatrix = rows.map { listOf(T.primaryKey.queryValue(obj = it)) }
+        val valueMatrix = rows.map { listOf(T.primaryColumn.queryValue(obj = it)) }
 
         //Build batch query
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)

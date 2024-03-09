@@ -50,35 +50,63 @@ public val <T : Any> KProperty1<T, *>.ext_isUUID: Boolean get() = this.returnTyp
 
 
 /**
- * Represents whether the [KProperty1] is whole number.
+ * Checks if the property is an immutable, non-optional inline whole number.
  *
- * @return `true` if the [KProperty1] is an inline whole number, `false` otherwise.
+ * @receiver The `KProperty1` object.
+ * @return `true` if the property is an immutable, non-optional inline whole number, `false` otherwise.
  */
 public val <T : Any> KProperty1<T, *>.ext_isInlineWholeNumber: Boolean
     get() {
         val kclass = this.returnType.classifier as KClass<*>
         if (kclass.isValue) {
             val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
-            return firstParam?.type?.ext_isWholeNumber == true
+            return firstParam?.type?.ext_isWholeNumber == true && !firstParam.isOptional && !firstParam.type.isMarkedNullable
         }
         return false
     }
 
 /**
- * Checks if the property is an inline UUID.
- *
- * This property extension function is added to `KProperty1` objects, allowing you to determine
- * whether the property is an inline UUID or not.
+ * Checks if the property is an immutable, non-optional inline UUID.
  *
  * @receiver The `KProperty1` object.
- * @return `true` if the property is an inline UUID, `false` otherwise.
+ * @return `true` if the property is an immutable, non-optional inline UUID, `false` otherwise.
  */
 public val <T : Any> KProperty1<T, *>.ext_isInlineUUID: Boolean
     get() {
         val kclass = this.returnType.classifier as KClass<*>
         if (kclass.isValue) {
             val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
-            return firstParam?.type?.ext_isUUID == true
+            return firstParam?.type?.ext_isUUID == true && !firstParam.isOptional && !firstParam.type.isMarkedNullable
         }
         return false
     }
+
+/**
+ * This property represents whether the given property is an property representing auto-generated UUID.
+ * It returns `true` if the property meets the following criteria:
+ * - The property is either an inline UUID or a regular UUID
+ * - The property is not mutable
+ * - The property's return type is marked as nullable
+ *
+ * @return The flag indicating whether the property is an auto-generated UUID.
+ */
+public val <T : Any> KProperty1<T, *>.ext_isAutoUUID: Boolean
+    get() = !listOf(
+        (this.ext_isInlineUUID || this.ext_isUUID),
+        this.ext_isMutable, this.returnType.isMarkedNullable
+    ).contains(false)
+
+/**
+ * Indicates whether the property is representing auto-incrementing property.
+ * It returns `true` if the property meets the following criteria:
+ * - The property is either an inline or a regular whole number
+ * - The property is not mutable
+ * - The property's return type is marked as nullable
+ *
+ * @return true if the property is an auto-incrementing property, false otherwise.
+ */
+public val <T : Any> KProperty1<T, *>.ext_isAutoInc: Boolean
+    get() = !listOf(
+        (this.ext_isInlineWholeNumber || this.ext_isWholeNumber),
+        this.ext_isMutable, this.returnType.isMarkedNullable
+    ).contains(false)

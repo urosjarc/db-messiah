@@ -4,6 +4,7 @@ start
 
 if (primary key value is null) then(false)
     :<color:red>QueryException;
+    end
 else (true)
 endif
 
@@ -13,5 +14,6 @@ if (primary key is marked with ?) then(true)
     :<color:darkorange>Set primary key value to null;
 else (false)
 endif
+
 stop
 @enduml

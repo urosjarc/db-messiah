@@ -1,47 +1,32 @@
 package com.urosjarc.dbmessiah.builders
 
-import com.urosjarc.dbmessiah.data.Column
-import com.urosjarc.dbmessiah.data.QueryValue
+import com.urosjarc.dbmessiah.data.*
 
 /**
  * The RowBuilder class is responsible for generating SQL strings and query values based on a list of columns.
  *
  * @param columns The list of columns.
  */
-public class RowBuilder(
-    private val columns: List<Column>
-) {
+public data class RowBuilder(private val columns: List<Column>) {
 
     /**
-     * Helper method to generate a SQL string with the column names which should be used in first part of `INSERT` statement.
-     * @see [sqlInsertQuestions]
+     * Generates a string representation of the columns in SQL format.
      *
-     * @param separator The separator to use between column names. Default is ", ".
-     * @return The SQL string with the column names.
+     * @param separator The separator to use between columns. Default is ", ".
+     * @param escaped A function that escapes the column name.
+     * @return A string representation of the columns.
      */
-    public fun sqlInsertColumns(separator: String = ", ", escaped: (String) -> String): String =
+    public fun sqlColumns(separator: String = ", ", escaped: (String) -> String): String =
         this.columns.joinToString(separator = separator) { escaped(it.name) }
 
     /**
-     * Helper method to generate a SQL string with the values as question marks which should be used in second part of `INSERT` statement.
-     * @see [sqlInsertColumns]
+     * Generates a string representation of question marks based on the columns of the RowBuilder instance.
      *
      * @param separator The separator to use between question marks. Default is ", ".
-     * @return The SQL string with the question marks.
+     * @return A string representation of question marks.
      */
-    public fun sqlInsertQuestions(separator: String = ", "): String =
+    public fun sqlQuestions(separator: String = ", "): String =
         this.columns.joinToString(separator = separator) { "?" }
-
-    /**
-     * Helper method to generate a SQL string with the column names and the corresponding update values.
-     * This method should be used in `UPDATE` statement.
-     *
-     * @param separator The separator to use between column names. The default is ", ".
-     * @param zipper The string to use between column names and values. The default is " = ".
-     * @return The SQL string with the column names and values.
-     */
-    public fun sqlUpdateColumns(separator: String = ", ", zipper: String = " = ", escaped: (String) -> String): String =
-        this.columns.joinToString(separator = separator) { escaped(it.name) + "$zipper?" }
 
     /**
      * Extract list of [QueryValue] from the table columns inside [obj].

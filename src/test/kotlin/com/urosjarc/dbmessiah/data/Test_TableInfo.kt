@@ -49,10 +49,10 @@ class Test_TableInfo {
         this.tableInfo = TableInfo(
             schema = "Schema",
             kclass = Entity::class,
-            primaryKey = primaryColumn,
-            foreignKeys = listOf(foreignColumn),
+            primaryColumn = primaryColumn,
+            foreignColumns = listOf(foreignColumn),
             otherColumns = listOf(otherColumn),
-            serializers = AllTS.basic
+            typeSerializers = AllTS.basic
         )
 
     }

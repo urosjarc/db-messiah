@@ -11,18 +11,18 @@ import kotlin.reflect.KProperty1
  *
  * @param schema The schema that contains this table.
  * @param kclass The class representing the table.
- * @param primaryKey The [PrimaryColumn] for this table.
- * @param foreignKeys The list of [ForeignColumn] for this table.
+ * @param primaryColumn The [PrimaryColumn] for this table.
+ * @param foreignColumns The list of [ForeignColumn] for this table.
  * @param otherColumns The list of [OtherColumn] for this table.
- * @param serializers The list of [TypeSerializer] which will help in serialization process.
+ * @param typeSerializers The list of [TypeSerializer] which will help in serialization process.
  */
 public data class TableInfo(
     val schema: String,
     val kclass: KClass<*>,
-    val primaryKey: PrimaryColumn,
-    val foreignKeys: List<ForeignColumn>,
+    val primaryColumn: PrimaryColumn,
+    val foreignColumns: List<ForeignColumn>,
     val otherColumns: List<OtherColumn>,
-    val serializers: List<TypeSerializer<*>>
+    val typeSerializers: List<TypeSerializer<*>>
 ) {
 
     /**
@@ -39,7 +39,7 @@ public data class TableInfo(
      * Assign [TableInfo] instance to all their children.
      */
     init {
-        (listOf(this.primaryKey) + this.foreignKeys + this.otherColumns).forEach {
+        (listOf(this.primaryColumn) + this.foreignColumns + this.otherColumns).forEach {
             it.table = this
         }
     }
@@ -51,19 +51,34 @@ public data class TableInfo(
      * @return The corresponding [Column] or null if not found.
      */
     public fun getColumn(kprop: KProperty1<*, *>): Column? =
-        (listOf(this.primaryKey) + this.foreignKeys + this.otherColumns).firstOrNull { it.kprop == kprop }
+        (listOf(this.primaryColumn) + this.foreignColumns + this.otherColumns).firstOrNull { it.kprop == kprop }
 
     /**
-     * Retrieves a list of columns for the table with optional primary key included.
+     * Returns a [RowBuilder] object that is responsible for generating SQL strings and query values based on a list of columns.
+     * The method constructs the [RowBuilder] object by combining the foreign columns and other columns of the [TableInfo] instance.
+     * If the primary column has an auto-increment or auto-UUID property, the foreign columns and other columns are used as is.
+     * Otherwise, the primary column is positioned at the beginning of the list followed by the foreign columns and other columns.
      *
-     * @param withPrimaryColumn Boolean flag indicating whether the primary key should be included in the list of columns.
-     * @return A List of Column objects representing the columns in the table.
+     * @return The [RowBuilder] object.
      */
-    public fun getRowBuilder(withPrimaryColumn: Boolean): RowBuilder {
-        val columns: MutableList<Column> = (foreignKeys + otherColumns).toMutableList()
-        if (withPrimaryColumn) columns.add(0, this.primaryKey)
-        return RowBuilder(columns = columns)
+    public fun getInsertRowBuilder(): RowBuilder {
+        val columns = this.foreignColumns + this.otherColumns
+        return if (this.primaryColumn.autoInc || this.primaryColumn.autoUUID)
+            RowBuilder(columns = columns)
+        else
+            RowBuilder(columns = listOf(this.primaryColumn) + columns)
     }
+
+    /**
+     * Returns a [RowBuilder] object that is responsible for generating SQL strings and query values based on a list of columns.
+     *
+     * The method constructs the [RowBuilder] object by combining the foreign columns and other columns of the [TableInfo] instance.
+     * If the primary column has an auto-increment or auto-UUID property, the foreign columns and other columns are used as is.
+     * Otherwise, the primary column is positioned at the beginning of the list followed by the foreign columns and other columns.
+     *
+     * @return The [RowBuilder] object.
+     */
+    public fun getUpdateRowBuilder(): RowBuilder = RowBuilder(columns = this.foreignColumns + this.otherColumns)
 
     /** @suppress */
     override fun hashCode(): Int = path.hashCode()//OK

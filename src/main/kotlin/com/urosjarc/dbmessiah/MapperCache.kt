@@ -231,7 +231,7 @@ public open class MapperCache(
          * CONNECT TABLE INFOS OVER FOREIGN KEYS
          */
         for (tableInfo in this.tableInfos) {
-            for (column in tableInfo.foreignKeys) {
+            for (column in tableInfo.foreignColumns) {
                 val foreignTableKClass =
                     this.fkColumn_to_tableKClass[column] ?: throw MapperException("Could not find link between foreign key and table kclass")
                 column.foreignTable = this.tableKClass_to_tableInfo[foreignTableKClass]
@@ -334,8 +334,8 @@ public open class MapperCache(
 
         return TableInfo(
             schema = schema.name, kclass = table.kclass,
-            primaryKey = pkColumn, foreignKeys = fkColumns, otherColumns = otherColumns,
-            serializers = table.serializers
+            primaryColumn = pkColumn, foreignColumns = fkColumns, otherColumns = otherColumns,
+            typeSerializers = table.serializers
         )
     }
 

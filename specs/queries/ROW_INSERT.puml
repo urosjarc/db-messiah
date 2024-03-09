@@ -1,15 +1,31 @@
 @startuml
 start
-    :Before ROW[S] INSERT;
+
+:Before ROW[S] INSERT;
+
 if (primary key is AUTO_INCREMENT or AUTO_UUID) then(false)
+
+    if(primary key value is null) then(true)
+        :<color:red>QueryException;
+        end
+    else (false)
+    endif
+
+    :INSERT with primary column value;
+
 (true) elseif(primary key value is null) then(false)
     :<color:red>QueryException;
+    end
 else (true)
+    :INSERT without primary column value;
 endif
-    :After ROW[S] INSERT;
+
+:After ROW[S] INSERT;
+
 if (primary key is AUTO_INCREMENT or AUTO_UUID) then(true)
     :<color:darkorange>Update primary key;
 else (false)
 endif
+
 stop
 @enduml

@@ -1,0 +1,23 @@
+@startuml
+start
+:Before BATCH INSERT;
+if (primary key is AUTO_INCREMENT or AUTO_UUID) then(false)
+
+    if(primary key value is null) then(true)
+        :<color:red>QueryException;
+        end
+    else (false)
+    endif
+
+:INSERT with primary column value;
+
+(true) elseif(primary key value is null) then(false)
+    :<color:red>QueryException;
+    end
+else (true)
+    :INSERT without primary column value;
+endif
+
+:After BATCH INSERT;
+stop
+@enduml

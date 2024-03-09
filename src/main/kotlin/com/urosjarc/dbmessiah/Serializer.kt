@@ -16,6 +16,7 @@ import kotlin.reflect.KProperty1
  * inconsistency or error provided by the user mistake. These tests are trying to provide security, reliability and
  * ultimately trust to the end user.
  *
+ * @param allowAutoUUID A [Boolean] flag representing if database can have AUTO_UUID as primary keys.
  * @param schemas A list of [Schema] objects representing the database schemas that the serializer will work with.
  * @param globalSerializers A list of [TypeSerializer] objects representing global serializers to be used by the serializer.
  * @param globalInputs A list of [KClass] objects representing global input classes that can be used by the serializer.
@@ -23,6 +24,7 @@ import kotlin.reflect.KProperty1
  * @param globalProcedures A list of [KClass] objects representing global procedures that can be used by the serializer.
  */
 public abstract class Serializer(
+    internal val allowAutoUUID: Boolean,
     internal val schemas: List<Schema>,
     internal val globalSerializers: List<TypeSerializer<*>>,
     internal val globalInputs: List<KClass<*>> = listOf(),
@@ -60,7 +62,10 @@ public abstract class Serializer(
             it.`Schemas procedures must have valid name with valid property and parameter names`()
         }
         SerializerTests.TableTests(ser = this).also {
+            it.`Tables primary keys can be AUTO_UUID if database allows it`()
             it.`Tables primary keys must not be imutable and optional at the same time`()
+            it.`Tables primary keys must not be mutable and not optional at the same time`()
+            it.`Tables primary keys can be only be whole number or UUID`()
             it.`Tables foreign keys must not contain primary key`()
             it.`Tables foreign keys must point to registered table with primary key of same type`()
             it.`Tables constraints must be valid for specific column`()
@@ -253,8 +258,8 @@ public abstract class Serializer(
     public fun deleteRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
-            sql = "DELETE FROM ${escaped(T)} WHERE ${escaped(T.primaryKey)} = ?",
-            T.primaryKey.queryValue(row)
+            sql = "DELETE FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = ?",
+            T.primaryColumn.queryValue(row)
         )
     }
 
@@ -267,10 +272,11 @@ public abstract class Serializer(
      */
     public open fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
-        val escapedColumns = T.sqlInsertColumns { escaped(it) }
+        val RB = T.getInsertRowBuilder()
+        val escapedColumns = RB.sqlColumns { escaped(it) }
         return Query(
-            sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${T.sqlInsertQuestions()})",
-            *T.queryValues(obj = row),
+            sql = "INSERT INTO ${escaped(T)} ($escapedColumns) VALUES (${RB.sqlQuestions()})",
+            *RB.queryValues(obj = row),
         )
     }
 
@@ -282,11 +288,12 @@ public abstract class Serializer(
      */
     public fun updateRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
-        val escapedColumns = T.sqlUpdateColumns { escaped(it) }
+        val RB = T.getUpdateRowBuilder()
+        val escapedColumns = RB.sqlColumns { escaped(it) }
         return Query(
-            sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${escaped(T.primaryKey)} = ?",
-            *T.queryValues(obj = row),
-            T.primaryKey.queryValue(obj = row)
+            sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${escaped(T.primaryColumn)} = ?",
+            *RB.queryValues(obj = row),
+            T.primaryColumn.queryValue(obj = row)
         )
     }
 
@@ -338,7 +345,7 @@ public abstract class Serializer(
      */
     public fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryKey)} = $pk")
+        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = $pk")
     }
 
 
