@@ -138,7 +138,7 @@ public class Mapper(
         for (kparam in constructorParameters) {
             try {
                 val i = resultSet.findColumn(kparam.name)
-                val decodeInfo = DecodeInfo(kclass = kclass, kparam = kparam)
+                val decodeInfo = DecodeInfo(kclass = kclass, kparam = kparam, kprop = null)
                 val decoder = this.getSerializer(kparam).decoder
                 args[kparam] = decoder(resultSet, i, decodeInfo)
             } catch (e: Throwable) {

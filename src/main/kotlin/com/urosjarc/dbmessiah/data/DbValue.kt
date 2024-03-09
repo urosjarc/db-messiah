@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import java.sql.JDBCType
+import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
@@ -20,7 +21,7 @@ public abstract class DbValue(
     public val dbType: String,
     public val jdbcType: JDBCType,
     internal val encoder: Encoder<*>,
-    internal val decoder: Decoder<*>,
+    private val decoder: Decoder<*>,
 ) {
 
     /**
@@ -42,6 +43,21 @@ public abstract class DbValue(
      * Source class in which [kprop] is located.
      */
     public val kclass: KClass<*> = kprop.returnType.classifier as KClass<*>
+
+    /**
+     * Represents the decoding information for a specific parameter in a Kotlin class.
+     * Information is used in [Decoder] callback to help write custom [TypeSerializer].
+     */
+    public val decodeInfo: DecodeInfo = DecodeInfo(kclass = this.kclass, kprop = this.kprop, kparam = null)
+
+    /**
+     * Decodes a value from the given [ResultSet] at the specified index [i].
+     *
+     * @param rs The ResultSet to decode the value from.
+     * @param i The index of the column in the ResultSet.
+     * @return The decoded value as an instance of [Any], or null if decoding fails.
+     */
+    public fun decode(rs: ResultSet, i: Int): Any? = this.decoder(rs, i, this.decodeInfo)
 
     /**
      * Important method which extracts appropriate [QueryValue] from [obj] instance that this [DbValue] represents.
@@ -67,8 +83,8 @@ public abstract class DbValue(
             } catch (e: ClassCastException) {
                 throw DbValueException(
                     msg = "Trying to set property '$kp' to '$value' but failed! " +
-                            "Probably because incompatible types " +
-                            "or receiving object is missing matching property " +
+                            "Probably because incompatible types, " +
+                            "or receiving object is missing matching property, " +
                             "or property does not belong to the receiver: $obj",
                     cause = e
                 )
@@ -97,7 +113,6 @@ public abstract class DbValue(
                 cause = e
             )
         }
-
     }
 
     /** @suppress */

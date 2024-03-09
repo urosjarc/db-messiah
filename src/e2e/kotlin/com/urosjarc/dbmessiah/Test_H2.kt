@@ -3,6 +3,7 @@ package com.urosjarc.dbmessiah
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.h2.H2Schema
 import com.urosjarc.dbmessiah.impl.h2.H2Serializer
 import com.urosjarc.dbmessiah.impl.h2.H2Service
@@ -73,13 +74,13 @@ open class Test_H2 : Test_Contract {
             repeat(times = numParents) { p ->
                 val parent = Parent.get(seed = p)
                 parents.add(parent)
-                val parentInserted = it.row.insert(row = parent)
-                if (parent.pk == null || !parentInserted) throw Exception("Parent was not inserted: $parent")
+                it.row.insert(row = parent)
+                if (parent.pk == null) throw Exception("Parent was not inserted: $parent")
                 repeat(numChildren) { c ->
                     val child = Child.get(fk = parent.pk!!, seed = p * numChildren + c)
                     children.add(child)
-                    val childInserted = it.row.insert(row = child)
-                    if (child.pk == null || !childInserted) throw Exception("Children was not inserted: $child")
+                    it.row.insert(row = child)
+                    if (child.pk == null) throw Exception("Children was not inserted: $child")
                 }
             }
 
@@ -224,7 +225,7 @@ open class Test_H2 : Test_Contract {
         assertFalse(actual = parents.contains(newObj))
 
         //Insert new object
-        assertTrue(actual = it.row.insert(row = newObj))
+        it.row.insert(row = newObj)
 
         //Check if primary key was updated
         assertTrue(actual = newObj.pk!! > 0)
@@ -238,8 +239,12 @@ open class Test_H2 : Test_Contract {
         preParents.remove(newObj)
         assertEquals(actual = preParents, expected = parents)
 
+
         //Try to insert element again
-        assertFalse(actual = it.row.insert(row = newObj))
+        val e = assertThrows<QueryException> {
+            it.row.insert(row = newObj)
+        }
+        assertContains(charSequence = e.stackTraceToString(), "Row with already defined auto-generated primary key are not allowed to be inserted")
 
         //Parents really stayed as they were before
         val postParents2 = it.table.select<Parent>()
@@ -254,7 +259,7 @@ open class Test_H2 : Test_Contract {
 
         //Update first
         parents[0].col = "UPDATE"
-        assertTrue(it.row.update(row = parents[0]))
+        it.row.update(row = parents[0])
 
         //Get current all parents
         val postParents = it.table.select<Parent>()
@@ -263,7 +268,10 @@ open class Test_H2 : Test_Contract {
         //Object should not be updated if has no primary key
         parents[1].pk = null
         parents[1].col = "UPDATE2"
-        assertFalse(it.row.update(row = parents[1]))
+        val e = assertThrows<QueryException> {
+            it.row.update(row = parents[1])
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Row can't be updated with undefined primary key value")
 
         //Update should not change anything in db
         val postParents2 = it.table.select<Parent>()
@@ -280,7 +288,7 @@ open class Test_H2 : Test_Contract {
         assertTrue(parents[0].pk!! > 0)
 
         //Delete first
-        assertTrue(it.row.delete(row = parents[0]))
+        it.row.delete(row = parents[0])
 
         //Check if primary was set to null
         assertEquals(actual = parents[0].pk, expected = null)
@@ -297,7 +305,10 @@ open class Test_H2 : Test_Contract {
 
         //Object should not be deleted if has no primary key
         parents[1].pk = null
-        assertFalse(it.row.delete(row = parents[1]))
+        val e = assertThrows<QueryException> {
+            it.row.delete(row = parents[1])
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Row can't be deleted with undefined primary key value")
 
         //Update should not change anything in db
         val postParents2 = it.table.select<Parent>()
@@ -312,7 +323,7 @@ open class Test_H2 : Test_Contract {
         assertEquals(expected = this.parents, actual = parents)
 
         //Trying to insert empty array does nothing
-        assertEquals(actual = it.row.insert(rows = listOf()), expected = listOf())
+        it.row.insert(rows = listOf())
 
         //State is the same as before
         assertEquals(expected = this.parents, actual = it.table.select<Parent>())
@@ -320,19 +331,16 @@ open class Test_H2 : Test_Contract {
         //New object is not contained inside parents
         val newObj0 = Parent(col = "NEW0")
         val newObj1 = Parent(col = "NEW1")
-        val newObj2 = parents[0]
 
         assertFalse(actual = parents.contains(newObj0))
         assertFalse(actual = parents.contains(newObj1))
-        assertTrue(actual = parents.contains(newObj2))
 
         //Insert new object
-        assertEquals(actual = it.row.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(true, true, false))
+        it.row.insert(rows = listOf(newObj0, newObj1))
 
         //Check if primary key are not updated after batch insert
         assertTrue(actual = newObj0.pk != null)
         assertTrue(actual = newObj1.pk != null)
-        assertTrue(actual = newObj2.pk != null)
 
         //Get updated parents
         val postParents = it.table.select<Parent>()
@@ -345,7 +353,10 @@ open class Test_H2 : Test_Contract {
         assertEquals(expected = listOf(newObj0, newObj1), actual = last2Parents)
 
         //Trying to insert elements that are really allready in the database
-        assertEquals(actual = it.row.insert(rows = listOf(newObj0, newObj1, newObj2)), expected = listOf(false, false, false))
+        val e = assertThrows<QueryException> {
+            it.row.insert(rows = listOf(newObj0, newObj1))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -361,14 +372,17 @@ open class Test_H2 : Test_Contract {
         parents[1].col = "UPDATE1"
 
         //Update
-        assertEquals(expected = listOf(true, true), actual = it.row.update(rows = listOf(parents[0], parents[1])))
+        it.row.update(rows = listOf(parents[0], parents[1]))
 
         //List should be equal
         val postParents0 = it.table.select<Parent>()
         assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //If you update not allready inserted element it should reject
-        assertEquals(expected = listOf(false, false), actual = it.row.update(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
+        val e = assertThrows<QueryException> {
+            it.row.update(rows = listOf(Parent(col = "1"), Parent(col = "r")))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Row can't be updated with undefined primary key value")
 
         //And database should stay the same
         assertEquals(actual = it.table.select<Parent>(), expected = parents)
@@ -381,7 +395,7 @@ open class Test_H2 : Test_Contract {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = listOf(true, true), actual = it.row.delete(listOf(children[0], children[1])))
+        it.row.delete(listOf(children[0], children[1]))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
@@ -394,7 +408,10 @@ open class Test_H2 : Test_Contract {
         assertEquals(expected = filteredChildren, actual = postChildren0)
 
         //If you try to delete not allready inserted element it should reject
-        assertEquals(expected = listOf(false, false), actual = it.row.delete(rows = listOf(Parent(col = "1"), Parent(col = "r"))))
+        val e = assertThrows<QueryException> {
+            it.row.delete(rows = listOf(Parent(col = "1"), Parent(col = "r")))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Row can't be deleted with undefined primary key value")
 
         //And database should stay the same
         assertEquals(actual = it.table.select<Parent>(), expected = parents)
@@ -418,7 +435,7 @@ open class Test_H2 : Test_Contract {
         assertFalse(actual = parents.contains(newObj1))
 
         //Insert new object
-        assertEquals(actual = it.batch.insert(rows = listOf(newObj0, newObj1)), expected = 2)
+        it.batch.insert(rows = listOf(newObj0, newObj1))
 
         //Check if primary key are not updated after batch insert
         assertEquals(expected = null, actual = newObj0.pk)
@@ -438,7 +455,12 @@ open class Test_H2 : Test_Contract {
 
         //Get snapshot of parents before trying to insert
         val postParents2 = it.table.select<Parent>()
-        assertEquals(actual = it.batch.insert(rows = listOf(newObj0, newObj1)), expected = 0)
+
+        //Parents really stayed as they were before
+        val e = assertThrows<QueryException> {
+            it.batch.insert(rows = listOf(newObj0, newObj1))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -457,7 +479,7 @@ open class Test_H2 : Test_Contract {
         parents[1].col = "UPDATE1"
 
         //Update
-        assertEquals(expected = 2, actual = it.batch.update(rows = listOf(parents[0], parents[1])))
+        it.batch.update(rows = listOf(parents[0], parents[1]))
 
         //List should be equal
         val postParents0 = it.table.select<Parent>()
@@ -469,7 +491,11 @@ open class Test_H2 : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postParents1 = it.table.select<Parent>()
-        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postParents0[2], postParents0[3])))
+        val e = assertThrows<QueryException> {
+            it.batch.update(rows = listOf(postParents0[2], postParents0[3]))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', can't be updated with undefined primary key value")
+
 
         //List should be equal
         val postParents2 = it.table.select<Parent>()
@@ -483,9 +509,9 @@ open class Test_H2 : Test_Contract {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        assertEquals(expected = 2, actual = it.batch.delete(listOf(children[0], children[1])))
+        it.batch.delete(listOf(children[0], children[1]))
 
-        //Primary keys are not deleted
+        //Primary keys are deleted
         assertEquals(actual = children[0].pk, expected = null)
         assertEquals(actual = children[1].pk, expected = null)
 
@@ -501,7 +527,7 @@ open class Test_H2 : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postChildren1 = it.table.select<Child>()
-        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
+//        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
 
         //List should be equal
         val postChildren2 = it.table.select<Child>()

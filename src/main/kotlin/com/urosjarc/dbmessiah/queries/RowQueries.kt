@@ -58,11 +58,17 @@ public open class RowQueries(
              */
             val pk: Any =
                 if (this.ser is DerbySerializer || this.ser is H2Serializer)
-                    this.driver.insert(query = query, primaryKey = null, onGeneratedKeysFail = this.ser.selectLastId)
+                    this.driver.insert(
+                        query = query,
+                        generatedKey = null,
+                        onGeneratedKeysFail = this.ser.selectLastId,
+                        primaryColumn = T.primaryColumn
+                    )
                 else this.driver.insert(
                     query = query,
-                    primaryKey = this.ser.escaped(T.primaryColumn.name),
-                    onGeneratedKeysFail = this.ser.selectLastId
+                    generatedKey = this.ser.escaped(T.primaryColumn.name),
+                    onGeneratedKeysFail = this.ser.selectLastId,
+                    primaryColumn = T.primaryColumn
                 )
 
             //Set primary key on object
@@ -81,7 +87,7 @@ public open class RowQueries(
              * behaviour. We need to warn user of this unexpected behaviour as soon as possible before he is going
              * to the production. These are the problems that needs to be resolved as soon as possible.
              */
-            if(count != 1)
+            if (count != 1)
                 throw DriverException("Driver reported unexpected number of updates '$count' for inserting row: $row")
         }
     }
@@ -154,7 +160,7 @@ public open class RowQueries(
         /**
          * If user code allows we want to reset the primary column to null to make row
          */
-        if(T.primaryColumn.kprop.ext_isMutable && T.primaryColumn.kprop.ext_isOptional)
+        if (T.primaryColumn.kprop.ext_isMutable && T.primaryColumn.kprop.ext_isOptional)
             T.primaryColumn.setValue(row, null)
     }
 

@@ -289,7 +289,7 @@ public abstract class Serializer(
     public fun updateRow(row: Any): Query {
         val T = this.mapper.getTableInfo(obj = row)
         val RB = T.getUpdateRowBuilder()
-        val escapedColumns = RB.sqlColumns { escaped(it) }
+        val escapedColumns = RB.sqlColumns { "${escaped(it)} = ?" }
         return Query(
             sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${escaped(T.primaryColumn)} = ?",
             *RB.queryValues(obj = row),

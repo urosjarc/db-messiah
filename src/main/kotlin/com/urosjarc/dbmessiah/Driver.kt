@@ -137,13 +137,13 @@ public open class Driver(private val conn: Connection) {
      * separately inside specific database [Serializer] which overrides [Serializer.selectLastId] string.
      *
      * @param query The [Query] object representing the SQL query and its values.
-     * @param onGeneratedKeysFail The SQL statement to retrieve the generated primary by force.
-     * @param decodeIdResultSet The function to decode primary ID from the ResultSet.
-     * @return The generated primary ID if the insert was successful, or null if no rows were affected.
-     * @throws DriverException If there is an error processing the insert query.
-     * @throws IssueException If the inserted primary ID couldn't be retrieved normally nor by force.
+     * @param generatedKey The name of the generated key column, if any.
+     * @param onGeneratedKeysFail The SQL statement to be executed if the generated key retrieval fails.
+     * @param primaryColumn The [PrimaryColumn] object representing the primary column of the table.
+     * @return The inserted data.
+     * @throws DriverException If there is an error processing the insert query or retrieving the inserted data.
      */
-    internal fun insert(query: Query, primaryKey: String? = null, onGeneratedKeysFail: String?): Any {
+    internal fun insert(query: Query, generatedKey: String?, onGeneratedKeysFail: String?, primaryColumn: PrimaryColumn): Any {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -151,9 +151,9 @@ public open class Driver(private val conn: Connection) {
         //Execute query
         try {
             //Prepare statement
-            ps = if (primaryKey == null)
+            ps = if (generatedKey == null)
                 conn.prepareStatement(query.sql, Statement.RETURN_GENERATED_KEYS)
-            else conn.prepareStatement(query.sql, arrayOf(primaryKey))
+            else conn.prepareStatement(query.sql, arrayOf(generatedKey))
 
             this.prepareQuery(ps = ps, query = query)
 
@@ -172,7 +172,7 @@ public open class Driver(private val conn: Connection) {
         try {
             rs = ps.generatedKeys
             if (rs.next()) {
-                val data = rs.getObject(1)
+                val data = primaryColumn.decode(rs, 1) ?: throw DriverException(msg = "Failed to decode primary key value from: $query")
                 this.closeAll(ps = ps, rs = rs)
                 return data
             }
@@ -192,7 +192,7 @@ public open class Driver(private val conn: Connection) {
             if (onGeneratedKeysFail != null) {
                 rs2 = ps.connection.prepareStatement(onGeneratedKeysFail).executeQuery()
                 if (rs2.next()) {
-                    val data = rs2.getObject(1)
+                    val data = primaryColumn.decode(rs2, 1) ?: throw DriverException(msg = "Failed to decode primary key value from: $query")
                     this.closeAll(ps = ps, rs = rs2)
                     return data
                 }
