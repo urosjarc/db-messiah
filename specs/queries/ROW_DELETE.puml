@@ -2,10 +2,12 @@
 start
 :Before ROW[S] DELETE;
 
-if (primary key value is null) then(false)
-    :<color:red>QueryException;
+if (primary key value is null) then(true)
+    :<color:red>QueryException
+    <color:red>Can't delete row
+    <color:red>without primary key;
     end
-else (true)
+else (false)
 endif
 
 :After ROW[S] DELETE;

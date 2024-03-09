@@ -3,10 +3,11 @@ start
 
 :Before ROW[S] INSERT;
 
-if (primary key is AUTO_INCREMENT or AUTO_UUID) then(false)
+if (primary key is auto generated in DB) then(false)
 
     if(primary key value is null) then(true)
-        :<color:red>QueryException;
+        :<color:red>QueryException
+        <color:red>User forgot to define primary key!;
         end
     else (false)
     endif
@@ -14,17 +15,12 @@ if (primary key is AUTO_INCREMENT or AUTO_UUID) then(false)
     :INSERT with primary column value;
 
 (true) elseif(primary key value is null) then(false)
-    :<color:red>QueryException;
+    :<color:red>QueryException
+    <color:red>Row can't be inserted again!;
     end
 else (true)
     :INSERT without primary column value;
-endif
-
-:After ROW[S] INSERT;
-
-if (primary key is AUTO_INCREMENT or AUTO_UUID) then(true)
     :<color:darkorange>Update primary key;
-else (false)
 endif
 
 stop

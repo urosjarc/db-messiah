@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah.data
 
+import com.urosjarc.dbmessiah.extend.ext_isOptional
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
@@ -26,5 +27,5 @@ public open class OtherColumn(
     /**
      * If values in this column can be null or not.
      */
-    public val notNull: Boolean = !this.kprop.returnType.isMarkedNullable
+    public val notNull: Boolean = !this.kprop.ext_isOptional
 }

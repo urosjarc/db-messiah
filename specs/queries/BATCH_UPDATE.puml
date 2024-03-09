@@ -4,7 +4,9 @@ start
 :Before BATCH UPDATE;
 
 if (primary key value is null) then(true)
-    :<color:red>QueryException;
+    :<color:red>QueryException
+    <color:red>Can't update row
+    <color:red>without primary key;
     end
 else (false)
 endif

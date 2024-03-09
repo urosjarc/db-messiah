@@ -8,9 +8,9 @@ note {
 }
 </style>
 note as Customer
- |=     |= Int   |=  UInt |= Int?    |=  UInt?  |= UUID     |= UUID?               |= other |= other? |
- |= val | MANUAL | MANUAL | <color:red>ERROR    | <color:red>ERROR    | MANUAL    | <color:red>ERROR                | <color:red>ERROR  | <color:red>ERROR   |
- |= var | <color:red>ERROR  | <color:red>ERROR  | AUTO_INC | AUTO_INC | <color:red>ERROR     | AUTO_UUID \|\| <color:red>ERROR | <color:red>ERROR  | <color:red>ERROR   |
+ |=     |= Int   |=  UInt |= Int? |=  UInt? |= UUID |= UUID? |= other |= other? |
+ |= val | MANUAL | MANUAL | <color:red>ERROR | <color:red>ERROR | MANUAL | <color:red>ERROR | <color:red>ERROR | <color:red>ERROR |
+ |= var | <color:red>ERROR | <color:red>ERROR | AUTO_INC | AUTO_INC | <color:red>ERROR | AUTO_UUID \|\| <color:red>ERROR | <color:red>ERROR | <color:red>ERROR |
 end note
 
 note as Test

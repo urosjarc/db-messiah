@@ -142,7 +142,7 @@ public open class Driver(private val conn: Connection) {
      * @throws DriverException If there is an error processing the insert query.
      * @throws IssueException If the inserted primary ID couldn't be retrieved normally nor by force.
      */
-    internal fun insert(query: Query, primaryKey: String? = null, onGeneratedKeysFail: String?): Int? {
+    internal fun insert(query: Query, primaryKey: String? = null, onGeneratedKeysFail: String?): Int {
         var ps: PreparedStatement? = null
         var rs: ResultSet? = null
         var rs2: ResultSet? = null
@@ -159,11 +159,8 @@ public open class Driver(private val conn: Connection) {
             //Get info
             val numUpdates = ps.executeUpdate()
 
-            //If no updates happend close all
-            if (numUpdates == 0) {
-                this.closeAll(ps = ps)
-                return null
-            }
+            //If no updates happend close all (very low chance of this to happend since driver will create error!
+            if (numUpdates == 0) throw DriverException(msg = "Failed to create any insert change with: $query")
             //Continue with getting ids for inserts
         } catch (e: Throwable) {
             this.closeAll(ps = ps)

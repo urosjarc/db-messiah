@@ -35,6 +35,13 @@ public val <T : Any> KProperty1<T, *>.ext_owner: KClass<T> get() = this.javaFiel
 public val <T : Any> KProperty1<T, *>.ext_isMutable: Boolean get() = this is KMutableProperty1<T, *>
 
 /**
+ * Returns whether the property is optional or can be nullable.
+ *
+ * @return true if the property is optional, false otherwise.
+ */
+public val <T : Any> KProperty1<T, *>.ext_isOptional: Boolean get() = this.returnType.isMarkedNullable
+
+/**
  * Indicates whether the property represents a whole number.
  *
  * @return true if the property represents a whole number, false otherwise.
@@ -93,7 +100,7 @@ public val <T : Any> KProperty1<T, *>.ext_isInlineUUID: Boolean
 public val <T : Any> KProperty1<T, *>.ext_isAutoUUID: Boolean
     get() = !listOf(
         (this.ext_isInlineUUID || this.ext_isUUID),
-        this.ext_isMutable, this.returnType.isMarkedNullable
+        this.ext_isMutable, this.ext_isOptional
     ).contains(false)
 
 /**
@@ -108,5 +115,5 @@ public val <T : Any> KProperty1<T, *>.ext_isAutoUUID: Boolean
 public val <T : Any> KProperty1<T, *>.ext_isAutoInc: Boolean
     get() = !listOf(
         (this.ext_isInlineWholeNumber || this.ext_isWholeNumber),
-        this.ext_isMutable, this.returnType.isMarkedNullable
+        this.ext_isMutable, this.ext_isOptional
     ).contains(false)

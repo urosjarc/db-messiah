@@ -395,7 +395,7 @@ internal class SerializerTests {
         fun `Tables primary keys must not be imutable and optional at the same time`() {
             this.ser.schemas.forEach { schema ->
                 schema.tables.forEach { table ->
-                    if (table.primaryKey.returnType.isMarkedNullable && !table.primaryKey.ext_isMutable)
+                    if (table.primaryKey.ext_isOptional && !table.primaryKey.ext_isMutable)
                         throw SerializerTestsException("Primary key must not be imutable and optional at the same time: ${table.primaryKey}")
                 }
             }
@@ -408,7 +408,7 @@ internal class SerializerTests {
         fun `Tables primary keys must not be mutable and not optional at the same time`() {
             this.ser.schemas.forEach { schema ->
                 schema.tables.forEach { table ->
-                    if (!table.primaryKey.returnType.isMarkedNullable && table.primaryKey.ext_isMutable)
+                    if (!table.primaryKey.ext_isOptional && table.primaryKey.ext_isMutable)
                         throw SerializerTestsException("Primary key must not be mutable and not optional at the same time: ${table.primaryKey}")
                 }
             }
