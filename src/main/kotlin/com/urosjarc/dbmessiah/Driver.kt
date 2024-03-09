@@ -59,13 +59,14 @@ public open class Driver(private val conn: Connection) {
      * Creates batch groups of 1000 and then execute them one by one on the database connection.
      * Groups are created executed separately in order to not block database process.
      *
-     * @param batchQuery The [BatchQuery] object containing the SQL query string and value matrix.
-     * @return The number of updates executed.
-     * @throws DriverException If there is an error processing the batch query.
+     * @param batchQuery The [BatchQuery] object representing the batch query to be executed.
+     * @throws DriverException If number of updates does not match number of provided rows.
+     * @throws DriverException If there is an error processing the batch query results.
      */
-    internal fun batch(batchQuery: BatchQuery): Int {
+    internal fun batch(batchQuery: BatchQuery) {
         var ps: PreparedStatement? = null
         var numUpdates = 0
+        val batchSize = batchQuery.valueMatrix.size
 
         try {
             //Prepare statement and query
@@ -90,8 +91,8 @@ public open class Driver(private val conn: Connection) {
             //Close everything
             this.closeAll(ps = ps)
 
-            //Return result
-            return numUpdates
+            if (numUpdates != batchSize)
+                throw DriverException("Driver reported unexpected number of updates '$numUpdates' for batch of '${batchSize}' rows")
 
         } catch (e: Throwable) {
             this.closeAll(ps = ps)
