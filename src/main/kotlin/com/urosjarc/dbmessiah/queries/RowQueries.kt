@@ -56,7 +56,7 @@ public open class RowQueries(
              * H2 don't have option to escape columns that JDBC needs to return so we will use Statement.RETURN_GENERATED_KEYS instead.
              * Oracle and every other database (not derby) supports returning columns by name directly.
              */
-            val pk =
+            val pk: Any =
                 if (this.ser is DerbySerializer || this.ser is H2Serializer)
                     this.driver.insert(query = query, primaryKey = null, onGeneratedKeysFail = this.ser.selectLastId)
                 else this.driver.insert(

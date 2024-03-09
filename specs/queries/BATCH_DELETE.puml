@@ -13,7 +13,7 @@ endif
 
 :After BATCH DELETE;
 
-if (primary key is marked with ?) then(true)
+if (primary key is\nmutable and optional) then(true)
     :<color:darkorange>Set primary key value to null;
 else (false)
 endif
