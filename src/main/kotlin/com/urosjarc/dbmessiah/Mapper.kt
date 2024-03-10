@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.data.Procedure
 import com.urosjarc.dbmessiah.data.TableInfo
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.exceptions.MapperException
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.extend.ext_kparams
 import com.urosjarc.dbmessiah.extend.ext_kprops
 import java.sql.ResultSet
@@ -73,7 +74,7 @@ public class Mapper(
      * @throws MapperException if the table info for the table cannot be found.
      */
     public fun <T : Any> getTableInfo(kclass: KClass<T>): TableInfo =
-        this.tableKClass_to_tableInfo[kclass] ?: throw MapperException("Could not find table info for table: '${kclass.simpleName}'")
+        this.tableKClass_to_tableInfo[kclass] ?: throw QueryException("Could not find registered table: '${kclass.simpleName}'")
 
     /**
      * Retrieves the [TableInfo] object for the given table object.
@@ -100,7 +101,7 @@ public class Mapper(
      * @throws MapperException If the [Procedure] for the class cannot be found.
      */
     public fun getProcedure(kclass: KClass<*>): Procedure =
-        this.procedureKClass_to_procedure[kclass] ?: throw MapperException("Could not find procedure for kclass: '${kclass.simpleName}'")
+        this.procedureKClass_to_procedure[kclass] ?: throw QueryException("Could not find registered procedure: '${kclass.simpleName}'")
 
     /**
      * Decodes the result set into a list of objects of the specified output classes.

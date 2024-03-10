@@ -1,4 +1,7 @@
 import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.exceptions.DriverException
+import com.urosjarc.dbmessiah.exceptions.MapperException
+import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.exceptions.base.UnknownException
 import com.urosjarc.dbmessiah.exceptions.base.WarningException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
@@ -56,10 +59,10 @@ fun main_007() {
      * WarningException: You want to create table for class that is not registered inside database...
      */
     service0.autocommit {
-        val exception2 = assertThrows<WarningException> {
-            it.table.create(table = String::class)
+        val exception2 = assertThrows<QueryException> {
+            it.table.create<String>()
         }
-        assertContains(exception2.stackTraceToString(), "USER WARNING: Could not find table info for table: 'String'")
+        assertContains(exception2.stackTraceToString(), "USER WARNING: Could not find registered table: 'String'")
     }
 
     /**
@@ -71,8 +74,8 @@ fun main_007() {
          * System will try to log directly into the exception message all important informations so that developer
          * will never need to check logs what happened.
          */
-        val exception3 = assertThrows<UnknownException> {
-            it.run.execute { """SELECT * FROM XXX""" }
+        val exception3 = assertThrows<DriverException> {
+            it.query.run { """SELECT * FROM XXX""" }
         }
         assertContains(exception3.stackTraceToString(), "Failed to return query results from: \n\nSELECT * FROM XXX")
         assertContains(exception3.stackTraceToString(), "[SQLITE_ERROR] SQL error or missing database (no such table: XXX)")

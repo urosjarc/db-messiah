@@ -17,8 +17,7 @@ public class Query(
     /** @suppress */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as Query
+        if (other !is Query) return false
         if (sql != other.sql) return false
         if (!values.contentEquals(other.values)) return false
         return true

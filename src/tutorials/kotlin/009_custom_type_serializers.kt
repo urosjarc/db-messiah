@@ -88,20 +88,20 @@ fun main_008() {
          * Setup database
          */
         it.schema.create(schema = mainSchema8)
-        it.table.dropCascade(table = Parent8::class)
-        it.table.create(table = Parent8::class)
+        it.table.dropCascade<Parent8>()
+        it.table.create<Parent8>()
 
         /**
          * Insert table with custom tipe
          */
         val currentInstant = Instant.parse("2024-02-24T19:22:45Z")
         val parent80 = Parent8(instant = currentInstant)
-        assertTrue(it.row.insert(parent80))
+        it.row.insert(parent80)
 
         /**
          * Get inserted element, and check if it matches with expected value.
          */
-        val parent81 = it.row.select(table = Parent8::class, pk = parent80.pk!!)!!
+        val parent81 = it.row.select<Parent8>(pk = parent80.pk!!)!!
         assertEquals(parent81, parent80)
         assertEquals(parent81.instant, parent80.instant)
 

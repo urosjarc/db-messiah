@@ -57,21 +57,21 @@ fun main_003() {
          * Setup schema
          */
         it.schema.create(schema = schema3)
-        it.table.dropCascade(table = Parent3::class)
-        it.table.dropCascade(table = Child3::class)
+        it.table.dropCascade<Parent3>()
+        it.table.dropCascade<Child3>()
 
         /**
          * Create table for parent and child
          */
-        it.table.create(table = Parent3::class)
-        it.table.create(table = Child3::class)
+        it.table.create<Parent3>()
+        it.table.create<Child3>()
 
         /**
          * Write custom query without input or output
          * Sqlite driver support only one query per database call,
          * Postgresql driver on other hand supports many queries per db call...
          */
-        it.run.execute {
+        it.query.run {
             """
             INSERT INTO "main"."Parent3" ("pk", "value") VALUES (1, 'parent_1');
             INSERT INTO "main"."Parent3" ("pk", "value") VALUES (2, 'parent_2');
@@ -80,7 +80,7 @@ fun main_003() {
             """
         }
 
-        it.run.execute {
+        it.query.run {
             """
             INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (1, 1, 'child_1');
             INSERT INTO "main"."Child3" ("pk", "parent_pk", "value") VALUES (2, 1, 'child_2');
@@ -95,10 +95,10 @@ fun main_003() {
          * If you would like to peak inside list you will have to cast it to specific type.
          * If you use singe output, function will not return matrix but a list which don't have to be cast since there is only one output type provided.
          */
-        val matrix0 = it.run.query(Parent3::class, Child3::class) {
+        val matrix0 = it.query.get(Parent3::class, Child3::class) {
             """
-            SELECT * FROM main.Parent3;  
-            SELECT * FROM main.Child3 WHERE pk > 2  
+            SELECT * FROM "main"."Parent3";  
+            SELECT * FROM "main"."Child3" WHERE pk > 2  
             """
         }
         assertEquals(matrix0[0].size, 4) // Check the matrix size.
@@ -111,7 +111,7 @@ fun main_003() {
          * if you will use multiple outputs the resulting output will be matrix and if you use single output
          * you will get list.
          */
-        val matrix1 = it.run.query(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
+        val matrix1 = it.query.get(Parent3::class, Child3::class, input = Input3(parent_pk = 3)) {
             """
             SELECT * FROM "main"."Parent3" WHERE "pk" = ${it.input(Input3::parent_pk)};
             SELECT * FROM "main"."Child3" WHERE "pk" = 2  

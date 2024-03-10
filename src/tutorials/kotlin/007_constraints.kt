@@ -50,13 +50,12 @@ fun main_006() {
         /**
          * Setup database arhitecture...
          */
-        it.table.create(Parent6::class)
+        it.table.create<Parent6>()
 
         /**
          * Insert some rows with unique columns..
          */
-        val isInserted = it.row.insert(row = Parent6(uniqueValue = "asdf", nullableValue = null))
-        assertTrue(isInserted)
+        it.row.insert(row = Parent6(uniqueValue = "asdf", nullableValue = null))
 
         /**
          * Lets test if column can be inserted again with the same unique value...

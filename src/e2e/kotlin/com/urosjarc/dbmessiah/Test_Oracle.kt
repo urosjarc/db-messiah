@@ -4,7 +4,6 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.mysql.MysqlService
 import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
 import com.urosjarc.dbmessiah.impl.oracle.OracleSerializer
 import com.urosjarc.dbmessiah.impl.oracle.OracleService
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.test.*
 
 open class Test_Oracle : Test_Contract {

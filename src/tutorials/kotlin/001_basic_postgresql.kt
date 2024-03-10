@@ -77,10 +77,10 @@ fun main_001() {
         /**
          * Create tables and reset them
          */
-        it.table.create(table = Parent1::class)
-        it.table.create(table = Child1::class)
-        it.table.delete(table = Parent1::class)
-        it.table.delete(table = Child1::class)
+        it.table.create<Parent1>()
+        it.table.create<Child1>()
+        it.table.delete<Parent1>()
+        it.table.delete<Child1>()
 
         /**
          * Make some batch inserts
@@ -90,53 +90,44 @@ fun main_001() {
          * each group one by one in order to not block the database process.
          */
         val parent0 = MutableList(size = 100) { Parent1(value = "$it parent") }
-        val numInserted = it.batch.insert(parent0)
-        assertEquals(numInserted, 100)
+        it.batch.insert(parent0)
 
         /**
          * Get all inserted rows since primary key is not retrieved in batch queries.
          */
-        val parents0 = it.table.select(table = Parent1::class)
+        val parents0 = it.table.select<Parent1>()
 
         /**
          * Batch update
          */
         parents0.forEach { it.value += " new" }
-        val numUpdated = it.batch.update(parents0)
-        assertEquals(numUpdated, 100)
+        it.batch.update(parents0)
 
         /**
          * Select specific page with offset pagination.
          * Note that this should be used for small tables.
          */
-        val page0 = it.table.select(table = Parent1::class, page = Page(number = 3, orderBy = Parent1::pk, limit = 4))
+        val page0 = it.table.select<Parent1>(page = Page(number = 3, orderBy = Parent1::pk, limit = 4))
         assertEquals(page0.size, 4)
 
         /**
          * Select specific page with cursor pagination.
          * Note that this should be used for big tables.
          */
-        val page1 = it.table.select(table = Parent1::class, cursor = Cursor(index = 3, orderBy = Parent1::pk, limit = 4))
+        val page1 = it.table.select<Parent1, Int>(cursor = Cursor(index = 3, orderBy = Parent1::pk, limit = 4))
         assertEquals(page1.size, 4)
-
-        /**
-         * Cursor pagination with better type safety.
-         */
-        val page2 = it.table.select(table = Parent1::class, cursor = Cursor(row = page1[0], orderBy = Parent1::pk, limit = 4))
-        assertEquals(page2.size, 4)
 
         /**
          * Batch delete
          */
         parents0.forEach { it.value += " new" }
-        val numDeleted = it.batch.delete(parents0)
-        assertEquals(numDeleted, 100)
+        it.batch.delete(parents0)
 
         /**
          * Drop tables (with cascading)
          */
-        it.table.dropCascade(table = Child1::class)
-        it.table.dropCascade(table = Parent1::class)
+        it.table.dropCascade<Child1>()
+        it.table.dropCascade<Parent1>()
 
         /**
          * Drop schema

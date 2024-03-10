@@ -8,4 +8,4 @@ import com.urosjarc.dbmessiah.exceptions.base.UnknownException
  * @param msg The error message associated with the exception.
  * @param cause The cause of the exception.
  */
-internal class DriverException(msg: String, cause: Throwable? = null) : UnknownException(msg = msg, cause = cause)
+public class DriverException(msg: String, cause: Throwable? = null) : UnknownException(msg = msg, cause = cause)

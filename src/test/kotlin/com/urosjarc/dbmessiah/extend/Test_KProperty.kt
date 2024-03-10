@@ -19,35 +19,11 @@ class Test_KProperty {
         var j: Double? = null,
         var k: UInt,
     )
-
     @Test
-    fun `test ext_isWholeNumber()`() {
-        assertEquals(actual = Data::a.ext_isWholeNumber, expected = true)
-        assertEquals(actual = Data::b.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::c.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::d.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::e.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::f.ext_isWholeNumber, expected = true)
-        assertEquals(actual = Data::g.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::h.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::i.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::j.ext_isWholeNumber, expected = false)
-        assertEquals(actual = Data::k.ext_isWholeNumber, expected = true)
-    }
-
-    @Test
-    fun `test ext_canBeNull()`() {
-        assertEquals(actual = Data::a.ext_canBeNull, expected = false)
-        assertEquals(actual = Data::b.ext_canBeNull, expected = false)
-        assertEquals(actual = Data::c.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::d.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::e.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::f.ext_canBeNull, expected = false)
-        assertEquals(actual = Data::g.ext_canBeNull, expected = false)
-        assertEquals(actual = Data::h.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::i.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::j.ext_canBeNull, expected = true)
-        assertEquals(actual = Data::k.ext_canBeNull, expected = false)
+    fun `test ext_owner()`() {
+        assertEquals(actual = Data::a.ext_owner, expected = Data::class)
+        assertEquals(actual = Data::b.ext_owner, expected = Data::class)
+        assertEquals(actual = Data::c.ext_owner, expected = Data::class)
     }
 
     @Test
@@ -64,5 +40,36 @@ class Test_KProperty {
         assertEquals(actual = Data::j.ext_isMutable, expected = true)
         assertEquals(actual = Data::k.ext_isMutable, expected = true)
     }
+
+    @Test
+    fun `test ext_isOptional()`() {
+        assertEquals(actual = Data::a.ext_isOptional, expected = false)
+        assertEquals(actual = Data::b.ext_isOptional, expected = false)
+        assertEquals(actual = Data::c.ext_isOptional, expected = true)
+        assertEquals(actual = Data::d.ext_isOptional, expected = true)
+        assertEquals(actual = Data::e.ext_isOptional, expected = true)
+        assertEquals(actual = Data::f.ext_isOptional, expected = false)
+        assertEquals(actual = Data::g.ext_isOptional, expected = false)
+        assertEquals(actual = Data::h.ext_isOptional, expected = true)
+        assertEquals(actual = Data::i.ext_isOptional, expected = true)
+        assertEquals(actual = Data::j.ext_isOptional, expected = true)
+        assertEquals(actual = Data::k.ext_isOptional, expected = false)
+    }
+    @Test
+    fun `test ext_isWholeNumber()`() {
+        assertEquals(actual = Data::a.ext_isWholeNumber, expected = true)
+        assertEquals(actual = Data::b.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::c.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::d.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::e.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::f.ext_isWholeNumber, expected = true)
+        assertEquals(actual = Data::g.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::h.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::i.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::j.ext_isWholeNumber, expected = false)
+        assertEquals(actual = Data::k.ext_isWholeNumber, expected = true)
+    }
+
+
 
 }

@@ -46,6 +46,21 @@ class Test_Procedure {
     }
 
     @Test
+    fun `test args`(){
+        this.procedure.args.forEach {
+            assertEquals(actual = it.procedure, expected = this.procedure)
+        }
+    }
+    @Test
+    fun `test name`(){
+        assertEquals(actual = procedure.name, expected = "TestProcedure")
+    }
+    @Test
+    fun `test path`(){
+        assertEquals(actual = procedure.path, expected = "main.TestProcedure")
+    }
+
+    @Test
     fun `test getString()`() {
         assertEquals(expected = "TestProcedure(arg0: Int, arg1: String)", actual = procedure.toString())
     }

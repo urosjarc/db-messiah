@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty1
  * @param kparam The Kotlin constructor parameter representing the property (nullable if the property is not a constructor parameter).
  * @param kprop The Kotlin property representing the property (nullable if the property is not a member property).
  */
-public class DecodeInfo(
+public data class DecodeInfo(
     public val kclass: KClass<*>,
     public val kparam: KParameter?,
     public val kprop: KProperty1<*, *>?,

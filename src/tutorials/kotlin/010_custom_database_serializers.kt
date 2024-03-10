@@ -96,7 +96,8 @@ open class MyOwnSqliteSerializer(
      */
     override fun insertRow(row: Any, batch: Boolean): Query {
         val T = this.mapper.getTableInfo(obj = row)
-        val qValues = T.queryValues(obj = row)
+        val RB = T.getInsertRowBuilder()
+        val qValues = RB.queryValues(obj = row)
 
         /**
          * We will found query value of type varchar and inject our own message into it...
@@ -108,7 +109,7 @@ open class MyOwnSqliteSerializer(
          * Now lets return new values back...
          */
         return Query(
-            sql = "INSERT INTO ${escaped(T)} (${T.sqlInsertColumns { escaped(it) }}) VALUES (${T.sqlInsertQuestions()})",
+            sql = "INSERT INTO ${escaped(T)} (${RB.sqlColumns { escaped(it) }}) VALUES (${RB.sqlQuestions()})",
             *newValues.toTypedArray(),
         )
     }
@@ -141,19 +142,18 @@ fun main_009() {
         /**
          * Prepare database
          */
-        it.table.create(table = Parent9::class)
-        it.table.delete(table = Parent9::class)
+        it.table.create<Parent9>()
+        it.table.delete<Parent9>()
 
         /**
          * Insert default message
          */
-        val isInserted = it.row.insert(row = Parent9(value = "This is my default message"))
-        assertTrue(isInserted)
+        it.row.insert(row = Parent9(value = "This is my default message"))
 
         /**
          * Lets check if our implementation of injected message is working...
          */
-        val parents = it.table.select(table = Parent9::class)
+        val parents = it.table.select<Parent9>()
         assertEquals(parents.size, 1)
         assertEquals(parents[0].value, "I HAVE THE POWER!!!")
 

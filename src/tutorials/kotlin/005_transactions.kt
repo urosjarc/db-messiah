@@ -24,8 +24,8 @@ val service4 = SqliteService(
 
 fun main_004() {
     service4.autocommit {
-        it.table.drop(table = Parent4::class)
-        it.table.create(table = Parent4::class)
+        it.table.drop<Parent4>()
+        it.table.create<Parent4>()
     }
 
     /**
@@ -45,7 +45,7 @@ fun main_004() {
      * Because in the previous transaction exception occurred the changes are reverted inside database and our table should be still empty!
      */
     service4.autocommit {
-        assertTrue(it.table.select(table = Parent4::class).isEmpty())
+        assertTrue(it.table.select<Parent4>().isEmpty())
     }
 
     /**
@@ -109,7 +109,7 @@ fun main_004() {
          * and this state is reflected in database while transaction is running!
          * Note that db commits are sent to database right away!
          */
-        assertEquals(1, it.table.select(table = Parent4::class).size)
+        assertEquals(1, it.table.select<Parent4>().size)
 
         /**
          * If you at this point rollback changes to savepoint1

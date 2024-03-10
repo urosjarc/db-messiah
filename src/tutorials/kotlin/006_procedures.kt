@@ -66,8 +66,8 @@ fun main_005() {
          * Setup database
          */
         it.schema.create(schema = schema5)
-        it.table.drop(table = Parent5::class)
-        it.table.create(table = Parent5::class)
+        it.table.drop<Parent5>()
+        it.table.create<Parent5>()
 
         /**
          * Create some elements
@@ -82,7 +82,7 @@ fun main_005() {
          * callback where you provide execution body for the procedure. Database serializer
          * will create proper SQL in background. Note that some databases have no support for the procedures.
          */
-        it.procedure.create(procedure = Procedure50::class) {
+        it.procedure.create<Procedure50> {
             "SELECT * FROM schema5.Parent5 where pk = @${Procedure50::value.name};"
         }
 
@@ -96,7 +96,7 @@ fun main_005() {
         /**
          * Create procedure with multiple output
          */
-        it.procedure.create(procedure = Procedure51::class) {
+        it.procedure.create<Procedure51> {
             """
             SELECT * FROM schema5.Parent5 where pk = @${Procedure51::value.name};
             SELECT * FROM schema5.Parent5;

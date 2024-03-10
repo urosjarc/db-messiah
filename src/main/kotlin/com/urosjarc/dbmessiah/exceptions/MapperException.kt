@@ -8,4 +8,4 @@ import com.urosjarc.dbmessiah.exceptions.base.IssueException
  * @param msg The message describing the issue.
  * @param cause The cause of the issue, if any.
  */
-internal class MapperException(msg: String, cause: Throwable? = null) : IssueException(msg = msg, cause = cause)
+public class MapperException(msg: String, cause: Throwable? = null) : IssueException(msg = msg, cause = cause)

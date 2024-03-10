@@ -25,8 +25,7 @@ public open class Schema(
     /** @suppress */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as Schema
+        if (other !is Schema) return false
         return name == other.name
     }
 

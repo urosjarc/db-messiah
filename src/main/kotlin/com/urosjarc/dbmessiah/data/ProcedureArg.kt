@@ -44,9 +44,7 @@ public class ProcedureArg(
     /** @suppress */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
-        other as ProcedureArg
+        if (other !is ProcedureArg) return false
         return path == other.path
     }
 

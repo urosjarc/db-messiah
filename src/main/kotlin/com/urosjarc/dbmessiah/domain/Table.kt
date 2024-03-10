@@ -81,8 +81,7 @@ public class Table<T : Any>(
     /** @suppress */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as Table<*>
+        if (other !is Table<*>) return false
         return name == other.name
     }
 

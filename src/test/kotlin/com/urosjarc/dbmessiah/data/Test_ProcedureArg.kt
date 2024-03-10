@@ -17,6 +17,7 @@ class Test_ProcedureArg {
     private lateinit var pArg0Copy: ProcedureArg
     private lateinit var pArg0: ProcedureArg
     private lateinit var pArg1: ProcedureArg
+    private lateinit var pArg2: ProcedureArg
     private lateinit var procedure: Procedure
 
     data class TestProcedure(var arg0: Int, val arg1: String)
@@ -46,9 +47,16 @@ class Test_ProcedureArg {
             encoder = NumberTS.int.encoder,
             decoder = NumberTS.int.decoder
         )
+        pArg2 = ProcedureArg(
+            kprop = TestProcedure::arg1 as KProperty1<Any, Any?>,
+            dbType = "INT",
+            jdbcType = JDBCType.VARCHAR,
+            encoder = NumberTS.int.encoder,
+            decoder = NumberTS.int.decoder
+        )
         procedure = Procedure(
             schema = "main",
-            kclass = Test_Procedure.TestProcedure::class, args = listOf(pArg0)
+            kclass = Test_Procedure.TestProcedure::class, args = listOf(pArg0, pArg0Copy, pArg1)
         )
 
     }
@@ -56,7 +64,7 @@ class Test_ProcedureArg {
     @Test
     fun `test inited`() {
         assertEquals(expected = true, actual = pArg0.inited)
-        assertEquals(expected = false, actual = pArg1.inited)
+        assertEquals(expected = false, actual = pArg2.inited)
     }
 
     @Test
@@ -152,10 +160,7 @@ class Test_ProcedureArg {
         assertEquals(expected = "arg1_value", testProcedure.arg1)
         assertContains(
             charSequence = e1.message.toString(),
-            "Trying to set property 'var com.urosjarc.dbmessiah.data.Test_ProcedureArg.TestProcedure.arg0: kotlin.Int' " +
-                    "to 'arg1_2value' but failed! Probably because incompatible types " +
-                    "or receiving object is missing matching property " +
-                    "or property does not belong to the receiver: TestProcedure2(arg0=0, arg1=arg1_value)",
+            "Trying to set property 'var com.urosjarc.dbmessiah.data.Test_ProcedureArg.TestProcedure.arg0: kotlin.Int' to 'arg1_2value' but failed! Probably because incompatible types, or receiving object is missing matching property, or property does not belong to the receiver: TestProcedure2(arg0=0, arg1=arg1_value)",
             message = e1.toString()
         )
     }

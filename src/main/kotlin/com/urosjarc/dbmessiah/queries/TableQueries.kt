@@ -5,7 +5,6 @@ import com.urosjarc.dbmessiah.Serializer
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.exceptions.DriverException
-import kotlin.reflect.KClass
 
 /**
  * Provides methods to perform various operations on single database table.
@@ -26,7 +25,7 @@ public open class TableQueries(
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {
-            if(throws) throw e
+            if (throws) throw e
             return 0
         }
     }
@@ -43,7 +42,7 @@ public open class TableQueries(
         try {
             return this.driver.update(query = query)
         } catch (e: DriverException) {
-            if(throws) throw e
+            if (throws) throw e
             return 0
         }
     }
@@ -95,7 +94,7 @@ public open class TableQueries(
      * @param cursor The [Cursor] configuration for fetching items.
      * @return A list of objects representing the selected rows.
      */
-    public inline fun <reified T: Any, V: Comparable<V>> select(cursor: Cursor<T, V>): List<T> {
+    public inline fun <reified T : Any, V : Comparable<V>> select(cursor: Cursor<T, V>): List<T> {
         val query = this.ser.selectTable(table = T::class, cursor = cursor)
         return this.driver.query(query = query) {
             this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)

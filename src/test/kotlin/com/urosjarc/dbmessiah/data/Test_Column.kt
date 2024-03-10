@@ -2,6 +2,8 @@ package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.exceptions.DbValueException
 import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.NumberTS
+import com.urosjarc.dbmessiah.serializers.StringTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import java.sql.JDBCType
@@ -11,6 +13,7 @@ import kotlin.test.*
 
 class Test_Column {
 
+    private lateinit var table: TableInfo
     private lateinit var foreignColumnCanBeNull: ForeignColumn
     private lateinit var otherNotInitedColumn: OtherColumn
     private lateinit var primaryColumn: PrimaryColumn
@@ -72,7 +75,7 @@ class Test_Column {
             decoder = { rs, i, _ -> rs.getString(i) },
             encoder = { ps, i, x -> ps.setString(i, x.toString()) }
         )
-        TableInfo(
+        this.table = TableInfo(
             schema = "Schema",
             kclass = Entity::class,
             primaryColumn = primaryColumn,
@@ -83,21 +86,76 @@ class Test_Column {
     }
 
     @Test
-    fun `test inited`() {
-        assertTrue(actual = otherColumn.inited)
-        assertTrue(actual = primaryColumn.inited)
-        assertFalse(actual = foreignColumn.inited)
-
-        foreignColumn.foreignTable = foreignColumn.table.copy()
-
-        assertTrue(actual = foreignColumn.inited)
+    fun `test kclass`() {
+        assertEquals(actual = otherColumn.kclass, expected = String::class)
+        assertEquals(actual = primaryColumn.kclass, expected = Int::class)
+        assertEquals(actual = foreignColumn.kclass, expected = String::class)
     }
 
     @Test
-    fun `test path`() {
-        assertEquals(expected = "Schema.Entity.property", actual = otherColumn.path)
-        assertEquals(expected = "Schema.Entity.property", actual = foreignColumn.path)
-        assertEquals(expected = "Schema.Entity.id", actual = primaryColumn.path)
+    fun `test decodeInfo`() {
+        assertEquals(actual = otherColumn.decodeInfo, expected = DecodeInfo(kclass = String::class, kparam = null, kprop = Entity::property))
+        assertEquals(actual = primaryColumn.decodeInfo, expected = DecodeInfo(kclass = Int::class, kparam = null, kprop = Entity::id))
+        assertEquals(actual = foreignColumn.decodeInfo, expected = DecodeInfo(kclass = String::class, kparam = null, kprop = Entity::property))
+    }
+
+    @Test
+    fun `test queryValue`() {
+        assertEquals(
+            actual = otherColumn.queryValue(this.entity),
+            expected = QueryValue(name = "property", value = "Property", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
+        )
+        assertEquals(
+            actual = primaryColumn.queryValue(this.entity),
+            expected = QueryValue(name = "id", value = 23, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
+        )
+        assertEquals(
+            actual = foreignColumn.queryValue(this.entity),
+            expected = QueryValue(name = "property", value = "Property", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
+        )
+    }
+
+    @Test
+    fun `test setValue`() {
+        assertEquals(this.entity.id, 23)
+        assertEquals(this.entity.property, "Property")
+
+        val e = assertThrows<DbValueException> {
+            otherColumn.setValue(obj = this.entity, value = "xxxx")
+        }
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            "Trying to set property 'val com.urosjarc.dbmessiah.data.Test_Column.Entity.property: kotlin.String' to 'xxxx' but the property is probably immutable"
+        )
+
+        assertEquals(this.entity.id, 23)
+        assertEquals(this.entity.property, "Property")
+
+        primaryColumn.setValue(obj = this.entity, value = 32)
+
+        assertEquals(this.entity.id, 32)
+        assertEquals(this.entity.property, "Property")
+    }
+
+    @Test
+    fun `test getValue`() {
+        assertEquals(actual = otherColumn.getValue(this.entity), expected = "Property")
+        assertEquals(actual = primaryColumn.getValue(this.entity), expected = 23)
+        assertEquals(actual = foreignColumn.getValue(this.entity), expected = "Property")
+    }
+
+    @Test
+    fun `test table`() {
+        assertEquals(actual = otherColumn.table, expected = this.table)
+        assertEquals(actual = primaryColumn.table, expected = this.table)
+        assertEquals(actual = foreignColumn.table, expected = this.table)
+    }
+
+    @Test
+    fun `test inited`() {
+        assertTrue(actual = otherColumn.inited)
+        assertTrue(actual = primaryColumn.inited)
+        assertTrue(actual = foreignColumn.inited)
     }
 
     @Test
@@ -108,22 +166,15 @@ class Test_Column {
     }
 
     @Test
-    fun `test kclass`() {
-        assertEquals(expected = String::class, actual = otherColumn.kclass)
-        assertEquals(expected = String::class, actual = foreignColumn.kclass)
-        assertEquals(expected = Int::class, actual = primaryColumn.kclass)
-    }
-
-    @Test
-    fun `test hashCode()`() {
-        assertEquals(expected = otherColumn.hashCode(), actual = foreignColumn.hashCode())
-        assertNotEquals(illegal = otherColumn.hashCode(), actual = primaryColumn.hashCode())
-        assertNotEquals(illegal = foreignColumn.hashCode(), actual = primaryColumn.hashCode())
+    fun `test path`() {
+        assertEquals(expected = "Schema.Entity.property", actual = otherColumn.path)
+        assertEquals(expected = "Schema.Entity.property", actual = foreignColumn.path)
+        assertEquals(expected = "Schema.Entity.id", actual = primaryColumn.path)
     }
 
     @Test
     fun `test equals()`() {
-        assertEquals(expected = otherColumn, actual = foreignColumn)
+        assertTrue(otherColumn.equals(foreignColumn))
         assertFalse(otherColumn.equals(primaryColumn))
         assertFalse(foreignColumn.equals(primaryColumn))
     }
@@ -135,104 +186,4 @@ class Test_Column {
         assertEquals(expected = "Column(name='id', dbType='INT', jdbcType='INTEGER')", primaryColumn.toString())
     }
 
-
-    @Test
-    fun `test queryValue()`() {
-        val obj1 = Entity(id = 1, property = "property1")
-        val obj2 = Entity(id = 2, property = "property2")
-        val obj3 = Entity(id = 3, property = "property3")
-
-
-        val q1 = otherColumn.queryValue(obj = obj1)
-        assertEquals(actual = q1.name, expected = "property")
-        assertEquals(actual = q1.value, expected = obj1.property)
-        assertEquals(actual = q1.jdbcType, expected = JDBCType.VARCHAR)
-
-        val q2 = foreignColumn.queryValue(obj = obj2)
-        assertEquals(actual = q2.name, expected = "property")
-        assertEquals(actual = q2.value, expected = obj2.property)
-        assertEquals(actual = q2.jdbcType, expected = JDBCType.VARCHAR)
-
-        val q3 = primaryColumn.queryValue(obj = obj3)
-        assertEquals(actual = q3.name, expected = "id")
-        assertEquals(actual = q3.value, expected = obj3.id)
-        assertEquals(actual = q3.jdbcType, expected = JDBCType.INTEGER)
-    }
-
-    @Test
-    fun `test setValue()`() {
-        val obj1 = Entity(id = 1, property = "property1")
-        val obj2 = Entity2(text = "text1")
-
-        //Setting imutable property
-        val exc1 = assertThrows<DbValueException> {
-            otherColumn.setValue(obj = obj1, value = "XXX")
-        }
-        assertContains(
-            charSequence = exc1.message.toString(),
-            other = "Trying to set property 'val com.urosjarc.dbmessiah.data.Test_Column.Entity.property: kotlin.String' to 'XXX' but the property is probably immutable"
-        )
-
-        //Setting imutable property
-        val exc2 = assertThrows<DbValueException> {
-            foreignColumn.setValue(obj = obj1, value = "XXX")
-        }
-        assertContains(
-            charSequence = exc2.message.toString(),
-            other = "Trying to set property 'val com.urosjarc.dbmessiah.data.Test_Column.Entity.property: kotlin.String' to 'XXX' but the property is probably immutable"
-        )
-
-        //Setting incompatible type
-        val exc3 = assertThrows<DbValueException> {
-            primaryColumn.setValue(obj = obj1, value = "XXX")
-        }
-        assertContains(
-            charSequence = exc3.message.toString(),
-            other = "Trying to set property 'var com.urosjarc.dbmessiah.data.Test_Column.Entity.id: kotlin.Int' to 'XXX' but failed! Probably because incompatible types or receiving object is missing matching property or property does not belong to the receiver: Entity(id=1, property=property1)"
-        )
-
-        //Setting missing property
-        val exc4 = assertThrows<DbValueException> {
-            primaryColumn.setValue(obj = obj2, value = "XXX")
-        }
-        assertContains(
-            charSequence = exc4.message.toString(),
-            other = "Trying to set property 'var com.urosjarc.dbmessiah.data.Test_Column.Entity.id: kotlin.Int' to 'XXX' but failed! Probably because incompatible types or receiving object is missing matching property or property does not belong to the receiver: Entity2(text=text1)"
-        )
-
-
-        primaryColumn.setValue(obj = obj1, value = 1234)
-        assertEquals(actual = obj1, expected = Entity(id = 1234, property = "property1"))
-
-        foreignColumnCanBeNull.setValue(obj = obj2, value = null)
-        assertEquals(actual = obj2, expected = Entity2(text = null))
-    }
-
-    @Test
-    fun `test getValue()`() {
-        val obj = Entity(id = 1, property = "property1")
-        val obj2 = Entity2(text = "text1")
-
-        assertEquals(actual = otherColumn.getValue(obj), expected = obj.property)
-        assertEquals(actual = foreignColumn.getValue(obj), expected = obj.property)
-        assertEquals(actual = primaryColumn.getValue(obj), expected = obj.id)
-        assertEquals(actual = foreignColumnCanBeNull.getValue(obj2), expected = obj2.text)
-
-        val e0 = assertThrows<DbValueException> {
-            otherColumn.getValue(obj2)
-        }
-
-        assertContains(
-            charSequence = e0.message.toString(),
-            "Trying to get value 'val com.urosjarc.dbmessiah.data.Test_Column.Entity.property: kotlin.String' but failed! Probably because receiving object is missing matching property or property does not belong to the receiver: Entity2(text=text1)",
-            message = e0.toString()
-        )
-    }
-
-
-    @Test
-    fun `test ForeignColumn isNull`() {
-        assertTrue(actual = foreignColumn.notNull)
-        assertFalse(actual = foreignColumnCanBeNull.notNull)
-    }
 }

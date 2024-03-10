@@ -11,4 +11,4 @@ import com.urosjarc.dbmessiah.exceptions.base.IssueException
  * @param msg The message describing the issue.
  * @param cause The cause of the issue, if any.
  */
-internal class DbValueException(msg: String, cause: Throwable? = null) : IssueException(msg = msg, cause = cause)
+public class DbValueException(msg: String, cause: Throwable? = null) : IssueException(msg = msg, cause = cause)
