@@ -21,6 +21,7 @@ open class Test_H2 : Test_Contract {
 
     companion object {
         private lateinit var service: H2Service
+        private lateinit var UUIDservice: H2Service
 
         val schema = H2Schema(
             name = "main", tables = listOf(
@@ -31,6 +32,18 @@ open class Test_H2 : Test_Contract {
                     ),
                     constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
+                    )
+                )
+            )
+        )
+        val UUIDschema = H2Schema(
+            name = "uuid", tables = listOf(
+                Table(UUIDParent::pk),
+                Table(
+                    UUIDChild::pk, foreignKeys = listOf(
+                        UUIDChild::fk to UUIDParent::class
+                    ), constraints = listOf(
+                        UUIDChild::fk to listOf(C.CASCADE_DELETE)
                     )
                 )
             )
@@ -48,6 +61,15 @@ open class Test_H2 : Test_Contract {
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
+                )
+            )
+            UUIDservice = H2Service(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:h2:mem:main"
+                },
+                ser = H2Serializer(
+                    schemas = listOf(UUIDschema),
+                    globalSerializers = AllTS.h2,
                 )
             )
         }
@@ -356,7 +378,10 @@ open class Test_H2 : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -460,7 +485,10 @@ open class Test_H2 : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -724,5 +752,40 @@ open class Test_H2 : Test_Contract {
     }
 
     override fun `test procedure call with input`() {
+    }
+
+    @Test
+    override fun `test UUID`() {
+        UUIDservice.autocommit {
+            it.schema.create(schema = UUIDschema, throws = false)
+            it.table.dropCascade<UUIDChild>(throws = false)
+            it.table.dropCascade<UUIDParent>(throws = false)
+            it.table.create<UUIDParent>()
+            it.table.create<UUIDChild>()
+
+            /**
+             * Parent
+             */
+            val uuidParent0 = UUIDParent(col = "col0")
+            it.row.insert(uuidParent0)
+
+            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+            assertEquals(actual = uuidParent1, expected = uuidParent0)
+
+            val uuidParents0 = it.table.select<UUIDParent>()
+            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+
+            /**
+             * Children
+             */
+            val uuidChild0 = UUIDChild(fk = uuidParent0.pk, col = "col1")
+            it.row.insert(uuidChild0)
+
+            val uuidChild1: UUIDChild = it.row.select<UUIDChild>(pk = uuidChild0.pk!!)!!
+            assertEquals(actual = uuidChild1, expected = uuidChild0)
+
+            val uuidChilds0 = it.table.select<UUIDChild>()
+            assertEquals(actual = uuidChilds0, expected = listOf(uuidChild0))
+        }
     }
 }

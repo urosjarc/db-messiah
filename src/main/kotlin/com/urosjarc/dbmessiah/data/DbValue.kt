@@ -60,13 +60,21 @@ public abstract class DbValue(
     public fun decode(rs: ResultSet, i: Int): Any? = this.decoder(rs, i, this.decodeInfo)
 
     /**
-     * Important method which extracts appropriate [QueryValue] from [obj] instance that this [DbValue] represents.
+     * Extracts the appropriate [QueryValue] from the given [obj] instance.
      *
      * @param obj The object from which to generate the [QueryValue].
      * @return The generated [QueryValue].
      */
-    public fun queryValue(obj: Any): QueryValue =
-        QueryValue(name = this.name, value = this.getValue(obj = obj), jdbcType = this.jdbcType, encoder = this.encoder)
+    public fun <T : Any> queryValueFrom(obj: T): QueryValue = this.queryValue(value = this.getValue(obj = obj))
+
+    /**
+     * Creates a [QueryValue] with the provided value.
+     *
+     * @param value The value to be set in the [QueryValue].
+     * @return The created [QueryValue] instance.
+     */
+    public fun queryValue(value: Any?): QueryValue = QueryValue(name = this.name, value = value, jdbcType = this.jdbcType, encoder = this.encoder)
+
 
     /**
      * Important method which sets appropriate value to the [obj] property which this [DbValue] represents.

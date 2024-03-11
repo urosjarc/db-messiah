@@ -21,6 +21,7 @@ open class Test_Derby : Test_Contract {
 
     companion object {
         private lateinit var service: DerbyService
+        private lateinit var UUIDservice: DerbyService
 
         val schema = DerbySchema(
             name = "main", tables = listOf(
@@ -36,6 +37,7 @@ open class Test_Derby : Test_Contract {
 
             )
         )
+        val UUIDschema = DerbySchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -49,6 +51,15 @@ open class Test_Derby : Test_Contract {
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
+                )
+            )
+            UUIDservice = DerbyService(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:derby:memory:db;create=true"
+                },
+                ser = DerbySerializer(
+                    schemas = listOf(UUIDschema),
+                    globalSerializers = AllTS.derby,
                 )
             )
         }
@@ -345,7 +356,10 @@ open class Test_Derby : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -447,7 +461,10 @@ open class Test_Derby : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -694,5 +711,27 @@ open class Test_Derby : Test_Contract {
     }
 
     override fun `test procedure call with input`() {
+    }
+
+    @Test
+    override fun `test UUID`() {
+        UUIDservice.autocommit {
+            it.schema.create(schema = UUIDschema, throws = false)
+            it.table.drop<UUIDParent>(throws = false)
+            it.table.create<UUIDParent>()
+
+            /**
+             * Parent
+             */
+            val uuidParent0 = UUIDParent(col = "col0")
+            it.row.insert(uuidParent0)
+
+            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+            assertEquals(actual = uuidParent1, expected = uuidParent0)
+
+            val uuidParents0 = it.table.select<UUIDParent>()
+            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+
+        }
     }
 }

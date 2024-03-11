@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
@@ -19,6 +20,7 @@ open class Test_Sqlite : Test_Contract {
 
     companion object {
         private lateinit var service: SqliteService
+        private lateinit var UUIDservice: SqliteService
 
         @JvmStatic
         @BeforeAll
@@ -40,6 +42,15 @@ open class Test_Sqlite : Test_Contract {
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
+            )
+            UUIDservice = SqliteService(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:sqlite::memory:"
+                },
+                ser = SqliteSerializer(
+                    tables = listOf(Table(UUIDParent::pk)),
+                    globalSerializers = AllTS.sqlite,
+                ),
             )
         }
     }
@@ -345,7 +356,10 @@ open class Test_Sqlite : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -447,7 +461,10 @@ open class Test_Sqlite : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -707,5 +724,26 @@ open class Test_Sqlite : Test_Contract {
     }
 
     override fun `test procedure call with input`() {
+    }
+
+    @Test
+    override fun `test UUID`() {
+        UUIDservice.autocommit {
+            it.table.drop<UUIDParent>(throws = false)
+            it.table.create<UUIDParent>()
+
+            /**
+             * Parent
+             */
+            val uuidParent0 = UUIDParent(col = "col0")
+            it.row.insert(uuidParent0)
+
+            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+            assertEquals(actual = uuidParent1, expected = uuidParent0)
+
+            val uuidParents0 = it.table.select<UUIDParent>()
+            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+        }
+
     }
 }

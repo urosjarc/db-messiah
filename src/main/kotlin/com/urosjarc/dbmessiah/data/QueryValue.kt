@@ -1,6 +1,7 @@
 package com.urosjarc.dbmessiah.data
 
 import java.sql.JDBCType
+import java.util.*
 
 /**
  * Represents a SQL [QueryValue] to be used in a JDBC prepared statement.
@@ -24,6 +25,7 @@ public data class QueryValue(
      */
     public val escapped: String
         get() = when (this.value) {
+            is UUID -> "'$value'"
             is String -> "'$value'"
             is Char -> "'$value'"
             else -> this.value.toString()

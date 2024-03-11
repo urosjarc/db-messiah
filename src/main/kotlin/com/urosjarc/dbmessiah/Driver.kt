@@ -176,6 +176,7 @@ public open class Driver(private val conn: Connection) {
                 this.closeAll(ps = ps, rs = rs)
                 return data
             }
+            rs.close()
         } catch (e: SQLException) {
             this.log.warn(e.message.toString())
             //Auto reurn id is probably not supported
@@ -196,13 +197,14 @@ public open class Driver(private val conn: Connection) {
                     this.closeAll(ps = ps, rs = rs2)
                     return data
                 }
+                rs2.close()
             }
         } catch (e: Throwable) {
             this.closeAll(ps = ps, rs = rs2)
             throw DriverException(msg = "Failed to process id results with '$onGeneratedKeysFail' for: $query", cause = e)
         }
 
-        this.closeAll(ps = ps, rs = rs2)
+        this.closeAll(ps = ps)
         throw DriverException(msg = "Could not retrieve inserted id normally nor with force from: $query")
     }
 

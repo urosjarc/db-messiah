@@ -17,7 +17,7 @@ private val KType.ext_isWholeNumber: Boolean get() = listOf(typeOf<Int>(), typeO
  *
  * @return true if the type is a UUID, false otherwise.
  */
-private val KType.ext_isUUID: Boolean get() = listOf(typeOf<UUID>()).contains(this)
+private val KType.ext_isUUID: Boolean get() = listOf(typeOf<UUID>(), typeOf<UUID?>()).contains(this)
 
 /**
  * The [ext_owner] property is an extension property for the [KProperty1] class.

@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import java.util.*
 import kotlin.random.Random
 
 data class TestProcedure(
@@ -47,3 +48,14 @@ data class Parent(
         }
     }
 }
+
+data class UUIDChild(
+    var pk: UUID? = null,
+    val fk: UUID,
+    val col: String
+)
+
+data class UUIDParent(
+    val pk: UUID = UUID.randomUUID(),
+    var col: String
+)

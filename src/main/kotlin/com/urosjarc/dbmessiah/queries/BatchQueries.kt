@@ -80,7 +80,7 @@ public class BatchQueries(
         val query = this.ser.updateRow(row = firstRow)
 
         //Build QueryValue matrix
-        val valueMatrix = rows.map { listOf(*RB.queryValues(obj = it), T.primaryColumn.queryValue(obj = it)) }
+        val valueMatrix = rows.map { listOf(*RB.queryValues(obj = it), T.primaryColumn.queryValueFrom(obj = it)) }
 
         //Build batch query
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)
@@ -114,7 +114,7 @@ public class BatchQueries(
         val query = this.ser.deleteRow(row = firstRow)
 
         //Build QueryValue matrix
-        val valueMatrix = rows.map { listOf(T.primaryColumn.queryValue(obj = it)) }
+        val valueMatrix = rows.map { listOf(T.primaryColumn.queryValueFrom(obj = it)) }
 
         //Build batch query
         val batchQuery = BatchQuery(sql = query.sql, valueMatrix = valueMatrix)

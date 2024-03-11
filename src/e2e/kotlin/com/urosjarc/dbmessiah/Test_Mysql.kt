@@ -1,5 +1,6 @@
 package com.urosjarc.dbmessiah
 
+import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
@@ -21,6 +22,7 @@ open class Test_Mysql : Test_Contract {
 
     companion object {
         private lateinit var service: MysqlService
+        private lateinit var UUIDservice: MysqlService
 
         val schema = MysqlSchema(
             name = "main", tables = listOf(
@@ -34,6 +36,18 @@ open class Test_Mysql : Test_Contract {
             procedures = listOf(
                 TestProcedure::class,
                 TestProcedureEmpty::class
+            )
+        )
+        val UUIDschema = MysqlSchema(
+            name = "uuid", tables = listOf(
+                Table(UUIDParent::pk),
+                Table(
+                    UUIDChild::pk, foreignKeys = listOf(
+                        UUIDChild::fk to UUIDParent::class
+                    ), constraints = listOf(
+                        UUIDChild::fk to listOf(C.CASCADE_DELETE)
+                    )
+                )
             )
         )
 
@@ -51,6 +65,17 @@ open class Test_Mysql : Test_Contract {
                     globalSerializers = AllTS.basic,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
+                )
+            )
+            UUIDservice = MysqlService(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:mysql://localhost:3307"
+                    this["username"] = "root"
+                    this["password"] = "root"
+                },
+                ser = MysqlSerializer(
+                    schemas = listOf(UUIDschema),
+                    globalSerializers = AllTS.mysql,
                 )
             )
         }
@@ -380,7 +405,10 @@ open class Test_Mysql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -482,7 +510,10 @@ open class Test_Mysql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -746,5 +777,40 @@ open class Test_Mysql : Test_Contract {
         val r1 = (results[1] as List<Parent>)
         assertEquals(actual = r0, expected = listOf(1))
         assertEquals(actual = r1, expected = listOf(parent))
+    }
+
+    @Test
+    override fun `test UUID`() {
+        UUIDservice.autocommit {
+            it.schema.create(schema = UUIDschema, throws = false)
+            it.table.drop<UUIDChild>(throws = false)
+            it.table.drop<UUIDParent>(throws = false)
+            it.table.create<UUIDParent>()
+            it.table.create<UUIDChild>()
+
+            /**
+             * Parent
+             */
+            val uuidParent0 = UUIDParent(col = "col0")
+            it.row.insert(uuidParent0)
+
+            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+            assertEquals(actual = uuidParent1, expected = uuidParent0)
+
+            val uuidParents0 = it.table.select<UUIDParent>()
+            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+
+            /**
+             * Children
+             */
+            val uuidChild0 = UUIDChild(fk = uuidParent0.pk, col = "col1")
+            it.row.insert(uuidChild0)
+
+            val uuidChild1: UUIDChild = it.row.select<UUIDChild>(pk = uuidChild0.pk!!)!!
+            assertEquals(actual = uuidChild1, expected = uuidChild0)
+
+            val uuidChilds0 = it.table.select<UUIDChild>()
+            assertEquals(actual = uuidChilds0, expected = listOf(uuidChild0))
+        }
     }
 }

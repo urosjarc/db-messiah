@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah.data
 
-import com.urosjarc.dbmessiah.extend.ext_isAutoInc
-import com.urosjarc.dbmessiah.extend.ext_isAutoUUID
+import com.urosjarc.dbmessiah.extend.*
 import java.sql.JDBCType
 import kotlin.reflect.KProperty1
 
@@ -21,6 +20,27 @@ public class PrimaryColumn(
     encoder = encoder,
     decoder = decoder
 ) {
+
+    /**
+     * Represents a boolean value indicating whether the given variable is a whole number.
+     * The value of this variable is determined by the logical OR operation
+     * between two properties: `kprop.ext_isWholeNumber` and `kprop.ext_isInlineWholeNumber`.
+     *
+     * @property isWholeNumber The boolean value indicating whether the given variable is a whole number.
+     *
+     * @see Column
+     */
+    public val isWholeNumber: Boolean = kprop.ext_isWholeNumber || kprop.ext_isInlineWholeNumber
+
+    /**
+     * Represents a boolean value indicating whether the given variable is a UUID.
+     * The value of this variable is determined by the logical OR operation between two properties: `kprop.ext_isUUID` and `kprop.ext_isInlineUUID`.
+     *
+     * @property isUUID The boolean value indicating whether the given variable is a UUID.
+     *
+     * @see Column
+     */
+    public val isUUID: Boolean = kprop.ext_isUUID || kprop.ext_isInlineUUID
 
     /**
      * Represents whether a column is auto-increment.

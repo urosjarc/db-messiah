@@ -6,6 +6,7 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -259,7 +260,7 @@ public abstract class Serializer(
         val T = this.mapper.getTableInfo(obj = row)
         return Query(
             sql = "DELETE FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = ?",
-            T.primaryColumn.queryValue(row)
+            T.primaryColumn.queryValueFrom(row)
         )
     }
 
@@ -293,7 +294,7 @@ public abstract class Serializer(
         return Query(
             sql = "UPDATE ${escaped(T)} SET $escapedColumns WHERE ${escaped(T.primaryColumn)} = ?",
             *RB.queryValues(obj = row),
-            T.primaryColumn.queryValue(obj = row)
+            T.primaryColumn.queryValueFrom(obj = row)
         )
     }
 
@@ -345,7 +346,8 @@ public abstract class Serializer(
      */
     public fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = $pk")
+        val qv = T.primaryColumn.queryValue(value = pk)
+        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = ${qv.escapped}")
     }
 
 

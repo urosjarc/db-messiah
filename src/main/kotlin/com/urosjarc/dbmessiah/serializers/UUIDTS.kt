@@ -2,6 +2,7 @@ package com.urosjarc.dbmessiah.serializers
 
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import java.sql.JDBCType
+import java.sql.SQLException
 import java.util.*
 
 /**
@@ -12,27 +13,27 @@ public object UUIDTS {
     public val sqlite: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
         dbType = "CHARACTER(36)",
-        jdbcType = JDBCType.BLOB,
+        jdbcType = JDBCType.CHAR,
         decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
         encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val postgresql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
         dbType = "UUID",
-        jdbcType = JDBCType.NCHAR,
+        jdbcType = JDBCType.JAVA_OBJECT,
         decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
-        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
+        encoder = { ps, i, x -> ps.setObject(i, x) })
 
     public val oracle: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "STRING",
-        jdbcType = JDBCType.CHAR,
+        dbType = "VARCHAR2(36)",
+        jdbcType = JDBCType.VARCHAR,
         decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
         encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val mysql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "BINARY(16)",
+        dbType = "CHARACTER(36)",
         jdbcType = JDBCType.BINARY,
         decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
         encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })

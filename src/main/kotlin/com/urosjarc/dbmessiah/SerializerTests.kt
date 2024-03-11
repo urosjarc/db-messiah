@@ -381,7 +381,7 @@ internal class SerializerTests {
                 this.ser.schemas.forEach { schema ->
                     schema.tables.forEach { table ->
                         if (table.primaryKey.ext_isAutoUUID)
-                            throw SerializerTestsException("Db2 does not support AUTO_UUID primary keys: ${table.primaryKey}")
+                            throw SerializerTestsException("Database does not support AUTO_UUID primary keys: ${table.primaryKey}")
                     }
                 }
             }

@@ -1,7 +1,6 @@
 package com.urosjarc.dbmessiah
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 interface Test_Contract {
     fun prepare()
@@ -54,4 +53,7 @@ interface Test_Contract {
 
     @Test
     fun `test procedure call with input`()
+
+    @Test
+    fun `test UUID`()
 }

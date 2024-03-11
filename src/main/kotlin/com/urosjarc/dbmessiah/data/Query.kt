@@ -27,11 +27,7 @@ public class Query(
     override fun toString(): String {
         var index = 1
         val values = if (values.isEmpty()) "" else "\n" + values.joinToString(separator = "") {
-            val value = when (it.value) {
-                is String -> "'${it.value}'"
-                else -> it.value.toString()
-            }
-            "\t${index++}) ${it.name}: ${it.jdbcType} = ${value}\n"
+            "\t${index++}) ${it.name}: ${it.jdbcType} = ${it.escapped}\n"
         }
         return "\n\n$sql\n${values}"
     }

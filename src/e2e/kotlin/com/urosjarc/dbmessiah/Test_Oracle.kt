@@ -21,6 +21,7 @@ open class Test_Oracle : Test_Contract {
 
     companion object {
         private lateinit var service: OracleService
+        private lateinit var UUIDservice: OracleService
 
         val schema = OracleSchema(
             name = "SYSTEM",
@@ -36,6 +37,7 @@ open class Test_Oracle : Test_Contract {
                 )
             ),
         )
+        val UUIDschema = OracleSchema(name = "SYSTEM", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -55,6 +57,17 @@ open class Test_Oracle : Test_Contract {
                         TestProcedure::class,
                         TestProcedureEmpty::class
                     )
+                )
+            )
+            UUIDservice = OracleService(
+                config = Properties().apply {
+                    this["jdbcUrl"] = "jdbc:oracle:thin:@localhost:1521:XE"
+                    this["username"] = "system"
+                    this["password"] = "root"
+                },
+                ser = OracleSerializer(
+                    schemas = listOf(UUIDschema),
+                    globalSerializers = AllTS.oracle,
                 )
             )
         }
@@ -386,7 +399,10 @@ open class Test_Oracle : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -488,7 +504,10 @@ open class Test_Oracle : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -744,5 +763,25 @@ open class Test_Oracle : Test_Contract {
         assertEquals(expected = null, actual = it.row.select<Parent>(pk = parent.pk!!))
         it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col))
         assertEquals(expected = parent, actual = it.row.select<Parent>(pk = parent.pk!!))
+    }
+
+    @Test
+    override fun `test UUID`() {
+        UUIDservice.autocommit {
+            it.table.dropCascade<UUIDParent>(throws = false)
+            it.table.create<UUIDParent>()
+
+            /**
+             * Parent
+             */
+            val uuidParent0 = UUIDParent(col = "col0")
+            it.row.insert(uuidParent0)
+
+            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+            assertEquals(actual = uuidParent1, expected = uuidParent0)
+
+            val uuidParents0 = it.table.select<UUIDParent>()
+            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+        }
     }
 }
