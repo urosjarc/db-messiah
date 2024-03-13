@@ -102,15 +102,15 @@ class Test_Column {
     @Test
     fun `test queryValue`() {
         assertEquals(
-            actual = otherColumn.queryValueOf(this.entity),
+            actual = otherColumn.queryValueFrom(this.entity),
             expected = QueryValue(name = "property", value = "Property", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
         )
         assertEquals(
-            actual = primaryColumn.queryValueOf(this.entity),
+            actual = primaryColumn.queryValueFrom(this.entity),
             expected = QueryValue(name = "id", value = 23, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
         )
         assertEquals(
-            actual = foreignColumn.queryValueOf(this.entity),
+            actual = foreignColumn.queryValueFrom(this.entity),
             expected = QueryValue(name = "property", value = "Property", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
         )
     }

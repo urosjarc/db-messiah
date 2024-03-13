@@ -33,17 +33,17 @@ public object UUIDTS {
 
     public val mysql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "CHARACTER(36)",
-        jdbcType = JDBCType.BINARY,
-        decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
-        encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
+        dbType = "CHAR(36)",
+        jdbcType = JDBCType.CHAR,
+        decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
+        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val maria: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
         dbType = "UUID",
-        jdbcType = JDBCType.BINARY,
-        decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
-        encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
+        jdbcType = JDBCType.CHAR,
+        decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
+        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val mssql: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
@@ -61,15 +61,15 @@ public object UUIDTS {
 
     public val derby: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "CHAR(16)",
-        jdbcType = JDBCType.BINARY,
-        decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
-        encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
+        dbType = "CHAR(36)",
+        jdbcType = JDBCType.CHAR,
+        decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
+        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 
     public val db2: TypeSerializer<UUID> = TypeSerializer(
         kclass = UUID::class,
-        dbType = "BINARY(16)",
-        jdbcType = JDBCType.BINARY,
-        decoder = { rs, i, _ -> UUID.nameUUIDFromBytes(rs.getBytes(i)) },
-        encoder = { ps, i, x -> ps.setBytes(i, x.toString().encodeToByteArray()) })
+        dbType = "CHAR(36)",
+        jdbcType = JDBCType.CHAR,
+        decoder = { rs, i, _ -> UUID.fromString(rs.getString(i)) },
+        encoder = { ps, i, x -> ps.setString(i, x.toString()) })
 }

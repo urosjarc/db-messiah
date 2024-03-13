@@ -33,7 +33,7 @@ public open class H2Serializer(
             else if (T.primaryColumn.autoUUID) " DEFAULT RANDOM_UUID()"
             else ""
 
-        col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType} PRIMARY KEY${default}")
+        col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType}$default PRIMARY KEY")
 
         //Foreign keys
         T.foreignColumns.forEach {

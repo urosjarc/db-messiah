@@ -20,7 +20,10 @@ public open class MssqlSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures,
-    allowAutoUUID = true
+    /**
+     * SQL server does not return generated UUID from database.
+     */
+    allowAutoUUID = false
 ) {
 
     override val selectLastId: String = "SELECT SCOPE_IDENTITY()"

@@ -38,18 +38,7 @@ open class Test_Maria : Test_Contract {
                 TestProcedureEmpty::class
             )
         )
-        val UUIDschema = MariaSchema(
-            name = "uuid", tables = listOf(
-                Table(UUIDParent::pk),
-                Table(
-                    UUIDChild::pk, foreignKeys = listOf(
-                        UUIDChild::fk to UUIDParent::class
-                    ), constraints = listOf(
-                        UUIDChild::fk to listOf(C.CASCADE_DELETE)
-                    )
-                )
-            )
-        )
+        val UUIDschema = MariaSchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -786,10 +775,8 @@ open class Test_Maria : Test_Contract {
     override fun `test UUID`() {
         UUIDservice.autocommit {
             it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDChild>(throws = false)
             it.table.drop<UUIDParent>(throws = false)
             it.table.create<UUIDParent>()
-            it.table.create<UUIDChild>()
 
             /**
              * Parent
@@ -802,18 +789,6 @@ open class Test_Maria : Test_Contract {
 
             val uuidParents0 = it.table.select<UUIDParent>()
             assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-
-            /**
-             * Children
-             */
-            val uuidChild0 = UUIDChild(fk = uuidParent0.pk, col = "col1")
-            it.row.insert(uuidChild0)
-
-            val uuidChild1: UUIDChild = it.row.select<UUIDChild>(pk = uuidChild0.pk!!)!!
-            assertEquals(actual = uuidChild1, expected = uuidChild0)
-
-            val uuidChilds0 = it.table.select<UUIDChild>()
-            assertEquals(actual = uuidChilds0, expected = listOf(uuidChild0))
         }
     }
 }

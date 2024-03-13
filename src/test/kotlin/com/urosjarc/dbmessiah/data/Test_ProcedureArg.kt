@@ -102,17 +102,17 @@ class Test_ProcedureArg {
         pArg1.procedure = procedure
         val testProcedure = TestProcedure(arg0 = 0, arg1 = "arg1_value")
         assertEquals(
-            actual = this.pArg0.queryValueOf(testProcedure),
+            actual = this.pArg0.queryValueFrom(testProcedure),
             expected = QueryValue(name = "arg0", value = 0, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
         )
         assertEquals(
-            actual = this.pArg1.queryValueOf(testProcedure),
+            actual = this.pArg1.queryValueFrom(testProcedure),
             expected = QueryValue(name = "arg1", value = "arg1_value", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(0).encoder)
         )
 
         val testProcedure2 = TestProcedure2(arg0 = 0, arg1 = "arg1_value")
         val e = assertThrows<DbValueException> {
-            this.pArg1.queryValueOf(testProcedure2)
+            this.pArg1.queryValueFrom(testProcedure2)
         }
         assertContains(
             charSequence = e.message.toString(),

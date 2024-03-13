@@ -18,6 +18,9 @@ public open class OracleSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures,
+    /**
+     * Generation of UUID is to complex (it can be done but not in this version).
+     */
     allowAutoUUID = false
 ) {
     override val selectLastId: String? = null

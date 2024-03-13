@@ -18,7 +18,15 @@ public open class MysqlSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures,
-    allowAutoUUID = true
+    /**
+     * Mysql supports inserting UUID as default value on primary key on db side,
+     * but retrieving it back produces error
+     * Caused by: java.lang.IllegalArgumentException: Invalid UUID string: 0
+     * The same goes for [selectLastId]
+     *
+     * > https://stackoverflow.com/questions/48261628/how-to-get-a-generated-uuid-type-using-jdbc-getgeneratedkeys
+     */
+    allowAutoUUID = false
 ) {
 
     override val selectLastId: String = "SELECT LAST_INSERT_ID()"
@@ -33,7 +41,7 @@ public open class MysqlSerializer(
         //PRIMARY KEY
         val default =
             if (T.primaryColumn.autoInc) " AUTO_INCREMENT"
-            else if (T.primaryColumn.autoUUID) " DEFAULT (uuid_to_bin(uuid()))"
+            else if (T.primaryColumn.autoUUID) " DEFAULT (UUID())"
             else ""
 
         col.add("${escaped(T.primaryColumn.name)} ${T.primaryColumn.dbType} PRIMARY KEY${default}")
