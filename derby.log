@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Thu Mar 14 00:29:17 CET 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-018e-3a26-1393-00000a2056e8 
+on database directory memory:/home/urosjarc/vcs/db-jesus/db with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@251a69d7 
+Loaded from file:/home/urosjarc/.gradle/caches/modules-2/files-2.1/org.apache.derby/derby/10.17.1.0/e90e61e8ee731614a9bafd3d81155e09fff5e80c/derby-10.17.1.0.jar
+java.vendor=Amazon.com Inc.
+java.runtime.version=19.0.2+7-FR
+user.dir=/home/urosjarc/vcs/db-jesus
+os.name=Linux
+os.arch=amd64
+os.version=6.5.0-25-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

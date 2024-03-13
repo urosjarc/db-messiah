@@ -1,4 +1,5 @@
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
+import java.lang.Thread.sleep
 
 plugins {
     `java-library`
@@ -34,7 +35,10 @@ koverReport {
 }
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
-    this.tasks = listOf("test", "tutorials", "chinook", "e2e")
+    this.doFirst {
+        sleep(15 * 1000)
+    }
+    this.tasks = listOf("build", "test", "tutorials", "chinook", "e2e")
 }
 
 tasks.dokkaHtml {
