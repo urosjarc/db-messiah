@@ -346,8 +346,10 @@ public abstract class Serializer(
      */
     public fun <T : Any, K : Any> selectTable(table: KClass<T>, pk: K): Query {
         val T = this.mapper.getTableInfo(kclass = table)
-        val qv = T.primaryColumn.queryValue(value = pk)
-        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = ${qv.escapped}")
+        return Query(
+            sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(T.primaryColumn)} = ?",
+            T.primaryColumn.queryValue(value = pk)
+        )
     }
 
 
