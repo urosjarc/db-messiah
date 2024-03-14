@@ -36,9 +36,11 @@ koverReport {
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.doFirst {
-        sleep(15 * 1000)
+        println("Start sleep...")
+        sleep(50 * 1000)
+        println("Stop sleep...")
     }
-    this.tasks = listOf("build", "test", "tutorials", "chinook", "e2e")
+    this.tasks = listOf("test", "tutorials", "chinook", "e2e")
 }
 
 tasks.dokkaHtml {
