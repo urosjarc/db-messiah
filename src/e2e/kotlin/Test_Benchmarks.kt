@@ -1,5 +1,3 @@
-package com.urosjarc.dbmessiah
-
 import org.junit.jupiter.api.Test
 import kotlin.math.absoluteValue
 import kotlin.reflect.KCallable

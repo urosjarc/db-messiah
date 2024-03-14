@@ -1,13 +1,10 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
-import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
-import com.urosjarc.dbmessiah.impl.mssql.MssqlService
-import com.urosjarc.dbmessiah.impl.mysql.MysqlService
+import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
+import com.urosjarc.dbmessiah.impl.oracle.OracleSerializer
+import com.urosjarc.dbmessiah.impl.oracle.OracleService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -16,16 +13,16 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-
-open class Test_Mssql : Test_Contract {
+open class Test_Oracle : Test_Contract {
     open var children = mutableListOf<Child>()
     open var parents = mutableListOf<Parent>()
 
     companion object {
-        private lateinit var service: MssqlService
+        private lateinit var service: OracleService
 
-        val schema = MssqlSchema(
-            name = "main", tables = listOf(
+        val schema = OracleSchema(
+            name = "SYSTEM",
+            tables = listOf(
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
@@ -37,26 +34,26 @@ open class Test_Mssql : Test_Contract {
                 ),
                 Table(UUIDParent::pk)
             ),
-            procedures = listOf(
-                TestProcedure::class,
-                TestProcedureEmpty::class
-            )
         )
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = MssqlService(
+            service = OracleService(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:sqlserver://localhost:1433;encrypt=false;"
-                    this["username"] = "sa"
-                    this["password"] = "Root_root1"
+                    this["jdbcUrl"] = "jdbc:oracle:thin:@localhost:1521:XE"
+                    this["username"] = "system"
+                    this["password"] = "root"
                 },
-                ser = MssqlSerializer(
+                ser = OracleSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.mssql,
+                    globalSerializers = AllTS.oracle,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
+                    globalProcedures = listOf(
+                        TestProcedure::class,
+                        TestProcedureEmpty::class
+                    )
                 )
             )
         }
@@ -66,14 +63,12 @@ open class Test_Mssql : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.schema.create(schema = schema)
             it.table.drop<Child>(throws = false)
             it.table.drop<Parent>(throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-
-            it.table.create<Parent>(throws = false)
-            it.table.create<Child>(throws = false)
-            it.table.create<UUIDParent>(throws = false)
+            it.table.dropCascade<UUIDParent>(throws = false)
+            it.table.create<Parent>()
+            it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -106,31 +101,32 @@ open class Test_Mssql : Test_Contract {
 
         //Create procedures and disable foreign checks
         service.autocommit {
-            it.procedure.drop<TestProcedure>(throws = false)
-            it.procedure.create<TestProcedure> {
-                """
-                    ${it.SELECT<Parent>()} WHERE
-                        ${it.column(Parent::pk)} = ${it.arg(TestProcedure::parent_pk)}
-                        AND ${it.column(Parent::col)} = ${it.arg(TestProcedure::parent_col)};
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
-                """
-            }
             it.procedure.drop<TestProcedureEmpty>(throws = false)
             it.procedure.create<TestProcedureEmpty> {
                 """
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 2;
+                    INSERT INTO ${it.table<Parent>()}
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (1234, 'new parent from procedure');
+                """
+            }
+            it.procedure.drop<TestProcedure>(throws = false)
+            it.procedure.create<TestProcedure> {
+                """
+                    INSERT INTO ${it.table<Parent>()}
+                        (${it.name(Parent::pk)}, ${it.name(Parent::col)})
+                    VALUES
+                        (${it.arg(TestProcedure::parent_pk)}, ${it.arg(TestProcedure::parent_col)});
                 """
             }
         }
-
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: MssqlService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: OracleService.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = "Invalid object name 'main.Parent'",
+            other = " table or view does not exist",
             message = e.stackTraceToString()
         )
     }
@@ -142,8 +138,7 @@ open class Test_Mssql : Test_Contract {
 
         //Drop
         it.table.delete<Child>()
-        it.table.drop<Child>()
-        it.table.drop<Parent>(throws = false)
+        it.table.dropCascade<Parent>()
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -166,9 +161,7 @@ open class Test_Mssql : Test_Contract {
 
         //Drop
         it.table.delete<Parent>()
-        it.table.delete<Child>()
-        it.table.drop<Child>()
-        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
+        assertEquals(actual = it.table.dropCascade<Parent>(), expected = 0)
 
         //Select will create error
         this.assertTableNotExists<Parent>(q = it)
@@ -394,7 +387,10 @@ open class Test_Mssql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -496,7 +492,10 @@ open class Test_Mssql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -578,20 +577,13 @@ open class Test_Mssql : Test_Contract {
         it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run {
-            """
-            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
-            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 2;
-            """
-        }
+        it.query.run { "${it.DELETE<Parent>()} WHERE ${it.column(Parent::pk)} = 1" }
 
         //Check for deletion
-        val postParent2 = it.row.select<Parent>(pk = 2)
         val postParent1 = it.row.select<Parent>(pk = 1)
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
-        assertEquals(expected = null, actual = postParent2)
     }
 
     @Test
@@ -600,19 +592,10 @@ open class Test_Mssql : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get(Parent::class, Parent::class) {
-            """
-                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
-                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
-                    ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
-                """.trimIndent()
-        }
+        val objs = it.query.get<Parent> { "${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3" }
 
         //If multiple select are not supported then it should return only first select
-        assertEquals(expected = listOf(listOf(parent1, parent2), listOf(parent1)), actual = objs)
-
-        //Also If multiple results are not supported then it should delete the 1 parent also
-        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = null)
+        assertEquals(expected = listOf(parent1, parent2), actual = objs)
     }
 
     @Test
@@ -626,36 +609,23 @@ open class Test_Mssql : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query.get(Child::class, Child::class, input = input) {
+        val objs = it.query.get(Child::class, input = input) {
             """
-                    ${it.SELECT<Child>()}
-                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)};
-                    
-                    ${it.SELECT<Child>()}
-                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
-                """.trimIndent()
+                ${it.SELECT<Child>()}
+                join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
+            """
         }
 
         assertEquals(
             actual = objs,
             expected =
             listOf(
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                ),
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                )
+                Child(pk = 6, fk = 2, col = "-1350163013"),
+                Child(pk = 7, fk = 2, col = "1544682258"),
+                Child(pk = 8, fk = 2, col = "-182312124"),
+                Child(pk = 9, fk = 2, col = "-1397853422"),
+                Child(pk = 10, fk = 2, col = "62774084")
             )
         )
     }
@@ -769,24 +739,20 @@ open class Test_Mssql : Test_Contract {
 
     @Test
     override fun `test procedure call without input`() = service.autocommit {
-        val results = it.procedure.call(procedure = TestProcedureEmpty(), Parent::class, Parent::class)
-        assertEquals(expected = 2, actual = results.size)
-        val r0 = (results[0] as List<Parent>).map { it.pk }
-        val r1 = (results[1] as List<Parent>).map { it.pk }
-        assertEquals(actual = r0, expected = listOf(1))
-        assertEquals(actual = r1, expected = listOf(2))
+        val parent = Parent(pk = 1234, col = "new parent from procedure")
+        assertEquals(expected = null, actual = it.row.select<Parent>(pk = parent.pk!!))
+        it.procedure.call(procedure = TestProcedureEmpty())
+        assertEquals(expected = parent, actual = it.row.select<Parent>(pk = parent.pk!!))
     }
 
     @Test
     override fun `test procedure call with input`() = service.autocommit {
-        val parent = it.table.select<Parent>().first()
-        val results = it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col), Parent::class, Parent::class)
-        assertEquals(expected = 2, actual = results.size)
-        val r0 = (results[0] as List<Parent>).map { it.pk }
-        val r1 = (results[1] as List<Parent>)
-        assertEquals(actual = r0, expected = listOf(1))
-        assertEquals(actual = r1, expected = listOf(parent))
+        val parent = Parent.get(pk = 1000, seed = 0)
+        assertEquals(expected = null, actual = it.row.select<Parent>(pk = parent.pk!!))
+        it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col))
+        assertEquals(expected = parent, actual = it.row.select<Parent>(pk = parent.pk!!))
     }
+
     @Test
     override fun `test UUID`() = service.autocommit {
         val uuidParent0 = UUIDParent(col = "col0")

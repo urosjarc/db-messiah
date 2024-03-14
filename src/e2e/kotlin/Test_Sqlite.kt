@@ -1,12 +1,9 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.maria.MariaSchema
-import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
-import com.urosjarc.dbmessiah.impl.maria.MariaService
+import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
+import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,42 +12,31 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-
-open class Test_Maria : Test_Contract {
-    open var parents = mutableListOf<Parent>()
-    open var children = mutableListOf<Child>()
+open class Test_Sqlite : Test_Contract {
+    var parents = mutableListOf<Parent>()
+    var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: MariaService
-
-        val schema = MariaSchema(
-            name = "main", tables = listOf(
-                Table(Parent::pk),
-                Table(
-                    Child::pk, foreignKeys = listOf(
-                        Child::fk to Parent::class
-                    )
-                ),
-                Table(UUIDParent::pk)
-            ),
-            procedures = listOf(
-                TestProcedure::class,
-                TestProcedureEmpty::class
-            )
-        )
+        private lateinit var service: SqliteService
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = MariaService(
+            service = SqliteService(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:mariadb://localhost:3306"
-                    this["username"] = "root"
-                    this["password"] = "root"
+                    this["jdbcUrl"] = "jdbc:sqlite::memory:"
                 },
-                ser = MariaSerializer(
-                    schemas = listOf(schema),
-                    globalSerializers = AllTS.maria,
+                ser = SqliteSerializer(
+                    tables = listOf(
+                        Table(Parent::pk),
+                        Table(
+                            Child::pk, foreignKeys = listOf(
+                                Child::fk to Parent::class
+                            )
+                        ),
+                        Table(UUIDParent::pk)
+                    ),
+                    globalSerializers = AllTS.sqlite,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
@@ -62,11 +48,9 @@ open class Test_Maria : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.schema.create(schema = schema)
-            it.query.run { "SET FOREIGN_KEY_CHECKS=0;" }
             it.table.drop<Child>()
             it.table.drop<Parent>()
-            it.table.drop<UUIDParent>()
+            it.table.drop<UUIDParent>(throws = false)
 
             it.table.create<Parent>()
             it.table.create<Child>()
@@ -101,35 +85,13 @@ open class Test_Maria : Test_Contract {
                 throw Exception("Test state does not match with expected state")
         }
 
-        //Create procedures and disable foreign checks
-        service.autocommit {
-            it.procedure.drop<TestProcedure>(throws = false)
-            it.procedure.create<TestProcedure> {
-                """
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = ${it.arg(TestProcedure::parent_pk)} AND ${it.column(Parent::col)} = ${
-                    it.arg(
-                        TestProcedure::parent_col
-                    )
-                };
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
-                """
-            }
-            it.procedure.drop<TestProcedureEmpty>(throws = false)
-            it.procedure.create<TestProcedureEmpty> {
-                """
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
-                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 2;
-                """
-            }
-        }
-
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: MariaService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: SqliteService.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = "Table 'main.Parent' doesn't exist",
+            other = "SQL error or missing database (no such table: main.Parent)",
             message = e.stackTraceToString()
         )
     }
@@ -153,20 +115,20 @@ open class Test_Maria : Test_Contract {
         assertTrue(actual = preParents.isNotEmpty())
 
         //Create table if allready created should not throw error
-        assertEquals(actual = it.table.create<Parent>(), expected = 0)
+        assertEquals(actual = it.table.create<Parent>(), expected = 1)
 
         //Create table should not change previous state
         val postParents = it.table.select<Parent>()
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
+        assertEquals(actual = it.table.drop<Parent>(), expected = 1)
 
         //Select will create error
         this.assertTableNotExists<Parent>(q = it)
 
         //Recreate table
-        assertEquals(actual = it.table.create<Parent>(), expected = 0)
+        assertEquals(actual = it.table.create<Parent>(), expected = 1)
 
         //Now we can get elements
         assertTrue(it.table.select<Parent>().isEmpty())
@@ -576,7 +538,12 @@ open class Test_Maria : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run { "${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1" }
+        it.query.run {
+            """
+                ${it.DELETE<Parent>()} where pk = 1;
+                ${it.DELETE<Parent>()} where pk = 2;
+            """
+        }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -593,7 +560,13 @@ open class Test_Maria : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> { "${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3" }
+        val objs = it.query.get<Parent> {
+            """
+                ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
+                ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
+                ${it.DELETE<Parent>()} where pk = 1;
+            """
+        }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
@@ -615,10 +588,10 @@ open class Test_Maria : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(output = Child::class, input = input) {
             """
-                ${it.SELECT<Child>()}
+                ${it.SELECT<Child>()} 
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
                 where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
-            """
+            """.trimIndent()
         }
 
         assertEquals(
@@ -632,7 +605,6 @@ open class Test_Maria : Test_Contract {
             )
         )
     }
-
 
     @Test
     override fun `test transaction with rollback all`() {
@@ -740,26 +712,10 @@ open class Test_Maria : Test_Contract {
         }
     }
 
-
-    @Test
-    override fun `test procedure call without input`() = service.autocommit {
-        val results = it.procedure.call(procedure = TestProcedureEmpty(), Parent::class, Parent::class)
-        assertEquals(expected = 2, actual = results.size)
-        val r0 = (results[0] as List<Parent>).map { it.pk }
-        val r1 = (results[1] as List<Parent>).map { it.pk }
-        assertEquals(actual = r0, expected = listOf(1))
-        assertEquals(actual = r1, expected = listOf(2))
+    override fun `test procedure call without input`() {
     }
 
-    @Test
-    override fun `test procedure call with input`() = service.autocommit {
-        val parent = it.table.select<Parent>().first()
-        val results = it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col), Parent::class, Parent::class)
-        assertEquals(expected = 2, actual = results.size)
-        val r0 = (results[0] as List<Parent>).map { it.pk }
-        val r1 = (results[1] as List<Parent>)
-        assertEquals(actual = r0, expected = listOf(1))
-        assertEquals(actual = r1, expected = listOf(parent))
+    override fun `test procedure call with input`() {
     }
 
     @Test

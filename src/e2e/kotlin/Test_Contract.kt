@@ -1,5 +1,3 @@
-package com.urosjarc.dbmessiah
-
 import org.junit.jupiter.api.Test
 
 interface Test_Contract {

@@ -1,11 +1,10 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
+import com.urosjarc.dbmessiah.impl.derby.DerbySchema
+import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
+import com.urosjarc.dbmessiah.impl.derby.DerbyService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -14,31 +13,38 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-open class Test_Sqlite : Test_Contract {
+open class Test_Derby : Test_Contract {
     var parents = mutableListOf<Parent>()
     var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: SqliteService
+        private lateinit var service: DerbyService
+
+        val schema = DerbySchema(
+            name = "main", tables = listOf(
+                Table(Parent::pk),
+                Table(
+                    Child::pk, foreignKeys = listOf(
+                        Child::fk to Parent::class
+                    ),
+                    constraints = listOf(
+                        Child::fk to listOf(C.CASCADE_DELETE)
+                    )
+                ),
+                Table(UUIDParent::pk)
+            )
+        )
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = SqliteService(
+            service = DerbyService(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:sqlite::memory:"
+                    this["jdbcUrl"] = "jdbc:derby:memory:db;create=true"
                 },
-                ser = SqliteSerializer(
-                    tables = listOf(
-                        Table(Parent::pk),
-                        Table(
-                            Child::pk, foreignKeys = listOf(
-                                Child::fk to Parent::class
-                            )
-                        ),
-                        Table(UUIDParent::pk)
-                    ),
-                    globalSerializers = AllTS.sqlite,
+                ser = DerbySerializer(
+                    schemas = listOf(schema),
+                    globalSerializers = AllTS.derby,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
@@ -50,10 +56,10 @@ open class Test_Sqlite : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.table.drop<Child>()
-            it.table.drop<Parent>()
+            it.schema.create(schema = schema, throws = false)
+            it.table.drop<Child>(throws = false)
+            it.table.drop<Parent>(throws = false)
             it.table.drop<UUIDParent>(throws = false)
-
             it.table.create<Parent>()
             it.table.create<Child>()
             it.table.create<UUIDParent>()
@@ -89,11 +95,11 @@ open class Test_Sqlite : Test_Contract {
 
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: SqliteService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: DerbyService.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = "SQL error or missing database (no such table: main.Parent)",
+            other = """Table/View 'main.Parent' does not exist.""",
             message = e.stackTraceToString()
         )
     }
@@ -104,7 +110,8 @@ open class Test_Sqlite : Test_Contract {
         it.table.select<Parent>()
 
         //Drop
-        it.table.drop<Parent>()
+        it.table.drop<Child>(throws = false)
+        it.table.drop<Parent>(throws = false)
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -117,23 +124,11 @@ open class Test_Sqlite : Test_Contract {
         assertTrue(actual = preParents.isNotEmpty())
 
         //Create table if allready created should not throw error
-        assertEquals(actual = it.table.create<Parent>(), expected = 1)
 
-        //Create table should not change previous state
-        val postParents = it.table.select<Parent>()
-        assertEquals(actual = postParents, expected = preParents)
-
-        //Drop
-        assertEquals(actual = it.table.drop<Parent>(), expected = 1)
-
-        //Select will create error
-        this.assertTableNotExists<Parent>(q = it)
-
-        //Recreate table
-        assertEquals(actual = it.table.create<Parent>(), expected = 1)
-
-        //Now we can get elements
-        assertTrue(it.table.select<Parent>().isEmpty())
+        val e = assertThrows<Throwable> {
+            it.table.create<Parent>()
+        }
+        assertContains(charSequence = e.stackTraceToString(), "already exists")
     }
 
     @Test
@@ -540,12 +535,7 @@ open class Test_Sqlite : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run {
-            """
-                ${it.DELETE<Parent>()} where pk = 1;
-                ${it.DELETE<Parent>()} where pk = 2;
-            """
-        }
+        it.query.run { """${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1""" }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -562,19 +552,10 @@ open class Test_Sqlite : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> {
-            """
-                ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
-                ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
-                ${it.DELETE<Parent>()} where pk = 1;
-            """
-        }
+        val objs = it.query.get<Parent> { """${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
-
-        //Also If multiple results are not supported then it should not delete the 1 parent also
-        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = parent1)
     }
 
     @Test
@@ -588,12 +569,12 @@ open class Test_Sqlite : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query.get(output = Child::class, input = input) {
+        val objs = it.query.get(Child::class, input = input) {
             """
                 ${it.SELECT<Child>()} 
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
                 where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
-            """.trimIndent()
+            """
         }
 
         assertEquals(
@@ -607,6 +588,7 @@ open class Test_Sqlite : Test_Contract {
             )
         )
     }
+
 
     @Test
     override fun `test transaction with rollback all`() {
@@ -730,5 +712,6 @@ open class Test_Sqlite : Test_Contract {
 
         val uuidParents0 = it.table.select<UUIDParent>()
         assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
+
     }
 }

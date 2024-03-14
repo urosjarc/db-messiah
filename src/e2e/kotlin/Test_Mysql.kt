@@ -1,12 +1,9 @@
-package com.urosjarc.dbmessiah
-
-import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.h2.H2Schema
-import com.urosjarc.dbmessiah.impl.h2.H2Serializer
-import com.urosjarc.dbmessiah.impl.h2.H2Service
+import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
+import com.urosjarc.dbmessiah.impl.mysql.MysqlSerializer
+import com.urosjarc.dbmessiah.impl.mysql.MysqlService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,47 +12,44 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-open class Test_H2 : Test_Contract {
-    var parents = mutableListOf<Parent>()
-    var children = mutableListOf<Child>()
+
+open class Test_Mysql : Test_Contract {
+    open var parents = mutableListOf<Parent>()
+    open var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: H2Service
+        private lateinit var service: MysqlService
 
-        val schema = H2Schema(
+        val schema = MysqlSchema(
             name = "main", tables = listOf(
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
-                    ),
-                    constraints = listOf(
-                        Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 ),
-                Table(UUIDParent::pk),
-                Table(
-                    UUIDChild::pk, foreignKeys = listOf(
-                        UUIDChild::fk to UUIDParent::class
-                    ), constraints = listOf(
-                        UUIDChild::fk to listOf(C.CASCADE_DELETE)
-                    )
-                )
+                Table(UUIDParent::pk)
+            ),
+            procedures = listOf(
+                TestProcedure::class,
+                TestProcedureEmpty::class
             )
         )
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = H2Service(
+            service = MysqlService(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:h2:mem:main"
+                    this["jdbcUrl"] = "jdbc:mysql://localhost:3307"
+                    this["username"] = "root"
+                    this["password"] = "root"
                 },
-                ser = H2Serializer(
+                ser = MysqlSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.h2,
+                    globalSerializers = AllTS.mysql,
                     globalOutputs = listOf(Output::class),
-                    globalInputs = listOf(Input::class)
+                    globalInputs = listOf(Input::class),
                 )
             )
         }
@@ -65,17 +59,15 @@ open class Test_H2 : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.schema.create(schema = "main")
-
-            it.table.dropCascade<Child>()
-            it.table.dropCascade<Parent>()
-            it.table.dropCascade<UUIDChild>()
-            it.table.dropCascade<UUIDParent>()
+            it.schema.create(schema = schema)
+            it.query.run { "SET FOREIGN_KEY_CHECKS=0;" }
+            it.table.drop<Child>()
+            it.table.drop<Parent>()
+            it.table.drop<UUIDParent>(throws = false)
 
             it.table.create<Parent>()
             it.table.create<Child>()
             it.table.create<UUIDParent>()
-            it.table.create<UUIDChild>()
         }
 
         val numParents = 5
@@ -106,13 +98,34 @@ open class Test_H2 : Test_Contract {
                 throw Exception("Test state does not match with expected state")
         }
 
+        //Create procedures and disable foreign checks
+        service.autocommit {
+            it.procedure.drop<TestProcedure>(throws = false)
+            it.procedure.create<TestProcedure> {
+                """
+                    ${it.SELECT<Parent>()}
+                    WHERE ${it.column(Parent::pk)} = ${it.arg(TestProcedure::parent_pk)}
+                        AND ${it.column(Parent::col)} = ${it.arg(TestProcedure::parent_col)};
+                        
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
+                """
+            }
+            it.procedure.drop<TestProcedureEmpty>(throws = false)
+            it.procedure.create<TestProcedureEmpty> {
+                """
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 2;
+                """
+            }
+        }
+
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: H2Service.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: MysqlService.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """ Table "Parent" not found""",
+            other = "Table 'main.Parent' doesn't exist",
             message = e.stackTraceToString()
         )
     }
@@ -123,7 +136,7 @@ open class Test_H2 : Test_Contract {
         it.table.select<Parent>()
 
         //Drop
-        it.table.dropCascade<Parent>()
+        it.table.drop<Parent>()
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -143,7 +156,7 @@ open class Test_H2 : Test_Contract {
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        assertEquals(actual = it.table.dropCascade<Parent>(), expected = 0)
+        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
 
         //Select will create error
         this.assertTableNotExists<Parent>(q = it)
@@ -252,7 +265,6 @@ open class Test_H2 : Test_Contract {
         val preParents = postParents.toMutableList()
         preParents.remove(newObj)
         assertEquals(actual = preParents, expected = parents)
-
 
         //Try to insert element again
         val e = assertThrows<QueryException> {
@@ -472,8 +484,6 @@ open class Test_H2 : Test_Contract {
 
         //Get snapshot of parents before trying to insert
         val postParents2 = it.table.select<Parent>()
-
-        //Parents really stayed as they were before
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
@@ -516,7 +526,6 @@ open class Test_H2 : Test_Contract {
         }
         assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', can't be updated with undefined primary key value")
 
-
         //List should be equal
         val postParents2 = it.table.select<Parent>()
         assertEquals(expected = postParents1, actual = postParents2)
@@ -531,7 +540,7 @@ open class Test_H2 : Test_Contract {
         //Delete
         it.batch.delete(listOf(children[0], children[1]))
 
-        //Primary keys are deleted
+        //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
         assertEquals(actual = children[1].pk, expected = null)
 
@@ -547,7 +556,10 @@ open class Test_H2 : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postChildren1 = it.table.select<Child>()
-//        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
+        val e = assertThrows<QueryException> {
+            it.batch.delete(rows = listOf(postChildren0[2], postChildren0[3]))
+        }
+        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', can't be deleted with undefined primary key value")
 
         //List should be equal
         val postChildren2 = it.table.select<Child>()
@@ -560,12 +572,7 @@ open class Test_H2 : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run {
-            """
-            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
-            ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 2;
-            """
-        }
+        it.query.run { "${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1" }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -573,7 +580,7 @@ open class Test_H2 : Test_Contract {
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
-        assertEquals(expected = null, actual = postParent2)
+        assertEquals(expected = preParent2, actual = postParent2)
     }
 
     @Test
@@ -582,19 +589,13 @@ open class Test_H2 : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> {
-            """
-                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
-                    ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
-                    ${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1;
-                """.trimIndent()
-        }
+        val objs = it.query.get<Parent> { "${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
 
-        //Also If multiple results are not supported then it should delete the 1 parent also
-        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = null)
+        //Also If multiple results are not supported then it should not delete the 1 parent also
+        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = parent1)
     }
 
     @Test
@@ -610,29 +611,23 @@ open class Test_H2 : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(Child::class, input = input) {
             """
-                    ${it.SELECT<Child>()}
-                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)};
-                    
-                    ${it.SELECT<Child>()}
-                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
-                """.trimIndent()
+                ${it.SELECT<Child>()}
+                join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
+            """
         }
 
         assertEquals(
             actual = objs,
-            expected =
-            listOf(
+            expected = listOf(
                 Child(pk = 6, fk = 2, col = "-1350163013"),
                 Child(pk = 7, fk = 2, col = "1544682258"),
                 Child(pk = 8, fk = 2, col = "-182312124"),
                 Child(pk = 9, fk = 2, col = "-1397853422"),
                 Child(pk = 10, fk = 2, col = "62774084")
-            ),
+            )
         )
     }
-
 
     @Test
     override fun `test transaction with rollback all`() {
@@ -740,17 +735,29 @@ open class Test_H2 : Test_Contract {
         }
     }
 
-    override fun `test procedure call without input`() {
+    @Test
+    override fun `test procedure call without input`() = service.autocommit {
+        val results = it.procedure.call(procedure = TestProcedureEmpty(), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>).map { it.pk }
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(2))
     }
 
-    override fun `test procedure call with input`() {
+    @Test
+    override fun `test procedure call with input`() = service.autocommit {
+        val parent = it.table.select<Parent>().first()
+        val results = it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>)
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(parent))
     }
 
     @Test
     override fun `test UUID`() = service.autocommit {
-        /**
-         * Parent
-         */
         val uuidParent0 = UUIDParent(col = "col0")
         it.row.insert(uuidParent0)
 
@@ -759,17 +766,5 @@ open class Test_H2 : Test_Contract {
 
         val uuidParents0 = it.table.select<UUIDParent>()
         assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-
-        /**
-         * Children
-         */
-        val uuidChild0 = UUIDChild(fk = uuidParent0.pk, col = "col1")
-        it.row.insert(uuidChild0)
-
-        val uuidChild1: UUIDChild = it.row.select<UUIDChild>(pk = uuidChild0.pk!!)!!
-        assertEquals(actual = uuidChild1, expected = uuidChild0)
-
-        val uuidChilds0 = it.table.select<UUIDChild>()
-        assertEquals(actual = uuidChilds0, expected = listOf(uuidChild0))
     }
 }

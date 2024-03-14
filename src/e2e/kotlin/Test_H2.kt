@@ -1,12 +1,10 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
-import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
-import com.urosjarc.dbmessiah.impl.postgresql.PgService
+import com.urosjarc.dbmessiah.impl.h2.H2Schema
+import com.urosjarc.dbmessiah.impl.h2.H2Serializer
+import com.urosjarc.dbmessiah.impl.h2.H2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,21 +13,21 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-
-open class Test_Postgresql : Test_Contract {
-    open var parents = mutableListOf<Parent>()
-    open var children = mutableListOf<Child>()
+open class Test_H2 : Test_Contract {
+    var parents = mutableListOf<Parent>()
+    var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: PgService
+        private lateinit var service: H2Service
 
-        val schema = PgSchema(
+        val schema = H2Schema(
             name = "main", tables = listOf(
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
-                    ), constraints = listOf(
+                    ),
+                    constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 ),
@@ -47,15 +45,13 @@ open class Test_Postgresql : Test_Contract {
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = PgService(
+            service = H2Service(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"
-                    this["username"] = "root"
-                    this["password"] = "root"
+                    this["jdbcUrl"] = "jdbc:h2:mem:main"
                 },
-                ser = PgSerializer(
+                ser = H2Serializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.postgresql,
+                    globalSerializers = AllTS.h2,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
@@ -67,7 +63,8 @@ open class Test_Postgresql : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.schema.create(schema = schema)
+            it.schema.create(schema = "main")
+
             it.table.dropCascade<Child>()
             it.table.dropCascade<Parent>()
             it.table.dropCascade<UUIDChild>()
@@ -109,11 +106,11 @@ open class Test_Postgresql : Test_Contract {
 
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: PgService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: H2Service.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """relation "main.Parent" does not exist""",
+            other = """ Table "Parent" not found""",
             message = e.stackTraceToString()
         )
     }
@@ -254,6 +251,7 @@ open class Test_Postgresql : Test_Contract {
         preParents.remove(newObj)
         assertEquals(actual = preParents, expected = parents)
 
+
         //Try to insert element again
         val e = assertThrows<QueryException> {
             it.row.insert(row = newObj)
@@ -370,7 +368,10 @@ open class Test_Postgresql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -399,7 +400,7 @@ open class Test_Postgresql : Test_Contract {
         assertContains(charSequence = e.stackTraceToString(), other = "Row can't be updated with undefined primary key value")
 
         //And database should stay the same
-        assertEquals(actual = it.table.select<Parent>().sortedBy { it.pk }, expected = parents.sortedBy { it.pk })
+        assertEquals(actual = it.table.select<Parent>(), expected = parents)
     }
 
     @Test
@@ -469,10 +470,15 @@ open class Test_Postgresql : Test_Contract {
 
         //Get snapshot of parents before trying to insert
         val postParents2 = it.table.select<Parent>()
+
+        //Parents really stayed as they were before
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -508,6 +514,7 @@ open class Test_Postgresql : Test_Contract {
         }
         assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', can't be updated with undefined primary key value")
 
+
         //List should be equal
         val postParents2 = it.table.select<Parent>()
         assertEquals(expected = postParents1, actual = postParents2)
@@ -522,7 +529,7 @@ open class Test_Postgresql : Test_Contract {
         //Delete
         it.batch.delete(listOf(children[0], children[1]))
 
-        //Primary keys are not deleted
+        //Primary keys are deleted
         assertEquals(actual = children[0].pk, expected = null)
         assertEquals(actual = children[1].pk, expected = null)
 
@@ -538,10 +545,7 @@ open class Test_Postgresql : Test_Contract {
 
         //Create snapshot before inserting for comparison
         val postChildren1 = it.table.select<Child>()
-        val e = assertThrows<QueryException> {
-            it.batch.delete(rows = listOf(postChildren0[2], postChildren0[3]))
-        }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', can't be deleted with undefined primary key value")
+//        assertEquals(expected = 0, actual = it.batch.update(rows = listOf(postChildren0[2], postChildren0[3])))
 
         //List should be equal
         val postChildren2 = it.table.select<Child>()
@@ -551,7 +555,7 @@ open class Test_Postgresql : Test_Contract {
     @Test
     override fun `test query`() = service.autocommit {
         it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something...")
-        it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
+        val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
         it.query.run {
@@ -576,7 +580,7 @@ open class Test_Postgresql : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get(Parent::class, Parent::class) {
+        val objs = it.query.get<Parent> {
             """
                     ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3;
                     ${it.SELECT<Parent>()} where ${it.column(Parent::pk)} = 1;
@@ -585,7 +589,7 @@ open class Test_Postgresql : Test_Contract {
         }
 
         //If multiple select are not supported then it should return only first select
-        assertEquals(expected = listOf(listOf(parent1, parent2), listOf(parent1)), actual = objs)
+        assertEquals(expected = listOf(parent1, parent2), actual = objs)
 
         //Also If multiple results are not supported then it should delete the 1 parent also
         assertEquals(actual = it.row.select<Parent>(pk = 1), expected = null)
@@ -602,37 +606,28 @@ open class Test_Postgresql : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query.get(Child::class, Child::class, input = input) {
+        val objs = it.query.get(Child::class, input = input) {
             """
-                ${it.SELECT<Child>()}
-                join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)};
-                
-                ${it.SELECT<Child>()}
-                join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
-                where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
-            """.trimIndent()
+                    ${it.SELECT<Child>()}
+                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)};
+                    
+                    ${it.SELECT<Child>()}
+                    join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
+                    where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
+                """.trimIndent()
         }
 
         assertEquals(
             actual = objs,
             expected =
             listOf(
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                ),
-                listOf(
-                    Child(pk = 6, fk = 2, col = "-1350163013"),
-                    Child(pk = 7, fk = 2, col = "1544682258"),
-                    Child(pk = 8, fk = 2, col = "-182312124"),
-                    Child(pk = 9, fk = 2, col = "-1397853422"),
-                    Child(pk = 10, fk = 2, col = "62774084")
-                )
-            )
+                Child(pk = 6, fk = 2, col = "-1350163013"),
+                Child(pk = 7, fk = 2, col = "1544682258"),
+                Child(pk = 8, fk = 2, col = "-182312124"),
+                Child(pk = 9, fk = 2, col = "-1397853422"),
+                Child(pk = 10, fk = 2, col = "62774084")
+            ),
         )
     }
 
@@ -751,6 +746,9 @@ open class Test_Postgresql : Test_Contract {
 
     @Test
     override fun `test UUID`() = service.autocommit {
+        /**
+         * Parent
+         */
         val uuidParent0 = UUIDParent(col = "col0")
         it.row.insert(uuidParent0)
 
@@ -760,9 +758,6 @@ open class Test_Postgresql : Test_Contract {
         val uuidParents0 = it.table.select<UUIDParent>()
         assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
 
-        /**
-         * Children
-         */
         /**
          * Children
          */

@@ -1,12 +1,10 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.derby.DerbySchema
-import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
-import com.urosjarc.dbmessiah.impl.derby.DerbyService
+import com.urosjarc.dbmessiah.impl.maria.MariaSchema
+import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
+import com.urosjarc.dbmessiah.impl.maria.MariaService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,38 +13,42 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-open class Test_Derby : Test_Contract {
-    var parents = mutableListOf<Parent>()
-    var children = mutableListOf<Child>()
+
+open class Test_Maria : Test_Contract {
+    open var parents = mutableListOf<Parent>()
+    open var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: DerbyService
+        private lateinit var service: MariaService
 
-        val schema = DerbySchema(
+        val schema = MariaSchema(
             name = "main", tables = listOf(
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
-                    ),
-                    constraints = listOf(
-                        Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 ),
                 Table(UUIDParent::pk)
+            ),
+            procedures = listOf(
+                TestProcedure::class,
+                TestProcedureEmpty::class
             )
         )
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = DerbyService(
+            service = MariaService(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:derby:memory:db;create=true"
+                    this["jdbcUrl"] = "jdbc:mariadb://localhost:3306"
+                    this["username"] = "root"
+                    this["password"] = "root"
                 },
-                ser = DerbySerializer(
+                ser = MariaSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.derby,
+                    globalSerializers = AllTS.maria,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
@@ -58,10 +60,12 @@ open class Test_Derby : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.schema.create(schema = schema, throws = false)
-            it.table.drop<Child>(throws = false)
-            it.table.drop<Parent>(throws = false)
-            it.table.drop<UUIDParent>(throws = false)
+            it.schema.create(schema = schema)
+            it.query.run { "SET FOREIGN_KEY_CHECKS=0;" }
+            it.table.drop<Child>()
+            it.table.drop<Parent>()
+            it.table.drop<UUIDParent>()
+
             it.table.create<Parent>()
             it.table.create<Child>()
             it.table.create<UUIDParent>()
@@ -95,13 +99,35 @@ open class Test_Derby : Test_Contract {
                 throw Exception("Test state does not match with expected state")
         }
 
+        //Create procedures and disable foreign checks
+        service.autocommit {
+            it.procedure.drop<TestProcedure>(throws = false)
+            it.procedure.create<TestProcedure> {
+                """
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = ${it.arg(TestProcedure::parent_pk)} AND ${it.column(Parent::col)} = ${
+                    it.arg(
+                        TestProcedure::parent_col
+                    )
+                };
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
+                """
+            }
+            it.procedure.drop<TestProcedureEmpty>(throws = false)
+            it.procedure.create<TestProcedureEmpty> {
+                """
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 1;
+                    ${it.SELECT<Parent>()} WHERE ${it.column(Parent::pk)} = 2;
+                """
+            }
+        }
+
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: DerbyService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: MariaService.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = """Table/View 'main.Parent' does not exist.""",
+            other = "Table 'main.Parent' doesn't exist",
             message = e.stackTraceToString()
         )
     }
@@ -112,8 +138,7 @@ open class Test_Derby : Test_Contract {
         it.table.select<Parent>()
 
         //Drop
-        it.table.drop<Child>(throws = false)
-        it.table.drop<Parent>(throws = false)
+        it.table.drop<Parent>()
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -126,11 +151,23 @@ open class Test_Derby : Test_Contract {
         assertTrue(actual = preParents.isNotEmpty())
 
         //Create table if allready created should not throw error
+        assertEquals(actual = it.table.create<Parent>(), expected = 0)
 
-        val e = assertThrows<Throwable> {
-            it.table.create<Parent>()
-        }
-        assertContains(charSequence = e.stackTraceToString(), "already exists")
+        //Create table should not change previous state
+        val postParents = it.table.select<Parent>()
+        assertEquals(actual = postParents, expected = preParents)
+
+        //Drop
+        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
+
+        //Select will create error
+        this.assertTableNotExists<Parent>(q = it)
+
+        //Recreate table
+        assertEquals(actual = it.table.create<Parent>(), expected = 0)
+
+        //Now we can get elements
+        assertTrue(it.table.select<Parent>().isEmpty())
     }
 
     @Test
@@ -537,7 +574,7 @@ open class Test_Derby : Test_Contract {
         val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run { """${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1""" }
+        it.query.run { "${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1" }
 
         //Check for deletion
         val postParent2 = it.row.select<Parent>(pk = 2)
@@ -554,10 +591,13 @@ open class Test_Derby : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> { """${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3""" }
+        val objs = it.query.get<Parent> { "${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
+
+        //Also If multiple results are not supported then it should not delete the 1 parent also
+        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = parent1)
     }
 
     @Test
@@ -571,9 +611,9 @@ open class Test_Derby : Test_Contract {
 
         //Execute update
         val input = Input(child_pk = 1, parent_pk = 2)
-        val objs = it.query.get(Child::class, input = input) {
+        val objs = it.query.get(output = Child::class, input = input) {
             """
-                ${it.SELECT<Child>()} 
+                ${it.SELECT<Child>()}
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
                 where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
             """
@@ -698,10 +738,26 @@ open class Test_Derby : Test_Contract {
         }
     }
 
-    override fun `test procedure call without input`() {
+
+    @Test
+    override fun `test procedure call without input`() = service.autocommit {
+        val results = it.procedure.call(procedure = TestProcedureEmpty(), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>).map { it.pk }
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(2))
     }
 
-    override fun `test procedure call with input`() {
+    @Test
+    override fun `test procedure call with input`() = service.autocommit {
+        val parent = it.table.select<Parent>().first()
+        val results = it.procedure.call(procedure = TestProcedure(parent_pk = parent.pk!!, parent_col = parent.col), Parent::class, Parent::class)
+        assertEquals(expected = 2, actual = results.size)
+        val r0 = (results[0] as List<Parent>).map { it.pk }
+        val r1 = (results[1] as List<Parent>)
+        assertEquals(actual = r0, expected = listOf(1))
+        assertEquals(actual = r1, expected = listOf(parent))
     }
 
     @Test
@@ -714,6 +770,5 @@ open class Test_Derby : Test_Contract {
 
         val uuidParents0 = it.table.select<UUIDParent>()
         assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-
     }
 }

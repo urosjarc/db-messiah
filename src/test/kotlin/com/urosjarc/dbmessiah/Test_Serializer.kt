@@ -305,10 +305,12 @@ class Test_Serializer {
     fun `test selectTable pk`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, pk = 123),
-            expected = Query(
-                sql = "SELECT * FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = ?",
-                QueryValue(name = "pk", value = 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
-            )
+            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = 123")
+        )
+        val uuid = UUID.randomUUID()
+        assertEquals(
+            actual = this.ser.selectTable(table = Parent::class, pk = uuid),
+            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = '$uuid'")
         )
     }
 

@@ -1,5 +1,3 @@
-package com.urosjarc.dbmessiah
-
 import java.util.*
 import kotlin.random.Random
 

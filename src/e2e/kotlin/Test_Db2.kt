@@ -1,12 +1,10 @@
-package com.urosjarc.dbmessiah
-
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
-import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
-import com.urosjarc.dbmessiah.impl.oracle.OracleSerializer
-import com.urosjarc.dbmessiah.impl.oracle.OracleService
+import com.urosjarc.dbmessiah.impl.db2.Db2Schema
+import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
+import com.urosjarc.dbmessiah.impl.db2.Db2Service
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,47 +13,46 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-open class Test_Oracle : Test_Contract {
-    open var children = mutableListOf<Child>()
+
+open class Test_Db2 : Test_Contract {
     open var parents = mutableListOf<Parent>()
+    open var children = mutableListOf<Child>()
 
     companion object {
-        private lateinit var service: OracleService
+        private lateinit var service: Db2Service
 
-        val schema = OracleSchema(
-            name = "SYSTEM",
-            tables = listOf(
+        val schema = Db2Schema(
+            name = "main", tables = listOf(
                 Table(Parent::pk),
                 Table(
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
-                    ),
-                    constraints = listOf(
+                    ), constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 ),
                 Table(UUIDParent::pk)
             ),
+            procedures = listOf(
+                TestProcedure::class,
+                TestProcedureEmpty::class
+            )
         )
 
         @JvmStatic
         @BeforeAll
         fun init() {
-            service = OracleService(
+            service = Db2Service(
                 config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:oracle:thin:@localhost:1521:XE"
-                    this["username"] = "system"
+                    this["jdbcUrl"] = "jdbc:db2://localhost:50000/main"
+                    this["username"] = "db2inst1"
                     this["password"] = "root"
                 },
-                ser = OracleSerializer(
+                ser = Db2Serializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.oracle,
+                    globalSerializers = AllTS.db2,
                     globalOutputs = listOf(Output::class),
-                    globalInputs = listOf(Input::class),
-                    globalProcedures = listOf(
-                        TestProcedure::class,
-                        TestProcedureEmpty::class
-                    )
+                    globalInputs = listOf(Input::class)
                 )
             )
         }
@@ -65,9 +62,10 @@ open class Test_Oracle : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.table.drop<Child>(throws = false)
-            it.table.drop<Parent>(throws = false)
-            it.table.dropCascade<UUIDParent>(throws = false)
+            it.schema.create(schema = schema, throws = false)
+            it.table.drop<Child>()
+            it.table.drop<Parent>()
+            it.table.drop<UUIDParent>()
             it.table.create<Parent>()
             it.table.create<Child>()
             it.table.create<UUIDParent>()
@@ -106,7 +104,7 @@ open class Test_Oracle : Test_Contract {
             it.procedure.drop<TestProcedureEmpty>(throws = false)
             it.procedure.create<TestProcedureEmpty> {
                 """
-                    INSERT INTO ${it.table<Parent>()}
+                    INSERT INTO ${it.table<Parent>()} 
                         (${it.name(Parent::pk)}, ${it.name(Parent::col)})
                     VALUES
                         (1234, 'new parent from procedure');
@@ -124,11 +122,11 @@ open class Test_Oracle : Test_Contract {
         }
     }
 
-    private inline fun <reified T : Any> assertTableNotExists(q: OracleService.Connection) {
+    private inline fun <reified T : Any> assertTableNotExists(q: Db2Service.Connection) {
         val e = assertThrows<Throwable> { q.table.select<T>() }
         assertContains(
             charSequence = e.stackTraceToString(),
-            other = " table or view does not exist",
+            other = """SQLERRMC=main.Parent""",
             message = e.stackTraceToString()
         )
     }
@@ -139,8 +137,7 @@ open class Test_Oracle : Test_Contract {
         it.table.select<Parent>()
 
         //Drop
-        it.table.delete<Child>()
-        it.table.dropCascade<Parent>()
+        it.table.drop<Parent>()
 
         //You can't select on droped table
         this.assertTableNotExists<Parent>(q = it)
@@ -152,18 +149,15 @@ open class Test_Oracle : Test_Contract {
         val preParents = it.table.select<Parent>()
         assertTrue(actual = preParents.isNotEmpty())
 
-        //Create table if allready created throws an error
-        assertThrows<Throwable> {
-            it.table.create<Parent>()
-        }
+        //Create table if allready created should not throw error
+        assertEquals(actual = it.table.create<Parent>(), expected = 0)
 
         //Create table should not change previous state
         val postParents = it.table.select<Parent>()
         assertEquals(actual = postParents, expected = preParents)
 
         //Drop
-        it.table.delete<Parent>()
-        assertEquals(actual = it.table.dropCascade<Parent>(), expected = 0)
+        assertEquals(actual = it.table.drop<Parent>(), expected = 0)
 
         //Select will create error
         this.assertTableNotExists<Parent>(q = it)
@@ -296,7 +290,7 @@ open class Test_Oracle : Test_Contract {
 
         //Get current all parents
         val postParents = it.table.select<Parent>()
-        assertEquals(expected = parents, actual = postParents)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents.sortedBy { it.pk })
 
         //Object should not be updated if has no primary key
         parents[1].pk = null
@@ -412,7 +406,7 @@ open class Test_Oracle : Test_Contract {
 
         //List should be equal
         val postParents0 = it.table.select<Parent>()
-        assertEquals(expected = parents, actual = postParents0)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //If you update not allready inserted element it should reject
         val e = assertThrows<QueryException> {
@@ -431,7 +425,7 @@ open class Test_Oracle : Test_Contract {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        it.row.delete(rows = listOf(children[0], children[1]))
+        it.row.delete(listOf(children[0], children[1]))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
@@ -520,7 +514,7 @@ open class Test_Oracle : Test_Contract {
 
         //List should be equal
         val postParents0 = it.table.select<Parent>()
-        assertEquals(expected = parents, actual = postParents0)
+        assertEquals(expected = parents.sortedBy { it.pk }, actual = postParents0.sortedBy { it.pk })
 
         //Insert without primary key
         postParents0[2].pk = null
@@ -545,7 +539,7 @@ open class Test_Oracle : Test_Contract {
         assertEquals(expected = this.children, actual = children)
 
         //Delete
-        it.batch.delete(rows = listOf(children[0], children[1]))
+        it.batch.delete(listOf(children[0], children[1]))
 
         //Primary keys are not deleted
         assertEquals(actual = children[0].pk, expected = null)
@@ -576,16 +570,18 @@ open class Test_Oracle : Test_Contract {
     @Test
     override fun `test query`() = service.autocommit {
         it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something...")
-        it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
+        val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
-        it.query.run { "${it.DELETE<Parent>()} WHERE ${it.column(Parent::pk)} = 1" }
+        it.query.run { """${it.DELETE<Parent>()} where ${it.column(Parent::pk)} = 1""" }
 
         //Check for deletion
+        val postParent2 = it.row.select<Parent>(pk = 2)
         val postParent1 = it.row.select<Parent>(pk = 1)
 
         //Parent 1 should be deleted
         assertEquals(expected = null, actual = postParent1)
+        assertEquals(expected = preParent2, actual = postParent2)
     }
 
     @Test
@@ -594,10 +590,13 @@ open class Test_Oracle : Test_Contract {
         val parent1 = it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something")
         val parent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something")
 
-        val objs = it.query.get<Parent> { "${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3" }
+        val objs = it.query.get<Parent> { """${it.SELECT<Parent>()} where ${it.column(Parent::pk)} < 3""" }
 
         //If multiple select are not supported then it should return only first select
         assertEquals(expected = listOf(parent1, parent2), actual = objs)
+
+        //Also If multiple results are not supported then it should not delete the 1 parent also
+        assertEquals(actual = it.row.select<Parent>(pk = 1), expected = parent1)
     }
 
     @Test
@@ -613,7 +612,7 @@ open class Test_Oracle : Test_Contract {
         val input = Input(child_pk = 1, parent_pk = 2)
         val objs = it.query.get(Child::class, input = input) {
             """
-                ${it.SELECT<Child>()}
+                ${it.SELECT<Child>()} 
                 join ${it.table<Parent>()} on ${it.column(Child::fk)} = ${it.column(Parent::pk)}
                 where ${it.column(Parent::pk)} = ${it.input(Input::parent_pk)}
             """
@@ -621,8 +620,7 @@ open class Test_Oracle : Test_Contract {
 
         assertEquals(
             actual = objs,
-            expected =
-            listOf(
+            expected = listOf(
                 Child(pk = 6, fk = 2, col = "-1350163013"),
                 Child(pk = 7, fk = 2, col = "1544682258"),
                 Child(pk = 8, fk = 2, col = "-182312124"),
