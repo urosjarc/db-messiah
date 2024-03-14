@@ -7,8 +7,6 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.db2.Db2Schema
 import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import com.urosjarc.dbmessiah.impl.db2.Db2Service
-import com.urosjarc.dbmessiah.impl.derby.DerbySchema
-import com.urosjarc.dbmessiah.impl.derby.DerbyService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +22,6 @@ open class Test_Db2 : Test_Contract {
 
     companion object {
         private lateinit var service: Db2Service
-        private lateinit var UUIDservice: Db2Service
 
         val schema = Db2Schema(
             name = "main", tables = listOf(
@@ -36,13 +33,14 @@ open class Test_Db2 : Test_Contract {
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
                 ),
+                Table(UUIDParent::pk)
             ),
             procedures = listOf(
                 TestProcedure::class,
                 TestProcedureEmpty::class
             )
         )
-        val UUIDschema = Db2Schema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
+
         @JvmStatic
         @BeforeAll
         fun init() {
@@ -54,20 +52,9 @@ open class Test_Db2 : Test_Contract {
                 },
                 ser = Db2Serializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.db2,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
-                )
-            )
-            UUIDservice = Db2Service(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:db2://localhost:50000/main"
-                    this["username"] = "db2inst1"
-                    this["password"] = "root"
-                },
-                ser = Db2Serializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.db2,
                 )
             )
         }
@@ -80,8 +67,10 @@ open class Test_Db2 : Test_Contract {
             it.schema.create(schema = schema, throws = false)
             it.table.drop<Child>()
             it.table.drop<Parent>()
+            it.table.drop<UUIDParent>()
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -767,23 +756,14 @@ open class Test_Db2 : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

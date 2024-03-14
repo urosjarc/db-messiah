@@ -23,7 +23,6 @@ open class Test_Mssql : Test_Contract {
 
     companion object {
         private lateinit var service: MssqlService
-        private lateinit var UUIDservice: MssqlService
 
         val schema = MssqlSchema(
             name = "main", tables = listOf(
@@ -35,14 +34,14 @@ open class Test_Mssql : Test_Contract {
                     constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
-                )
+                ),
+                Table(UUIDParent::pk)
             ),
             procedures = listOf(
                 TestProcedure::class,
                 TestProcedureEmpty::class
             )
         )
-        val UUIDschema = MssqlSchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -55,20 +54,9 @@ open class Test_Mssql : Test_Contract {
                 },
                 ser = MssqlSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.mssql,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
-                )
-            )
-            UUIDservice = MssqlService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:sqlserver://localhost:1433;encrypt=false;"
-                    this["username"] = "sa"
-                    this["password"] = "Root_root1"
-                },
-                ser = MssqlSerializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.mssql,
                 )
             )
         }
@@ -81,8 +69,11 @@ open class Test_Mssql : Test_Contract {
             it.schema.create(schema = schema)
             it.table.drop<Child>(throws = false)
             it.table.drop<Parent>(throws = false)
+            it.table.drop<UUIDParent>(throws = false)
+
             it.table.create<Parent>(throws = false)
             it.table.create<Child>(throws = false)
+            it.table.create<UUIDParent>(throws = false)
         }
 
         val numParents = 5
@@ -797,23 +788,14 @@ open class Test_Mssql : Test_Contract {
         assertEquals(actual = r1, expected = listOf(parent))
     }
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

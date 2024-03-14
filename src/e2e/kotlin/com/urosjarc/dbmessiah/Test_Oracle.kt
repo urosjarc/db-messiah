@@ -21,7 +21,6 @@ open class Test_Oracle : Test_Contract {
 
     companion object {
         private lateinit var service: OracleService
-        private lateinit var UUIDservice: OracleService
 
         val schema = OracleSchema(
             name = "SYSTEM",
@@ -34,10 +33,10 @@ open class Test_Oracle : Test_Contract {
                     constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
-                )
+                ),
+                Table(UUIDParent::pk)
             ),
         )
-        val UUIDschema = OracleSchema(name = "SYSTEM", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -50,24 +49,13 @@ open class Test_Oracle : Test_Contract {
                 },
                 ser = OracleSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.oracle,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
                     globalProcedures = listOf(
                         TestProcedure::class,
                         TestProcedureEmpty::class
                     )
-                )
-            )
-            UUIDservice = OracleService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:oracle:thin:@localhost:1521:XE"
-                    this["username"] = "system"
-                    this["password"] = "root"
-                },
-                ser = OracleSerializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.oracle,
                 )
             )
         }
@@ -79,8 +67,10 @@ open class Test_Oracle : Test_Contract {
         service.autocommit {
             it.table.drop<Child>(throws = false)
             it.table.drop<Parent>(throws = false)
+            it.table.dropCascade<UUIDParent>(throws = false)
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -766,22 +756,14 @@ open class Test_Oracle : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.table.dropCascade<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

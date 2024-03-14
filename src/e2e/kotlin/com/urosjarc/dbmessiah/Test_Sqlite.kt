@@ -20,7 +20,6 @@ open class Test_Sqlite : Test_Contract {
 
     companion object {
         private lateinit var service: SqliteService
-        private lateinit var UUIDservice: SqliteService
 
         @JvmStatic
         @BeforeAll
@@ -36,21 +35,13 @@ open class Test_Sqlite : Test_Contract {
                             Child::pk, foreignKeys = listOf(
                                 Child::fk to Parent::class
                             )
-                        )
+                        ),
+                        Table(UUIDParent::pk)
                     ),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.sqlite,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )
-            )
-            UUIDservice = SqliteService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:sqlite::memory:"
-                },
-                ser = SqliteSerializer(
-                    tables = listOf(Table(UUIDParent::pk)),
-                    globalSerializers = AllTS.sqlite,
-                ),
             )
         }
     }
@@ -61,8 +52,11 @@ open class Test_Sqlite : Test_Contract {
         service.autocommit {
             it.table.drop<Child>()
             it.table.drop<Parent>()
+            it.table.drop<UUIDParent>(throws = false)
+
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -727,23 +721,14 @@ open class Test_Sqlite : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
-
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

@@ -22,7 +22,6 @@ open class Test_Maria : Test_Contract {
 
     companion object {
         private lateinit var service: MariaService
-        private lateinit var UUIDservice: MariaService
 
         val schema = MariaSchema(
             name = "main", tables = listOf(
@@ -31,14 +30,14 @@ open class Test_Maria : Test_Contract {
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
                     )
-                )
+                ),
+                Table(UUIDParent::pk)
             ),
             procedures = listOf(
                 TestProcedure::class,
                 TestProcedureEmpty::class
             )
         )
-        val UUIDschema = MariaSchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -51,20 +50,9 @@ open class Test_Maria : Test_Contract {
                 },
                 ser = MariaSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.maria,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
-                )
-            )
-            UUIDservice = MariaService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:mariadb://localhost:3306"
-                    this["username"] = "root"
-                    this["password"] = "root"
-                },
-                ser = MariaSerializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.maria,
                 )
             )
         }
@@ -78,8 +66,11 @@ open class Test_Maria : Test_Contract {
             it.query.run { "SET FOREIGN_KEY_CHECKS=0;" }
             it.table.drop<Child>()
             it.table.drop<Parent>()
+            it.table.drop<UUIDParent>()
+
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -772,23 +763,14 @@ open class Test_Maria : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

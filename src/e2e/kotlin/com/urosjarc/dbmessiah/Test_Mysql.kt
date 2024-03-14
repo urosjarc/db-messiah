@@ -1,6 +1,5 @@
 package com.urosjarc.dbmessiah
 
-import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
@@ -22,7 +21,6 @@ open class Test_Mysql : Test_Contract {
 
     companion object {
         private lateinit var service: MysqlService
-        private lateinit var UUIDservice: MysqlService
 
         val schema = MysqlSchema(
             name = "main", tables = listOf(
@@ -31,14 +29,14 @@ open class Test_Mysql : Test_Contract {
                     Child::pk, foreignKeys = listOf(
                         Child::fk to Parent::class
                     )
-                )
+                ),
+                Table(UUIDParent::pk)
             ),
             procedures = listOf(
                 TestProcedure::class,
                 TestProcedureEmpty::class
             )
         )
-        val UUIDschema = MysqlSchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -51,20 +49,9 @@ open class Test_Mysql : Test_Contract {
                 },
                 ser = MysqlSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.mysql,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
-                )
-            )
-            UUIDservice = MysqlService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:mysql://localhost:3307"
-                    this["username"] = "root"
-                    this["password"] = "root"
-                },
-                ser = MysqlSerializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.mysql,
                 )
             )
         }
@@ -78,8 +65,11 @@ open class Test_Mysql : Test_Contract {
             it.query.run { "SET FOREIGN_KEY_CHECKS=0;" }
             it.table.drop<Child>()
             it.table.drop<Parent>()
+            it.table.drop<UUIDParent>(throws = false)
+
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -769,23 +759,14 @@ open class Test_Mysql : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
-
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-        }
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
     }
 }

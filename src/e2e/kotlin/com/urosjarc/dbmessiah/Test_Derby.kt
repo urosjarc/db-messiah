@@ -21,7 +21,6 @@ open class Test_Derby : Test_Contract {
 
     companion object {
         private lateinit var service: DerbyService
-        private lateinit var UUIDservice: DerbyService
 
         val schema = DerbySchema(
             name = "main", tables = listOf(
@@ -33,11 +32,10 @@ open class Test_Derby : Test_Contract {
                     constraints = listOf(
                         Child::fk to listOf(C.CASCADE_DELETE)
                     )
-                )
-
+                ),
+                Table(UUIDParent::pk)
             )
         )
-        val UUIDschema = DerbySchema(name = "uuid", tables = listOf(Table(UUIDParent::pk)))
 
         @JvmStatic
         @BeforeAll
@@ -48,18 +46,9 @@ open class Test_Derby : Test_Contract {
                 },
                 ser = DerbySerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.basic,
+                    globalSerializers = AllTS.derby,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
-                )
-            )
-            UUIDservice = DerbyService(
-                config = Properties().apply {
-                    this["jdbcUrl"] = "jdbc:derby:memory:db;create=true"
-                },
-                ser = DerbySerializer(
-                    schemas = listOf(UUIDschema),
-                    globalSerializers = AllTS.derby,
                 )
             )
         }
@@ -72,8 +61,10 @@ open class Test_Derby : Test_Contract {
             it.schema.create(schema = schema, throws = false)
             it.table.drop<Child>(throws = false)
             it.table.drop<Parent>(throws = false)
+            it.table.drop<UUIDParent>(throws = false)
             it.table.create<Parent>()
             it.table.create<Child>()
+            it.table.create<UUIDParent>()
         }
 
         val numParents = 5
@@ -714,24 +705,15 @@ open class Test_Derby : Test_Contract {
     }
 
     @Test
-    override fun `test UUID`() {
-        UUIDservice.autocommit {
-            it.schema.create(schema = UUIDschema, throws = false)
-            it.table.drop<UUIDParent>(throws = false)
-            it.table.create<UUIDParent>()
+    override fun `test UUID`() = service.autocommit {
+        val uuidParent0 = UUIDParent(col = "col0")
+        it.row.insert(uuidParent0)
 
-            /**
-             * Parent
-             */
-            val uuidParent0 = UUIDParent(col = "col0")
-            it.row.insert(uuidParent0)
+        val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
+        assertEquals(actual = uuidParent1, expected = uuidParent0)
 
-            val uuidParent1: UUIDParent = it.row.select<UUIDParent>(pk = uuidParent0.pk)!!
-            assertEquals(actual = uuidParent1, expected = uuidParent0)
+        val uuidParents0 = it.table.select<UUIDParent>()
+        assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
 
-            val uuidParents0 = it.table.select<UUIDParent>()
-            assertEquals(actual = uuidParents0, expected = listOf(uuidParent0))
-
-        }
     }
 }
