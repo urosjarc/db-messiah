@@ -101,7 +101,7 @@ public open class OracleSerializer(
                 CREATE OR REPLACE PROCEDURE ${escaped(P)}$args
                 AS BEGIN
                     $procedureBody
-                END;
+                END
             """.trimIndent()
         )
     }

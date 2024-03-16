@@ -56,7 +56,7 @@ public open class SqliteSerializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T.name)} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T.name)} ($columns)")
     }
 
     override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query {

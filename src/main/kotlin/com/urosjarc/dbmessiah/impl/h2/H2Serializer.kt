@@ -57,7 +57,7 @@ public open class H2Serializer(
         val columns = (col + constraints).joinToString(", ")
 
         //Return created query
-        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns);")
+        return Query(sql = "CREATE TABLE IF NOT EXISTS ${escaped(T)} ($columns)")
     }
 
     override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query = TODO("Not implemented")

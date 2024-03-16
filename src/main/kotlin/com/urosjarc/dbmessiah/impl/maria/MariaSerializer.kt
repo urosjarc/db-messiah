@@ -71,7 +71,7 @@ public open class MariaSerializer(
                 CREATE OR REPLACE PROCEDURE ${escaped(P)}($args)
                 BEGIN
                     $procedureBody
-                END;
+                END
             """.trimIndent()
         )
     }

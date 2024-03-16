@@ -76,10 +76,10 @@ public open class MysqlSerializer(
         val args = P.args.map { "${escaped(it.name)} ${it.dbType}" }.joinToString(", ")
         return Query(
             sql = """
-                CREATE PROCEDURE IF NOT EXISTS ${escaped(P)} ($args)
+                CREATE PROCEDURE IF NOT EXISTS ${escaped(P)}($args)
                 BEGIN
                     $procedureBody
-                END;
+                END
             """.trimIndent()
         )
     }
