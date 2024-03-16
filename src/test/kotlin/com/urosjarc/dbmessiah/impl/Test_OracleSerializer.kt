@@ -159,11 +159,11 @@ class Test_OracleSerializer : Test_Serializer() {
         val proc0 = this.ser.createProcedure(procedure = TestProcedure::class, procedureBody = "BODY")
         val proc1 = this.ser.createProcedure(procedure = TestProcedureEmpty::class, procedureBody = "BODY")
         assertEquals(
-            expected = Query(sql = "CREATE OR REPLACE PROCEDURE \"TestProcedure\"(\"parent_col\" VARCHAR, \"parent_pk\" INTEGER)\nAS BEGIN\n    BODY\nEND"),
+            expected = Query(sql = "CREATE OR REPLACE PROCEDURE \"TestProcedure\"(\"parent_col\" VARCHAR, \"parent_pk\" INTEGER)\nAS BEGIN\n    BODY\nEND;"),
             actual = proc0
         )
         assertEquals(
-            expected = Query(sql = "CREATE OR REPLACE PROCEDURE \"TestProcedureEmpty\"\nAS BEGIN\n    BODY\nEND"),
+            expected = Query(sql = "CREATE OR REPLACE PROCEDURE \"TestProcedureEmpty\"\nAS BEGIN\n    BODY\nEND;"),
             actual = proc1
         )
     }

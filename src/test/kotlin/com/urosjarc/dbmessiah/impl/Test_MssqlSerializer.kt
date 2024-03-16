@@ -137,7 +137,7 @@ class Test_MssqlSerializer : Test_Serializer() {
     override fun `test createSchema`() {
         assertEquals(
             actual = this.ser.createSchema(schema = this.schema),
-            expected = Query(sql = "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'main')\nBEGIN\n    EXEC( 'CREATE SCHEMA [main]' );\nEND")
+            expected = Query(sql = "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'main')\nBEGIN\n    EXEC( 'CREATE SCHEMA [main]' );\nEND;")
         )
     }
 
@@ -165,11 +165,11 @@ class Test_MssqlSerializer : Test_Serializer() {
         val proc0 = this.ser.createProcedure(procedure = TestProcedure::class, procedureBody = "BODY")
         val proc1 = this.ser.createProcedure(procedure = TestProcedureEmpty::class, procedureBody = "BODY")
         assertEquals(
-            expected = Query(sql = "CREATE OR ALTER PROCEDURE [TestProcedure] @parent_col VARCHAR(100), @parent_pk INTEGER\nBEGIN\n    BODY\nEND"),
+            expected = Query(sql = "CREATE OR ALTER PROCEDURE [TestProcedure] @parent_col VARCHAR(100), @parent_pk INTEGER\nAS BEGIN\n    BODY\nEND;"),
             actual = proc0
         )
         assertEquals(
-            expected = Query(sql = "CREATE OR ALTER PROCEDURE [TestProcedureEmpty] \nBEGIN\n    BODY\nEND"),
+            expected = Query(sql = "CREATE OR ALTER PROCEDURE [TestProcedureEmpty] \nAS BEGIN\n    BODY\nEND;"),
             actual = proc1
         )
     }

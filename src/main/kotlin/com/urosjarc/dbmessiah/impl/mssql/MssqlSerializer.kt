@@ -100,9 +100,9 @@ public open class MssqlSerializer(
         return Query(
             sql = """
                 CREATE OR ALTER PROCEDURE ${escaped(P)} $args
-                BEGIN
+                AS BEGIN
                     $procedureBody
-                END
+                END;
             """.trimIndent()
         )
     }
@@ -113,7 +113,7 @@ public open class MssqlSerializer(
                 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '${schema.name}')
                 BEGIN
                     EXEC( 'CREATE SCHEMA ${escaped(schema.name)}' );
-                END
+                END;
             """.trimIndent()
         )
     }
