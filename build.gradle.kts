@@ -36,9 +36,9 @@ koverReport {
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.doFirst {
-        println("Start sleep...")
-        sleep(100 * 1000)
-        println("Stop sleep...")
+        println("Waiting for services to warm up...")
+        sleep(60 * 1000)
+        println("Start with testing...")
     }
     this.tasks = listOf("test", "tutorials", "chinook", "e2e")
 }
