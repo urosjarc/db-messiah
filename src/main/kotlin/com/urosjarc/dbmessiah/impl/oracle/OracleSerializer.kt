@@ -23,7 +23,6 @@ public open class OracleSerializer(
      */
     allowAutoUUID = false
 ) {
-    override val selectLastId: String? = null
     override fun escaped(name: String): String = "\"$name\""
 
     override fun <T : Any> createTable(table: KClass<T>): Query {

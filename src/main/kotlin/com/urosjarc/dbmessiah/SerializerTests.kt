@@ -5,6 +5,7 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.SerializerTestsException
 import com.urosjarc.dbmessiah.extend.*
+import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
@@ -496,14 +497,41 @@ internal class SerializerTests {
 
                         //Primary key does not need constraints
                         if (prop == table.primaryKey) {
-                            if (prop_const.value.isNotEmpty())
-                                prop_const.value.forEach {
-                                    when (it) {
-                                        C.UNIQUE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
-                                        C.CASCADE_UPDATE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
-                                        C.CASCADE_DELETE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
-                                    }
+                            prop_const.value.forEach {
+                                when (it) {
+                                    C.UNIQUE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.UNIQUE}' constraint")
+                                    C.CASCADE_UPDATE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
+                                    C.CASCADE_DELETE -> throw SerializerTestsException("Primary key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
                                 }
+                            }
+                        }
+
+                        if (table.foreignKeys.keys.contains(prop)) {
+                            prop_const.value.forEach {
+                                when (it) {
+                                    C.CASCADE_UPDATE -> {
+                                        if (this.ser is Db2Serializer)
+                                            throw SerializerTestsException("Db2 database does not support '${C.CASCADE_UPDATE}' constraint")
+                                    }
+                                    C.CASCADE_DELETE -> {}
+                                    C.UNIQUE -> {}
+                                }
+                            }
+
+                        } else {
+                            prop_const.value.forEach {
+                                when (it) {
+                                    C.CASCADE_UPDATE -> {
+                                        throw SerializerTestsException("Non foreign key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_UPDATE}' constraint")
+                                    }
+
+                                    C.CASCADE_DELETE -> {
+                                        throw SerializerTestsException("Non foreign key ${schema}.${table}.'${table.primaryKey.name}' does not need '${C.CASCADE_DELETE}' constraint")
+                                    }
+
+                                    C.UNIQUE -> {}
+                                }
+                            }
                         }
                     }
                 }

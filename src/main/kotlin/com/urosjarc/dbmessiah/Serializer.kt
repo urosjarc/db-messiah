@@ -6,6 +6,7 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
+import com.urosjarc.dbmessiah.extend.ext_kprops
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -96,7 +97,7 @@ public abstract class Serializer(
      *
      * @property selectLastId The last id selected from the database.
      */
-    public abstract val selectLastId: String?
+    public open var selectLastId: String? = null
 
     /**
      * Escapes the given string with database specific escaping quotation.
@@ -153,7 +154,7 @@ public abstract class Serializer(
      *
      * @return The PlantUML string for visualizing the database schema.
      */
-    public fun plantUML(): String {
+    public fun plantUML(withPrimaryKey: Boolean = true, withForeignKeys: Boolean = true, withOtherColumns: Boolean = false): String {
         val text = mutableListOf(
             "@startuml", "skinparam backgroundColor darkgray", "skinparam ClassBackgroundColor lightgray"
         )
@@ -174,16 +175,25 @@ public abstract class Serializer(
                 val className = kclass_to_path[t.kclass]
                 val type = (t.primaryKey.returnType.classifier as KClass<*>).simpleName
                 text.add("\t class $className {")
-                text.add("\t\t ${t.primaryKey.name}: $type")
+
+                if (withPrimaryKey)
+                    text.add("\t\t ${t.primaryKey.name}: $type")
 
                 t.foreignKeys.forEach {
                     val fk = it.key.name
                     val kclass = it.value
                     val toClass = kclass_to_path[kclass]!!
                     val fromClass = "${s.name}.${t.name}"
-                    relationships.add("${fromClass} -down-> ${toClass}")
-                    text.add("\t\t $fk: ${kclass.simpleName}")
+                    relationships.add("${fromClass} -down-> ${toClass}: $fk")
+
+                    if (withForeignKeys)
+                        text.add("\t\t $fk: ${kclass.simpleName}")
                 }
+
+                if (withOtherColumns)
+                    t.kclass.ext_kprops.forEach {
+                        text.add("\t\t ${it.name}: ${(it.returnType.classifier as KClass<*>).simpleName}")
+                    }
 
                 text.add("\t }")
             }

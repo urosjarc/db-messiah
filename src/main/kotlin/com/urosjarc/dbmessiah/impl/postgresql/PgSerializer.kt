@@ -19,7 +19,6 @@ public open class PgSerializer(
     globalOutputs = globalOutputs,
     allowAutoUUID = true
 ) {
-    override val selectLastId: String? = null
     override fun escaped(name: String): String = "\"$name\""
 
     override fun <T : Any> createTable(table: KClass<T>): Query {

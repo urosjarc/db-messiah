@@ -18,7 +18,6 @@ public open class H2Serializer(
     globalOutputs = globalOutputs,
     allowAutoUUID = true
 ) {
-    override val selectLastId: String = "SELECT LAST_INSERT_ROWID();"
     override fun escaped(name: String): String = "\"$name\""
 
     override fun <T : Any> createTable(table: KClass<T>): Query {

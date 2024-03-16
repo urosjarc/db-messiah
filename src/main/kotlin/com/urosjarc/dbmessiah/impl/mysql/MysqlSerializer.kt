@@ -29,7 +29,6 @@ public open class MysqlSerializer(
     allowAutoUUID = false
 ) {
 
-    override val selectLastId: String = "SELECT LAST_INSERT_ID()"
     override fun escaped(name: String): String = "`$name`"
 
     override fun <T : Any> createTable(table: KClass<T>): Query {

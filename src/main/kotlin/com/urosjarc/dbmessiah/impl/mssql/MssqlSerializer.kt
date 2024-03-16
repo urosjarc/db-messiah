@@ -26,7 +26,6 @@ public open class MssqlSerializer(
     allowAutoUUID = false
 ) {
 
-    override val selectLastId: String = "SELECT SCOPE_IDENTITY()"
     override fun escaped(name: String): String = "[$name]"
     override fun <T : Any> escaped(procedureArg: KProperty1<T, *>): String = "@${procedureArg.name}"
     override fun <T : Any> createTable(table: KClass<T>): Query {

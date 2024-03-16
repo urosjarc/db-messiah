@@ -14,7 +14,11 @@ import kotlin.reflect.KProperty1
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class Test_Serializer {
+abstract class Test_Serializer {
+    lateinit var otherTables: List<Table<Other>>
+    lateinit var tablesNonAutoUUID: List<Table<UUIDChild>>
+    lateinit var tables: List<Table<*>>
+    lateinit var tablesUUID: List<Table<*>>
     lateinit var column: PrimaryColumn
     lateinit var tableInfo: TableInfo
     lateinit var procedureArg: ProcedureArg
@@ -22,6 +26,7 @@ class Test_Serializer {
     lateinit var schema: Schema
     lateinit var ser: Serializer
 
+    data class Other(val pk: Int, val notNull: Int, val unique: Int, val canBeNull: Int?, val cascades: Int)
     data class Child(val pk: Int, val fk: Int, val col: String)
     data class Parent(var pk: Int? = null, var col: String)
     data class UUIDChild(val pk: UUID, val fk: UUID, val col: String)
@@ -43,7 +48,6 @@ class Test_Serializer {
         globalOutputs = globalOutputs,
         globalProcedures = globalProcedures,
     ) {
-        override val selectLastId: String? = null
         override fun escaped(name: String): String = "'$name'"
         override fun <T : Any> createTable(table: KClass<T>): Query = TODO("Not yet implemented")
         override fun <T : Any> createProcedure(procedure: KClass<T>, procedureBody: String): Query = TODO("Not yet implemented")
@@ -51,8 +55,10 @@ class Test_Serializer {
         override fun <T : Any> dropProcedure(procedure: KClass<T>): Query = TODO("Not yet implemented")
     }
 
+    open fun wrap(name: String): String = "'$name'"
+
     @BeforeEach
-    fun init() {
+    open fun init() {
         this.column = PrimaryColumn(
             kprop = Parent::pk as KProperty1<Any, Any?>,
             dbType = "INTEGER",
@@ -68,24 +74,38 @@ class Test_Serializer {
             otherColumns = listOf(),
             typeSerializers = listOf()
         )
-        this.schema = Schema(
-            name = "schema",
-            tables = listOf(
-                Table(Parent::pk),
-                Table(
-                    Child::pk, foreignKeys = listOf(
-                        Child::fk to Parent::class
-                    )
-                ),
-                Table(UUIDParent::pk),
-                Table(
-                    UUIDChild::pk, foreignKeys = listOf(
-                        UUIDChild::fk to UUIDParent::class
-                    ), constraints = listOf(
-                        UUIDChild::fk to listOf(C.CASCADE_DELETE)
-                    )
+        this.tables = listOf(
+            Table(Parent::pk),
+            Table(
+                Child::pk, foreignKeys = listOf(
+                    Child::fk to Parent::class
                 )
             ),
+        )
+        this.otherTables = listOf(
+            Table(
+                Other::pk, foreignKeys = listOf(
+                    Other::cascades to Other::class
+                ), constraints = listOf(
+                    Other::unique to listOf(C.UNIQUE),
+                    Other::cascades to listOf(C.CASCADE_DELETE, C.CASCADE_UPDATE)
+                )
+            )
+        )
+        this.tablesNonAutoUUID = listOf(Table(UUIDChild::pk))
+        this.tablesUUID = listOf(
+            Table(UUIDParent::pk),
+            Table(
+                UUIDChild::pk,
+                foreignKeys = listOf(UUIDChild::fk to UUIDParent::class),
+                constraints = listOf(
+                    UUIDChild::fk to listOf(C.CASCADE_DELETE)
+                )
+            )
+        )
+        this.schema = Schema(
+            name = "schema",
+            tables = this.tables,
         )
         this.procedureArg = ProcedureArg(
             kprop = TestProcedure::parent_pk as KProperty1<Any, Any?>,
@@ -110,32 +130,35 @@ class Test_Serializer {
     }
 
     @Test
+    abstract fun `test escaped name`()
+
+    @Test
     fun `test escaped schema`() {
-        assertEquals(actual = this.ser.escaped(schema = this.schema), expected = "'schema'")
+        assertEquals(actual = this.ser.escaped(schema = this.schema), expected = wrap("schema"))
     }
 
     @Test
     fun `test escaped procedure`() {
-        assertEquals(actual = this.ser.escaped(procedure = this.procedure), expected = "'schema'.'TestProcedure'")
+        assertEquals(actual = this.ser.escaped(procedure = this.procedure), expected = "${wrap("schema")}.${wrap("TestProcedure")}")
     }
 
     @Test
     fun `test escaped procedureArg`() {
-        assertEquals(actual = this.ser.escaped(procedureArg = TestProcedure::parent_pk), expected = "'parent_pk'")
+        assertEquals(actual = this.ser.escaped(procedureArg = TestProcedure::parent_pk), expected = wrap("parent_pk"))
     }
 
     @Test
     fun `test escaped tableInfo`() {
-        assertEquals(actual = this.ser.escaped(tableInfo = this.tableInfo), expected = "'schema'.'Parent'")
+        assertEquals(actual = this.ser.escaped(tableInfo = this.tableInfo), expected = "${wrap("schema")}.${wrap("Parent")}")
     }
 
     @Test
     fun `test escaped column`() {
-        assertEquals(actual = this.ser.escaped(column = this.column), expected = "'schema'.'Parent'.'pk'")
+        assertEquals(actual = this.ser.escaped(column = this.column), expected = "${wrap("schema")}.${wrap("Parent")}.${wrap("pk")}")
     }
 
     @Test
-    fun `test plantUML`() {
+    open fun `test plantUML`() {
         assertEquals(
             actual = this.ser.plantUML(),
             expected = listOf(
@@ -169,30 +192,45 @@ class Test_Serializer {
     }
 
     @Test
-    fun `test createSchema`() {
+    open fun `test createSchema`() {
         assertEquals(
             actual = this.ser.createSchema(schema = this.schema),
-            expected = Query(sql = "CREATE SCHEMA IF NOT EXISTS 'schema'")
+            expected = Query(sql = "CREATE SCHEMA IF NOT EXISTS ${wrap("schema")}")
         )
     }
 
     @Test
-    fun `test dropSchema`() {
+    open fun `test dropSchema`() {
         assertEquals(
             actual = this.ser.dropSchema(schema = this.schema),
-            expected = Query(sql = "DROP SCHEMA IF EXISTS 'schema'")
+            expected = Query(sql = "DROP SCHEMA IF EXISTS ${wrap("schema")}")
         )
         assertEquals(
             actual = this.ser.dropSchema(schema = this.schema, cascade = true),
-            expected = Query(sql = "DROP SCHEMA IF EXISTS 'schema' CASCADE")
+            expected = Query(sql = "DROP SCHEMA IF EXISTS ${wrap("schema")} CASCADE")
         )
     }
+
+    @Test
+    fun `test dropTable`() {
+        assertEquals(
+            actual = this.ser.dropTable(table = Parent::class),
+            expected = Query(sql = "DROP TABLE IF EXISTS ${wrap("schema")}.${wrap("Parent")}")
+        )
+        assertEquals(
+            actual = this.ser.dropTable(table = Parent::class, cascade = true),
+            expected = Query(sql = "DROP TABLE IF EXISTS ${wrap("schema")}.${wrap("Parent")} CASCADE")
+        )
+    }
+
+    @Test
+    abstract fun `test createTable`()
 
     @Test
     fun `test deleteTable`() {
         assertEquals(
             actual = this.ser.deleteTable(table = Parent::class),
-            expected = Query(sql = "DELETE FROM 'schema'.'Parent'")
+            expected = Query(sql = "DELETE FROM ${wrap("schema")}.${wrap("Parent")}")
         )
     }
 
@@ -201,26 +239,19 @@ class Test_Serializer {
         assertEquals(
             actual = this.ser.deleteRow(row = Parent(pk = 123, col = "col123")),
             expected = Query(
-                sql = "DELETE FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = ?",
+                sql = "DELETE FROM ${wrap("schema")}.${wrap("Parent")} WHERE ${wrap("schema")}.${wrap("Parent")}.${wrap("pk")} = ?",
                 QueryValue(name = "pk", value = 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
             )
         )
     }
 
     @Test
-    fun `test insertRow auto incremental`() {
+    fun `test insertRow auto int incremental`() {
         listOf(false, true).forEach {
             assertEquals(
                 actual = this.ser.insertRow(row = Parent(col = "col123"), batch = it),
                 expected = Query(
-                    sql = "INSERT INTO 'schema'.'Parent' ('col') VALUES (?)",
-                    QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
-                )
-            )
-            assertEquals(
-                actual = this.ser.insertRow(row = UUIDParent(col = "col123"), batch = it),
-                expected = Query(
-                    sql = "INSERT INTO 'schema'.'UUIDParent' ('col') VALUES (?)",
+                    sql = "INSERT INTO ${wrap("schema")}.${wrap("Parent")} (${wrap("col")}) VALUES (?)",
                     QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
                 )
             )
@@ -228,22 +259,41 @@ class Test_Serializer {
     }
 
     @Test
-    fun `test insertRow non auto incremental`() {
+    open fun `test insertRow auto UUID incremental`() {
+        listOf(false, true).forEach {
+            assertEquals(
+                actual = this.ser.insertRow(row = UUIDParent(col = "col123"), batch = it),
+                expected = Query(
+                    sql = "INSERT INTO ${wrap("schema")}.${wrap("UUIDParent")} (${wrap("col")}) VALUES (?)",
+                    QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test insertRow non auto int incremental`() {
         listOf(false, true).forEach {
             assertEquals(
                 actual = this.ser.insertRow(row = Child(pk = 123, fk = 12, col = "col123"), batch = it),
                 expected = Query(
-                    sql = "INSERT INTO 'schema'.'Child' ('pk', 'fk', 'col') VALUES (?, ?, ?)",
+                    sql = "INSERT INTO ${wrap("schema")}.${wrap("Child")} (${wrap("pk")}, ${wrap("fk")}, ${wrap("col")}) VALUES (?, ?, ?)",
                     QueryValue(name = "pk", value = 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
                     QueryValue(name = "fk", value = 12, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
                     QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
                 )
             )
+        }
+    }
+
+    @Test
+    open fun `test insertRow non auto uuid incremental`() {
+        listOf(false, true).forEach {
             val row = UUIDChild(pk = UUID.randomUUID(), fk = UUID.randomUUID(), col = "col123")
             assertEquals(
                 actual = this.ser.insertRow(row, batch = it),
                 expected = Query(
-                    sql = "INSERT INTO 'schema'.'UUIDChild' ('pk', 'fk', 'col') VALUES (?, ?, ?)",
+                    sql = "INSERT INTO ${wrap("schema")}.${wrap("UUIDChild")} (${wrap("pk")}, ${wrap("fk")}, ${wrap("col")}) VALUES (?, ?, ?)",
                     QueryValue(name = "pk", value = row.pk, jdbcType = JDBCType.CHAR, encoder = UUIDTS.sqlite.encoder),
                     QueryValue(name = "fk", value = row.fk, jdbcType = JDBCType.CHAR, encoder = UUIDTS.sqlite.encoder),
                     QueryValue(name = "col", value = row.col, jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder)
@@ -257,7 +307,11 @@ class Test_Serializer {
         assertEquals(
             actual = this.ser.updateRow(row = Parent(pk = 123, col = "col123")),
             expected = Query(
-                sql = "UPDATE 'schema'.'Parent' SET 'col' = ? WHERE 'schema'.'Parent'.'pk' = ?",
+                sql = "UPDATE ${wrap("schema")}.${wrap("Parent")} SET ${wrap("col")} = ? WHERE ${wrap("schema")}.${wrap("Parent")}.${
+                    wrap(
+                        "pk"
+                    )
+                } = ?",
                 QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder),
                 QueryValue(name = "pk", value = 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
             )
@@ -265,7 +319,11 @@ class Test_Serializer {
         assertEquals(
             actual = this.ser.updateRow(row = Child(pk = 123, fk = 321, col = "col123")),
             expected = Query(
-                sql = "UPDATE 'schema'.'Child' SET 'fk' = ?, 'col' = ? WHERE 'schema'.'Child'.'pk' = ?",
+                sql = "UPDATE ${wrap("schema")}.${wrap("Child")} SET ${wrap("fk")} = ?, ${wrap("col")} = ? WHERE ${wrap("schema")}.${wrap("Child")}.${
+                    wrap(
+                        "pk"
+                    )
+                } = ?",
                 QueryValue(name = "fk", value = 321, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
                 QueryValue(name = "col", value = "col123", jdbcType = JDBCType.VARCHAR, encoder = StringTS.string(100).encoder),
                 QueryValue(name = "pk", value = 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
@@ -277,7 +335,7 @@ class Test_Serializer {
     fun `test selectTable`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent'")
+            expected = Query(sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")}")
         )
     }
 
@@ -285,7 +343,7 @@ class Test_Serializer {
     fun `test selectTable page`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, page = Page(number = 3, orderBy = Parent::pk, limit = 15, order = Order.DESC)),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' ORDER BY 'pk' DESC LIMIT 15 OFFSET 45")
+            expected = Query(sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")} ORDER BY ${wrap("pk")} DESC LIMIT 15 OFFSET 45")
         )
     }
 
@@ -293,11 +351,11 @@ class Test_Serializer {
     fun `test selectTable cursor`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, cursor = Cursor(index = 123, orderBy = Parent::pk, limit = 15, order = Order.DESC)),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'pk' <= 123 ORDER BY 'pk' DESC LIMIT 15")
+            expected = Query(sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")} WHERE ${wrap("pk")} <= 123 ORDER BY ${wrap("pk")} DESC LIMIT 15")
         )
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, cursor = Cursor(index = 123, orderBy = Parent::pk, limit = 15, order = Order.ASC)),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'pk' >= 123 ORDER BY 'pk' ASC LIMIT 15")
+            expected = Query(sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")} WHERE ${wrap("pk")} >= 123 ORDER BY ${wrap("pk")} ASC LIMIT 15")
         )
     }
 
@@ -305,12 +363,24 @@ class Test_Serializer {
     fun `test selectTable pk`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, pk = 123),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = 123")
+            expected = Query(
+                sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")} WHERE ${wrap("schema")}.${wrap("Parent")}.${
+                    wrap(
+                        "pk"
+                    )
+                } = 123"
+            )
         )
         val uuid = UUID.randomUUID()
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, pk = uuid),
-            expected = Query(sql = "SELECT * FROM 'schema'.'Parent' WHERE 'schema'.'Parent'.'pk' = '$uuid'")
+            expected = Query(
+                sql = "SELECT * FROM ${wrap("schema")}.${wrap("Parent")} WHERE ${wrap("schema")}.${wrap("Parent")}.${
+                    wrap(
+                        "pk"
+                    )
+                } = '$uuid'"
+            )
         )
     }
 
@@ -328,11 +398,11 @@ class Test_Serializer {
             },
             expected = Query(
                 sql = listOf(
-                    "'schema'.'Parent'",
-                    "'pk'",
-                    "'TestProcedure'",
-                    "DELETE FROM 'schema'.'Parent'",
-                    "SELECT * FROM 'schema'.'Parent'"
+                    "${wrap("schema")}.${wrap("Parent")}",
+                    wrap("pk"),
+                    wrap("TestProcedure"),
+                    "DELETE FROM ${wrap("schema")}.${wrap("Parent")}",
+                    "SELECT * FROM ${wrap("schema")}.${wrap("Parent")}"
                 ).joinToString()
             )
         )
@@ -356,14 +426,23 @@ class Test_Serializer {
             expected = Query(
                 sql = listOf(
                     "?",
-                    "'schema'.'Parent'",
-                    "'pk'",
-                    "'TestProcedure'",
-                    "DELETE FROM 'schema'.'Parent'",
-                    "SELECT * FROM 'schema'.'Parent'"
+                    "${wrap("schema")}.${wrap("Parent")}",
+                    wrap("pk"),
+                    wrap("TestProcedure"),
+                    "DELETE FROM ${wrap("schema")}.${wrap("Parent")}",
+                    "SELECT * FROM ${wrap("schema")}.${wrap("Parent")}"
                 ).joinToString(),
                 QueryValue(name = "fk", value = 321, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder),
             )
         )
     }
+
+    @Test
+    abstract fun `test createProcedure`()
+
+    @Test
+    abstract fun `test callProcedure`()
+
+    @Test
+    abstract fun `test dropProcedure`()
 }
