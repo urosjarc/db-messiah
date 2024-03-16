@@ -37,7 +37,7 @@ tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.doFirst {
         println("Start sleep...")
-        sleep(50 * 1000)
+        sleep(100 * 1000)
         println("Stop sleep...")
     }
     this.tasks = listOf("test", "tutorials", "chinook", "e2e")
