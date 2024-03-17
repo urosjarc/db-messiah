@@ -1,3 +1,5 @@
+package basic_sqlite
+
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
@@ -10,31 +12,27 @@ import kotlin.test.*
 /**
  * Define your domain classes (tables)...
  */
-data class Parent0(
-    var pk: Int? = null, // Parent auto-incremental primary key (Int?, Uint?)
+data class Parent(
+    var pk: Int? = null, // Auto-incremental primary key (Int?, Uint?)
     var value: String
 )
 
-data class Child0(
-    val pk: UUID, // Child non auto-incremental primary key
+data class Child(
+    val pk: Int,         // Non auto-incremental primary key
     val parent_pk: Int,
     var value: String
 )
 
 /**
  * Create database serializer and explain database structure...
- * If primary key is mutable and of type Int? or Uint? system will automatically mark primary key as auto-incremental,
- * user don't have to do anything. If primary key is anything else than Int? or Uint? the initialization of the primary key
- * will be left to the user to define primary keys on application level. This is preferred
- * in case of having UUID for primary key identification.
  * Note that every table MUST have primary key, tables without primary key are considered a bad practice and they are not supported by this library.
  */
-val ser0 = SqliteSerializer(
+val serializer = SqliteSerializer(
     tables = listOf(
-        Table(Parent0::pk), // Pass primary key reference to table to register `Parent` as db table and mark `pk` as primary key.
+        Table(Parent::pk), // Pass primary key reference to table to register `Parent` as db table and automatically mark `pk` as primary key.
         Table(
-            Child0::pk, foreignKeys = listOf(
-                Child0::parent_pk to Parent0::class // Define mapping from foreign key to parent table.
+            Child::pk, foreignKeys = listOf(
+                Child::parent_pk to Parent::class // Define mapping from foreign key to parent table.
             )
         ),
     ),
@@ -47,7 +45,7 @@ val ser0 = SqliteSerializer(
  * > https://github.com/brettwooldridge/HikariCP
  * > https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#rocket-initialization
  */
-val config0 = Properties().apply {
+val config = Properties().apply {
     this["jdbcUrl"] = "jdbc:sqlite::memory:"
     this["username"] = "root"
     this["password"] = "root"
@@ -56,16 +54,17 @@ val config0 = Properties().apply {
 /**
  * Create database service by providing it your db serializer and db configuration...
  */
-val service0 = SqliteService(config = config0, ser = ser0)
+val service = SqliteService(config = config, ser = serializer)
 
-fun main_000() {
+fun basic_sqlite() {
     /**
      * To visualize database structure you can use plantUML extractor...
      * IntelliJ has plugin to support ".plantuml" extensions.
-     * For more informations visit plantUML website:
+     * > https://plugins.jetbrains.com/plugin/7017-plantuml-integration
+     * For more informations visit plantUML website and plugin for Intelij:
      * > https://plantuml.com/
      */
-    File("db.plantuml").writeText(ser0.plantUML())
+    File("db.plantuml").writeText(serializer.plantUML())
 
     /**
      *  When you want to query database, you will be provided with available db connection (SqliteQueryConn) from the connection pool.
@@ -75,23 +74,23 @@ fun main_000() {
      *  when needed. This means lightning fast db operations! Please refer to the HikariCP benchmarks...
      *  > https://github.com/brettwooldridge/HikariCP-benchmark
      */
-    service0.autocommit { dbConn: SqliteService.Connection -> // Fetch available (non-transactional) db connection from the HikariCP connection pool...
+    service.autocommit { dbConn: SqliteService.Connection -> // Fetch available (non-transactional) db connection from the HikariCP connection pool...
         /**
          * Create table...
          */
-        dbConn.table.create<Parent0>() // Create new table...
+        dbConn.table.create<Parent>() // Create new table...
 
         /**
          * Insert row...
          */
-        val parent0 = Parent0(value = "Hello World") // Create new object...
+        val parent0 = Parent(value = "Hello World") // Create new object...
         dbConn.row.insert(row = parent0)             // Insert object to table...
         assertNotNull(parent0.pk)                    // Check if object has primary key...
 
         /**
          * Select all table elements
          */
-        val parents0 = dbConn.table.select<Parent0>() // SELECT all table elements...
+        val parents0 = dbConn.table.select<Parent>() // SELECT all table elements...
         assertContains(parents0, parent0)             // Parent is contained in selected elements...
 
         /**
@@ -103,8 +102,8 @@ fun main_000() {
         /**
          * Check if change was updated
          */
-        val parent1 = dbConn.row.select<Parent0>(pk = parent0.pk!!) // Get specific row from the table by primary key...
-        assertEquals(parent1, parent0)                              // Parent is equal to original...
+        val parent1 = dbConn.row.select<Parent>(pk = parent0.pk!!) // Get specific row from the table by primary key...
+        assertEquals(parent1, parent0)   // Parent is equal to original...
 
         /**
          * Remove row
@@ -114,17 +113,14 @@ fun main_000() {
 
         /**
          * Insert many rows
-         * Note that inserting rows will create database call for each row and another call for fetching primary key.
-         * So if you are inserting 3 rows to database there there will be 6 database calls in the worst case.
-         * If database driver supports fetching primary key there will be only 3 database calls.
          */
         val parents1 = listOf(
-            Parent0(value = "parent10"),
-            Parent0(value = "parent11"),
-            Parent0(value = "parent12"),
+            Parent(value = "parent10"),
+            Parent(value = "parent11"),
+            Parent(value = "parent12"),
         )
         dbConn.row.insert(parents1)                        // Insert all parents one by one...
-        assertFalse(parents1.map { it.pk }.contains(null)) // All primary keys should be setted by the library...
+        assertFalse(parents1.map { it.pk }.contains(null)) // All primary keys should be set by the library...
 
         /**
          * Update many rows
@@ -141,12 +137,12 @@ fun main_000() {
         /**
          * Delete all table rows...
          */
-        dbConn.table.delete<Parent0>()
+        dbConn.table.delete<Parent>()
 
         /**
          * Drop table
          */
-        dbConn.table.drop<Child0>()  // Drop table from database
-        dbConn.table.drop<Parent0>() // Drop table from database
+        dbConn.table.drop<Child>()  // Drop table from database
+        dbConn.table.drop<Parent>() // Drop table from database
     }
 }

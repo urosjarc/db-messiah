@@ -73,7 +73,8 @@ public val <T : Any> KProperty1<T, *>.ext_isInlineWholeNumber: Boolean
     }
 
 /**
- * Checks if the property is an immutable, non-optional inline UUID.
+ * Checks if the property is an immutable, non-nullable inline UUID.
+ * Inside value must be imutable, non-nullable UUID.
  *
  * @receiver The `KProperty1` object.
  * @return `true` if the property is an immutable, non-optional inline UUID, `false` otherwise.
@@ -83,7 +84,7 @@ public val <T : Any> KProperty1<T, *>.ext_isInlineUUID: Boolean
         val kclass = this.returnType.classifier as KClass<*>
         if (kclass.isValue) {
             val firstParam = kclass.primaryConstructor?.parameters?.firstOrNull()
-            return firstParam?.type?.ext_isUUID == true && !firstParam.isOptional && !firstParam.type.isMarkedNullable
+            return firstParam?.type?.ext_isUUID == true && !firstParam.type.isMarkedNullable
         }
         return false
     }
