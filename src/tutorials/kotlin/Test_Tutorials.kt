@@ -1,8 +1,11 @@
 import basic_postgresql.basic_postgresql
 import basic_sqlite.basic_sqlite
 import constraints.constraints
+import exceptions.exceptions
+import indexing_and_profiling.indexing_and_profiling
 import org.junit.jupiter.api.Test
 import primary_keys.primary_keys
+import procedures.procedures
 import query_postgresql.query_postgresql
 import query_sqlite.query_sqlite
 import transactions.transactions
@@ -28,9 +31,14 @@ class Test_Tutorials {
 
     @Test
     fun `test transactions`() = transactions()
-//
-//    @Test
-//    fun `test exceptions`() = main_007()
+
+    @Test
+    fun `test procedures`() = procedures()
+    @Test
+    fun `test indexing and profiling`() = indexing_and_profiling()
+
+    @Test
+    fun `test exceptions`() = exceptions()
 //
 //    @Test
 //    fun `test custom type serializer`() = main_008()

@@ -8,10 +8,12 @@ import kotlin.time.measureTimedValue
 
 /**
  * Measures and stores the execution time of a query.
+ * @property active Flag that tells if profiler is in active state of logging.
  * @property logs The list of all query logs that were executed on the current service.
  */
 public class Profiler {
     public companion object {
+        public var active: Boolean = false
         public val logs: MutableMap<Int, QueryLog> = mutableMapOf()
 
         /**
@@ -75,7 +77,7 @@ public class Profiler {
             this.log(type = QueryLog.Type.CALL, sql = query.sql, repetitions = 1, code)
 
         /**
-         * Measures and stores the execution time of a query.
+         * Measures and stores the execution time of a query if the Profiler is in active state.
          *
          * @param type The type of the query log.
          * @param sql The SQL string for the query.
@@ -84,6 +86,8 @@ public class Profiler {
          * @return The result of the code block.
          */
         private fun <T> log(type: QueryLog.Type, sql: String, repetitions: Int, code: () -> T): T {
+            if (!this.active) return code()
+
             val (returned, duration) = measureTimedValue { code() }
 
             val ql = QueryLog(
@@ -96,6 +100,7 @@ public class Profiler {
             val log = this.logs.getOrPut(key = ql.hashCode()) { ql }
 
             log.repetitions += repetitions
+            log.duration += duration
 
             return returned
         }
