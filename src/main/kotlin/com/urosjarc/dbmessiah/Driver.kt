@@ -77,14 +77,14 @@ public open class Driver(private val conn: Connection) {
                 this.prepareQuery(ps = ps, query = Query(sql = batchQuery.sql, values = values.toTypedArray()))
                 ps.addBatch()
                 if (++i % 1_000 == 0) {
-                    val exeCount = ps.executeBatch()
+                    val exeCount = Profiler.logBatch(query = batchQuery) { ps.executeBatch() }
                     numUpdates += exeCount.sum()
                     ps.clearParameters()
                     i = 0
                 }
             }
             if (i > 0) {
-                val exeCount = ps.executeBatch()
+                val exeCount = Profiler.logBatch(query = batchQuery) { ps.executeBatch() }
                 numUpdates += exeCount.sum()
             }
 
@@ -116,7 +116,7 @@ public open class Driver(private val conn: Connection) {
             this.prepareQuery(ps = ps, query = query)
 
             //Get info
-            val count: Int = ps.executeUpdate()
+            val count: Int = Profiler.logUpdate(query = query) { ps.executeUpdate() }
 
             //Close all
             this.closeAll(ps = ps)
@@ -158,7 +158,7 @@ public open class Driver(private val conn: Connection) {
             this.prepareQuery(ps = ps, query = query)
 
             //Get info
-            val numUpdates = ps.executeUpdate()
+            val numUpdates = Profiler.logInsert(query = query) { ps.executeUpdate() }
 
             //If no updates happend close all (very low chance of this to happend since driver will create error!
             if (numUpdates == 0) throw DriverException(msg = "Failed to create any insert change with: $query")
@@ -191,6 +191,7 @@ public open class Driver(private val conn: Connection) {
         //Try fetching ids with force if onGeneragedKeysFail sql is not null!!!
         try {
             if (onGeneratedKeysFail != null) {
+                // This is not profiled since user can't modify the query.
                 rs2 = ps.connection.prepareStatement(onGeneratedKeysFail).executeQuery()
                 if (rs2.next()) {
                     val data = primaryColumn.decode(rs2, 1) ?: throw DriverException(msg = "Failed to decode primary key value from: $query")
@@ -225,7 +226,7 @@ public open class Driver(private val conn: Connection) {
         try {
             ps = conn.prepareStatement(query.sql)
             this.prepareQuery(ps = ps, query = query)
-            var isResultSet = ps.execute()
+            var isResultSet = Profiler.logExecute(query = query) { ps.execute() }
 
             var count = 0
             do {
@@ -270,7 +271,7 @@ public open class Driver(private val conn: Connection) {
             val objs = mutableListOf<T>()
 
             //Create result set and fill element
-            rs = ps.executeQuery()
+            rs = Profiler.logQuery(query = query) { ps.executeQuery() }
             while (rs.next()) {
                 objs.add(decodeResultSet(rs))
             }
@@ -305,7 +306,7 @@ public open class Driver(private val conn: Connection) {
             //Prepare statement and query
             ps = conn.prepareCall(query.sql)
             this.prepareQuery(ps = ps, query = query)
-            var isResultSet = ps.execute()
+            var isResultSet = Profiler.logCall(query = query) { ps.execute() }
 
             var count = 0
             do {
