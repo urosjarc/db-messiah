@@ -1,3 +1,5 @@
+package custom_type_serializers
+
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
@@ -9,32 +11,32 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import java.sql.JDBCType
 import java.sql.Timestamp
+import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 
 /**
  * For example we have table with column type Instant::class
  * The Instant::class serializer is not provided by the library since only basic kotlin JVM types serializers are defined...
  */
-data class Parent8(var pk: Int? = null, val instant: Instant)
+data class Parent(var pk: Int? = null, val instant: Instant)
 
 /**
  * All serializers that you can use are defined in com.urosjarc.dbmessiah.serializers
  * where you can look how they are defined. For learning purposes lets define our own
  * custom serializer for kotlinx Instant class to add support for our Table.time column.
+ * Inside constructor parameters there are extensive comments explaning everything...
  */
 
 val instantTS: TypeSerializer<Instant> = TypeSerializer(
-    kclass = Instant::class,        // Lets explain which kotlin class we want to serialize...
-    dbType = "TIMESTAMP",           // Lets tell db type that will represent the value.
-    jdbcType = JDBCType.TIMESTAMP,  // Lets also tell jdbc type for PreparedStatement in order to prevent SQL injections.
+    kclass = Instant::class,        // Which kotlin class we want to serialize...
+    dbType = "TIMESTAMP",           // Which db type will represent the value.
+    jdbcType = JDBCType.TIMESTAMP,  // Which jdbc type will be used for PreparedStatement in order to prevent SQL injections.
 
     /**
      * Note that 'rs' is JDBC ResultSet object which is object representing ONE row fetched from DB.
      * Because ResultSet is one row the columns are then fetched with 'i' index which represents index of the column to be fetched.
      * Correct index is passed by default to the user. The variable 'info' contains additional infos about the decoding value.
-     *
      */
     decoder = { rs, i, info -> rs.getTimestamp(i).toInstant().toKotlinInstant() },  // Lets define how to decode value from result set...
 
@@ -47,21 +49,22 @@ val instantTS: TypeSerializer<Instant> = TypeSerializer(
 )
 
 /**
- * In the following example we apply the Instant::class serializer to different levels of database.
- * In the beginning of database development you would want to define you serializers to globalSerializer,
- * after a while to optimize the database you would then define custom serializers to problematic objects.
- *
- * Here is an example how to apply Instant::class serializer to different database level
+ * There are multiple levels on which we can apply specific type serializer.
+ * There are (global, schema, table, column) levels listed by increasing priority.
+ * If type serializer is applied on global level all columns over all schemas will be serialized with this serializer.
+ * If type serializer is applied on schema level then only those columns defined in that schemas will be serialized with this serializer.
+ * The same is true for other levels. If system finds multiple serializer for some column then system will use the type serializer with highest priority.
+ * Here is an example how to apply Instant::class serializer to different database levels.
  */
-val mainSchema8 = PgSchema(
-    name = "main", tables = listOf(
+val schema = PgSchema(
+    name = "custom_type_serializers", tables = listOf(
         Table(
-            primaryKey = Parent8::pk,
+            primaryKey = Parent::pk,
             serializers = listOf(
                 instantTS // You can apply serializer to specific table which will override the same serializer inside schema and globalSerializers.
             ),
             columnSerializers = listOf(
-                Parent8::instant to instantTS // You can apply serializer to specific column which will override the same serializer inside table, schema, globalSerializer.
+                Parent::instant to instantTS // You can apply serializer to specific column which will override the same serializer inside table, schema, globalSerializer.
             )
         )
     ),
@@ -70,40 +73,44 @@ val mainSchema8 = PgSchema(
     )
 )
 
-val postgresqlSerializer2 = PgSerializer(
-    schemas = listOf(mainSchema8),
+val serializer = PgSerializer(
+    schemas = listOf(schema),
     globalSerializers = listOf( // One option is to define serializer to global serializer which will be applied to all database.
         NumberTS.int, // You can use allready defined serializer provided by the library...
         instantTS     // Here you defined your own serializer...
     )
 )
 
-val postgresqlService2 = PgService(config = config1, ser = postgresqlSerializer2)
+val service = PgService(ser = serializer, config = Properties().apply {
+    this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"
+    this["username"] = "root"
+    this["password"] = "root"
+})
 
-fun main_008() {
+fun custom_type_serializers() {
 
-    postgresqlService2.autocommit {
+    service.autocommit {
 
         /**
          * Setup database
          */
-        it.schema.create(schema = mainSchema8)
-        it.table.dropCascade<Parent8>()
-        it.table.create<Parent8>()
+        it.schema.create(schema = schema)
+        it.table.dropCascade<Parent>()
+        it.table.create<Parent>()
 
         /**
          * Insert table with custom tipe
          */
         val currentInstant = Instant.parse("2024-02-24T19:22:45Z")
-        val parent80 = Parent8(instant = currentInstant)
-        it.row.insert(parent80)
+        val parent0 = Parent(instant = currentInstant)
+        it.row.insert(parent0)
 
         /**
          * Get inserted element, and check if it matches with expected value.
          */
-        val parent81 = it.row.select<Parent8>(pk = parent80.pk!!)!!
-        assertEquals(parent81, parent80)
-        assertEquals(parent81.instant, parent80.instant)
+        val parent1 = it.row.select<Parent>(pk = parent0.pk!!)!!
+        assertEquals(parent1, parent0)
+        assertEquals(parent1.instant, parent0.instant)
 
     }
 

@@ -1,3 +1,5 @@
+package custom_database_serializers
+
 import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.data.TableInfo
@@ -7,15 +9,14 @@ import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import java.sql.JDBCType
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * It will come a time when you will become dissatisfied with the system and will want to modify it by your own needs.
- * For example, you would want to create db indexes on table creation for all string columns...
  * System is designed in such a way that you can override any part of it and plug in your own implementation
- * instead! Off course deep level of SQL and Kotlin syntax is needed before you partake overriding any part of the sistem :)
+ * instead. Off course deep level of SQL and Kotlin syntax is needed before you partake overriding any part of the sistem :)
  * It's not for beginners. If you would like some help please feel free to create new issue to ask how you can achieve your goal.
  */
 
@@ -45,6 +46,9 @@ open class MyOwnSqliteSerializer(
     globalOutputs = globalOutputs
 ) {
 
+    /**
+     * We want to override query generation for creating new database table.
+     */
     override fun <T : Any> createTable(table: KClass<T>): Query {
         /**
          * First we want the retrieve all data about the table that this class represents.
@@ -119,7 +123,7 @@ open class MyOwnSqliteSerializer(
 /**
  * Lets define our domains
  */
-data class Parent9(
+data class Parent(
     var pk: Int? = null, // Parent auto-incremental primary key (Int?, Uint?)
     var value: String
 )
@@ -129,31 +133,31 @@ data class Parent9(
  */
 
 
-val service9 = SqliteService(
-    config = config0,
+val service = SqliteService(
+    config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
     ser = MyOwnSqliteSerializer( // Here we are using our own implementation
-        tables = listOf(Table(Parent9::pk)),
+        tables = listOf(Table(Parent::pk)),
         globalSerializers = AllTS.basic
     )
 )
 
-fun main_009() {
-    service9.autocommit {
+fun custom_database_serializers() {
+    service.autocommit {
         /**
          * Prepare database
          */
-        it.table.create<Parent9>()
-        it.table.delete<Parent9>()
+        it.table.create<Parent>()
+        it.table.delete<Parent>()
 
         /**
          * Insert default message
          */
-        it.row.insert(row = Parent9(value = "This is my default message"))
+        it.row.insert(row = Parent(value = "This is my default message"))
 
         /**
          * Lets check if our implementation of injected message is working...
          */
-        val parents = it.table.select<Parent9>()
+        val parents = it.table.select<Parent>()
         assertEquals(parents.size, 1)
         assertEquals(parents[0].value, "I HAVE THE POWER!!!")
 

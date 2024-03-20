@@ -1,6 +1,8 @@
 import basic_postgresql.basic_postgresql
 import basic_sqlite.basic_sqlite
 import constraints.constraints
+import custom_database_serializers.custom_database_serializers
+import custom_type_serializers.custom_type_serializers
 import exceptions.exceptions
 import indexing_and_profiling.indexing_and_profiling
 import org.junit.jupiter.api.Test
@@ -34,15 +36,16 @@ class Test_Tutorials {
 
     @Test
     fun `test procedures`() = procedures()
+
     @Test
     fun `test indexing and profiling`() = indexing_and_profiling()
 
     @Test
     fun `test exceptions`() = exceptions()
-//
-//    @Test
-//    fun `test custom type serializer`() = main_008()
-//
-//    @Test
-//    fun `test custom database serializer`() = main_009()
+
+    @Test
+    fun `test custom type serializer`() = custom_type_serializers()
+
+    @Test
+    fun `test custom database serializer`() = custom_database_serializers()
 }

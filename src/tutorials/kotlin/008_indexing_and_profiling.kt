@@ -65,8 +65,8 @@ fun indexing_and_profiling() {
      * QueryLog(
      *     type = QUERY,
      *     duration = 20ms,
-     *     repetitions=2,
-     *     sql="SELECT * FROM Parent WHERE Parent.col = ?"
+     *     repetitions = 2,
+     *     sql = "SELECT * FROM Parent WHERE Parent.col = ?"
      * )
      *
      * Because of this accumulation feature you can use Profiler in long-running experiments
@@ -92,7 +92,4 @@ fun indexing_and_profiling() {
         println("\tQuery SQL: ${ql.sql}")
         println()
     }
-
-
-
 }
