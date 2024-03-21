@@ -7,23 +7,16 @@ import com.urosjarc.dbmessiah.serializers.AllTS
 import java.util.*
 
 /**
- * There are 3 main exceptions classes: issue, warning, unknown...
+ * When you are using library for the first time you will be greeted with following message...
  *
- * Warning exception: Happens when system wants to warn user of a problem that can be fixed by him...
- *      - SerializerTestsException: It can happen on the start if user creates inconsistent or bad database structure.
- *      - QueryException: It can happen at runtime when inconsistency is found before, during or after query serialization process from db to kotlin or back.
+ * ERROR StatusLogger Log4j2 could not find a logging implementation. Please add log4j-core to the classpath. Using SimpleLogger to log to the console...
+ * SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+ * SLF4J: Defaulting to no-operation (NOP) logger implementation
+ * SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
  *
- * Issue subtypes: All exceptions such types should be reported to issue tracker since this cant be fixed by the user.
- *      - MapperException: Error created in Mapper process when mapping can't be found or performed...
- *      - DbValueException: Error when trying to retrieve or set bad value from db column, argument, etc...
- *
- * Unknown subtypes: All exceptions that can't be easy categorized as warning or issue, usually this exception is caused by external source...
- *      - ConnectionException: Any error related to db connection in the JDBC driver.
- *      - DriverException: Any error created by driver that executes db queries and sends them to JDBC driver.
- *
- * System will test user schema configuration heavily at the beginning of initialization to catch any potential problems or inconsistencies created by the
- * user. After final tests are executed the sistem is considered type safe and any errors after initialization will the form of Issue or Unknown exception.
- * Let's see few examples...
+ * Library uses Log4j interface for logging across the sistem.
+ * But since this is only an interface you will have to provide your implementation where
+ * actual logging will be happening.
  */
 
 /**

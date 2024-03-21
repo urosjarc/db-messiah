@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration scan="true">
+
+    <Appenders>
+
+        <Console name="Console"
+                 target="SYSTEM_OUT">
+            <PatternLayout pattern="%30file:%-3line | %-5level | %msg%n"/>
+        </Console>
+
+        <RollingRandomAccessFile name="File"
+                                 append="true"
+                                 fileName="logs/last.log"
+                                 filePattern="logs/%d{yyyy_MM_dd_HH_mm_ss}.log"
+                                 bufferedIO="true"
+                                 immediateFlush="false">
+            <PatternLayout pattern="%30file:%-3line | %-5level | %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingRandomAccessFile>
+
+        <Async name="Async-Console"
+               ignoreExceptions="false"
+               includeLocation="true">
+            <AppenderRef ref="Console"/>
+        </Async>
+        <Async name="Async-File"
+               includeLocation="true">
+            <AppenderRef ref="File"/>
+        </Async>
+
+    </Appenders>
+
+    <Loggers>
+        <Root includeLocation="true" level="TRACE">
+            <AppenderRef level="trace" ref="Async-Console"/>
+            <AppenderRef level="trace" ref="Async-File"/>
+        </Root>
+    </Loggers>
+</Configuration>
