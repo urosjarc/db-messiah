@@ -1,11 +1,8 @@
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import java.lang.Thread.sleep
-import java.net.URI
 
-val GPG_PRIVATE_KEY = System.getenv("GPG_PRIVATE_KEY") ?: throw Exception("GPG_PRIVATE_KEY")
-val GPG_PRIVATE_PASSWORD = System.getenv("GPG_PRIVATE_PASSWORD") ?: throw Exception("GPG_PRIVATE_PASSWORD")
-val SONATYPE_USERNAME = System.getenv("SONATYPE_USERNAME") ?: throw Exception("SONATYPE_USERNAME")
-val SONATYPE_PASSWORD = System.getenv("SONATYPE_PASSWORD") ?: throw Exception("SONATYPE_PASSWORD")
+val GPG_PRIVATE_KEY = System.getenv("GPG_PRIVATE_KEY")
+val GPG_PRIVATE_PASSWORD = System.getenv("GPG_PRIVATE_PASSWORD")
 
 plugins {
     signing
@@ -21,6 +18,7 @@ plugins {
 
 group = "com.urosjarc"
 version = "0.0.1-SNAPSHOT"
+val github = "https://github.com/urosjarc/db-messiah"
 
 kotlin {
     explicitApi()
@@ -63,12 +61,12 @@ signing {
     sign(publishing.publications)
 }
 
-val dokaOutputDir = "${layout.buildDirectory}/dokka"
-val cleanDokka by tasks.register<Delete>("cleanDokka") { delete(dokaOutputDir) }
-val javadocJar = tasks.register<Jar>("javadocJar") {
-    dependsOn(tasks.dokkaHtml)
-    archiveClassifier = "javadoc"
-    from(dokaOutputDir)
+val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.outputDirectory)
 }
 
 tasks.dokkaHtml {
@@ -154,7 +152,7 @@ testing {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("db-messiah") {
             groupId = rootProject.group as String
             artifactId = rootProject.name
             version = rootProject.version as String
@@ -163,10 +161,10 @@ publishing {
             pom {
                 name = "Db Messiah"
                 description = "Kotlin lib. for enterprise database development"
-                url = "https://github.com/urosjarc/db-messiah"
+                url = github
                 issueManagement {
                     system = "Github"
-                    url = "https://github.com/urosjarc/db-messiah/issues"
+                    url = "$github/issues"
                 }
                 licenses {
                     license {
@@ -182,9 +180,9 @@ publishing {
                     }
                 }
                 scm {
-                    url = "https://github.com/urosjarc/db-messiah/"
-                    connection = "https//github.com/urosjarc/db-messiah.git"
-                    developerConnection = "https://github.com/urosjarc/db-messiah.git"
+                    connection.set("scm:git:$github")
+                    developerConnection.set("scm:git:$github")
+                    url.set(github)
                 }
             }
         }
@@ -192,15 +190,7 @@ publishing {
     repositories {
         maven {
             name = "oss"
-            val repositoryId: String? = System.getenv("SONATYPE_REPOSITORY_ID")
-            val releasesRepoUrl = URI("https://oss.sonatype.org/service/local/staging/deployByRepositoryId/$repositoryId/")
-            val snapshotsRepoUrl = URI("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-
-            credentials {
-                username = SONATYPE_USERNAME
-                password = SONATYPE_PASSWORD
-            }
+            url = uri(layout.buildDirectory.dir("repo"))
         }
     }
 
