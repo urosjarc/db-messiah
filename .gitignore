@@ -1,6 +1,7 @@
 .gradle
 build/
 .idea
+.env
 logs
 *.plantuml
 *.log

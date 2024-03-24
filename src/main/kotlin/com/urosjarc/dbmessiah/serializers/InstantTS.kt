@@ -13,14 +13,14 @@ public object InstantTS {
         kclass = Instant::class,
         dbType = "DATETIME",
         jdbcType = JDBCType.TIMESTAMP,
-        decoder = { rs, i, info -> rs.getTimestamp(i).toInstant() },
+        decoder = { rs, i, _ -> rs.getTimestamp(i).toInstant() },
         encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x)) }
     )
     public val TIMESTAMP: TypeSerializer<Instant> = TypeSerializer(
         kclass = Instant::class,
         dbType = "TIMESTAMP",
         jdbcType = JDBCType.TIMESTAMP,
-        decoder = { rs, i, info -> rs.getTimestamp(i).toInstant() },
+        decoder = { rs, i, _ -> rs.getTimestamp(i).toInstant() },
         encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x)) }
     )
 }

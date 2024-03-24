@@ -12,6 +12,12 @@ import kotlin.time.measureTimedValue
  * @property logs The list of all query logs that were executed on the current service.
  */
 public class Profiler {
+    /**
+     * The [Companion] class represents a collection of utility methods for logging query execution time.
+     *
+     * @property active Indicates whether the profiler is in the active logging state.
+     * @property logs A mutable map that stores the query log entries.
+     */
     public companion object {
         public var active: Boolean = false
         public val logs: MutableMap<Int, QueryLog> = mutableMapOf()

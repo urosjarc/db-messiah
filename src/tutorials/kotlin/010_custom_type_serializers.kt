@@ -38,7 +38,7 @@ val instantTS: TypeSerializer<Instant> = TypeSerializer(
      * Because ResultSet is one row the columns are then fetched with 'i' index which represents index of the column to be fetched.
      * Correct index is passed by default to the user. The variable 'info' contains additional infos about the decoding value.
      */
-    decoder = { rs, i, info -> rs.getTimestamp(i).toInstant().toKotlinInstant() },  // Lets define how to decode value from result set...
+    decoder = { rs, i, _ -> rs.getTimestamp(i).toInstant().toKotlinInstant() },  // Lets define how to decode value from result set...
 
     /**
      * Note that ps is JDBC PreparedStatement object which is object representing ONE SQL statement.

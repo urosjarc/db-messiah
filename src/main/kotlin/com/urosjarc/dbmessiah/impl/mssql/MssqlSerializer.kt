@@ -78,13 +78,13 @@ public open class MssqlSerializer(
         return Query(sql = "DROP TABLE IF EXISTS ${escaped(T)}")
     }
 
-    public override fun <T : Any> callProcedure(obj: T): Query {
-        val P = this.mapper.getProcedure(obj = obj)
+    public override fun <T : Any> callProcedure(procedure: T): Query {
+        val P = this.mapper.getProcedure(obj = procedure)
         // Here we don't escape arguments since @ signs is responsible for escaping argument
         val args = P.args.map { "@${it.name} = ?" }.joinToString(", ")
         return Query(
             sql = "EXEC ${escaped(P)} $args",
-            *P.queryValues(obj = obj)
+            *P.queryValues(obj = procedure)
         )
     }
 

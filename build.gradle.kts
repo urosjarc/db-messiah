@@ -1,5 +1,11 @@
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import java.lang.Thread.sleep
+import java.net.URI
+
+val GPG_PRIVATE_KEY = System.getenv("GPG_PRIVATE_KEY") ?: throw Exception("GPG_PRIVATE_KEY")
+val GPG_PRIVATE_PASSWORD = System.getenv("GPG_PRIVATE_PASSWORD") ?: throw Exception("GPG_PRIVATE_PASSWORD")
+val SONATYPE_USERNAME = System.getenv("SONATYPE_USERNAME") ?: throw Exception("SONATYPE_USERNAME")
+val SONATYPE_PASSWORD = System.getenv("SONATYPE_PASSWORD") ?: throw Exception("SONATYPE_PASSWORD")
 
 plugins {
     signing
@@ -20,10 +26,7 @@ kotlin {
     explicitApi()
     jvmToolchain(19)
 }
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+
 repositories {
     mavenCentral()
 }
@@ -38,6 +41,13 @@ koverReport {
         includes { classes("com.urosjarc.dbmessiah.*") }
     }
 }
+
+dependencies {
+    implementation(kotlin("reflect"))
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
+}
+
 tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.doFirst {
@@ -46,6 +56,19 @@ tasks.register<GradleBuild>("github") {
         println("Start with testing...")
     }
     this.tasks = listOf("test", "tutorials", "chinook", "e2e")
+}
+
+signing {
+    useInMemoryPgpKeys(GPG_PRIVATE_KEY, GPG_PRIVATE_PASSWORD)
+    sign(publishing.publications)
+}
+
+val dokaOutputDir = "${layout.buildDirectory}/dokka"
+val cleanDokka by tasks.register<Delete>("cleanDokka") { delete(dokaOutputDir) }
+val javadocJar = tasks.register<Jar>("javadocJar") {
+    dependsOn(tasks.dokkaHtml)
+    archiveClassifier = "javadoc"
+    from(dokaOutputDir)
 }
 
 tasks.dokkaHtml {
@@ -66,12 +89,6 @@ tasks.dokkaHtml {
             skipEmptyPackages.set(false)
         }
     }
-}
-
-dependencies {
-    implementation(kotlin("reflect"))
-    implementation("com.zaxxer:HikariCP:5.1.0")
-    implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
 }
 
 testing {
@@ -142,11 +159,15 @@ publishing {
             artifactId = rootProject.name
             version = rootProject.version as String
             from(components["java"])
-
+            artifact(javadocJar)
             pom {
                 name = "Db Messiah"
                 description = "Kotlin lib. for enterprise database development"
                 url = "https://github.com/urosjarc/db-messiah"
+                issueManagement {
+                    system = "Github"
+                    url = "https://github.com/urosjarc/db-messiah/issues"
+                }
                 licenses {
                     license {
                         name = "The Apache License, Version 2.0"
@@ -161,22 +182,24 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/urosjarc/db-messiah.git"
-                    developerConnection = "scm:git:ssh://github.com/urosjarc/db-messiah.git"
                     url = "https://github.com/urosjarc/db-messiah/"
+                    connection = "https//github.com/urosjarc/db-messiah.git"
+                    developerConnection = "https://github.com/urosjarc/db-messiah.git"
                 }
             }
         }
     }
     repositories {
         maven {
-            def snapshotsRepoUrl = 'https://your-nexus-url.com/snapshots'
-            def releasesRepoUrl = 'https://your-nexus-url.com/releases'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            name = "oss"
+            val repositoryId: String? = System.getenv("SONATYPE_REPOSITORY_ID")
+            val releasesRepoUrl = URI("https://oss.sonatype.org/service/local/staging/deployByRepositoryId/$repositoryId/")
+            val snapshotsRepoUrl = URI("https://oss.sonatype.org/content/repositories/snapshots/")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
 
             credentials {
-                username = System.getenv('NEXUS_USERNAME')
-                password = System.getenv('NEXUS_PASSWORD')
+                username = SONATYPE_USERNAME
+                password = SONATYPE_PASSWORD
             }
         }
     }

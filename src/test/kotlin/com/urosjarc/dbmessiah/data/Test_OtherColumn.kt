@@ -28,8 +28,8 @@ class Test_OtherColumn {
         kprop = kprop as KProperty1<Any, Any?>,
         dbType = "",
         jdbcType = JDBCType.VARCHAR,
-        encoder = { ps, i, x -> },
-        decoder = { rs: ResultSet, i: Int, dInfo: DecodeInfo -> rs.getString(i) }
+        encoder = { _, _, _ -> },
+        decoder = { rs: ResultSet, i: Int, _: DecodeInfo -> rs.getString(i) }
     ).notNull
 
     @Test

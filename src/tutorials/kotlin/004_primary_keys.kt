@@ -76,7 +76,7 @@ val id_serializer = TypeSerializer(
     kclass = Id::class,
     dbType = "INTEGER",
     jdbcType = JDBCType.INTEGER,
-    decoder = { rs, i, info -> Id<Any>(rs.getInt(i)) },
+    decoder = { rs, i, _ -> Id<Any>(rs.getInt(i)) },
     encoder = { ps, i, x -> ps.setInt(i, x.value) }
 )
 
@@ -92,7 +92,7 @@ val uuid_serializer = TypeSerializer(
     kclass = UId::class,
     dbType = "UUID",
     jdbcType = JDBCType.JAVA_OBJECT,
-    decoder = { rs, i, info -> UId<Any>(value = rs.getObject(i) as UUID) },
+    decoder = { rs, i, _ -> UId<Any>(value = rs.getObject(i) as UUID) },
     encoder = { ps, i, x -> ps.setObject(i, x.value) }
 )
 

@@ -64,7 +64,7 @@ object Seed {
             )
         }
 
-        val playlistTrack = arrayOfNulls<PlaylistTrack>(num).mapIndexed { i, _ ->
+        val playlistTrack = arrayOfNulls<PlaylistTrack>(num).mapIndexed { _, _ ->
             PlaylistTrack(
                 playlistId = Id(Random.nextInt(1, num - 1)),
                 trackId = Id(Random.nextInt(1, num - 1)),
