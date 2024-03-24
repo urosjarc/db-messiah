@@ -3,6 +3,8 @@ import java.lang.Thread.sleep
 
 val GPG_PRIVATE_KEY = System.getenv("GPG_PRIVATE_KEY")
 val GPG_PRIVATE_PASSWORD = System.getenv("GPG_PRIVATE_PASSWORD")
+val SONATYPE_USERNAME = System.getenv("SONATYPE_USERNAME")
+val SONATYPE_PASSWORD = System.getenv("SONATYPE_PASSWORD")
 
 plugins {
     signing
@@ -189,8 +191,16 @@ publishing {
     }
     repositories {
         maven {
-            name = "oss"
+            name = "local"
             url = uri(layout.buildDirectory.dir("repo"))
+        }
+        maven {
+            name = "snapshot"
+            setUrl { "https://oss.sonatype.org/content/repositories/snapshots/" }
+            credentials {
+                username = SONATYPE_USERNAME
+                password = SONATYPE_PASSWORD
+            }
         }
     }
 
