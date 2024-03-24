@@ -5,7 +5,6 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import com.urosjarc.dbmessiah.impl.mssql.MssqlService
-import com.urosjarc.dbmessiah.impl.mysql.MysqlService
 import com.urosjarc.dbmessiah.serializers.AllTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -392,7 +391,10 @@ open class Test_Mssql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.row.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Row with already defined auto-generated primary key are not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Row with already defined auto-generated primary key are not allowed to be inserted"
+        )
 
         //This will not change anything
         assertEquals(actual = it.table.select<Parent>(), expected = postParents)
@@ -494,7 +496,10 @@ open class Test_Mssql : Test_Contract {
         val e = assertThrows<QueryException> {
             it.batch.insert(rows = listOf(newObj0, newObj1))
         }
-        assertContains(charSequence = e.stackTraceToString(), other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted")
+        assertContains(
+            charSequence = e.stackTraceToString(),
+            other = "Batched row on index '0', with already defined auto-generated primary key, is not allowed to be inserted"
+        )
 
         //Parents really stayed as they were before
         val postParents3 = it.table.select<Parent>()
@@ -785,6 +790,7 @@ open class Test_Mssql : Test_Contract {
         assertEquals(actual = r0, expected = listOf(1))
         assertEquals(actual = r1, expected = listOf(parent))
     }
+
     @Test
     override fun `test UUID`() = service.autocommit {
         val uuidParent0 = UUIDParent(col = "col0")

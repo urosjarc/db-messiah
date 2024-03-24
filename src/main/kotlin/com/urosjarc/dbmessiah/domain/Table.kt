@@ -8,6 +8,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.extensionReceiverParameter
 import kotlin.reflect.full.instanceParameter
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaField
 
 /**
  * A class representing a table in a database or schema.
@@ -25,6 +27,47 @@ public class Table<T : Any>(
     internal val serializers: List<TypeSerializer<*>> = listOf(),
     columnSerializers: List<Pair<KProperty1<T, *>, TypeSerializer<*>>> = listOf()
 ) {
+
+    public companion object {
+        /**
+         * If primary and foreign keys are of the same
+         * typed inline class `inline class Id<T>`, you can
+         * use this function to extract map of foreign keys pointing to T class.
+         * You can use return value of this function directly in [Table] constructor.
+         *
+         * @param primaryKey The primary key property of type KProperty1<T, *>.
+         * @return Map of foreign keys pointing to the right table
+         * @throws Exception if the owner class of the primary key cannot be determined.
+         */
+        public fun <T : Any> getInlineTypedForeignKeys(primaryKey: KProperty1<T, *>): MutableList<Pair<KProperty1<T, *>, KClass<*>>> {
+            //Get KClass of primary key
+            val pkKClass = primaryKey.returnType.classifier as KClass<*>
+
+            //First extract the owner of the primary key.
+            val owner = primaryKey.javaField?.declaringClass?.kotlin ?: throw Exception("Could not get owner of $primaryKey")
+
+            //Define foreign key map where we will fill all foreign keys.
+            val fkMap: MutableList<Pair<KProperty1<T, *>, KClass<*>>> = mutableListOf()
+
+            //Get all properties of the owner class.
+            val kprops = owner.memberProperties.filter { it.javaField != null }
+
+            //Scan all properties
+            kprops.forEach {
+
+                //If property type is of type Id and is not primary key then it must be foreign key
+                if (it != primaryKey && it.returnType.classifier == pkKClass) {
+
+                    //Extract T from Id<T> as KClass
+                    val foreignKClass = it.returnType.arguments.first().type?.classifier
+
+                    //Fill foreign key map
+                    fkMap.add(Pair(it, foreignKClass) as Pair<KProperty1<T, *>, KClass<*>>)
+                }
+            }
+            return fkMap
+        }
+    }
 
     /**
      * Unescaped name of the [Table].

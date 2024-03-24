@@ -18,7 +18,7 @@ public open class MariaSerializer(
     globalInputs = globalInputs,
     globalOutputs = globalOutputs,
     globalProcedures = globalProcedures,
-    allowAutoUUID = true
+    allowAutoUUID = false //It has support for UUID, but it does not return auto generated UUID primary key.
 ) {
 
     override fun escaped(name: String): String = "`$name`"
