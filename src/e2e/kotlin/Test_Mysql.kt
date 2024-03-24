@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSerializer
 import com.urosjarc.dbmessiah.impl.mysql.MysqlService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ open class Test_Mysql : Test_Contract {
                 },
                 ser = MysqlSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.mysql,
+                    globalSerializers = BasicTS.mysql,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
                 )

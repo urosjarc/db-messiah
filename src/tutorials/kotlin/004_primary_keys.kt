@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.sql.JDBCType
 import java.util.*
 import kotlin.test.assertEquals
@@ -118,7 +118,7 @@ val schema = PgSchema(
  */
 val service = PgService(ser = PgSerializer(
     schemas = listOf(schema),
-    globalSerializers = AllTS.postgresql + listOf(id_serializer, uuid_serializer), // Don't forget to register custom serializer here!
+    globalSerializers = BasicTS.postgresql + listOf(id_serializer, uuid_serializer), // Don't forget to register custom serializer here!
 ), config = Properties().apply {
     this["jdbcUrl"] = "jdbc:postgresql://localhost:5432/public"
     this["username"] = "root"

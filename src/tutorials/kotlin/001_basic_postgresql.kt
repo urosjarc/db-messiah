@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -48,7 +48,7 @@ val child_schema = PgSchema(
  */
 val serializer = PgSerializer(
     schemas = listOf(parent_schema, child_schema),
-    globalSerializers = AllTS.postgresql
+    globalSerializers = BasicTS.postgresql
 )
 
 val config = Properties().apply {

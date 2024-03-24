@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.h2.H2Schema
 import com.urosjarc.dbmessiah.impl.h2.H2Serializer
 import com.urosjarc.dbmessiah.impl.h2.H2Service
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,7 +51,7 @@ open class Test_H2 : Test_Contract {
                 },
                 ser = H2Serializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.h2,
+                    globalSerializers = BasicTS.h2,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )

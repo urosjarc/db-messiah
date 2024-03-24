@@ -6,7 +6,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.exceptions.base.WarningException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertContains
@@ -38,7 +38,7 @@ data class Parent(var pk: Int? = null, var value: String)
 
 val service = SqliteService(
     config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
-    ser = SqliteSerializer(tables = listOf(Table(indexing_and_profiling.Parent::pk)), globalSerializers = AllTS.sqlite)
+    ser = SqliteSerializer(tables = listOf(Table(indexing_and_profiling.Parent::pk)), globalSerializers = BasicTS.sqlite)
 )
 
 fun exceptions() {
@@ -48,7 +48,7 @@ fun exceptions() {
     val exception0 = assertThrows<WarningException> {
         SqliteSerializer(
             tables = listOf(Table(Parent::pk), Table(Parent::pk)),
-            globalSerializers = AllTS.sqlite
+            globalSerializers = BasicTS.sqlite
         )
     }
     assertContains(exception0.stackTraceToString(), "USER WARNING: Schema 'main' has tables registered multiple times: ['Parent']")

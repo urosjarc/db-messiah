@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.derby.DerbySchema
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
 import com.urosjarc.dbmessiah.impl.derby.DerbyService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ open class Test_Derby : Test_Contract {
                 },
                 ser = DerbySerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.derby,
+                    globalSerializers = BasicTS.derby,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )

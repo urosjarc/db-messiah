@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import com.urosjarc.dbmessiah.impl.mssql.MssqlService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,7 +51,7 @@ open class Test_Mssql : Test_Contract {
                 },
                 ser = MssqlSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.mssql,
+                    globalSerializers = BasicTS.mssql,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
                 )

@@ -5,14 +5,9 @@ import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.impl.db2.Db2Schema
-import com.urosjarc.dbmessiah.impl.db2.Db2Serializer
-import com.urosjarc.dbmessiah.impl.maria.MariaSchema
-import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
-import com.urosjarc.dbmessiah.serializers.NumberTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
 import org.junit.jupiter.api.BeforeEach
@@ -41,7 +36,7 @@ class Test_PgSerializer : Test_Serializer() {
         this.schema = PgSchema(name = "main", tables = this.tables + this.otherTables + this.tablesNonAutoUUID)
         this.ser = PgSerializer(
             schemas = listOf(this.schema as PgSchema),
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
 

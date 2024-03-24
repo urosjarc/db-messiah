@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.builders.QueryBuilder
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -31,7 +31,7 @@ val serializer = SqliteSerializer(
         Table(Parent::pk),
         Table(Child::pk, foreignKeys = listOf(Child::parent_pk to Parent::class)),
     ),
-    globalSerializers = AllTS.sqlite,
+    globalSerializers = BasicTS.sqlite,
     globalOutputs = listOf(Output::class), // Note if you use custom objects as input or output you have to register them to global inputs or outputs.
     globalInputs = listOf(Input::class),   // This is because library uses reflection at initialization to scan objects of their properties, constructors etc...
 )

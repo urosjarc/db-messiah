@@ -2,7 +2,7 @@ package com.urosjarc.dbmessiah.builders
 
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -20,7 +20,7 @@ class Test_ProcedureBuilder {
             tables = listOf(
                 Table(Parent::col)
             ),
-            globalSerializers = AllTS.basic
+            globalSerializers = BasicTS.basic
         )
         this.pb = ProcedureBuilder(ser = ser, procedure = Procedure::class)
     }

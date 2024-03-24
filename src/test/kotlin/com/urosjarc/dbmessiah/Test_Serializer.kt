@@ -2,7 +2,7 @@ package com.urosjarc.dbmessiah
 
 import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.*
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
@@ -127,7 +127,7 @@ abstract class Test_Serializer {
             allowAutoUUID = true,
             schemas = listOf(this.schema),
             globalProcedures = listOf(TestProcedure::class, TestProcedureEmpty::class),
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
 

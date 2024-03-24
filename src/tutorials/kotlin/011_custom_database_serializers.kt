@@ -7,7 +7,7 @@ import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.sql.JDBCType
 import java.util.*
 import kotlin.reflect.KClass
@@ -137,7 +137,7 @@ val service = SqliteService(
     config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
     ser = MyOwnSqliteSerializer( // Here we are using our own implementation
         tables = listOf(Table(Parent::pk)),
-        globalSerializers = AllTS.basic
+        globalSerializers = BasicTS.basic
     )
 )
 

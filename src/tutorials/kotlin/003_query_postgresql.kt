@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -28,7 +28,7 @@ val schema = PgSchema(
  */
 val service = PgService(ser = PgSerializer(
     schemas = listOf(schema),
-    globalSerializers = AllTS.postgresql,
+    globalSerializers = BasicTS.postgresql,
     globalOutputs = listOf(Output::class), // Note if you use custom objects as input or output you have to register them to global inputs or outputs.
     globalInputs = listOf(Input::class),   // This is because library uses reflection at initilization to scan objects of their properties, constructors etc...
 ), config = Properties().apply {

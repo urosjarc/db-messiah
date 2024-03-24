@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.Profiler
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.util.*
 
 /**
@@ -27,7 +27,7 @@ data class Parent(var pk: Int? = null, var value: String)
 
 val service = SqliteService(
     config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
-    ser = SqliteSerializer(tables = listOf(Table(Parent::pk)), globalSerializers = AllTS.sqlite)
+    ser = SqliteSerializer(tables = listOf(Table(Parent::pk)), globalSerializers = BasicTS.sqlite)
 )
 
 fun indexing_and_profiling() {

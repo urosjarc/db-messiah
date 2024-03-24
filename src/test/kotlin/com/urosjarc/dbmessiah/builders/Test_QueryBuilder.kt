@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +25,7 @@ class Test_QueryBuilder {
             tables = listOf(
                 Table(Parent::col0)
             ),
-            globalSerializers = AllTS.basic
+            globalSerializers = BasicTS.basic
         )
         this.parent = Parent(col0 = 0, col1 = "1")
         this.qb = QueryBuilder(input = this.parent, ser = ser)

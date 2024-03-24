@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.postgresql.PgService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,7 +53,7 @@ open class Test_Postgresql : Test_Contract {
                 },
                 ser = PgSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.postgresql,
+                    globalSerializers = BasicTS.postgresql,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )

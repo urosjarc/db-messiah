@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSchema
 import com.urosjarc.dbmessiah.impl.mssql.MssqlSerializer
 import com.urosjarc.dbmessiah.impl.mssql.MssqlService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -39,7 +39,7 @@ val schema = MssqlSchema(
 )
 
 val service = MssqlService(
-    ser = MssqlSerializer(schemas = listOf(schema), globalSerializers = AllTS.postgresql),
+    ser = MssqlSerializer(schemas = listOf(schema), globalSerializers = BasicTS.postgresql),
     config = Properties().apply {
         this["jdbcUrl"] = "jdbc:sqlserver://localhost:1433;encrypt=false;"
         this["username"] = "sa"

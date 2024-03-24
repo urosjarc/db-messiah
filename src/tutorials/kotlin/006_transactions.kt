@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.ConnectionException
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.util.*
@@ -19,7 +19,7 @@ data class Parent(var pk: Int? = null, var value: String)
 
 val service = SqliteService(
     config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
-    ser = SqliteSerializer(tables = listOf(Table(Parent::pk)), globalSerializers = AllTS.sqlite)
+    ser = SqliteSerializer(tables = listOf(Table(Parent::pk)), globalSerializers = BasicTS.sqlite)
 )
 
 fun transactions() {

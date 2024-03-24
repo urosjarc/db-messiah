@@ -1,11 +1,10 @@
-import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
 import com.urosjarc.dbmessiah.impl.maria.MariaService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,7 +47,7 @@ open class Test_Maria : Test_Contract {
                 },
                 ser = MariaSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.maria,
+                    globalSerializers = BasicTS.maria,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class)
                 )

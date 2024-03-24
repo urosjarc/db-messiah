@@ -9,7 +9,7 @@ import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
 import com.urosjarc.dbmessiah.impl.oracle.OracleSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
@@ -39,7 +39,7 @@ class Test_OracleSerializer : Test_Serializer() {
         this.ser = OracleSerializer(
             schemas = listOf(this.schema as OracleSchema),
             globalProcedures = listOf(TestProcedure::class, TestProcedureEmpty::class),
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
     @Test

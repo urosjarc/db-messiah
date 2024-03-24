@@ -1,7 +1,7 @@
 package com.urosjarc.dbmessiah.data
 
 import com.urosjarc.dbmessiah.exceptions.DbValueException
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import org.junit.jupiter.api.BeforeEach
@@ -81,7 +81,7 @@ class Test_Column {
             primaryColumn = primaryColumn,
             foreignColumns = listOf(foreignColumn, foreignColumnCanBeNull),
             otherColumns = listOf(otherColumn),
-            typeSerializers = AllTS.basic
+            typeSerializers = BasicTS.basic
         )
     }
 

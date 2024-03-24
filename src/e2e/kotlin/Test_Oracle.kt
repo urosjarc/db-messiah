@@ -5,7 +5,7 @@ import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
 import com.urosjarc.dbmessiah.impl.oracle.OracleSerializer
 import com.urosjarc.dbmessiah.impl.oracle.OracleService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ open class Test_Oracle : Test_Contract {
                 },
                 ser = OracleSerializer(
                     schemas = listOf(schema),
-                    globalSerializers = AllTS.oracle,
+                    globalSerializers = BasicTS.oracle,
                     globalOutputs = listOf(Output::class),
                     globalInputs = listOf(Input::class),
                     globalProcedures = listOf(
@@ -63,8 +63,8 @@ open class Test_Oracle : Test_Contract {
     override fun prepare() {
         //Reseting tables
         service.autocommit {
-            it.table.drop<Child>(throws = false)
-            it.table.drop<Parent>(throws = false)
+            it.table.dropCascade<Child>(throws = false)
+            it.table.dropCascade<Parent>(throws = false)
             it.table.dropCascade<UUIDParent>(throws = false)
             it.table.create<Parent>()
             it.table.create<Child>()

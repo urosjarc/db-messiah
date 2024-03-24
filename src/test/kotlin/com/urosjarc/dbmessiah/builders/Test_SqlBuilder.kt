@@ -1,14 +1,11 @@
 package com.urosjarc.dbmessiah.builders
 
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.exceptions.QueryException
 import com.urosjarc.dbmessiah.impl.maria.MariaSchema
 import com.urosjarc.dbmessiah.impl.maria.MariaSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class Test_SqlBuilder {
@@ -22,7 +19,7 @@ class Test_SqlBuilder {
     fun init() {
         this.ser = MariaSerializer(
             schemas = listOf(MariaSchema(name = "main", tables = listOf(Table(Parent::col0)))),
-            globalSerializers = AllTS.basic,
+            globalSerializers = BasicTS.basic,
             globalProcedures = listOf(Procedure::class)
         )
 

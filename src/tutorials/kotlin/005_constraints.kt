@@ -4,7 +4,7 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertContains
@@ -48,7 +48,7 @@ val serializer = SqliteSerializer(
                 Parent::uniqueValue to listOf(C.UNIQUE) // We will attach unique modifier to the column...
             )
         ),
-    ), globalSerializers = AllTS.basic
+    ), globalSerializers = BasicTS.basic
 )
 
 /**

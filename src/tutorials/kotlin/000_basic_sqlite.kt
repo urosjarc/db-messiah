@@ -3,7 +3,7 @@ package basic_sqlite
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import java.io.File
 import java.util.*
 import kotlin.test.*
@@ -36,7 +36,7 @@ val serializer = SqliteSerializer(
             )
         ),
     ),
-    globalSerializers = AllTS.sqlite //Pass list of all basic kotlin serializers to be used by serializer (PS: Its super easy to define your own custom serializer).
+    globalSerializers = BasicTS.sqlite //Pass list of all basic kotlin serializers to be used by serializer (PS: Its super easy to define your own custom serializer).
 )
 
 /**

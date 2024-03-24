@@ -7,7 +7,7 @@ import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
 import com.urosjarc.dbmessiah.impl.mysql.MysqlSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.NumberTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
@@ -37,7 +37,7 @@ class Test_MysqlSerializer : Test_Serializer() {
         this.ser = MysqlSerializer(
             schemas = listOf(this.schema as MysqlSchema),
             globalProcedures = listOf(TestProcedure::class, TestProcedureEmpty::class),
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
 

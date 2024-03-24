@@ -5,12 +5,8 @@ import com.urosjarc.dbmessiah.data.Query
 import com.urosjarc.dbmessiah.data.QueryValue
 import com.urosjarc.dbmessiah.domain.C
 import com.urosjarc.dbmessiah.domain.Table
-import com.urosjarc.dbmessiah.impl.derby.DerbySchema
-import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
-import com.urosjarc.dbmessiah.impl.h2.H2Schema
-import com.urosjarc.dbmessiah.impl.h2.H2Serializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +34,7 @@ class Test_SqliteSerializer : Test_Serializer() {
         )
         this.ser = SqliteSerializer(
             tables = this.tables + this.otherTables + this.tablesNonAutoUUID,
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
 

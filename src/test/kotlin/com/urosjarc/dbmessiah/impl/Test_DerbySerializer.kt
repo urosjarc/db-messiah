@@ -9,7 +9,7 @@ import com.urosjarc.dbmessiah.domain.Page
 import com.urosjarc.dbmessiah.domain.Table
 import com.urosjarc.dbmessiah.impl.derby.DerbySchema
 import com.urosjarc.dbmessiah.impl.derby.DerbySerializer
-import com.urosjarc.dbmessiah.serializers.AllTS
+import com.urosjarc.dbmessiah.serializers.BasicTS
 import com.urosjarc.dbmessiah.serializers.StringTS
 import com.urosjarc.dbmessiah.serializers.UUIDTS
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +38,7 @@ class Test_DerbySerializer : Test_Serializer() {
         this.schema = DerbySchema(name = "main", tables = this.tables + this.otherTables + this.tablesNonAutoUUID)
         this.ser = DerbySerializer(
             schemas = listOf(this.schema as DerbySchema),
-            globalSerializers = AllTS.sqlite,
+            globalSerializers = BasicTS.sqlite,
         )
     }
 
