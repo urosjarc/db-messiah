@@ -9,6 +9,13 @@ import java.util.*
  * your own custom inline id class. For example `inline class Id<T>(val value: UUID = UUID.random())`.
  */
 public object IdTS {
+    public inline fun <reified T : Any> int(crossinline construct: (value: Int) -> T, crossinline deconstruct: (value: T) -> Int): TypeSerializer<T> =
+        TypeSerializer(kclass = T::class,
+            dbType = "INTEGER",
+            jdbcType = JDBCType.INTEGER,
+            decoder = { rs, i, _ -> construct(rs.getInt(i)) },
+            encoder = { ps, i, x -> ps.setInt(i, deconstruct(x)) })
+
     public object uuid {
 
         public inline fun <reified T : Any> sqlite(crossinline construct: (value: UUID) -> T): TypeSerializer<T> = TypeSerializer(kclass = T::class,
