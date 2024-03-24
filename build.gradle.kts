@@ -2,6 +2,7 @@ import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import java.lang.Thread.sleep
 
 plugins {
+    signing
     `java-library`
     `maven-publish`
     `jvm-test-suite`
@@ -9,16 +10,20 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.10"
     id("com.adarshr.test-logger") version "4.0.0"
     id("org.jetbrains.kotlinx.kover") version "0.7.6"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 group = "com.urosjarc"
-version = "0.0.2-SNAPSHOT"
+version = "0.0.1-SNAPSHOT"
 
 kotlin {
     explicitApi()
     jvmToolchain(19)
 }
-
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 repositories {
     mavenCentral()
 }
@@ -155,7 +160,25 @@ publishing {
                         email = "jar.fmf@gmail.com"
                     }
                 }
+                scm {
+                    connection = "scm:git:git://github.com/urosjarc/db-messiah.git"
+                    developerConnection = "scm:git:ssh://github.com/urosjarc/db-messiah.git"
+                    url = "https://github.com/urosjarc/db-messiah/"
+                }
             }
         }
     }
+    repositories {
+        maven {
+            def snapshotsRepoUrl = 'https://your-nexus-url.com/snapshots'
+            def releasesRepoUrl = 'https://your-nexus-url.com/releases'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username = System.getenv('NEXUS_USERNAME')
+                password = System.getenv('NEXUS_PASSWORD')
+            }
+        }
+    }
+
 }
