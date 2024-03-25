@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "com.urosjarc"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 val github = "https://github.com/urosjarc/db-messiah"
 
 kotlin {
@@ -156,7 +156,7 @@ testing {
 
 publishing {
     publications {
-        create<MavenPublication>("db-messiah") {
+        create<MavenPublication>("maven") {
             groupId = rootProject.group as String
             artifactId = rootProject.name
             version = rootProject.version as String
@@ -192,10 +192,6 @@ publishing {
         }
     }
     repositories {
-        maven {
-            name = "local"
-            url = uri(layout.buildDirectory.dir("repo"))
-        }
         maven {
             name = "snapshot"
             setUrl { "https://oss.sonatype.org/content/repositories/snapshots/" }
