@@ -26,7 +26,9 @@ kotlin {
     explicitApi()
     jvmToolchain(19)
 }
-
+java {
+    withSourcesJar()
+}
 repositories {
     mavenCentral()
 }
