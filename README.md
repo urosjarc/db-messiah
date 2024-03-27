@@ -1,6 +1,7 @@
 <h1 align="center">db-messiah</h1>
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
 <br>
+<br>
 <table width="100%" border="0">
     <tr>
         <td width="33%">
@@ -16,26 +17,25 @@
         </td>
         <td width="33%">
             <h3 align="center"><a href="https://github.com/urosjarc/db-analyser">db-analyser</a></h3>
-            <p align="center">GUI for helping you inspect and write very complex JOIN statements in SQL or db-messiah.
+            <p align="center">GUI for inspecting and writing very complex JOIN statements in SQL or db-messiah.
         </td>
     </tr>
 </table>
 <br>
+<br>
 
 <h2 align="center">Get started</h2>
 
-<h3>Dependencies</h3>
 
 ```kotlin
+/** DEPENDENCIES */
+
 implementation("com.urosjarc:db-messiah:0.0.1")                     // Required
 implementation("com.urosjarc:db-messiah-extra:0.0.1")               // Optional extra utils
 implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") // Optional logging
-```
 
+/** DRIVERS */
 
-<h3>Drivers</h3>
-
-```kotlin
 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0") // Lets continue with sqlite driver...
 runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
 runtimeOnly("com.h2database:h2:2.2.224")
