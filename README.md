@@ -101,6 +101,10 @@ val sqlite = SqliteService(
 
 <br><h3 align="center">Diagrams</h3>
 
+<table width="100%">
+<tr>
+<td width="50%">
+
 ```kotlin
 /** PlantUML */
 
@@ -112,6 +116,9 @@ File("db.plantuml").writeText(
     )
 )
 ```
+
+</td> <td width="50%"> <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/chinook.png"> </td> </tr>
+</table>
 
 <br><h3 align="center">Operations</h3>
 
