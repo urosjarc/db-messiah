@@ -1,8 +1,5 @@
 <h1 align="center">db-messiah</h1>
-
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
-
-<br><br>
 <table width="100%" border="0">
     <tr>
         <td width="33%">
@@ -26,10 +23,6 @@
 <br><br>
 
 <h2 align="center">Get started</h2>
-
-<br>
-
-<h3 align="center">Dependencies</h3>
 
 ```kotlin
 implementation("com.urosjarc:db-messiah:0.0.1")                     // Required
