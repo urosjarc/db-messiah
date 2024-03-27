@@ -1,5 +1,7 @@
 <h1 align="center">db-messiah</h1>
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
+<p align="center"><b>Sqlite</b> . . . <b>H2</b> . . . <b>Postgres</b> . . . <b>Maria</b> . . . <b>MSSQL</b> . . . <b>Oracle</b> . . . <b>Mysql</b> . . . <b>DB2</b> . . . <b>Derby</b><br>
+<b>+ 290 Unit tests</b> . . . <b>+ 210 E2E tests</b> . . . <b>+ 22 Tutorals tests</b></b></p>
 <br>
 <br>
 <table width="100%" border="0">
@@ -12,12 +14,13 @@
                 <p><a href="#get-started">Get started</a></p>
                 <p><a href="#tutorials">Tutorials</a></p>
                 <p><a href="#configuration">Configuration</a></p>
+                <p><a href="#configuration">Features</a></p>
                 <p><a href="#specifications">Specifications</a></p>
                 <p><a href="#motivation">Motivation</a></p>
         </td>
         <td width="33%">
             <h3 align="center"><a href="https://github.com/urosjarc/db-analyser">db-analyser</a></h3>
-            <p align="center">GUI for inspecting and writing very complex JOIN statements in SQL or db-messiah.
+            <p align="center">GUI for db analysis, to help you create complex JOIN statements for SQL or db-messiah.
         </td>
     </tr>
 </table>
@@ -100,6 +103,18 @@ val sqlite = SqliteService(
     ser = serializer
 )
 ```
+
+<h3>Diagrams</h3>
+```kotlin
+/** PlantUML */
+
+File("db.plantuml").writeText(serializer.plantUML(
+    withPrimaryKey = true,
+    withForeignKeys = true,
+    withOtherColumns = false
+))
+```
+
 
 <h3>Operations</h3>
 
@@ -194,27 +209,60 @@ val serializer = SqliteSerializer(
 )
 ```
 
-<br>
-<h3 align="center">Tutorials</h3>
+<br> <h3 align="center">Tutorials</h3>
 
 <p align="center">
-All tutorials are defined as kotlin files inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/tutorials/kotlin">src/tutorials/kotlin</a> directory.
-<br>All tutorials are subjects of e2e testing suite.
+All tutorials are defined as kotlin files inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/tutorials/kotlin">src/tutorials/kotlin</a> directory.<br>
+Recommend project structure and all best practices are defined in <a href="https://github.com/urosjarc/db-messiah/tree/master/src/chinook/kotlin">src/chinook/kotlin</a> demo project,<br>
+implementing famous <a href="https://github.com/lerocha/chinook-database">Chinook sample database</a>.
+All tutorials are e2e tested.
 </p>
 
-<br>
-<h3 align="center">Configuration</h3>
+<br> <h3 align="center">Configuration</h3>
 
 <p align="center">
 Service config property object is passed on initialization directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library
 <br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection configuration</a>.
 </p>
 
-<br>
-<h3 align="center">Logging</h3>
+<br><h3 align="center">Logging</h3>
 
 <p align="center">
-The recommend logging configuration is located in <code>src/test/resources/log4j2.xml</code> where you can
-<br>find logger for non-blocking Async Rolling log files (one log file per session) and non-blocking async console logger with pretty
-<br>padding for maximum readability. For detailed explanation read about <a href="https://logging.apache.org/log4j/2.x/manual/appenders.html">Log4j Appenders</a>.
+The recommend logging configuration is located here <a href="https://github.com/urosjarc/db-messiah/blob/master/src/test/resources/log4j2.xml">src/test/resources/log4j2.xml</a>,<br>
+where you can find logger for non-blocking Async Rolling log files (one log file per session)<br>
+and non-blocking async console logger with pretty padding for maximum readability.<br>
+For detailed explanation read about <a href="https://logging.apache.org/log4j/2.x/manual/appenders.html">Log4j Appenders</a>.
 </p>
+
+<br><h3 align="center">Features</h3>
+
+<br><h3 align="center">Specifications</h3>
+
+<table align="center" width="100%">
+
+<tr>
+    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_DELETE.png"></td>
+    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_UPDATE.png"></td>
+    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/NOT_NULL.png"></td>
+</tr>
+
+<tr>
+    <td colspan="3"><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/PRIMARY_KEY.png"></td>
+</tr>
+
+<tr>
+    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/UNIQUE.png"></td>
+    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_DELETE.png"></td>
+</tr>
+
+<tr>
+    <td colspan="2" ><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_INSERT.png"></td>
+    <td ><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_UPDATE.png"></td>
+</tr>
+
+<tr>
+    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_DELETE.png"></td>
+    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_INSERT.png"></td>
+    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_UPDATE.png"></td>
+</tr>
+</table>
