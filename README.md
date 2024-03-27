@@ -29,7 +29,6 @@
 
 <h2 align="center">Get started</h2>
 
-
 ```kotlin
 /** DEPENDENCIES */
 
@@ -105,57 +104,59 @@ val sqlite = SqliteService(
 ```
 
 <h3>Diagrams</h3>
+
 ```kotlin
 /** PlantUML */
 
-File("db.plantuml").writeText(serializer.plantUML(
-    withPrimaryKey = true,
-    withForeignKeys = true,
-    withOtherColumns = false
-))
+File("db.plantuml").writeText(
+    serializer.plantUML(
+        withPrimaryKey = true,
+        withForeignKeys = true,
+        withOtherColumns = false
+    )
+)
 ```
-
 
 <h3>Operations</h3>
 
 ```kotlin
 sqlite.autocommit {
-    
+
     /** CREATE */
-    
+
     it.table.create<Parent>()
     it.table.create<Child>()
 
     /** INSERT */
-    
+
     val parent = Parent(value = "Hello World!")
     it.row.insert(row = parent)
     assert(parent.pk != null)
 
     /** INSERT */
-    
+
     val child = Child(pk = 1, parent_pk = parent.pk, value = "Hello World!")
     it.row.insert(row = child)
 
     /** SELECT */
-    
+
     val parents = it.table.select<Parent>()
     assert(parents.contains(parent))
 
     /** UPDATE */
-    
+
     parent.value = "How are you?"
     it.table.update(parent)
 
     /** WHERE */
-    
+
     val someChildren = it.query.get(output = Child::class, input = parent) {
         """ ${it.SELECT<Child>()} WHERE ${it.column(Child::value)} = ${it.input(Parent::value)} """
     }
     assert(someChildren.size > 0)
 
     /** JOIN */
-    
+
     val moreChildren = it.query.get(output = Child::class, input = parent) {
         """
             ${it.SELECT<Child>()}
@@ -241,9 +242,9 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 <table align="center" width="100%">
 
 <tr>
-    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_DELETE.png"></td>
-    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_UPDATE.png"></td>
-    <td width="33.3%"><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/NOT_NULL.png"></td>
+    <td width="33.3%"><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_DELETE.png"></td>
+    <td width="33.3%"><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/CASCADE_UPDATE.png"></td>
+    <td width="33.3%"><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/NOT_NULL.png"></td>
 </tr>
 
 <tr>
@@ -251,18 +252,23 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 </tr>
 
 <tr>
-    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/UNIQUE.png"></td>
-    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_DELETE.png"></td>
+    <td><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/UNIQUE.png"></td>
+    <td><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_DELETE.png"></td>
+    <td ><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_UPDATE.png"></td>
 </tr>
 
 <tr>
-    <td colspan="2" ><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_INSERT.png"></td>
-    <td ><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_UPDATE.png"></td>
+    <td colspan="3" ><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/BATCH_INSERT.png"></td>
+</tr>
+<tr>
+    <td colspan="3"><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_INSERT.png"></td>
 </tr>
 
-<tr>
-    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_DELETE.png"></td>
-    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_INSERT.png"></td>
-    <td><img src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_UPDATE.png"></td>
-</tr>
+</table>
+
+<table width="100%">
+    <tr>
+        <td><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_DELETE.png"></td>
+        <td><img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/queries/ROW_UPDATE.png"></td>
+    </tr>
 </table>
