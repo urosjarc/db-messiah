@@ -11,7 +11,6 @@
                 <p><a href="#get-started">Get started</a></p>
                 <p><a href="#tutorials">Tutorials</a></p>
                 <p><a href="#configuration">Configuration</a></p>
-                <p><a href="#features">Features</a></p>
                 <p><a href="#specifications">Specifications</a></p>
                 <p><a href="#motivation">Motivation</a></p>
         </td>
@@ -164,44 +163,24 @@ val serializer = SqliteSerializer(
 )
 ```
 
-<h2 align="center">Tutorials</h2>
+<h3 align="center">Tutorials</h3>
 
-<table width="100%">
-    <tr>
-        <td width="33.3%" align="center">
-            <h3>Starting</h3>
-            <hr>
-            <p>Sqlite: <a>basics</a> / <a>queries</a></p>
-            <p>Postgresql: <a>basics</a> / <a>queries</a></p>
-            <p><a>Primary keys</a> / <a>Constraints</a></p>
-        </td>
-        <td width="33.3%" align="center">
-            <h3>Progressing</h3>
-            <hr>
-            <p><a>Transactions</a></p>
-            <p><a>Procedures</a></p>
-            <p><a>Indexing and Profiling</a></p>
-        </td>
-        <td width="33.3%" align="center">
-            <h3>Developers</h3>
-            <hr>
-            <p><a>Exceptions</a></p>
-            <p><a>Custom type serializers</a></p>
-            <p><a>Custom database serializers</a></p>
-        </td>
-    </tr>
-</table>
+<p align="center">
+All tutorials are defined as kotlin files inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/tutorials/kotlin">src/tutorials/kotlin</a> directory.
+<br>All tutorials are subjects of e2e testing suite.
+</p>
 
-<h2 align="center">Configuration</h2>
+<h3 align="center">Configuration</h3>
 
-<h3 align="center">JDBC</h3>
-
-Service config property object is passed on initialization directly to the [HikariCP](https://github.com/brettwooldridge/HikariCP) library
-which handles everything around
-database [connection configuration](https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby).
+<p align="center">
+Service config property object is passed on initialization directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library
+<br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection configuration</a>.
+</p>
 
 <h3 align="center">Logging</h3>
 
-The recommend logging configuration is located in `src/test/resources/log4j2.xml` where you can
-find logger for non-blocking Async Rolling log files (one log file per session) and non-blocking async console logger with pretty
-padding for maximum readability. For detailed explanation read about [Log4j Appenders](https://logging.apache.org/log4j/2.x/manual/appenders.html).
+<p align="center">
+The recommend logging configuration is located in <code>src/test/resources/log4j2.xml</code> where you can
+<br>find logger for non-blocking Async Rolling log files (one log file per session) and non-blocking async console logger with pretty
+<br>padding for maximum readability. For detailed explanation read about <a href="https://logging.apache.org/log4j/2.x/manual/appenders.html">Log4j Appenders</a>.
+</p>
