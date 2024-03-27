@@ -1,5 +1,6 @@
 <h1 align="center">db-messiah</h1>
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
+<br>
 <table width="100%" border="0">
     <tr>
         <td width="33%">
@@ -7,12 +8,12 @@
             <p align="center">Extra utils for db-messiah. Support for kotlinx.datetime types, etc... </p>
         </td>
         <td width="33%" align="center">
-                <p><a>Get started</a></p>
-                <p><a>Tutorials</a></p>
-                <p><a>Configuration</a></p>
-                <p><a>Specifications</a></p>
-                <p><a>Features</a></p>
-                <p><a>Motivation</a></p>
+                <p><a href="#get-started">Get started</a></p>
+                <p><a href="#tutorials">Tutorials</a></p>
+                <p><a href="#configuration">Configuration</a></p>
+                <p><a href="#features">Features</a></p>
+                <p><a href="#specifications">Specifications</a></p>
+                <p><a href="#motivation">Motivation</a></p>
         </td>
         <td width="33%">
             <h3 align="center"><a href="https://github.com/urosjarc/db-analyser">db-analyser</a></h3>
@@ -20,7 +21,7 @@
         </td>
     </tr>
 </table>
-<br><br>
+<br>
 
 <h2 align="center">Get started</h2>
 
@@ -64,9 +65,11 @@ val serializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite,
     tables = listOf(
         Table(Parent::pk),
-        Table(Child::pk, foreignKeys = listOf(
-            Child::parent_pk to Parent::class
-        )),
+        Table(
+            Child::pk, foreignKeys = listOf(
+                Child::parent_pk to Parent::class
+            )
+        ),
     ),
 )
 
@@ -95,7 +98,7 @@ sqlite.autocommit {
     val parent = Parent(value = "Hello World!")
     it.row.insert(row = parent)
     assert(parent.pk != null)
-    
+
     //INSERT
     val child = Child(pk = 1, parent_pk = parent.pk, value = "Hello World!")
     it.row.insert(row = child)
@@ -103,17 +106,17 @@ sqlite.autocommit {
     //SELECT
     val parents = it.table.select<Parent>()
     assert(parents.contains(parent))
-    
+
     //UPDATE
     parent.value = "How are you?"
     it.table.update(parent)
-    
+
     //WHERE
-    val someChildren = it.query.get(output = Child::class, input = parent) { 
+    val someChildren = it.query.get(output = Child::class, input = parent) {
         """ ${it.SELECT<Child>()} WHERE ${it.column(Child::value)} = ${it.input(Parent::value)} """
     }
     assert(someChildren.size > 0)
-    
+
     //JOIN
     val moreChildren = it.query.get(output = Child::class, input = parent) {
         """
@@ -125,6 +128,7 @@ sqlite.autocommit {
     assert(moreChildren.size > 0)
 }
 ```
+
 <h3 align="center">Transactions</h3>
 
 ```kotlin
@@ -156,7 +160,7 @@ val TIMESTAMP = TypeSerializer<Instant>(
 //Apply your custom serializer to global serializers
 val serializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP)
-    tables = listOf( ... ),
+            tables = listOf ( ... ),
 )
 ```
 
@@ -164,20 +168,27 @@ val serializer = SqliteSerializer(
 
 <table width="100%">
     <tr>
-        <td width="33.3%"></td>
         <td width="33.3%" align="center">
-                <p>Sqlite: <a>basics</a> / <a>queries</a></p>
-                <p>Postgresql: <a>basics</a> / <a>queries</a></p>
-                <p><a>Primary keys</a></p>
-                <p><a>Constraints</a></p>
-                <p><a>Transactions</a></p>
-                <p><a>Procedures</a></p>
-                <p><a>Indexing and Profiling</a></p>
-                <p><a>Exceptions</a></p>
-                <p><a>Custom type serializers</a></p>
-                <p><a>Custom database serializers</a></p>
+            <h3>Starting</h3>
+            <hr>
+            <p>Sqlite: <a>basics</a> / <a>queries</a></p>
+            <p>Postgresql: <a>basics</a> / <a>queries</a></p>
+            <p><a>Primary keys</a> / <a>Constraints</a></p>
         </td>
-        <td width="33.3%"></td>
+        <td width="33.3%" align="center">
+            <h3>Progressing</h3>
+            <hr>
+            <p><a>Transactions</a></p>
+            <p><a>Procedures</a></p>
+            <p><a>Indexing and Profiling</a></p>
+        </td>
+        <td width="33.3%" align="center">
+            <h3>Developers</h3>
+            <hr>
+            <p><a>Exceptions</a></p>
+            <p><a>Custom type serializers</a></p>
+            <p><a>Custom database serializers</a></p>
+        </td>
     </tr>
 </table>
 
@@ -186,7 +197,8 @@ val serializer = SqliteSerializer(
 <h3 align="center">JDBC</h3>
 
 Service config property object is passed on initialization directly to the [HikariCP](https://github.com/brettwooldridge/HikariCP) library
-which handles everything around database [connection configuration](https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby).
+which handles everything around
+database [connection configuration](https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby).
 
 <h3 align="center">Logging</h3>
 
