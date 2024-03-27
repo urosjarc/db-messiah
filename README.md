@@ -24,12 +24,18 @@
 
 <h2 align="center">Get started</h2>
 
+<h3>Dependencies</h3>
+
 ```kotlin
 implementation("com.urosjarc:db-messiah:0.0.1")                     // Required
 implementation("com.urosjarc:db-messiah-extra:0.0.1")               // Optional extra utils
 implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") // Optional logging
+```
 
-// Pick your database driver
+
+<h3>Drivers</h3>
+
+```kotlin
 runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0") // Lets continue with sqlite driver...
 runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
 runtimeOnly("com.h2database:h2:2.2.224")
@@ -41,13 +47,18 @@ runtimeOnly("org.postgresql:postgresql:42.7.1")
 runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
 ```
 
-<h3 align="center">Domain</h3>
+<h3>Domain</h3>
 
 ```kotlin
+
+/** PARENT */
+
 data class Parent(
     var pk: Int? = null, // Auto-incremental primary key
     val value: String    // NOT NULL column
 )
+
+/** CHILD */
 
 data class Child(
     val pk: Int,         // Non auto-incremental primary key
@@ -56,10 +67,12 @@ data class Child(
 )
 ```
 
-<h3 align="center">Database</h3>
+<h3>Database</h3>
 
 ```kotlin
-// SCHEMA DEFINITION
+
+/** SCHEMA */
+
 val serializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite,
     tables = listOf(
@@ -72,12 +85,15 @@ val serializer = SqliteSerializer(
     ),
 )
 
-// JDBC CONFIG
+/** CONFIG */
+
 val config = Properties().apply {
     this["jdbcUrl"] = "jdbc:sqlite::memory:"
     this["username"] = "root"
     this["password"] = "root"
 }
+
+/** SERVICE */
 
 val sqlite = SqliteService(
     config = config,
@@ -85,38 +101,46 @@ val sqlite = SqliteService(
 )
 ```
 
-<h3 align="center">Operations</h3>
+<h3>Operations</h3>
 
 ```kotlin
 sqlite.autocommit {
-    //CREATE
+    
+    /** CREATE */
+    
     it.table.create<Parent>()
     it.table.create<Child>()
 
-    //INSERT
+    /** INSERT */
+    
     val parent = Parent(value = "Hello World!")
     it.row.insert(row = parent)
     assert(parent.pk != null)
 
-    //INSERT
+    /** INSERT */
+    
     val child = Child(pk = 1, parent_pk = parent.pk, value = "Hello World!")
     it.row.insert(row = child)
 
-    //SELECT
+    /** SELECT */
+    
     val parents = it.table.select<Parent>()
     assert(parents.contains(parent))
 
-    //UPDATE
+    /** UPDATE */
+    
     parent.value = "How are you?"
     it.table.update(parent)
 
-    //WHERE
+    /** WHERE */
+    
     val someChildren = it.query.get(output = Child::class, input = parent) {
         """ ${it.SELECT<Child>()} WHERE ${it.column(Child::value)} = ${it.input(Parent::value)} """
     }
     assert(someChildren.size > 0)
 
-    //JOIN
+    /** JOIN */
+    
     val moreChildren = it.query.get(output = Child::class, input = parent) {
         """
             ${it.SELECT<Child>()}
@@ -128,26 +152,32 @@ sqlite.autocommit {
 }
 ```
 
-<h3 align="center">Transactions</h3>
+<h3>Transactions</h3>
 
 ```kotlin
 service.transaction { // Any exception inside will trigger rollback ALL!
-    ...
+    //...
     val savePoint1 = it.roolback.savePoint()
-    ...
+    //...
     val savePoint2 = it.roolback.savePoint()
-    ...
+    //...
     it.roolback.to(point = savePoint2)
+    //...
 }
 
+/** ISOLATION */
+
 service.transaction(isolation = Isolation.READ_UNCOMMITTED) {
-    ...
+    //...
 }
 ```
 
-<h3 align="center">Custom Serializers</h3>
+<h3>Custom Serializers</h3>
 
 ```kotlin
+
+/** SERIALIZE: Instant(TIMESTAMP) */
+
 val TIMESTAMP = TypeSerializer<Instant>(
     kclass = Instant::class,
     dbType = "TIMESTAMP",
@@ -156,13 +186,15 @@ val TIMESTAMP = TypeSerializer<Instant>(
     encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x.toJavaInstant())) }
 )
 
-//Apply your custom serializer to global serializers
+/** REGISTRATION */
+
 val serializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP)
             tables = listOf ( ... ),
 )
 ```
 
+<br>
 <h3 align="center">Tutorials</h3>
 
 <p align="center">
@@ -170,6 +202,7 @@ All tutorials are defined as kotlin files inside <a href="https://github.com/uro
 <br>All tutorials are subjects of e2e testing suite.
 </p>
 
+<br>
 <h3 align="center">Configuration</h3>
 
 <p align="center">
@@ -177,6 +210,7 @@ Service config property object is passed on initialization directly to the <a hr
 <br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection configuration</a>.
 </p>
 
+<br>
 <h3 align="center">Logging</h3>
 
 <p align="center">
