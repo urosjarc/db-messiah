@@ -2,47 +2,19 @@ import domain.Album
 import domain.Customer
 import domain.Invoice
 import domain.Track
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class Test_Chinook {
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun seed(): Unit {
-            /**
-             * We will seed all databases with 20 rows for each table.
-             */
-            Seed.all(num = 20)
-        }
-    }
-
-    @Test
-    fun plantUML() {
-        /**
-         * For all databases we will create platUML diagram
-         * showing database structure. To see image of compiled plantuml
-         * diagram you have to install awesome
-         * [PlantUML Integration](https://plugins.jetbrains.com/plugin/7017-plantuml-integration)
-         */
-        File("db2.plantuml").writeText(db2_serializer.plantUML())
-        File("derby.plantuml").writeText(derby_serializer.plantUML())
-        File("h2.plantuml").writeText(h2_serializer.plantUML())
-        File("maria.plantuml").writeText(maria_serializer.plantUML())
-        File("mssql.plantuml").writeText(mssql_serializer.plantUML())
-        File("mysql.plantuml").writeText(mysql_serializer.plantUML())
-        File("oracle.plantuml").writeText(oracle_serializer.plantUML())
-        File("postgresql.plantuml").writeText(postgresql_serializer.plantUML())
-        File("sqlite.plantuml").writeText(sqlite_serializer.plantUML())
-    }
-
     @Test
     fun `test db2`() {
+        File("db2.plantuml").writeText(db2_serializer.plantUML())
+        Seed.db2()
         db2.autocommit { aconn ->
 
+            val customer = aconn.table.select<Customer>().first()
 
             /**
              * Lets see how we can retrieve all invoices for customer with primary key 3...
@@ -53,7 +25,7 @@ class Test_Chinook {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = 3
+                    WHERE "people"."Customer"."id" = ${customer.id!!.value}
                 """
             }
 
@@ -68,12 +40,11 @@ class Test_Chinook {
              * and wrapp names with quotation characters. Final result will be the same as
              * first query that we performed.
              */
-            val customer_id = 3
             val invoices1 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = $customer_id
+                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             /**
@@ -94,16 +65,17 @@ class Test_Chinook {
 
     @Test
     fun `test derby`() {
-
+        File("derby.plantuml").writeText(derby_serializer.plantUML())
+        Seed.derby()
         derby.autocommit {
 
-            val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found")
+            val customer = it.table.select<Customer>().first()
 
             val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = 3
+                    WHERE "people"."Customer"."id" = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -123,16 +95,14 @@ class Test_Chinook {
 
     @Test
     fun `test h2`() {
-
+        File("h2.plantuml").writeText(h2_serializer.plantUML())
+        Seed.h2()
         h2.autocommit {
-
-            val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found")
 
             val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -141,7 +111,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -152,15 +121,14 @@ class Test_Chinook {
 
     @Test
     fun `test maria`() {
+        File("maria.plantuml").writeText(maria_serializer.plantUML())
+        Seed.maria()
         maria.autocommit { aconn ->
-
-            val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
             val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM `billing`.`Invoice`
                     INNER JOIN `people`.`Customer` ON `people`.`Customer`.`id` = `billing`.`Invoice`.`customerId`
-                    WHERE `people`.`Customer`.`id` = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -169,7 +137,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -180,15 +147,14 @@ class Test_Chinook {
 
     @Test
     fun `test mysql`() {
+        File("mysql.plantuml").writeText(mysql_serializer.plantUML())
+        Seed.mysql()
         mysql.autocommit { aconn ->
-
-            val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
             val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM `billing`.`Invoice`
                     INNER JOIN `people`.`Customer` ON `people`.`Customer`.`id` = `billing`.`Invoice`.`customerId`
-                    WHERE `people`.`Customer`.`id` = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -197,7 +163,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -208,15 +173,14 @@ class Test_Chinook {
 
     @Test
     fun `test mssql`() {
+        File("mssql.plantuml").writeText(mssql_serializer.plantUML())
+        Seed.mssql()
         mssql.autocommit { aconn ->
-
-            val album = aconn.row.select<Album>(pk = 3) ?: throw Exception("Album not found!")
 
             val tracks0 = aconn.query.get<Track> {
                 """
                     SELECT * FROM "music"."Track"
                     INNER JOIN "music"."Album" ON "music"."Album"."artistId" = "music"."Track"."id"
-                    WHERE "music"."Album"."id" = 3
                 """
             }
             assertTrue(tracks0.isNotEmpty())
@@ -225,7 +189,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Track>()}
                     INNER JOIN ${it.table<Album>()} ON ${it.column(Album::artistId)} = ${it.column(Track::id)}
-                    WHERE ${it.column(Album::id)} = ${album.id!!.value}
                 """
             }
             assertTrue(tracks1.isNotEmpty())
@@ -236,15 +199,14 @@ class Test_Chinook {
 
     @Test
     fun `test postgresql`() {
+        File("postgresql.plantuml").writeText(postgresql_serializer.plantUML())
+        Seed.pg()
         pg.autocommit { aconn ->
-
-            val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
             val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -253,7 +215,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -264,15 +225,14 @@ class Test_Chinook {
 
     @Test
     fun `test oracle`() {
+        File("oracle.plantuml").writeText(oracle_serializer.plantUML())
+        Seed.oracle()
         oracle.autocommit { aconn ->
-
-            val customer = aconn.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
             val invoices0 = aconn.query.get<Invoice> {
                 """
                     SELECT * FROM "SYSTEM"."Invoice"
                     INNER JOIN "SYSTEM"."Customer" ON "SYSTEM"."Customer"."id" = "SYSTEM"."Invoice"."customerId"
-                    WHERE "SYSTEM"."Customer"."id" = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -281,7 +241,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -292,16 +251,14 @@ class Test_Chinook {
 
     @Test
     fun `test sqlite`() {
-
+        File("sqlite.plantuml").writeText(sqlite_serializer.plantUML())
+        Seed.sqlite()
         sqlite.autocommit {
-
-            val customer = it.row.select<Customer>(pk = 3) ?: throw Exception("Customer not found!")
 
             val invoices0 = it.query.get<Invoice> {
                 """
                     SELECT * FROM "Invoice"
                     INNER JOIN "Customer" ON "Customer"."id" = "Invoice"."customerId"
-                    WHERE "Customer"."id" = 3
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -310,7 +267,6 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
                 """
             }
             assertTrue(invoices1.isNotEmpty())
