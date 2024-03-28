@@ -23,10 +23,23 @@ public data class QueryValue(
      * Represents [value] that will be escaped with quotations.
      */
     public val escapped: String
-        get() = when (this.value) {
-            is Int -> value.toString()
-            is UInt -> value.toString()
-            else -> "'$value'"
+        get() {
+            return when (this.value) {
+                is Int -> value.toString()
+                is UInt -> value.toString()
+                else -> {
+                    /**
+                     * TODO: Properties from KClass.memberProperties are getting inline values from provided objects
+                     * TODO: that are having null value inside (inline Id(val uuid: UUID)) and
+                     * TODO: because of that if I do uuid.toString() inside Id class there will be NullPointerException.
+                     */
+                    try {
+                        "'$value'"
+                    } catch (e: NullPointerException){
+                        return "NULL"
+                    }
+                }
+            }
         }
 
     /** @suppress */

@@ -30,7 +30,18 @@ public open class Driver(private val conn: Connection) {
             rawSql = rawSql.replaceFirst("?", queryValue.escapped)
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
             //If value is not null encoding is done over user defined encoder !!!
-            else (queryValue.encoder as Encoder<Any?>)(ps, i + 1, queryValue.value)
+            else {
+                /**
+                 * TODO: Properties from KClass.memberProperties are getting inline values from provided objects
+                 * TODO: that are having null value inside (inline Id(val uuid: UUID)) and
+                 * TODO: because of that if I do uuid.toString() inside Id class there will be NullPointerException.
+                 */
+                try {
+                    (queryValue.encoder as Encoder<Any?>)(ps, i + 1, queryValue.value)
+                } catch (e: NullPointerException){
+                    ps.setNull(i+1, Types.VARCHAR)
+                }
+            }
         }
         this.log.info("Prepare query: ${rawSql.replace("\\s+".toRegex(), " ")}")
     }
