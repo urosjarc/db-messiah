@@ -1,7 +1,7 @@
 import domain.Album
+import domain.Artist
 import domain.Customer
 import domain.Invoice
-import domain.Track
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -25,7 +25,7 @@ class Test_Chinook {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = ${customer.id!!.value}
+                    WHERE "people"."Customer"."id" = '${customer.id.value}'
                 """
             }
 
@@ -44,7 +44,7 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
+                    WHERE ${it.column(Customer::id)} = '${customer.id.value}'
                 """
             }
             /**
@@ -75,7 +75,7 @@ class Test_Chinook {
                 """
                     SELECT * FROM "billing"."Invoice"
                     INNER JOIN "people"."Customer" ON "people"."Customer"."id" = "billing"."Invoice"."customerId"
-                    WHERE "people"."Customer"."id" = ${customer.id!!.value}
+                    WHERE "people"."Customer"."id" = '${customer.id.value}'
                 """
             }
             assertTrue(invoices0.isNotEmpty())
@@ -84,7 +84,7 @@ class Test_Chinook {
                 """
                     SELECT * FROM ${it.table<Invoice>()}
                     INNER JOIN ${it.table<Customer>()} ON ${it.column(Customer::id)} = ${it.column(Invoice::customerId)}
-                    WHERE ${it.column(Customer::id)} = ${customer.id!!.value}
+                    WHERE ${it.column(Customer::id)} = '${customer.id.value}'
                 """
             }
             assertTrue(invoices1.isNotEmpty())
@@ -177,23 +177,23 @@ class Test_Chinook {
         Seed.mssql()
         mssql.autocommit { aconn ->
 
-            val tracks0 = aconn.query.get<Track> {
+            val artists0 = aconn.query.get<Artist> {
                 """
-                    SELECT * FROM "music"."Track"
-                    INNER JOIN "music"."Album" ON "music"."Album"."artistId" = "music"."Track"."id"
-                """
-            }
-            assertTrue(tracks0.isNotEmpty())
-
-            val tracks1 = aconn.query.get<Track> {
-                """
-                    SELECT * FROM ${it.table<Track>()}
-                    INNER JOIN ${it.table<Album>()} ON ${it.column(Album::artistId)} = ${it.column(Track::id)}
+                    SELECT * FROM "music"."Artist"
+                    INNER JOIN "music"."Album" ON "music"."Album"."artistId" = "music"."Artist"."id"
                 """
             }
-            assertTrue(tracks1.isNotEmpty())
+            assertTrue(artists0.isNotEmpty())
 
-            assertEquals(tracks1, tracks0)
+            val artists = aconn.query.get<Artist> {
+                """
+                    SELECT * FROM ${it.table<Artist>()}
+                    INNER JOIN ${it.table<Album>()} ON ${it.column(Album::artistId)} = ${it.column(Artist::id)}
+                """
+            }
+            assertTrue(artists.isNotEmpty())
+
+            assertEquals(artists, artists0)
         }
     }
 

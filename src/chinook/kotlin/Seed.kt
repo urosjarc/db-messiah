@@ -1,7 +1,5 @@
 import domain.*
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDate
 import kotlin.random.Random
 
 /**
@@ -10,9 +8,19 @@ import kotlin.random.Random
  */
 object Seed {
     val seedSize = 20
+    val rseed = Random(seed = 0)
+
+    val boss = Employee(
+        firstName = "firstName_00",
+        lastName = "lastName_00",
+        title = "title_00",
+        reportsTo = null,
+        birthDate = LocalDate.now(),
+        hireDate = LocalDate.now()
+    )
 
     val artist = arrayOfNulls<Album>(seedSize).mapIndexed { i, _ -> Artist(name = "name_$i") }
-    val album = arrayOfNulls<Album>(seedSize).mapIndexed { i, _ -> Album(title = "name_$i", artistId = Id(Random.nextInt(1, seedSize - 1))) }
+    val album = arrayOfNulls<Album>(seedSize).mapIndexed { i, _ -> Album(title = "name_$i", artistId = artist.random(rseed).id) }
     val mediaType = arrayOfNulls<MediaType>(seedSize).mapIndexed { i, _ -> MediaType(name = "name_$i") }
     val genre = arrayOfNulls<Genre>(seedSize).mapIndexed { i, _ -> Genre(name = "name_$i") }
     val playlist = arrayOfNulls<Playlist>(seedSize).mapIndexed { i, _ -> Playlist(name = "name_$i") }
@@ -22,9 +30,9 @@ object Seed {
             firstName = "firstName_$i",
             lastName = "lastName_$i",
             title = "title_$i",
-            reportsTo = Id(1),
-            birthDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date,
-            hireDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date
+            reportsTo = boss.id,
+            birthDate = LocalDate.now(),
+            hireDate = LocalDate.now()
         )
     }
 
@@ -32,14 +40,14 @@ object Seed {
         Customer(
             firstName = "firstName_$i",
             lastName = "lastName_$i",
-            supportRepId = Id(Random.nextInt(1, seedSize - 1))
+            supportRepId = employee.random(rseed).id
         )
     }
 
     val invoice = arrayOfNulls<Invoice>(seedSize).mapIndexed { i, _ ->
         Invoice(
-            customerId = Id(Random.nextInt(1, seedSize - 1)),
-            invoiceDate = Clock.System.now().toLocalDateTime(TimeZone.UTC).date,
+            customerId = customer.random(rseed).id,
+            invoiceDate = LocalDate.now(),
             billingAddress = "billingAddress_$i"
         )
     }
@@ -47,24 +55,24 @@ object Seed {
     val track = arrayOfNulls<Track>(seedSize).mapIndexed { i, _ ->
         Track(
             name = "name_$i",
-            albumId = Id(Random.nextInt(1, seedSize - 1)),
-            mediaTypeId = Id(Random.nextInt(1, seedSize - 1)),
-            genreId = Id(Random.nextInt(1, seedSize - 1)),
+            albumId = album.random(rseed).id,
+            mediaTypeId = mediaType.random(rseed).id,
+            genreId = genre.random(rseed).id,
             composer = "composer_id"
         )
     }
 
     val playlistTrack = arrayOfNulls<PlaylistTrack>(seedSize).mapIndexed { _, _ ->
         PlaylistTrack(
-            playlistId = Id(Random.nextInt(1, seedSize - 1)),
-            trackId = Id(Random.nextInt(1, seedSize - 1)),
+            playlistId = playlist.random(rseed).id,
+            trackId = track.random(rseed).id
         )
     }
 
     val invoiceLine = arrayOfNulls<InvoiceLine>(seedSize).mapIndexed { i, _ ->
         InvoiceLine(
-            invoiceId = Id(Random.nextInt(1, seedSize - 1)),
-            trackId = Id(Random.nextInt(1, seedSize - 1)),
+            invoiceId = invoice.random(rseed).id,
+            trackId = track.random(rseed).id,
             unitPrice = i.toFloat(),
             quantity = i
         )
@@ -92,11 +100,11 @@ object Seed {
         it.table.create<InvoiceLine>()
 
         it.batch.insert(rows = artist)
-        it.batch.insert(rows = artist)
         it.batch.insert(rows = album)
         it.batch.insert(rows = mediaType)
         it.batch.insert(rows = genre)
         it.batch.insert(rows = playlist)
+        it.row.insert(boss)
         it.batch.insert(rows = employee)
         it.batch.insert(rows = customer)
         it.batch.insert(rows = invoice)
@@ -127,6 +135,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -157,6 +166,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -191,6 +201,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -275,6 +286,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -301,6 +313,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -335,6 +348,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)
@@ -373,6 +387,7 @@ object Seed {
         it.batch.insert(mediaType)
         it.batch.insert(genre)
         it.batch.insert(playlist)
+        it.row.insert(boss)
         it.batch.insert(employee)
         it.batch.insert(customer)
         it.batch.insert(invoice)

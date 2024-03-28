@@ -9,51 +9,7 @@ import com.urosjarc.dbmessiah.impl.mysql.MysqlSchema
 import com.urosjarc.dbmessiah.impl.oracle.OracleSchema
 import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
 import domain.*
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaField
-
-/**
- * With a little of bit of reflection we can easily extract the foreign keys information
- * of a table that owns given primary key property. With this function we can automatically
- * build our final tables in [createTable] without any mistakes or friction.
- * To use this function is preferred when you have huge amount of tables and foreign keys.
- * This function is not included to main library because library does not want to force
- * user to use specific class with the specific name. User can define his own [Id] class
- * and define how extraction of foreign keys will happened.
- *
- * And as always, before use this or any other function understand what it does and don't trust
- * any foreign code.
- *
- * @param primaryKey the primary key property.
- * @return a mutable list of pairs, where each pair contains a foreign key property and its class.
- * @*/
-fun <T : Any> extractForeignKeys(primaryKey: KProperty1<T, *>): MutableList<Pair<KProperty1<T, *>, KClass<*>>> {
-    //First extract the owner of the primary key.
-    val owner = primaryKey.javaField?.declaringClass?.kotlin ?: throw Exception("Could not get owner of $primaryKey")
-
-    //Define foreign key map where we will fill all foreign keys.
-    val fkMap: MutableList<Pair<KProperty1<T, *>, KClass<*>>> = mutableListOf()
-
-    //Get all properties of the owner class.
-    val kprops = owner.memberProperties.filter { it.javaField != null }
-
-    //Scan all properties
-    kprops.forEach {
-
-        //If property type is of type Id and is not primary key then it must be foreign key
-        if (it != primaryKey && it.returnType.classifier == Id::class) {
-
-            //Extract T from Id<T> as KClass
-            val foreignKClass = it.returnType.arguments.first().type?.classifier
-
-            //Fill foreign key map
-            fkMap.add(Pair(it, foreignKClass) as Pair<KProperty1<T, *>, KClass<*>>)
-        }
-    }
-    return fkMap
-}
 
 /**
  * With [extractForeignKeys] function
@@ -66,7 +22,7 @@ fun <T : Any> extractForeignKeys(primaryKey: KProperty1<T, *>): MutableList<Pair
  */
 fun <T : Any> createTable(primaryKey: KProperty1<T, *>): Table<T> {
     //Gather all foreign keys
-    val foreignKeys = extractForeignKeys(primaryKey = primaryKey)
+    val foreignKeys = Table.getInlineTypedForeignKeys(primaryKey = primaryKey)
     return Table(
         primaryKey = primaryKey,
         foreignKeys = foreignKeys,

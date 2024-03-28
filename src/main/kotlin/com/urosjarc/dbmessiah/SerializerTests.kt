@@ -381,8 +381,10 @@ internal class SerializerTests {
             if (!this.ser.allowAutoUUID) {
                 this.ser.schemas.forEach { schema ->
                     schema.tables.forEach { table ->
-                        if (table.primaryKey.ext_isAutoUUID)
-                            throw SerializerTestsException("Database does not support AUTO_UUID primary keys: ${table.primaryKey}")
+                        if (table.primaryKey.ext_isAutoUUID) {
+                            val db = this.ser::class.simpleName?.replace("Serializer", "")
+                            throw SerializerTestsException("Database '$db' does not support AUTO_UUID primary keys: ${table.primaryKey}")
+                        }
                     }
                 }
             }

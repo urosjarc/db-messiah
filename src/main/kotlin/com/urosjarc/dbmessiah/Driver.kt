@@ -29,9 +29,14 @@ public open class Driver(private val conn: Connection) {
         (query.values).forEachIndexed { i, queryValue: QueryValue ->
             rawSql = rawSql.replaceFirst("?", queryValue.escapped)
             if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
-            else (queryValue.encoder as Encoder<Any>)(
-                ps, i + 1, queryValue.value
-            ) //If value is not null encoding is done over user defined encoder !!!
+            else {
+                try { //TODO: Fix this null pointer problem
+                    (queryValue.encoder as Encoder<Any>)(ps, i + 1, queryValue.value)
+                } catch (e: NullPointerException) {
+                    this.log.fatal(e)
+                    ps.setNull(i + 1, Types.CHAR)
+                }
+            } //If value is not null encoding is done over user defined encoder !!!
         }
         this.log.info("Prepare query: ${rawSql.replace("\\s+".toRegex(), " ")}")
     }

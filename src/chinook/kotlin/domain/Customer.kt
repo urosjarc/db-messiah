@@ -3,7 +3,7 @@ package domain
 import Id
 
 data class Customer(
-    var id: Id<Customer>? = null,
+    val id: Id<Customer> = Id(),
     val firstName: String,
     val lastName: String,
  // val company: String,

@@ -3,7 +3,7 @@ package domain
 import Id
 
 data class PlaylistTrack(
-    var id: Id<PlaylistTrack>? = null,
+    val id: Id<PlaylistTrack> = Id(),
     val playlistId: Id<Playlist>,
     val trackId: Id<Track>
 )

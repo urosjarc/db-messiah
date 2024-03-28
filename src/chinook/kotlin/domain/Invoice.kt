@@ -1,10 +1,10 @@
 package domain
 
 import Id
-import kotlinx.datetime.LocalDate
+import java.time.LocalDate
 
 data class Invoice(
-    var id: Id<Invoice>? = null,
+    val id: Id<Invoice> = Id(),
     val customerId: Id<Customer>,
     val invoiceDate: LocalDate,
     val billingAddress: String,

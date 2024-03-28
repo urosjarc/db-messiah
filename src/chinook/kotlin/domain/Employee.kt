@@ -1,10 +1,10 @@
 package domain
 
 import Id
-import kotlinx.datetime.LocalDate
+import java.time.LocalDate
 
 data class Employee(
-    var id: Id<Employee>? = null,
+    val id: Id<Employee> = Id(),
     val firstName: String,
     val lastName: String,
     val title: String,

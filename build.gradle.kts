@@ -54,7 +54,7 @@ tasks.register<GradleBuild>("github") {
     this.group = "verification"
     this.doFirst {
         println("Waiting for services to warm up...")
-        sleep(120 * 1000)
+        sleep(60 * 1000)
         println("Start with testing...")
     }
     this.tasks = listOf("test", "tutorials", "chinook", "e2e")
@@ -136,7 +136,6 @@ testing {
         register<JvmTestSuite>("chinook") {
             dependencies {
                 implementation(project())
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
 
                 //Databases

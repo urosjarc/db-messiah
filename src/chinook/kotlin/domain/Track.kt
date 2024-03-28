@@ -3,7 +3,7 @@ package domain
 import Id
 
 data class Track(
-    var id: Id<Track>? = null,
+    val id: Id<Track> = Id(),
     val name: String,
     val albumId: Id<Album>,
     val mediaTypeId: Id<MediaType>,

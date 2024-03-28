@@ -3,7 +3,7 @@ package domain
 import Id
 
 data class InvoiceLine(
-    var id: Id<InvoiceLine>? = null,
+    val id: Id<InvoiceLine> = Id(),
     val invoiceId: Id<Invoice>,
     val trackId: Id<Track>,
     val unitPrice: Float,

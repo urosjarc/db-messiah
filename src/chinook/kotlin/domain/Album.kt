@@ -3,7 +3,7 @@ package domain
 import Id
 
 data class Album(
-    var id: Id<Album>? = null,
+    val id: Id<Album> = Id(),
     val title: String,
     val artistId: Id<Artist>
 )
