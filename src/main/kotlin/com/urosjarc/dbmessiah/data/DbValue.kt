@@ -112,7 +112,13 @@ public abstract class DbValue(
      */
     public fun getValue(obj: Any): Any? {
         try {
-            return this.kprop.get(receiver = obj)
+            val data = this.kprop.get(receiver = obj)
+            try {
+                println(data)
+            } catch (e: NullPointerException){
+                throw Exception("This is nasty bug")
+            }
+            return data
         } catch (e: Throwable) {
             throw DbValueException(
                 msg = "Trying to get value '${this.kprop}' but failed! " +

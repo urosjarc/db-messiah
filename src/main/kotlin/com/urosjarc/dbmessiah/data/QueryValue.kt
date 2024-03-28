@@ -26,13 +26,7 @@ public data class QueryValue(
         get() = when (this.value) {
             is Int -> value.toString()
             is UInt -> value.toString()
-            else -> {
-                try { // TODO: Fix this
-                    "'$value'"
-                } catch (e: NullPointerException){
-                    "NULL"
-                }
-            }
+            else -> "'$value'"
         }
 
     /** @suppress */
