@@ -18,10 +18,11 @@ note as Test
     on other databases ERROR will be created.
 
     <color:red>The same table is applied on inline types which are required to be in the form
-    <color:red>inline class Name(val value: Type)
-    <color:red>Note that inside value of inline class is val with non nullable type!
+    <color:red>inline class Name(val value: Type) { override fun toString() { ... } }
+    <color:red>Note that inside value of inline class is val with non nullable type.
+    <color:red>Method toString() should be overridden with DB compatible type representation.
 
 end note
 
-Test -up-> Customer
+Customer -[hidden]-> Test
 @enduml
