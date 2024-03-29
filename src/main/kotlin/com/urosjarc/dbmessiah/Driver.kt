@@ -28,7 +28,7 @@ public open class Driver(private val conn: Connection) {
         //Apply values to prepared statement
         (query.values).forEachIndexed { i, queryValue: QueryValue ->
             rawSql = rawSql.replaceFirst("?", queryValue.escapped)
-            if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.ordinal) //If value is null encoding is done with setNull function !!!
+            if (queryValue.value == null) ps.setNull(i + 1, queryValue.jdbcType.vendorTypeNumber) //If value is null encoding is done with setNull function !!!
             //If value is not null encoding is done over user defined encoder !!!
             else {
                 /**
@@ -39,7 +39,7 @@ public open class Driver(private val conn: Connection) {
                 try {
                     (queryValue.encoder as Encoder<Any?>)(ps, i + 1, queryValue.value)
                 } catch (e: NullPointerException){
-                    ps.setNull(i+1, Types.VARCHAR)
+                    ps.setNull(i+1, queryValue.jdbcType.vendorTypeNumber)
                 }
             }
         }
