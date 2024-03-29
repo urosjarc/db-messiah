@@ -14,7 +14,7 @@
                 <p><a href="#tutorials">Tutorials</a></p>
                 <p><a href="#configuration">Configuration</a></p>
                 <p><a href="#features">Features</a></p>
-                <p><a href="#primary-key">Specifications</a></p>
+                <p><a href="#specifications">Specifications</a></p>
         </td>
         <td width="33%">
             <h3 align="center"><a href="https://github.com/urosjarc/db-analyser">db-analyser</a></h3>
@@ -235,21 +235,27 @@ for(ql in top10) {
 
 <p align="center">
 All tutorials are tested and defined as kotlin files inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/tutorials/kotlin">src/tutorials/kotlin</a> directory.<br>
-Recommend project structure and all best practices are defined in <a href="https://github.com/urosjarc/db-messiah/tree/master/src/chinook/kotlin">src/chinook/kotlin</a> demo project which<br>
-implements famous <a href="https://github.com/lerocha/chinook-database">Chinook sample database</a>.
+Sample project is inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/chinook/kotlin">src/chinook/kotlin</a> directory and it implements<br>
+for all supported databases famous <a href="https://github.com/lerocha/chinook-database">Chinook sample database</a>.<br>
+
 </p>
 
 <br> <h3 align="center">Configuration</h3>
 
 <p align="center">
-Service config property object is passed on initialization directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library
-<br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection configuration</a>.
+User provided config property object is on initialization passed directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library
+<br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection pooling and configuration</a>.
 </p>
 
 <br><h3 align="center">Testing</h3>
-<p align="center">All user defined code will be subject of heavy initialization testing.<br>
-The initialization tests can be found inside
-<a href="https://github.com/urosjarc/db-messiah/blob/master/src/main/kotlin/com/urosjarc/dbmessiah/SerializerTests.kt">SerializerTests.kt</a></p>
+<p align="center">Only at initialization library uses <a href = "https://kotlinlang.org/docs/reflection.html">Kotlin reflection</a>, to introspect the user provided db structure.<br>
+System will create <a href="https://github.com/urosjarc/db-messiah/blob/master/src/main/kotlin/com/urosjarc/dbmessiah/MapperCache.kt">mapping rules</a> on how kotlin classes will be mapped into db tables.<br>
+System will also test resulting rules, in order to find any user errors or inconsistency.<br>
+The list of all tests can be found inside <a href="https://github.com/urosjarc/db-messiah/blob/master/src/main/kotlin/com/urosjarc/dbmessiah/SerializerTests.kt">SerializerTests.kt</a>.<br>
+System will for E2E testing use db servers defined inside docker <a href="https://github.com/urosjarc/db-messiah/tree/master/compose.yaml">compose.yaml</a> file.<br>
+You can start start those servers with <code>docker-compose up</code>.
+
+</p>
 
 
 <br><h3 align="center">Logging</h3>
@@ -293,6 +299,12 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 |    LocalDate   |     DATE     |          :white_check_mark:          |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
 |    LocalTime   |     TIME     |     :white_check_mark: but Oracle    |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
 |    LocalTime   | NUMBER(5, 0) |                Oracle                |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |>
+
+<br><br><h2 align="center">Specifications</h3>
+
+<p align="center">
+    
+</p>
 
 <br><br><h3 align="center">PRIMARY KEY</h3>
 <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/specs/constraints/PRIMARY_KEY.png">

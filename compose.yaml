@@ -1,6 +1,9 @@
 services:
 
   maria:
+    # JDBC_URL: 'jdbc:mariadb://localhost:3306'
+    # USERNAME: 'root'
+    # PASSWORD: 'root'
     image: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: root
@@ -8,6 +11,9 @@ services:
       - 3306:3306
 
   postgresql:
+    # JDBC_URL: 'jdbc:postgresql://localhost:5432/public'
+    # USERNAME: 'root'
+    # PASSWORD: 'root'
     image: postgres
     environment:
       POSTGRES_DB: public
@@ -18,25 +24,32 @@ services:
       - 5432:5432
 
   mysql:
+    # JDBC_URL: 'jdbc:mysql://localhost:3307'
+    # USERNAME: 'root'
+    # PASSWORD: 'root'
     image: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-     #MYSQL_ROOT_USER: root
       MYSQL_TCP_PORT: 3307
     ports:
       - 3307:3307
 
   mssql:
+    # JDBC_URL: 'jdbc:sqlserver://localhost:1433;encrypt=false;'
+    # USERNAME: 'sa'
+    # PASSWORD: 'Root_root1'
     container_name: mssql
     image: mcr.microsoft.com/mssql/server:2017-latest
     environment:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: Root_root1
-     #MSSQL_SA_USERNAME: sa
     ports:
       - 1433:1433
 
   db2:
+    # JDBC_URL: 'jdbc:db2://localhost:50000/main'
+    # USERNAME: 'db2inst1'
+    # PASSWORD: 'root'
     container_name: db2
     image: icr.io/db2_community/db2
     privileged: true
@@ -57,6 +70,9 @@ services:
       - 50000:50000
 
   oracle:
+    # JDBC_URL: 'jdbc:oracle:thin:@localhost:1521:XE'
+    # USERNAME: 'system'
+    # PASSWORD: 'root'
     container_name: oracle
     ports:
       - 1521:1521
