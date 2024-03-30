@@ -11,6 +11,7 @@ class Test_Chinook {
     @Test
     fun `test db2`() {
         File("./build/db2.plantuml").writeText(db2_serializer.plantUML())
+        File("./build/db2.dbdiagram.txt").writeText(db2_serializer.dbDiagramIO())
         Seed.db2()
         db2.autocommit { aconn ->
 
@@ -66,6 +67,7 @@ class Test_Chinook {
     @Test
     fun `test derby`() {
         File("./build/derby.plantuml").writeText(derby_serializer.plantUML())
+        File("./build/derby.dbdiagram.txt").writeText(derby_serializer.dbDiagramIO())
         Seed.derby()
         derby.autocommit {
 
@@ -96,6 +98,7 @@ class Test_Chinook {
     @Test
     fun `test h2`() {
         File("./build/h2.plantuml").writeText(h2_serializer.plantUML())
+        File("./build/h2.dbdiagram.txt").writeText(h2_serializer.dbDiagramIO())
         Seed.h2()
         h2.autocommit {
 
@@ -122,6 +125,7 @@ class Test_Chinook {
     @Test
     fun `test maria`() {
         File("./build/maria.plantuml").writeText(maria_serializer.plantUML())
+        File("./build/maria.dbdiagram.txt").writeText(maria_serializer.dbDiagramIO())
         Seed.maria()
         maria.autocommit { aconn ->
 
@@ -148,6 +152,7 @@ class Test_Chinook {
     @Test
     fun `test mysql`() {
         File("./build/mysql.plantuml").writeText(mysql_serializer.plantUML())
+        File("./build/mysql.dbdiagram.txt").writeText(mysql_serializer.dbDiagramIO())
         Seed.mysql()
         mysql.autocommit { aconn ->
 
@@ -174,6 +179,7 @@ class Test_Chinook {
     @Test
     fun `test mssql`() {
         File("./build/mssql.plantuml").writeText(mssql_serializer.plantUML())
+        File("./build/mssql.dbdiagram.txt").writeText(mssql_serializer.dbDiagramIO())
         Seed.mssql()
         mssql.autocommit { aconn ->
 
@@ -200,6 +206,7 @@ class Test_Chinook {
     @Test
     fun `test postgresql`() {
         File("./build/postgresql.plantuml").writeText(postgresql_serializer.plantUML())
+        File("./build/postgresql.dbdiagram.txt").writeText(postgresql_serializer.dbDiagramIO())
         Seed.pg()
         pg.autocommit { aconn ->
 
@@ -226,6 +233,7 @@ class Test_Chinook {
     @Test
     fun `test oracle`() {
         File("./build/oracle.plantuml").writeText(oracle_serializer.plantUML())
+        File("./build/oracle.dbdiagram.txt").writeText(oracle_serializer.dbDiagramIO())
         Seed.oracle()
         oracle.autocommit { aconn ->
 
@@ -252,6 +260,7 @@ class Test_Chinook {
     @Test
     fun `test sqlite`() {
         File("./build/sqlite.plantuml").writeText(sqlite_serializer.plantUML())
+        File("./build/sqlite.dbdiagram.txt").writeText(sqlite_serializer.dbDiagramIO())
         Seed.sqlite()
         sqlite.autocommit {
 

@@ -107,6 +107,14 @@ fun main() {
             withOtherColumns = false
         )
     )
+
+    /** dbdiagram.io */
+
+    File("./build/db.dbdiagramio").writeText(
+        serializer.dbDiagramIO(
+            withOtherColumns = false
+        )
+    )
     // STOP
 
     // START 'Operations'

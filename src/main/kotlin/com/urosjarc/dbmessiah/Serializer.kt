@@ -27,12 +27,12 @@ import kotlin.reflect.KProperty1
  */
 public abstract class Serializer(
     internal val allowAutoUUID: Boolean,
-    internal val schemas: List<Schema>,
+    final override val schemas: List<Schema>,
     internal val globalSerializers: List<TypeSerializer<*>>,
     internal val globalInputs: List<KClass<*>> = listOf(),
     internal val globalOutputs: List<KClass<*>> = listOf(),
     internal val globalProcedures: List<KClass<*>> = listOf()
-) {
+): Exporter(schemas = schemas) {
 
     init {
         SerializerTests.EmptinessTests(ser = this).also {
@@ -148,66 +148,6 @@ public abstract class Serializer(
      */
     public fun escaped(column: Column): String =
         listOf(column.table.schema, column.table.name, column.name).joinToString(".") { escaped(name = it) }
-
-    /**
-     * Generates [PlantUML class diagram](https://plantuml.com/class-diagram) representing database arhitecture.
-     *
-     * @return The PlantUML string for visualizing the database schema.
-     */
-    public fun plantUML(withPrimaryKey: Boolean = true, withForeignKeys: Boolean = true, withOtherColumns: Boolean = false): String {
-        val text = mutableListOf(
-            "@startuml", "skinparam backgroundColor darkgray", "skinparam ClassBackgroundColor lightgray"
-        )
-
-        val relationships = mutableListOf<String>()
-        val kclass_to_path = mutableMapOf<KClass<*>, String>()
-
-        this.schemas.forEach { s ->
-            s.tables.forEach { t ->
-                kclass_to_path[t.kclass] = "${s.name}.${t.name}"
-            }
-        }
-
-        text.add("")
-        this.schemas.forEach { s ->
-            text.add("package ${s.name} <<Folder>> {")
-            s.tables.forEach { t ->
-                val className = kclass_to_path[t.kclass]
-                val type = (t.primaryKey.returnType.classifier as KClass<*>).simpleName
-                text.add("\t class $className {")
-
-                if (withPrimaryKey)
-                    text.add("\t\t ${t.primaryKey.name}: $type")
-
-                t.foreignKeys.forEach {
-                    val fk = it.key.name
-                    val kclass = it.value
-                    val toClass = kclass_to_path[kclass]!!
-                    val fromClass = "${s.name}.${t.name}"
-                    relationships.add("${fromClass} -down-> ${toClass}: $fk")
-
-                    if (withForeignKeys)
-                        text.add("\t\t $fk: ${kclass.simpleName}")
-                }
-
-                if (withOtherColumns)
-                    t.kclass.ext_kprops.forEach {
-                        text.add("\t\t ${it.name}: ${(it.returnType.classifier as KClass<*>).simpleName}")
-                    }
-
-                text.add("\t }")
-            }
-            text.add("}")
-        }
-
-        text.add("")
-        text.addAll(relationships)
-        text.add("")
-        text.add("@enduml")
-
-        return text.joinToString("\n")
-
-    }
 
     /**
      * Creates [Query] for creating a schema in the database.

@@ -137,8 +137,8 @@ val sqlite = SqliteService(
 <br><h3 align="center">Diagrams</h3>
 
 <table width="100%">
-<tr>
-<td width="50%">
+    <tr>
+        <td width="50%">
 
 ```kotlin
 /** PlantUML */
@@ -150,9 +150,24 @@ File("./build/db.plantuml").writeText(
         withOtherColumns = false
     )
 )
+
+/** dbdiagram.io */
+
+File("./build/db.dbdiagramio").writeText(
+    serializer.dbDiagramIO(
+        withOtherColumns = false
+    )
+)
 ```
 
-</td> <td width="50%"> <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/chinook.png"> </td> </tr>
+</td>
+
+<td width="50%">
+    <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/chinook.plantuml.png">
+    <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/chinook.dbdiagramio.png">
+</td>
+</tr>
+
 </table>
 
 <br><h3 align="center">Operations</h3>

@@ -169,26 +169,52 @@ abstract class Test_Serializer {
                 "skinparam ClassBackgroundColor lightgray",
                 "",
                 "package schema <<Folder>> {",
-                "\t class schema.Parent {",
-                "\t\t pk: Int",
-                "\t }",
-                "\t class schema.Child {",
-                "\t\t pk: Int",
-                "\t\t fk: Parent",
-                "\t }",
-                "\t class schema.UUIDParent {",
-                "\t\t pk: UUID",
-                "\t }",
-                "\t class schema.UUIDChild {",
-                "\t\t pk: UUID",
-                "\t\t fk: UUIDParent",
-                "\t }",
+                "\tclass schema.Parent {",
+                "\t\tpk: Int",
+                "\t}",
+                "\tclass schema.Child {",
+                "\t\tpk: Int",
+                "\t\tfk: Parent",
+                "\t}",
+                "\tclass schema.UUIDParent {",
+                "\t\tpk: UUID",
+                "\t}",
+                "\tclass schema.UUIDChild {",
+                "\t\tpk: UUID",
+                "\t\tfk: UUIDParent",
+                "\t}",
                 "}",
                 "",
                 "schema.Child -down-> schema.Parent",
                 "schema.UUIDChild -down-> schema.UUIDParent",
                 "",
                 "@enduml"
+            ).joinToString("\n")
+        )
+    }
+
+    @Test
+    open fun `test dbDiagramIO`() {
+        assertEquals(
+            actual = this.ser.dbDiagramIO(),
+            expected = listOf(
+                "Table schema.Parent {",
+                "\tpk Int",
+                "}",
+                "Table schema.Child {",
+                "\tpk Int",
+                "\tfk Parent",
+                "}",
+                "class schema.UUIDParent {",
+                "\tpk UUID",
+                "}",
+                "class schema.UUIDChild {",
+                "\tpk UUID",
+                "\tfk UUIDParent",
+                "}",
+                "",
+                "Ref: schema.Child > schema.Parent",
+                "Ref: schema.UUIDChild > schema.UUIDParent",
             ).joinToString("\n")
         )
     }
