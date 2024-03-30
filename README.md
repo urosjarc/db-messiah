@@ -47,22 +47,48 @@ runtimeOnly("org.postgresql:postgresql:42.7.1")
 runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
 ```
 
+<br><h3 align="center">Primary keys</h3>
+
+```kotlin
+/** TYPE SAFE ID */
+
+@JvmInline
+value class Id<T>(val value: Int) {
+    override fun toString(): String = this.value.toString()
+}
+
+/** TYPE SAFE UID */
+
+@JvmInline
+value class UId<T>(val value: UUID = UUID.randomUUID()) {
+    override fun toString(): String = this.value.toString()
+}
+```
+
 <br><h3 align="center">Domain</h3>
 
 ```kotlin
 /** PARENT */
 
 data class Parent(
-    var pk: Int? = null, // Auto-incremental primary key
-    val value: String    // NOT NULL column
+    var pk: Id<Parent>? = null, // INTEGER Auto-incremental primary key
+    val value: String           // NOT NULL column
 )
 
 /** CHILD */
 
 data class Child(
-    val pk: Int,         // User defined primary key
-    val parent_pk: Int,  // Foreign key, NOT NULL
-    val value: String?   // NULL column
+    val pk: UId<Child> = UId(), // UUID Manual primary key
+    val parent_pk: Id<Parent>,  // Foreign key, NOT NULL
+    val value: String?          // NULL column
+)
+
+/** UNSAFE */
+
+data class Unsafe(
+//  var pk: Int? = null,                 // Unsafe INTEGER auto-incremental primary key
+    val pk: UUID = UUID.randomUUID(),    // Unsafe UUID manual primary key
+    val created: Instant = Instant.now() // Support for java.time.*
 )
 ```
 
@@ -72,12 +98,21 @@ data class Child(
 /** SCHEMA */
 
 val serializer = SqliteSerializer(
-        globalSerializers = BasicTS.sqlite,
+        globalSerializers = BasicTS.sqlite + listOf(
+            //        constructor    deconstructor 
+            IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
+            //                 constructor
+            IdTS.uuid.sqlite({ Id<Any>(it) })        // Serializer for UId<T>
+        ),
         tables = listOf(
             Table(Parent::pk),
             Table(
-                Child::pk, foreignKeys = listOf(
+                Child::pk,
+                foreignKeys = listOf( // Foreign keys
                     Child::parent_pk to Parent::class
+                ),
+                constraints = listOf( // Column constraints
+                    Child::parent_pk to listOf(C.UNIQUE, C.CASCADE_DELETE, C.CASCADE_UPDATE)
                 )
             ),
         ),
@@ -207,8 +242,8 @@ val TIMESTAMP = TypeSerializer<Instant>(
 /** REGISTRATION */
 
 val serializer = SqliteSerializer(
-    globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP)
-            tables = listOf ( ... ),
+    globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP),
+    //...
 )
 ```
 

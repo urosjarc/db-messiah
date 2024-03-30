@@ -24,11 +24,11 @@ val derby_serializer = DerbySerializer(
 )
 val h2_serializer = H2Serializer(
     schemas = listOf(h2_people_schema, h2_music_schema, h2_billing_schema),
-    globalSerializers = BasicTS.h2 + JavaTimeTS.h2 + listOf(IdTS.uuid.h2({ Id<Any>(it) }, { println(it); it.value }))
+    globalSerializers = BasicTS.h2 + JavaTimeTS.h2 + listOf(IdTS.uuid.h2({ Id<Any>(it) }, { it.value }))
 )
 val maria_serializer = MariaSerializer(
     schemas = listOf(maria_people_schema, maria_music_schema, maria_billing_schema),
-    globalSerializers = BasicTS.maria + JavaTimeTS.maria + listOf(IdTS.uuid.maria({ Id<Any>(it) }, { println(it); it.value }))
+    globalSerializers = BasicTS.maria + JavaTimeTS.maria + listOf(IdTS.uuid.maria({ Id<Any>(it) }, { it.value }))
 )
 val mssql_serializer = MssqlSerializer(
     schemas = listOf(mssql_people_schema, mssql_music_schema, mssql_billing_schema),

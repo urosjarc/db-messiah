@@ -99,55 +99,39 @@ testing {
             if (this is JvmTestSuite) {
                 useJUnitJupiter()
                 dependencies {
+                    implementation(project())
                     implementation("org.jetbrains.kotlin:kotlin-test")
                     implementation("org.apache.logging.log4j:log4j-core:2.17.1")
                     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
                     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+
+                    runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
+                    runtimeOnly("com.h2database:h2:2.2.224")
+                    runtimeOnly("org.apache.derby:derby:10.17.1.0")
+                    runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+                    runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
+                    runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
+                    runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
+                    runtimeOnly("org.postgresql:postgresql:42.7.1")
+                    runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
                 }
             }
         }
 
         register<JvmTestSuite>("e2e") {
             dependencies {
-                implementation(project())
-                runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
-                runtimeOnly("com.h2database:h2:2.2.224")
-                runtimeOnly("org.apache.derby:derby:10.17.1.0")
-                runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
-                runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
-                runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
-                runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-                runtimeOnly("org.postgresql:postgresql:42.7.1")
-                runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
             }
         }
 
         register<JvmTestSuite>("tutorials") {
             dependencies {
-                implementation(project())
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-                runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
-                runtimeOnly("org.postgresql:postgresql:42.7.1")
-                runtimeOnly("org.apache.derby:derby:10.17.1.0")
-                runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
             }
         }
 
         register<JvmTestSuite>("chinook") {
             dependencies {
-                implementation(project())
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.22")
-
-                //Databases
-                runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
-                runtimeOnly("com.h2database:h2:2.2.224")
-                runtimeOnly("org.apache.derby:derby:10.17.1.0")
-                runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
-                runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
-                runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
-                runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-                runtimeOnly("org.postgresql:postgresql:42.7.1")
-                runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
             }
         }
     }
