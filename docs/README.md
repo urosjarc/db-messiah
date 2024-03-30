@@ -1,6 +1,6 @@
 <h1 align="center">db-messiah</h1>
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
-<p align="center"><b>+290 unit tests, +210 e2e tests, +22 tutorial tests, +30 initialization tests</b></p>
+<p align="center"><b>+290 unit, +210 e2e, +30 initialization, +22 tutorial, +8 README.md tests</b></p>
 <br>
 <br>
 <table width="100%" border="0">
@@ -30,108 +30,29 @@
 ```kotlin
 /** DEPENDENCIES */
 
-implementation("com.urosjarc:db-messiah:0.0.1")                     // Required
-implementation("com.urosjarc:db-messiah-extra:0.0.1")               // Optional extra utils
-implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") // Optional logging
+// START 'Dependencies'
 
 /** DRIVERS */
 
-runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0") // Lets continue with sqlite driver...
-runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
-runtimeOnly("com.h2database:h2:2.2.224")
-runtimeOnly("org.apache.derby:derby:10.17.1.0")
-runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
-runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
-runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-runtimeOnly("org.postgresql:postgresql:42.7.1")
-runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
+// START 'Drivers'
 ```
 
 <br><h3 align="center">Primary keys</h3>
 
 ```kotlin
-/** TYPE SAFE ID */
-
-@JvmInline
-value class Id<T>(val value: Int) {
-    override fun toString(): String = this.value.toString()
-}
-
-/** TYPE SAFE UID */
-
-@JvmInline
-value class UId<T>(val value: UUID = UUID.randomUUID()) {
-    override fun toString(): String = this.value.toString()
-}
+// START 'Primary keys'
 ```
 
 <br><h3 align="center">Domain</h3>
 
 ```kotlin
-/** PARENT */
-
-data class Parent(
-    var pk: Id<Parent>? = null, // INTEGER Auto-incremental primary key
-    val value: String           // NOT NULL column
-)
-
-/** CHILD */
-
-data class Child(
-    val pk: UId<Child> = UId(), // UUID Manual primary key
-    val parent_pk: Id<Parent>,  // Foreign key, NOT NULL
-    val value: String?          // NULL column
-)
-
-/** UNSAFE */
-
-data class Unsafe(
-//  var pk: Int? = null,                 // Unsafe INTEGER auto-incremental primary key
-    val pk: UUID = UUID.randomUUID(),    // Unsafe UUID manual primary key
-    val created: Instant = Instant.now() // Support for java.time.*
-)
+// START 'Domain'
 ```
 
 <br><h3 align="center">Database</h3>
 
 ```kotlin
-/** SCHEMA */
-
-val serializer = SqliteSerializer(
-        globalSerializers = BasicTS.sqlite + listOf(
-            //        constructor    deconstructor 
-            IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
-            //                 constructor
-            IdTS.uuid.sqlite({ Id<Any>(it) })        // Serializer for UId<T>
-        ),
-        tables = listOf(
-            Table(Parent::pk),
-            Table(
-                Child::pk,
-                foreignKeys = listOf( // Foreign keys
-                    Child::parent_pk to Parent::class
-                ),
-                constraints = listOf( // Column constraints
-                    Child::parent_pk to listOf(C.UNIQUE, C.CASCADE_DELETE, C.CASCADE_UPDATE)
-                )
-            ),
-        ),
-    )
-
-/** CONFIG */
-
-val config = Properties().apply {
-    this["jdbcUrl"] = "jdbc:sqlite::memory:"
-    this["username"] = "root"
-    this["password"] = "root"
-}
-
-/** SERVICE */
-
-val sqlite = SqliteService(
-    config = config,
-    ser = serializer
-)
+// START 'Database'
 ```
 
 <br><h3 align="center">Diagrams</h3>
@@ -141,15 +62,7 @@ val sqlite = SqliteService(
 <td width="50%">
 
 ```kotlin
-/** PlantUML */
-
-File("db.plantuml").writeText(
-    serializer.plantUML(
-        withPrimaryKey = true,
-        withForeignKeys = true,
-        withOtherColumns = false
-    )
-)
+// START 'Diagrams'
 ```
 
 </td> <td width="50%"> <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/chinook.png"> </td> </tr>

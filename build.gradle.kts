@@ -93,6 +93,21 @@ tasks.dokkaHtml {
     }
 }
 
+val drivers = listOf(
+    "com.ibm.db2:jcc:11.5.9.0",
+    "com.h2database:h2:2.2.224",
+    "org.apache.derby:derby:10.17.1.0",
+    "org.mariadb.jdbc:mariadb-java-client:3.3.2",
+    "org.xerial:sqlite-jdbc:3.44.1.0",
+    "com.mysql:mysql-connector-j:8.2.0",
+    "com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11",
+    "org.postgresql:postgresql:42.7.1",
+    "com.oracle.database.jdbc:ojdbc11:23.3.0.23.09"
+)
+val optionals = listOf(
+    "org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0"
+)
+
 testing {
     suites {
         configureEach {
@@ -101,19 +116,9 @@ testing {
                 dependencies {
                     implementation(project())
                     implementation("org.jetbrains.kotlin:kotlin-test")
-                    implementation("org.apache.logging.log4j:log4j-core:2.17.1")
                     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
-                    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
-
-                    runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
-                    runtimeOnly("com.h2database:h2:2.2.224")
-                    runtimeOnly("org.apache.derby:derby:10.17.1.0")
-                    runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
-                    runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
-                    runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
-                    runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-                    runtimeOnly("org.postgresql:postgresql:42.7.1")
-                    runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
+                    optionals.forEach { implementation(it) }
+                    drivers.forEach { runtimeOnly(it) }
                 }
             }
         }
@@ -194,23 +199,35 @@ tasks.register<GradleBuild>("readme") {
     this.tasks = listOf("tutorials")
 
     doLast {
-        val readmeMap = mutableListOf<Pair<String, MutableList<String>>>()
-        val templateLines = File("src/tutorials/kotlin/Test_README.kt").readLines()
+        val dependencies = mutableListOf(
+            "implementation(\"${project.group}:${project.name}:$version\") // Required",
+            "implementation(\"${project.group}:${project.name}-extra:$version\") // Optional",
+        )
+        dependencies += optionals.map { "implementation(\"$it\") //Optional" }
+
+        val readmeMap: MutableList<Pair<String, MutableList<String>>> = mutableListOf(
+            "// START 'Dependencies'" to dependencies,
+            "// START 'Drivers'" to drivers.map { "runtimeOnly(\"$it\")" }.toMutableList()
+        )
+
+        val templateLines = File("./src/tutorials/kotlin/Test_README.kt").readLines()
         var active = false
+        var indent = ""
         templateLines.forEach {
-            if(it.startsWith("// START '")){
+            if (it.contains("// START '")) {
+                indent = it.split("//").first()
                 active = true
-                readmeMap.add(it to mutableListOf())
-            } else if(it.startsWith("// STOP")) {
+                readmeMap.add(it.replaceFirst(indent, "") to mutableListOf())
+            } else if (it.contains("// STOP")) {
                 active = false
-            } else if(active){
-                readmeMap.last().second.add(it)
+            } else if (active) {
+                readmeMap.last().second.add(it.replaceFirst(indent, ""))
             }
         }
 
-        val readme = File("README.md").readText()
+        var readme = File("./docs/README.md").readText()
         readmeMap.forEach { (key, value) ->
-            readme.replace(oldValue = key, newValue = value.joinToString(separator = ""))
+            readme = readme.replace(oldValue = key, newValue = value.joinToString("\n"))
         }
 
         File("README.md").writeText(readme)

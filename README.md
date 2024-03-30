@@ -1,6 +1,6 @@
 <h1 align="center">db-messiah</h1>
 <h3 align="center">Kotlin lib. for enterprise database development</h3>
-<p align="center"><b>+290 unit tests, +210 e2e tests, +22 tutorial tests, +30 initialization tests</b></p>
+<p align="center"><b>+290 unit, +210 e2e, +30 initialization, +22 tutorial, +8 README.md tests</b></p>
 <br>
 <br>
 <table width="100%" border="0">
@@ -30,17 +30,17 @@
 ```kotlin
 /** DEPENDENCIES */
 
-implementation("com.urosjarc:db-messiah:0.0.1")                     // Required
-implementation("com.urosjarc:db-messiah-extra:0.0.1")               // Optional extra utils
-implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") // Optional logging
+implementation("com.urosjarc:db-messiah:0.0.1") // Required
+implementation("com.urosjarc:db-messiah-extra:0.0.1") // Optional
+implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") //Optional
 
 /** DRIVERS */
 
-runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0") // Lets continue with sqlite driver...
 runtimeOnly("com.ibm.db2:jcc:11.5.9.0")
 runtimeOnly("com.h2database:h2:2.2.224")
 runtimeOnly("org.apache.derby:derby:10.17.1.0")
 runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
 runtimeOnly("com.mysql:mysql-connector-j:8.2.0")
 runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
 runtimeOnly("org.postgresql:postgresql:42.7.1")
@@ -72,7 +72,7 @@ value class UId<T>(val value: UUID = UUID.randomUUID()) {
 
 data class Parent(
     var pk: Id<Parent>? = null, // INTEGER Auto-incremental primary key
-    val value: String           // NOT NULL column
+    var value: String           // NOT NULL column
 )
 
 /** CHILD */
@@ -98,25 +98,25 @@ data class Unsafe(
 /** SCHEMA */
 
 val serializer = SqliteSerializer(
-        globalSerializers = BasicTS.sqlite + listOf(
-            //        constructor    deconstructor 
-            IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
-            //                 constructor
-            IdTS.uuid.sqlite({ Id<Any>(it) })        // Serializer for UId<T>
-        ),
-        tables = listOf(
-            Table(Parent::pk),
-            Table(
-                Child::pk,
-                foreignKeys = listOf( // Foreign keys
-                    Child::parent_pk to Parent::class
-                ),
-                constraints = listOf( // Column constraints
-                    Child::parent_pk to listOf(C.UNIQUE, C.CASCADE_DELETE, C.CASCADE_UPDATE)
-                )
+    globalSerializers = BasicTS.sqlite + listOf(
+        //        constructor    deconstructor
+        IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
+        //                 constructor
+        IdTS.uuid.sqlite({ UId<Any>(it) })        // Serializer for UId<T>
+    ),
+    tables = listOf(
+        Table(Parent::pk),
+        Table(
+            Child::pk,
+            foreignKeys = listOf( // Foreign keys
+                Child::parent_pk to Parent::class
             ),
+            constraints = listOf( // Column constraints
+                Child::parent_pk to listOf(C.UNIQUE, C.CASCADE_DELETE, C.CASCADE_UPDATE)
+            )
         ),
-    )
+    ),
+)
 
 /** CONFIG */
 
@@ -143,7 +143,7 @@ val sqlite = SqliteService(
 ```kotlin
 /** PlantUML */
 
-File("db.plantuml").writeText(
+File("./build/db.plantuml").writeText(
     serializer.plantUML(
         withPrimaryKey = true,
         withForeignKeys = true,
@@ -160,6 +160,8 @@ File("db.plantuml").writeText(
 ```kotlin
 sqlite.autocommit {
 
+    Profiler.active = true // Activate profiler
+
     /** CREATE */
 
     it.table.create<Parent>()
@@ -173,7 +175,7 @@ sqlite.autocommit {
 
     /** INSERT */
 
-    val child = Child(pk = 1, parent_pk = parent.pk, value = "Hello World!")
+    val child = Child(pk = UId(), parent_pk = parent.pk!!, value = "child value")
     it.row.insert(row = child)
 
     /** SELECT */
@@ -183,8 +185,8 @@ sqlite.autocommit {
 
     /** UPDATE */
 
-    parent.value = "How are you?"
-    it.table.update(parent)
+    parent.value = "child value"
+    it.row.update(parent)
 
     /** WHERE */
 
@@ -197,31 +199,31 @@ sqlite.autocommit {
 
     val moreChildren = it.query.get(output = Child::class, input = parent) {
         """
-            ${it.SELECT<Child>()}
-            INNER JOIN ${it.table<Parent>()} ON ${it.column(Parent::pk)} = ${it.column(Child::parent_pk)}
-            WHERE ${it.column(Parent::value)} = ${it.input(Parent::value)}
-        """
+        ${it.SELECT<Child>()}
+        INNER JOIN ${it.table<Parent>()} ON ${it.column(Parent::pk)} = ${it.column(Child::parent_pk)}
+        WHERE ${it.column(Parent::value)} = ${it.input(Parent::value)}
+    """
     }
     assert(moreChildren.size > 0)
+
+    Profiler.active = false // Deactivate profiler
 }
 ```
 
 <br><h3 align="center">Transactions</h3>
 
 ```kotlin
-service.transaction { // Any exception inside will trigger rollback ALL!
+sqlite.transaction { // Any exception inside will trigger rollback ALL!
     //...
-    val savePoint1 = it.roolback.savePoint()
+    val savePoint = it.roolback.savePoint()
     //...
-    val savePoint2 = it.roolback.savePoint()
-    //...
-    it.roolback.to(point = savePoint2)
+    it.roolback.to(point = savePoint)
     //...
 }
 
 /** ISOLATION */
 
-service.transaction(isolation = Isolation.READ_UNCOMMITTED) {
+sqlite.transaction(isolation = Isolation.READ_UNCOMMITTED) {
     //...
 }
 ```
@@ -231,39 +233,66 @@ service.transaction(isolation = Isolation.READ_UNCOMMITTED) {
 ```kotlin
 /** SERIALIZE: Instant(TIMESTAMP) */
 
-val TIMESTAMP = TypeSerializer<Instant>(
-        kclass = Instant::class,
-        dbType = "TIMESTAMP",
-        jdbcType = JDBCType.TIMESTAMP,
-        decoder = { rs, i, info -> rs.getTimestamp(i).toInstant().toKotlinInstant() },
-        encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x.toJavaInstant())) }
-    )
+val DURATION = TypeSerializer(
+    kclass = Duration::class,
+    dbType = "INTEGER",
+    jdbcType = JDBCType.INTEGER,
+    decoder = { rs, i, _ -> Duration.ofSeconds(rs.getLong(i)) },
+    encoder = { ps, i, x -> ps.setLong(i, x.toSeconds()) }
+)
 
 /** REGISTRATION */
 
-val serializer = SqliteSerializer(
-    globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP),
-    //...
+SqliteSerializer(
+    globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(DURATION),
+    tables = listOf(Table(Unsafe::pk))
 )
 ```
 
 <br><h3 align="center">Profiler</h3>
 
 ```kotlin
- /** TOP 10 SLOWEST QUERIES */
+/** TOP 5 SLOWEST QUERIES */
 
-val top10 = Profiler.logs.values
-        .filter { !it.sql.contains("DROP TABLE") }
-        .filter { !it.sql.contains("CREATE TABLE") }
-        .sortedByDescending { it.duration / it.repetitions }
-        .subList(0, 10)
+val top5 = Profiler.logs.values
+    .filter { !it.sql.contains("DROP TABLE") }
+    .filter { !it.sql.contains("CREATE TABLE") }
+    .sortedByDescending { it.duration / it.repetitions }
+    .subList(0, 5)
 
-for(ql in top10) {
-    println("Query: ${ql.sql}")
+for (ql in top5) {
+    println("\nQuery: ${ql.sql}")
     println("  * Type: ${ql.type}")
     println("  * Exec: ${ql.repetitions}")
     println("  * Time: ${ql.duration / ql.repetitions}")
 }
+
+/**
+Query: SELECT * FROM "main"."Parent"
+ * Type: QUERY
+ * Exec: 1
+ * Time: 318.53us
+
+Query: INSERT INTO "main"."Parent" ("value") VALUES (?)
+ * Type: INSERT
+ * Exec: 1
+ * Time: 317.288us
+
+Query: INSERT INTO "main"."Child" ("pk", "parent_pk", "value") VALUES (?, ?, ?)
+ * Type: UPDATE
+ * Exec: 1
+ * Time: 185.032us
+
+Query: UPDATE "main"."Parent" SET "value" = ? WHERE "main"."Parent"."pk" = ?
+ * Type: UPDATE
+ * Exec: 1
+ * Time: 153.494us
+
+Query:  SELECT * FROM "main"."Child" WHERE "main"."Child"."value" = ?
+ * Type: QUERY
+ * Exec: 1
+ * Time: 149.654us
+ */
 ```
 
 <br> <h3 align="center">Tutorials</h3>
@@ -338,7 +367,7 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 <br><br><h2 align="center">Specifications</h3>
 
 <p align="center">
-    
+
 </p>
 
 <br><br><h3 align="center">PRIMARY KEY</h3>

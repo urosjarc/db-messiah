@@ -55,7 +55,7 @@ data class Unsafe(
 )
 // STOP
 
-// START: 'Database'
+// START 'Database'
 /** SCHEMA */
 
 val serializer = SqliteSerializer(
@@ -97,19 +97,19 @@ val sqlite = SqliteService(
 
 fun main() {
 
-// START 'Diagrams'
+    // START 'Diagrams'
     /** PlantUML */
 
-    File("db.plantuml").writeText(
+    File("./build/db.plantuml").writeText(
         serializer.plantUML(
             withPrimaryKey = true,
             withForeignKeys = true,
             withOtherColumns = false
         )
     )
-// STOP
+    // STOP
 
-// START 'Operations'
+    // START 'Operations'
     sqlite.autocommit {
 
         Profiler.active = true // Activate profiler
@@ -160,16 +160,14 @@ fun main() {
 
         Profiler.active = false // Deactivate profiler
     }
-// STOP
+    // STOP
 
-// START 'Transactions'
+    // START 'Transactions'
     sqlite.transaction { // Any exception inside will trigger rollback ALL!
         //...
-        val savePoint1 = it.roolback.savePoint()
+        val savePoint = it.roolback.savePoint()
         //...
-        val savePoint2 = it.roolback.savePoint()
-        //...
-        it.roolback.to(point = savePoint2)
+        it.roolback.to(point = savePoint)
         //...
     }
 
@@ -178,29 +176,29 @@ fun main() {
     sqlite.transaction(isolation = Isolation.READ_UNCOMMITTED) {
         //...
     }
-// STOP
+    // STOP
 
-// START: 'Serializers'
+    // START 'Serializers'
     /** SERIALIZE: Instant(TIMESTAMP) */
 
     val DURATION = TypeSerializer(
         kclass = Duration::class,
         dbType = "INTEGER",
         jdbcType = JDBCType.INTEGER,
-        decoder = { rs, i, info -> Duration.ofSeconds(rs.getLong(i)) },
+        decoder = { rs, i, _ -> Duration.ofSeconds(rs.getLong(i)) },
         encoder = { ps, i, x -> ps.setLong(i, x.toSeconds()) }
     )
 
     /** REGISTRATION */
 
-    val sqliteSerializer = SqliteSerializer(
+    SqliteSerializer(
         globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(DURATION),
         tables = listOf(Table(Unsafe::pk))
     )
-// STOP
+    // STOP
 
 
-// START 'Profiler'
+    // START 'Profiler'
     /** TOP 5 SLOWEST QUERIES */
 
     val top5 = Profiler.logs.values
@@ -242,7 +240,7 @@ fun main() {
      * Exec: 1
      * Time: 149.654us
      */
-// STOP
+    // STOP
 }
 
 class Test_README {
