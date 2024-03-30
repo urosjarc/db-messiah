@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class Test_Chinook {
     @Test
     fun `test db2`() {
-        File("db2.plantuml").writeText(db2_serializer.plantUML())
+        File("./build/db2.plantuml").writeText(db2_serializer.plantUML())
         Seed.db2()
         db2.autocommit { aconn ->
 
@@ -65,7 +65,7 @@ class Test_Chinook {
 
     @Test
     fun `test derby`() {
-        File("derby.plantuml").writeText(derby_serializer.plantUML())
+        File("./build/derby.plantuml").writeText(derby_serializer.plantUML())
         Seed.derby()
         derby.autocommit {
 
@@ -95,7 +95,7 @@ class Test_Chinook {
 
     @Test
     fun `test h2`() {
-        File("h2.plantuml").writeText(h2_serializer.plantUML())
+        File("./build/h2.plantuml").writeText(h2_serializer.plantUML())
         Seed.h2()
         h2.autocommit {
 
@@ -121,7 +121,7 @@ class Test_Chinook {
 
     @Test
     fun `test maria`() {
-        File("maria.plantuml").writeText(maria_serializer.plantUML())
+        File("./build/maria.plantuml").writeText(maria_serializer.plantUML())
         Seed.maria()
         maria.autocommit { aconn ->
 
@@ -147,7 +147,7 @@ class Test_Chinook {
 
     @Test
     fun `test mysql`() {
-        File("mysql.plantuml").writeText(mysql_serializer.plantUML())
+        File("./build/mysql.plantuml").writeText(mysql_serializer.plantUML())
         Seed.mysql()
         mysql.autocommit { aconn ->
 
@@ -173,7 +173,7 @@ class Test_Chinook {
 
     @Test
     fun `test mssql`() {
-        File("mssql.plantuml").writeText(mssql_serializer.plantUML())
+        File("./build/mssql.plantuml").writeText(mssql_serializer.plantUML())
         Seed.mssql()
         mssql.autocommit { aconn ->
 
@@ -199,7 +199,7 @@ class Test_Chinook {
 
     @Test
     fun `test postgresql`() {
-        File("postgresql.plantuml").writeText(postgresql_serializer.plantUML())
+        File("./build/postgresql.plantuml").writeText(postgresql_serializer.plantUML())
         Seed.pg()
         pg.autocommit { aconn ->
 
@@ -225,7 +225,7 @@ class Test_Chinook {
 
     @Test
     fun `test oracle`() {
-        File("oracle.plantuml").writeText(oracle_serializer.plantUML())
+        File("./build/oracle.plantuml").writeText(oracle_serializer.plantUML())
         Seed.oracle()
         oracle.autocommit { aconn ->
 
@@ -251,7 +251,7 @@ class Test_Chinook {
 
     @Test
     fun `test sqlite`() {
-        File("sqlite.plantuml").writeText(sqlite_serializer.plantUML())
+        File("./build/sqlite.plantuml").writeText(sqlite_serializer.plantUML())
         Seed.sqlite()
         sqlite.autocommit {
 

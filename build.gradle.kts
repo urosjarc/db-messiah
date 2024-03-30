@@ -186,3 +186,33 @@ publishing {
     }
 
 }
+
+
+tasks.register<GradleBuild>("readme") {
+    group = "verification"
+    description = "Create README.md tests."
+    this.tasks = listOf("tutorials")
+
+    doLast {
+        val readmeMap = mutableListOf<Pair<String, MutableList<String>>>()
+        val templateLines = File("src/tutorials/kotlin/Test_README.kt").readLines()
+        var active = false
+        templateLines.forEach {
+            if(it.startsWith("// START '")){
+                active = true
+                readmeMap.add(it to mutableListOf())
+            } else if(it.startsWith("// STOP")) {
+                active = false
+            } else if(active){
+                readmeMap.last().second.add(it)
+            }
+        }
+
+        val readme = File("README.md").readText()
+        readmeMap.forEach { (key, value) ->
+            readme.replace(oldValue = key, newValue = value.joinToString(separator = ""))
+        }
+
+        File("README.md").writeText(readme)
+    }
+}

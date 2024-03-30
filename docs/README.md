@@ -158,112 +158,25 @@ File("db.plantuml").writeText(
 <br><h3 align="center">Operations</h3>
 
 ```kotlin
-sqlite.autocommit {
-
-    /** CREATE */
-
-    it.table.create<Parent>()
-    it.table.create<Child>()
-
-    /** INSERT */
-
-    val parent = Parent(value = "Hello World!")
-    it.row.insert(row = parent)
-    assert(parent.pk != null)
-
-    /** INSERT */
-
-    val child = Child(pk = 1, parent_pk = parent.pk, value = "Hello World!")
-    it.row.insert(row = child)
-
-    /** SELECT */
-
-    val parents = it.table.select<Parent>()
-    assert(parents.contains(parent))
-
-    /** UPDATE */
-
-    parent.value = "How are you?"
-    it.table.update(parent)
-
-    /** WHERE */
-
-    val someChildren = it.query.get(output = Child::class, input = parent) {
-        """ ${it.SELECT<Child>()} WHERE ${it.column(Child::value)} = ${it.input(Parent::value)} """
-    }
-    assert(someChildren.size > 0)
-
-    /** JOIN */
-
-    val moreChildren = it.query.get(output = Child::class, input = parent) {
-        """
-            ${it.SELECT<Child>()}
-            INNER JOIN ${it.table<Parent>()} ON ${it.column(Parent::pk)} = ${it.column(Child::parent_pk)}
-            WHERE ${it.column(Parent::value)} = ${it.input(Parent::value)}
-        """
-    }
-    assert(moreChildren.size > 0)
-}
+// START 'Operations'
 ```
 
 <br><h3 align="center">Transactions</h3>
 
 ```kotlin
-service.transaction { // Any exception inside will trigger rollback ALL!
-    //...
-    val savePoint1 = it.roolback.savePoint()
-    //...
-    val savePoint2 = it.roolback.savePoint()
-    //...
-    it.roolback.to(point = savePoint2)
-    //...
-}
-
-/** ISOLATION */
-
-service.transaction(isolation = Isolation.READ_UNCOMMITTED) {
-    //...
-}
+// START 'Transactions'
 ```
 
 <br><h3 align="center">Serializers</h3>
 
 ```kotlin
-/** SERIALIZE: Instant(TIMESTAMP) */
-
-val TIMESTAMP = TypeSerializer<Instant>(
-        kclass = Instant::class,
-        dbType = "TIMESTAMP",
-        jdbcType = JDBCType.TIMESTAMP,
-        decoder = { rs, i, info -> rs.getTimestamp(i).toInstant().toKotlinInstant() },
-        encoder = { ps, i, x -> ps.setTimestamp(i, Timestamp.from(x.toJavaInstant())) }
-    )
-
-/** REGISTRATION */
-
-val serializer = SqliteSerializer(
-    globalSerializers = BasicTS.sqlite + listOf(TIMESTAMP),
-    //...
-)
+// START 'Serializers'
 ```
 
 <br><h3 align="center">Profiler</h3>
 
 ```kotlin
- /** TOP 10 SLOWEST QUERIES */
-
-val top10 = Profiler.logs.values
-        .filter { !it.sql.contains("DROP TABLE") }
-        .filter { !it.sql.contains("CREATE TABLE") }
-        .sortedByDescending { it.duration / it.repetitions }
-        .subList(0, 10)
-
-for(ql in top10) {
-    println("Query: ${ql.sql}")
-    println("  * Type: ${ql.type}")
-    println("  * Exec: ${ql.repetitions}")
-    println("  * Time: ${ql.duration / ql.repetitions}")
-}
+// START 'Profiler'
 ```
 
 <br> <h3 align="center">Tutorials</h3>
@@ -338,7 +251,7 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 <br><br><h2 align="center">Specifications</h3>
 
 <p align="center">
-    
+
 </p>
 
 <br><br><h3 align="center">PRIMARY KEY</h3>
