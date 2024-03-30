@@ -2,7 +2,9 @@ name: Docs for db-messiah
 
 on:
   push:
-    branches: [ main ]
+
+permissions:
+  contents: write
 
 jobs:
   publish:
@@ -12,10 +14,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up JDK 21
+      - name: Set up JDK 19
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 19
           distribution: 'adopt'
 
       - name: Build documentation
