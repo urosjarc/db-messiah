@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.urosjarc.dbmessiah.data</title>
+    <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../index.html">
+                            db-messiah
+                    </a>
+            </div>
+            <div class="library-version">
+0.0.1            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="package" id="content" pageIds="db-messiah::com.urosjarc.dbmessiah.data////PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../index.html">db-messiah</a><span class="delimiter">/</span><span class="current">com.urosjarc.dbmessiah.data</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1664935606%2FClasslikes%2F769193423" anchor-label="BatchQuery" id="-1664935606%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-batch-query/index.html"><span>Batch</span><wbr></wbr><span><span>Query</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1664935606%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-batch-query/index.html">BatchQuery</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sql<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>valueMatrix<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-query-value/index.html">QueryValue</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a <a href="-batch-query/index.html">BatchQuery</a> to be executed on a database. It consists of an SQL string and a value matrix of <a href="-query-value/index.html">QueryValue</a>. One row of <a href="-query-value/index.html">QueryValue</a> matrix represents values for one database call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-569387998%2FClasslikes%2F769193423" anchor-label="Column" id="-569387998%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-column/index.html"><span><span>Column</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-569387998%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-column/index.html">Column</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-db-value/index.html">DbValue</a></div><div class="brief "><p class="paragraph">Represents a column in a database table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1797109161%2FClasslikes%2F769193423" anchor-label="DbValue" id="-1797109161%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-db-value/index.html"><span>Db</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1797109161%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-db-value/index.html">DbValue</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a database value for columns or procedure arguments.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1156487428%2FClasslikes%2F769193423" anchor-label="DecodeInfo" id="-1156487428%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-decode-info/index.html"><span>Decode</span><wbr></wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1156487428%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-decode-info/index.html">DecodeInfo</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kclass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kparam<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-parameter/index.html">KParameter</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents the decoding information for a specific parameter in a Kotlin class. Information is used in <a href="-decoder/index.html">Decoder</a> callback to help write custom <a href="-type-serializer/index.html">TypeSerializer</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="456116934%2FClasslikes%2F769193423" anchor-label="Decoder" id="456116934%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-decoder/index.html"><span><span>Decoder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="456116934%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">typealias </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-decoder/index.html">T</a><span class="token operator">&gt;</span><span class="token operator"> = </span><span class="token punctuation">(</span><span class="token keyword"></span>rs<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/ResultSet.html">ResultSet</a><span class="token punctuation">, </span><span class="token keyword"></span>i<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span class="token keyword"></span>dInfo<span class="token operator">: </span><a href="-decode-info/index.html">DecodeInfo</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="-decoder/index.html">T</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Represents a callback that decodes a value of type T from a <a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/ResultSet.html">ResultSet</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1603212526%2FClasslikes%2F769193423" anchor-label="Encoder" id="1603212526%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-encoder/index.html"><span><span>Encoder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1603212526%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">typealias </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-encoder/index.html">T</a><span class="token operator">&gt;</span><span class="token operator"> = </span><span class="token punctuation">(</span><span class="token keyword"></span>ps<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/PreparedStatement.html">PreparedStatement</a><span class="token punctuation">, </span><span class="token keyword"></span>i<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span class="token keyword"></span>x<span class="token operator">: </span><a href="-encoder/index.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></div><div class="brief "><p class="paragraph">Represents an encoder function that encodes a value of type T into a <a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/PreparedStatement.html">PreparedStatement</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1127502272%2FClasslikes%2F769193423" anchor-label="ForeignColumn" id="1127502272%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-foreign-column/index.html"><span>Foreign</span><wbr></wbr><span><span>Column</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1127502272%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-foreign-column/index.html">ForeignColumn</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>unique<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>cascadeDelete<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>cascadeUpdate<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-other-column/index.html">OtherColumn</a></div><div class="brief "><p class="paragraph">Represents a foreign column.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="33234500%2FClasslikes%2F769193423" anchor-label="OtherColumn" id="33234500%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-other-column/index.html"><span>Other</span><wbr></wbr><span><span>Column</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="33234500%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-other-column/index.html">OtherColumn</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>unique<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-column/index.html">Column</a></div><div class="brief "><p class="paragraph">Represents an ordinary column that is not <a href="-primary-column/index.html">PrimaryColumn</a> nor <a href="-foreign-column/index.html">ForeignColumn</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-984834350%2FClasslikes%2F769193423" anchor-label="PrimaryColumn" id="-984834350%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-primary-column/index.html"><span>Primary</span><wbr></wbr><span><span>Column</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-984834350%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-primary-column/index.html">PrimaryColumn</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-column/index.html">Column</a></div><div class="brief "><p class="paragraph">Represents <a href="-primary-column/index.html">PrimaryColumn</a> in a <a href="-table-info/index.html">TableInfo</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1930916055%2FClasslikes%2F769193423" anchor-label="Procedure" id="1930916055%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-procedure/index.html"><span><span>Procedure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1930916055%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-procedure/index.html">Procedure</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>schema<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kclass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-procedure-arg/index.html">ProcedureArg</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a database procedure.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="995571797%2FClasslikes%2F769193423" anchor-label="ProcedureArg" id="995571797%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-procedure-arg/index.html"><span>Procedure</span><wbr></wbr><span><span>Arg</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="995571797%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-procedure-arg/index.html">ProcedureArg</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kprop<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-db-value/index.html">DbValue</a></div><div class="brief "><p class="paragraph">Represents an argument for a <a href="-procedure/index.html">Procedure</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1272316670%2FClasslikes%2F769193423" anchor-label="Query" id="-1272316670%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-query/index.html"><span><span>Query</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1272316670%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-query/index.html">Query</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">var </span>sql<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>values<span class="token operator">: </span><a href="-query-value/index.html">QueryValue</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A class representing a SQL query and its values.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1315444175%2FClasslikes%2F769193423" anchor-label="QueryValue" id="1315444175%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-query-value/index.html"><span>Query</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1315444175%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-query-value/index.html">QueryValue</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a SQL <a href="-query-value/index.html">QueryValue</a> to be used in a JDBC prepared statement. This <a href="-query-value/index.html">QueryValue</a> will replace question marks in the final SQL statement.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1334508078%2FClasslikes%2F769193423" anchor-label="TableInfo" id="1334508078%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-table-info/index.html"><span>Table</span><wbr></wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1334508078%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-table-info/index.html">TableInfo</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>schema<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kclass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>primaryColumn<span class="token operator">: </span><a href="-primary-column/index.html">PrimaryColumn</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>foreignColumns<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-foreign-column/index.html">ForeignColumn</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>otherColumns<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-other-column/index.html">OtherColumn</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>typeSerializers<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-type-serializer/index.html">TypeSerializer</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents the database table. This class is final representation of database table defined by the user. This class will be used internally by the system.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1064217396%2FClasslikes%2F769193423" anchor-label="TypeSerializer" id="-1064217396%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-type-serializer/index.html"><span>Type</span><wbr></wbr><span><span>Serializer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1064217396%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-type-serializer/index.html">TypeSerializer</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-type-serializer/index.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>kclass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-type-serializer/index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>dbType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>jdbcType<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.sql/java/sql/JDBCType.html">JDBCType</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>decoder<span class="token operator">: </span><a href="-decoder/index.html">Decoder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-type-serializer/index.html">T</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-type-serializer/index.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Represents a type serializer that is used to encode and decode value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

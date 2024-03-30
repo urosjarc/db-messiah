@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NamingTests</title>
+    <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../../index.html">
+                            db-messiah
+                    </a>
+            </div>
+            <div class="library-version">
+0.0.1            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="db-messiah::com.urosjarc.dbmessiah/SerializerTests.NamingTests///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../../index.html">db-messiah</a><span class="delimiter">/</span><a href="../../index.html">com.urosjarc.dbmessiah</a><span class="delimiter">/</span><a href="../index.html">SerializerTests</a><span class="delimiter">/</span><span class="current">NamingTests</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Naming</span><wbr></wbr><span><span>Tests</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">NamingTests</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>ser<span class="token operator">: </span><a href="../../-serializer/index.html">Serializer</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">The class is responsible for performing tests on element names. These tests are needed in case developer forgets to use escaping quotation while creating queries in <a href="../../-serializer/index.html">Serializer</a>. Database will create very strange exception messages which are really hard for the user to understand and to figure out where is the source of the problem. That's why we force naming convention of elements that will be used inside the database.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="930469438%2FConstructors%2F769193423" anchor-label="NamingTests" id="930469438%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-naming-tests.html"><span>Naming</span><wbr></wbr><span><span>Tests</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="930469438%2FConstructors%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ser<span class="token operator">: </span><a href="../../-serializer/index.html">Serializer</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1281585903%2FProperties%2F769193423" anchor-label="isValidNameRegex" id="-1281585903%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-valid-name-regex.html"><span>is</span><wbr></wbr><span>Valid</span><wbr></wbr><span>Name</span><wbr></wbr><span><span>Regex</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1281585903%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword"></span><span class="token keyword">val </span><a href="is-valid-name-regex.html">isValidNameRegex</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-regex/index.html">Regex</a></div><div class="brief "><p class="paragraph">Regular expression pattern used to validate if a name is a valid C-like variable name.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1593084127%2FProperties%2F769193423" anchor-label="ser" id="1593084127%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ser.html"><span><span>ser</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1593084127%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="ser.html">ser</a><span class="token operator">: </span><a href="../../-serializer/index.html">Serializer</a></div><div class="brief "><p class="paragraph">The Serializer instance used for testing.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1697946772%2FFunctions%2F769193423" anchor-label="assertValidKClass" id="1697946772%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="assert-valid-k-class.html"><span>assert</span><wbr></wbr><span>Valid</span><wbr></wbr><span><span>KClass</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1697946772%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="assert-valid-k-class.html"><span class="token function">assertValidKClass</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">group<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">kclass<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Asserts that the given KClass has a valid name and that all properties and parameters also have valid names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="526308043%2FFunctions%2F769193423" anchor-label="assertValidName" id="526308043%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="assert-valid-name.html"><span>assert</span><wbr></wbr><span>Valid</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="526308043%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">private </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="assert-valid-name.html"><span class="token function">assertValidName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">group<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Asserts that the given name is a valid C-like variable name.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="481380534%2FFunctions%2F769193423" anchor-label="Global inputs must have valid name with valid property and parameter names" id="481380534%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-global inputs must have valid name with valid property and parameter names.html"><span><span>Global</span></span> <span><span>inputs</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span> <span><span>with</span></span> <span><span>valid</span></span> <span><span>property</span></span> <span><span>and</span></span> <span><span>parameter</span></span> <span><span>names</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="481380534%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-global inputs must have valid name with valid property and parameter names.html"><span class="token function">Global inputs must have valid name with valid property and parameter names</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Global inputs must have valid name with valid property and parameter names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1080300041%2FFunctions%2F769193423" anchor-label="Global outputs must have valid name with valid property and parameter names" id="1080300041%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-global outputs must have valid name with valid property and parameter names.html"><span><span>Global</span></span> <span><span>outputs</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span> <span><span>with</span></span> <span><span>valid</span></span> <span><span>property</span></span> <span><span>and</span></span> <span><span>parameter</span></span> <span><span>names</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1080300041%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-global outputs must have valid name with valid property and parameter names.html"><span class="token function">Global outputs must have valid name with valid property and parameter names</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">This method validates that global outputs have valid names with valid property and parameter names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="293688845%2FFunctions%2F769193423" anchor-label="Global procedures must have valid name with valid property and parameter names" id="293688845%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-global procedures must have valid name with valid property and parameter names.html"><span><span>Global</span></span> <span><span>procedures</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span> <span><span>with</span></span> <span><span>valid</span></span> <span><span>property</span></span> <span><span>and</span></span> <span><span>parameter</span></span> <span><span>names</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="293688845%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-global procedures must have valid name with valid property and parameter names.html"><span class="token function">Global procedures must have valid name with valid property and parameter names</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Checks if global procedures have valid names with valid property and parameter names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1774964560%2FFunctions%2F769193423" anchor-label="Schema must have valid name" id="1774964560%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-schema must have valid name.html"><span><span>Schema</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1774964560%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-schema must have valid name.html"><span class="token function">Schema must have valid name</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Validates that the schema, tables, properties, and parameters have valid names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-72203742%2FFunctions%2F769193423" anchor-label="Schemas procedures must have valid name with valid property and parameter names" id="-72203742%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-schemas procedures must have valid name with valid property and parameter names.html"><span><span>Schemas</span></span> <span><span>procedures</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span> <span><span>with</span></span> <span><span>valid</span></span> <span><span>property</span></span> <span><span>and</span></span> <span><span>parameter</span></span> <span><span>names</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-72203742%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-schemas procedures must have valid name with valid property and parameter names.html"><span class="token function">Schemas procedures must have valid name with valid property and parameter names</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Validates that the procedures of all schemas have valid names with valid property and parameter names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2108980935%2FFunctions%2F769193423" anchor-label="Schemas tables must have valid name with valid property and parameter names" id="2108980935%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-schemas tables must have valid name with valid property and parameter names.html"><span><span>Schemas</span></span> <span><span>tables</span></span> <span><span>must</span></span> <span><span>have</span></span> <span><span>valid</span></span> <span><span>name</span></span> <span><span>with</span></span> <span><span>valid</span></span> <span><span>property</span></span> <span><span>and</span></span> <span><span>parameter</span></span> <span><span>names</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2108980935%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-schemas tables must have valid name with valid property and parameter names.html"><span class="token function">Schemas tables must have valid name with valid property and parameter names</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Validates that the Schemas tables have valid names with valid property and parameter names.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

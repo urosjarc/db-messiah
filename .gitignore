@@ -1,6 +1,0 @@
-.gradle
-build/
-.idea
-.env
-logs
-*.log

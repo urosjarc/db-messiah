@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Serializer</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            db-messiah
+                    </a>
+            </div>
+            <div class="library-version">
+0.0.1            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="db-messiah::com.urosjarc.dbmessiah/Serializer///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../index.html">db-messiah</a><span class="delimiter">/</span><a href="../index.html">com.urosjarc.dbmessiah</a><span class="delimiter">/</span><span class="current">Serializer</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Serializer</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">Serializer</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>allowAutoUUID<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>schemas<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-schema/index.html">Schema</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>globalSerializers<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.urosjarc.dbmessiah.data/-type-serializer/index.html">TypeSerializer</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>globalInputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>globalOutputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>globalProcedures<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()</span></span><span class="token punctuation">)</span> : <a href="../-exporter/index.html">Exporter</a></div><p class="paragraph">Serializer is an abstract class that provides functionality for serializing objects to various string like formats. This class should be implemented and overriden by specific database implementation. On class initialization all internal structure provided by the user will be heavily tested for any inconsistency or error provided by the user mistake. These tests are trying to provide security, reliability and ultimately trust to the end user.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>allow</span><wbr></wbr><span>Auto</span><wbr></wbr><span><span>UUID</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a> flag representing if database can have AUTO_UUID as primary keys.</p></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>schemas</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A list of <a href="../-schema/index.html">Schema</a> objects representing the database schemas that the serializer will work with.</p></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>global</span><wbr></wbr><span><span>Serializers</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A list of <a href="../../com.urosjarc.dbmessiah.data/-type-serializer/index.html">TypeSerializer</a> objects representing global serializers to be used by the serializer.</p></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>global</span><wbr></wbr><span><span>Inputs</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A list of <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a> objects representing global input classes that can be used by the serializer.</p></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>global</span><wbr></wbr><span><span>Outputs</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A list of <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a> objects representing global output classes that can be used by the serializer.</p></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>global</span><wbr></wbr><span><span>Procedures</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A list of <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a> objects representing global procedures that can be used by the serializer.</p></div></div></div></div></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.db2/-db2-serializer/index.html">Db2Serializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.derby/-derby-serializer/index.html">DerbySerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.h2/-h2-serializer/index.html">H2Serializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.maria/-maria-serializer/index.html">MariaSerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.mssql/-mssql-serializer/index.html">MssqlSerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.mysql/-mysql-serializer/index.html">MysqlSerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.oracle/-oracle-serializer/index.html">OracleSerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.postgresql/-pg-serializer/index.html">PgSerializer</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.urosjarc.dbmessiah.impl.sqlite/-sqlite-serializer/index.html">SqliteSerializer</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-1788196195%2FConstructors%2F769193423" anchor-label="Serializer" id="-1788196195%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-serializer.html"><span><span>Serializer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1788196195%2FConstructors%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">allowAutoUUID<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">schemas<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-schema/index.html">Schema</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">globalSerializers<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.urosjarc.dbmessiah.data/-type-serializer/index.html">TypeSerializer</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">globalInputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()<span class="token punctuation">, </span></span><span class="parameter ">globalOutputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()<span class="token punctuation">, </span></span><span class="parameter ">globalProcedures<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>listOf()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1633981350%2FProperties%2F769193423" anchor-label="allowAutoUUID" id="-1633981350%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="allow-auto-u-u-i-d.html"><span>allow</span><wbr></wbr><span>Auto</span><wbr></wbr><span><span>UUID</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1633981350%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword"></span><span class="token keyword">val </span><a href="allow-auto-u-u-i-d.html">allowAutoUUID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-36881855%2FProperties%2F769193423" anchor-label="globalInputs" id="-36881855%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="global-inputs.html"><span>global</span><wbr></wbr><span><span>Inputs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-36881855%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword"></span><span class="token keyword">val </span><a href="global-inputs.html">globalInputs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="989429182%2FProperties%2F769193423" anchor-label="globalOutputs" id="989429182%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="global-outputs.html"><span>global</span><wbr></wbr><span><span>Outputs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="989429182%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword"></span><span class="token keyword">val </span><a href="global-outputs.html">globalOutputs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1140411786%2FProperties%2F769193423" anchor-label="globalProcedures" id="1140411786%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="global-procedures.html"><span>global</span><wbr></wbr><span><span>Procedures</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1140411786%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword"></span><span class="token keyword">val </span><a href="global-procedures.html">globalProcedures</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-162499185%2FProperties%2F769193423" anchor-label="globalSerializers" id="-162499185%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="global-serializers.html"><span>global</span><wbr></wbr><span><span>Serializers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-162499185%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword"></span><span class="token keyword">val </span><a href="global-serializers.html">globalSerializers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.urosjarc.dbmessiah.data/-type-serializer/index.html">TypeSerializer</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1043334412%2FProperties%2F769193423" anchor-label="mapper" id="1043334412%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mapper.html"><span><span>mapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1043334412%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="mapper.html">mapper</a><span class="token operator">: </span><a href="../-mapper/index.html">Mapper</a></div><div class="brief "><p class="paragraph">Variable representing an instance of the <a href="../-mapper/index.html">Mapper</a> class. This instance will help us map object from database to user space and back.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="745587355%2FProperties%2F769193423" anchor-label="schemas" id="745587355%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="schemas.html"><span><span>schemas</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="745587355%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">internal </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="schemas.html">schemas</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-schema/index.html">Schema</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2135837088%2FProperties%2F769193423" anchor-label="selectLastId" id="-2135837088%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="select-last-id.html"><span>select</span><wbr></wbr><span>Last</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2135837088%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="select-last-id.html">selectLastId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Represents the SQL statement that will retrieve last id from database by force.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-327750459%2FFunctions%2F769193423" anchor-label="callProcedure" id="-327750459%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="call-procedure.html"><span>call</span><wbr></wbr><span><span>Procedure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-327750459%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="call-procedure.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="call-procedure.html"><span class="token function">callProcedure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">procedure<span class="token operator">: </span><a href="call-procedure.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for calling stored procedure.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1597165079%2FFunctions%2F769193423" anchor-label="createProcedure" id="1597165079%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-procedure.html"><span>create</span><wbr></wbr><span><span>Procedure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1597165079%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="create-procedure.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="create-procedure.html"><span class="token function">createProcedure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">procedure<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="create-procedure.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">procedureBody<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for creating a stored procedure in the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-221337851%2FFunctions%2F769193423" anchor-label="createSchema" id="-221337851%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-schema.html"><span>create</span><wbr></wbr><span><span>Schema</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-221337851%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-schema.html"><span class="token function">createSchema</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">schema<span class="token operator">: </span><a href="../-schema/index.html">Schema</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Creates <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for creating a schema in the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-137550739%2FFunctions%2F769193423" anchor-label="createTable" id="-137550739%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-table.html"><span>create</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-137550739%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="create-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="create-table.html"><span class="token function">createTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="create-table.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for creating new table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1815565736%2FFunctions%2F769193423" anchor-label="dbDiagramIO" id="1815565736%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-exporter/db-diagram-i-o.html"><span>db</span><wbr></wbr><span>Diagram</span><wbr></wbr><span><span>IO</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1815565736%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-exporter/db-diagram-i-o.html"><span class="token function">dbDiagramIO</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">withOtherColumns<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Generates a <a href="https://dbdiagram.io">dbdiagram.io</a> class diagram representing the database architecture.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1261664639%2FFunctions%2F769193423" anchor-label="deleteRow" id="1261664639%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-row.html"><span>delete</span><wbr></wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1261664639%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="delete-row.html"><span class="token function">deleteRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">row<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for deleting specific row by id from the database table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-26524834%2FFunctions%2F769193423" anchor-label="deleteTable" id="-26524834%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-table.html"><span>delete</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-26524834%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="delete-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="delete-table.html"><span class="token function">deleteTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="delete-table.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for deleting all rows from the specified table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-7966369%2FFunctions%2F769193423" anchor-label="dropProcedure" id="-7966369%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-procedure.html"><span>drop</span><wbr></wbr><span><span>Procedure</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-7966369%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="drop-procedure.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="drop-procedure.html"><span class="token function">dropProcedure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">procedure<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="drop-procedure.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for dropping a stored procedure from the database.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1229988364%2FFunctions%2F769193423" anchor-label="dropSchema" id="1229988364%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-schema.html"><span>drop</span><wbr></wbr><span><span>Schema</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1229988364%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="drop-schema.html"><span class="token function">dropSchema</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">schema<span class="token operator">: </span><a href="../-schema/index.html">Schema</a><span class="token punctuation">, </span></span><span class="parameter ">cascade<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Creates <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for dropping specific schema.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1650508970%2FFunctions%2F769193423" anchor-label="dropTable" id="1650508970%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-table.html"><span>drop</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1650508970%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="drop-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="drop-table.html"><span class="token function">dropTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="drop-table.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cascade<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for dropping a database table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1185945488%2FFunctions%2F769193423" anchor-label="escaped" id="-1185945488%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="escaped.html"><span><span>escaped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1185945488%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">schema<span class="token operator">: </span><a href="../-schema/index.html">Schema</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given <a href="../-schema/index.html">Schema</a> name with database specific escaping quotation.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">column<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-column/index.html">Column</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given column name with database specific escaping quotation.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">procedure<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-procedure/index.html">Procedure</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given <a href="../../com.urosjarc.dbmessiah.data/-procedure/index.html">Procedure</a> path with database specific escaping quotation.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tableInfo<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-table-info/index.html">TableInfo</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given table path with database specific escaping quotation.</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given string with database specific escaping quotation.</p></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="escaped.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="escaped.html"><span class="token function">escaped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">procedureArg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property1/index.html">KProperty1</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="escaped.html">T</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Escapes the given procedure argument name with database specific escaping quotation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-957883433%2FFunctions%2F769193423" anchor-label="insertRow" id="-957883433%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="insert-row.html"><span>insert</span><wbr></wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-957883433%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="insert-row.html"><span class="token function">insertRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">row<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">batch<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for inserting new row.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1392237240%2FFunctions%2F769193423" anchor-label="plantUML" id="1392237240%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-exporter/plant-u-m-l.html"><span>plant</span><wbr></wbr><span><span>UML</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1392237240%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-exporter/plant-u-m-l.html"><span class="token function">plantUML</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">withPrimaryKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">withForeignKeys<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">withOtherColumns<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Generates <a href="https://plantuml.com/class-diagram">PlantUML class diagram</a> representing database arhitecture.*</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="373948320%2FFunctions%2F769193423" anchor-label="query" id="373948320%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="query.html"><span><span>query</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="373948320%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="query.html"><span class="token function">query</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buildSql<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../com.urosjarc.dbmessiah.builders/-sql-builder/index.html">SqlBuilder</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> from user defined SQL string</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1600522897%2FFunctions%2F769193423" anchor-label="queryWithInput" id="1600522897%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="query-with-input.html"><span>query</span><wbr></wbr><span>With</span><wbr></wbr><span><span>Input</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1600522897%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="query-with-input.html">IN</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="query-with-input.html"><span class="token function">queryWithInput</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">input<span class="token operator">: </span><a href="query-with-input.html">IN</a><span class="token punctuation">, </span></span><span class="parameter ">buildSql<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span>queryBuilder<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.builders/-query-builder/index.html">QueryBuilder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="query-with-input.html">IN</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Creates <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> from user defined SQL string with inputs.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1399899594%2FFunctions%2F769193423" anchor-label="selectTable" id="-1399899594%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="select-table.html"><span>select</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1399899594%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="select-table.html"><span class="token function">selectTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for selecting all rows from table.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="select-table.html">K</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="select-table.html"><span class="token function">selectTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">pk<span class="token operator">: </span><a href="select-table.html">K</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for a specific row based on the primary key value.</p></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="select-table.html">V</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-comparable/index.html">Comparable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">V</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span><a href="select-table.html"><span class="token function">selectTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cursor<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.domain/-cursor/index.html">Cursor</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="select-table.html">V</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for selecting rows from table with cursor pagination.</p></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt; </span><a href="select-table.html"><span class="token function">selectTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">table<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">page<span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.domain/-page/index.html">Page</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="select-table.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for selecting rows from table with offset pagination.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1458837987%2FFunctions%2F769193423" anchor-label="updateRow" id="-1458837987%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-row.html"><span>update</span><wbr></wbr><span><span>Row</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1458837987%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="update-row.html"><span class="token function">updateRow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">row<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a></div><div class="brief "><p class="paragraph">Makes <a href="../../com.urosjarc.dbmessiah.data/-query/index.html">Query</a> for updating row by specific id in the database table.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
