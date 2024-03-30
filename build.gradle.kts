@@ -199,6 +199,9 @@ tasks.register<GradleBuild>("readme") {
     this.tasks = listOf("tutorials")
 
     doLast {
+        val templateLines = File("./src/tutorials/kotlin/Test_README.kt").readLines()
+        var readme = File("./src/tutorials/kotlin/Test_README.md").readText()
+
         val dependencies = mutableListOf(
             "implementation(\"${project.group}:${project.name}:$version\") // Required",
             "implementation(\"${project.group}:${project.name}-extra:$version\") // Optional",
@@ -210,7 +213,7 @@ tasks.register<GradleBuild>("readme") {
             "// START 'Drivers'" to drivers.map { "runtimeOnly(\"$it\")" }.toMutableList()
         )
 
-        val templateLines = File("./src/tutorials/kotlin/Test_README.kt").readLines()
+
         var active = false
         var indent = ""
         templateLines.forEach {
@@ -225,7 +228,6 @@ tasks.register<GradleBuild>("readme") {
             }
         }
 
-        var readme = File("./docs/README.md").readText()
         readmeMap.forEach { (key, value) ->
             readme = readme.replace(oldValue = key, newValue = value.joinToString("\n"))
         }

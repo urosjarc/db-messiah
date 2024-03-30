@@ -63,7 +63,7 @@ val serializer = SqliteSerializer(
         //        constructor    deconstructor
         IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
         //                 constructor
-        IdTS.uuid.sqlite({ UId<Any>(it) })        // Serializer for UId<T>
+        IdTS.uuid.sqlite({ UId<Any>(it) })       // Serializer for UId<T>
     ),
     tables = listOf(
         Table(Parent::pk),
@@ -97,24 +97,22 @@ val sqlite = SqliteService(
 
 fun main() {
 
-    // START 'Diagrams'
-    /** PlantUML */
-
-    File("./build/db.plantuml").writeText(
-        serializer.plantUML(
-            withPrimaryKey = true,
-            withForeignKeys = true,
-            withOtherColumns = false
+    // START 'PlantUML'
+    File("./build/db.pluml")
+        .writeText(
+            serializer.plantUML(
+                withOtherColumns = false
+            )
         )
-    )
+    // STOP
 
-    /** dbdiagram.io */
-
-    File("./build/db.dbdiagramio").writeText(
-        serializer.dbDiagramIO(
-            withOtherColumns = false
+    // START 'dbdiagram.io'
+    File("./build/db.txt")
+        .writeText(
+            serializer.dbDiagramIO(
+                withOtherColumns = false
+            )
         )
-    )
     // STOP
 
     // START 'Operations'

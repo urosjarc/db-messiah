@@ -64,7 +64,7 @@ fun basic_sqlite() {
      * For more informations visit plantUML website and plugin for Intelij:
      * > https://plantuml.com/
      */
-    File("db.plantuml").writeText(serializer.plantUML())
+    File("./build/db.plantuml").writeText(serializer.plantUML())
 
     /**
      *  When you want to query database, you will be provided with available db connection (SqliteQueryConn) from the connection pool.
