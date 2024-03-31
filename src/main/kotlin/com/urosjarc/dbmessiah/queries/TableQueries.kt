@@ -94,7 +94,7 @@ public open class TableQueries(
      * @param cursor The [Cursor] configuration for fetching items.
      * @return A list of objects representing the selected rows.
      */
-    public inline fun <reified T : Any, V : Comparable<V>> select(cursor: Cursor<T, V>): List<T> {
+    public inline fun <reified T : Any, V> select(cursor: Cursor<T, V>): List<T> {
         val query = this.ser.selectTable(table = T::class, cursor = cursor)
         return this.driver.query(query = query) {
             this.ser.mapper.decodeOne(resultSet = it, kclass = T::class)

@@ -22,7 +22,6 @@
         <td width="33%" align="center">
                 <p><a href="#get-started">Get started</a></p>
                 <p><a href="#tutorials">Tutorials</a></p>
-                <p><a href="#configuration">Configuration</a></p>
                 <p><a href="#specifications">Specifications</a></p>
                 <p><a href="#arhitecture">Arhitecture</a></p>
                 <p><a href="https://urosjarc.github.io/db-messiah/">Documentation</a></p>
@@ -64,18 +63,16 @@ runtimeOnly("com.oracle.database.jdbc:ojdbc11:23.3.0.23.09")
 /** TYPE SAFE ID */
 
 @JvmInline
-value class Id<T>(val value: Int): Comparable<Id<T>> {
-    /** FOR PAGINATION PURPOSES */
-    override fun compareTo(other: Id<T>): Int = this.value.compareTo(other.value)
-    /** FOR CORRECT VALUE REPRESENTATION */
+value class Id<T>(val value: Int){
+    /** You must override toString! */
     override fun toString(): String = this.value.toString()
 }
 
 /** TYPE SAFE UID */
 
 @JvmInline
-value class UId<T>(val value: UUID = UUID.randomUUID()) : Comparable<UId<T>> {
-    override fun compareTo(other: UId<T>): Int = this.value.compareTo(other.value)
+value class UId<T>(val value: UUID = UUID.randomUUID()) {
+    /** You must override toString! */
     override fun toString(): String = this.value.toString()
 }
 ```
@@ -234,7 +231,7 @@ sqlite.autocommit {
 
     val cursor = it.table.select<Child, UId<Child>>(
         cursor = Cursor(
-            row = children[3], limit = 5,
+            index = children[3].pk, limit = 5,
             orderBy = Child::pk, order = Order.ASC
         )
     )

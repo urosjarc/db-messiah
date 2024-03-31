@@ -18,18 +18,16 @@ import java.util.*
 /** TYPE SAFE ID */
 
 @JvmInline
-value class Id<T>(val value: Int): Comparable<Id<T>> {
-    /** FOR PAGINATION PURPOSES */
-    override fun compareTo(other: Id<T>): Int = this.value.compareTo(other.value)
-    /** FOR CORRECT VALUE REPRESENTATION */
+value class Id<T>(val value: Int){
+    /** You must override toString! */
     override fun toString(): String = this.value.toString()
 }
 
 /** TYPE SAFE UID */
 
 @JvmInline
-value class UId<T>(val value: UUID = UUID.randomUUID()) : Comparable<UId<T>> {
-    override fun compareTo(other: UId<T>): Int = this.value.compareTo(other.value)
+value class UId<T>(val value: UUID = UUID.randomUUID()) {
+    /** You must override toString! */
     override fun toString(): String = this.value.toString()
 }
 // STOP
@@ -162,7 +160,7 @@ fun main() {
 
         val cursor = it.table.select<Child, UId<Child>>(
             cursor = Cursor(
-                row = children[3], limit = 5,
+                index = children[3].pk, limit = 5,
                 orderBy = Child::pk, order = Order.ASC
             )
         )

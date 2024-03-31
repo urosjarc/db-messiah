@@ -50,10 +50,21 @@ data class ManualUUID(val pk: UUID = UUID.randomUUID(), val col: String) // MANU
  * foreign keys. Let's define Id inline classes which will hold information about foreign table type.
  */
 @JvmInline
-value class Id<T>(val value: Int) // Internal type MUST be immutable and non-nullable.
+value class Id<T>(val value: Int) { // Internal type MUST be immutable and non-nullable.
+    /**
+     * You must override toString method because
+     * default toString representation of any inline type
+     * is 'KClass(value)' but this is invalid format for database!
+     * Database needs to receive only value part!
+     * */
+    override fun toString(): String = this.value.toString()
+}
 
 @JvmInline
-value class UId<T>(val value: UUID = UUID.randomUUID()) // Internal type MUST be immutable and non-nullable.
+value class UId<T>(val value: UUID = UUID.randomUUID()) { // Internal type MUST be immutable and non-nullable.
+    override fun toString(): String = this.value.toString()
+}
+
 data class ParentSafe(var pk: Id<ParentSafe>? = null, val col: String) // AUTO_INC primary key with type safety.
 data class ParentUUIDSafe(var pk: UId<ParentSafe>? = null, val col: String) // AUTO_UUID primary key with type safety.
 data class ChildSafe(

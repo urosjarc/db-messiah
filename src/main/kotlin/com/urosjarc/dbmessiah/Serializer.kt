@@ -277,7 +277,7 @@ public abstract class Serializer(
      * @param cursor the cursor object containing query parameters such as order by, order and limit
      * @return a Query object representing the executed query
      */
-    public open fun <T : Any, V : Comparable<V>> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
+    public open fun <T : Any, V> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
         val ser = this.mapper.getSerializer(cursor.orderBy)
         val lge = when (cursor.order) {

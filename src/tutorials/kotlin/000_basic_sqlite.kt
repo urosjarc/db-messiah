@@ -58,13 +58,14 @@ val service = SqliteService(config = config, ser = serializer)
 
 fun basic_sqlite() {
     /**
-     * To visualize database structure you can use plantUML extractor...
+     * To visualize database structure you can use plantUML or dbdiagram.io extractor...
      * IntelliJ has plugin to support ".plantuml" extensions.
      * > https://plugins.jetbrains.com/plugin/7017-plantuml-integration
      * For more informations visit plantUML website and plugin for Intelij:
      * > https://plantuml.com/
      */
     File("./build/db.plantuml").writeText(serializer.plantUML())
+    File("./build/db.txt").writeText(serializer.dbDiagramIO())
 
     /**
      *  When you want to query database, you will be provided with available db connection (SqliteQueryConn) from the connection pool.

@@ -555,7 +555,7 @@ open class Test_H2 : Test_Contract {
     @Test
     override fun `test query`() = service.autocommit {
         it.row.select<Parent>(pk = 1) ?: throw Exception("It should return something...")
-        val preParent2 = it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
+        it.row.select<Parent>(pk = 2) ?: throw Exception("It should return something...")
 
         //Get current all parents
         it.query.run {

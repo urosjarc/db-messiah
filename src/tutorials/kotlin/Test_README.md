@@ -22,7 +22,6 @@
         <td width="33%" align="center">
                 <p><a href="#get-started">Get started</a></p>
                 <p><a href="#tutorials">Tutorials</a></p>
-                <p><a href="#configuration">Configuration</a></p>
                 <p><a href="#specifications">Specifications</a></p>
                 <p><a href="#arhitecture">Arhitecture</a></p>
                 <p><a href="https://urosjarc.github.io/db-messiah/">Documentation</a></p>
