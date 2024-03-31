@@ -2,6 +2,8 @@ import com.urosjarc.dbmessiah.Profiler
 import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.*
+import com.urosjarc.dbmessiah.impl.postgresql.PgSchema
+import com.urosjarc.dbmessiah.impl.postgresql.PgSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.BasicTS
@@ -18,7 +20,7 @@ import java.util.*
 /** TYPE SAFE ID */
 
 @JvmInline
-value class Id<T>(val value: Int){
+value class Id<T>(val value: Int) {
     /** You must override toString! */
     override fun toString(): String = this.value.toString()
 }
@@ -57,9 +59,9 @@ data class Unsafe(
 // STOP
 
 // START 'Database'
-/** SCHEMA */
+/** SQLITE */
 
-val serializer = SqliteSerializer(
+val sqliteSerializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(
         /** Serializer for Id<T> */
         IdTS.int(construct = { Id<Any>(it) }, deconstruct = { it.value }),
@@ -82,6 +84,19 @@ val serializer = SqliteSerializer(
     ),
 )
 
+/** POSTGRES */
+
+val pgSerializer = PgSerializer(
+    globalSerializers = BasicTS.sqlite + JavaTimeTS.postgresql,
+    schemas = listOf(
+        PgSchema(
+            name = "name", tables = listOf(
+                Table(Unsafe::pk),
+            )
+        ),
+    ),
+)
+
 /** CONFIG */
 
 val config = Properties().apply {
@@ -94,7 +109,7 @@ val config = Properties().apply {
 
 val sqlite = SqliteService(
     config = config,
-    ser = serializer
+    ser = sqliteSerializer
 )
 // STOP
 
@@ -103,7 +118,7 @@ fun main() {
     // START 'PlantUML'
     File("./build/db.pluml")
         .writeText(
-            serializer.plantUML(
+            sqliteSerializer.plantUML(
                 withOtherColumns = false
             )
         )
@@ -112,7 +127,7 @@ fun main() {
     // START 'dbdiagram.io'
     File("./build/db.txt")
         .writeText(
-            serializer.dbDiagramIO(
+            sqliteSerializer.dbDiagramIO(
                 withOtherColumns = false
             )
         )
