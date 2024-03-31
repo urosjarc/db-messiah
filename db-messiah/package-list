@@ -133,8 +133,7 @@ $dokka.location:com.urosjarc.dbmessiah.domain/C/entries/#/PointingToDeclaration/
 $dokka.location:com.urosjarc.dbmessiah.domain/C/valueOf/#kotlin.String/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-c/value-of.html
 $dokka.location:com.urosjarc.dbmessiah.domain/C/values/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-c/values.html
 $dokka.location:com.urosjarc.dbmessiah.domain/Cursor///PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/index.html
-$dokka.location:com.urosjarc.dbmessiah.domain/Cursor/Cursor/#TypeParam(bounds=[kotlin.Any])#kotlin.reflect.KProperty1[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Comparable[^]])?]#kotlin.Int#com.urosjarc.dbmessiah.domain.Order/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/-cursor.html
-$dokka.location:com.urosjarc.dbmessiah.domain/Cursor/Cursor/#TypeParam(bounds=[kotlin.Comparable[^]])#kotlin.reflect.KProperty1[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Comparable[^]])?]#kotlin.Int#com.urosjarc.dbmessiah.domain.Order/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/-cursor.html
+$dokka.location:com.urosjarc.dbmessiah.domain/Cursor/Cursor/#TypeParam(bounds=[kotlin.Any?])#kotlin.reflect.KProperty1[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Any?])?]#kotlin.Int#com.urosjarc.dbmessiah.domain.Order/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/-cursor.html
 $dokka.location:com.urosjarc.dbmessiah.domain/Cursor/index/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/--index--.html
 $dokka.location:com.urosjarc.dbmessiah.domain/Cursor/limit/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/limit.html
 $dokka.location:com.urosjarc.dbmessiah.domain/Cursor/order/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.domain/-cursor/order.html
@@ -558,7 +557,7 @@ $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/delete/#/PointingToD
 $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/driver/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/driver.html
 $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/drop/#kotlin.Boolean/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/drop.html
 $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/select/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/select.html
-$dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/select/#com.urosjarc.dbmessiah.domain.Cursor[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Comparable[^]])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/select.html
+$dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/select/#com.urosjarc.dbmessiah.domain.Cursor[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/select.html
 $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/select/#com.urosjarc.dbmessiah.domain.Page[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/select.html
 $dokka.location:com.urosjarc.dbmessiah.queries/TableQueries/ser/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.queries/-table-queries/ser.html
 $dokka.location:com.urosjarc.dbmessiah.serializers////PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah.serializers/index.html
@@ -752,7 +751,7 @@ $dokka.location:com.urosjarc.dbmessiah/Serializer/queryWithInput/#TypeParam(boun
 $dokka.location:com.urosjarc.dbmessiah/Serializer/schemas/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/schemas.html
 $dokka.location:com.urosjarc.dbmessiah/Serializer/selectLastId/#/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-last-id.html
 $dokka.location:com.urosjarc.dbmessiah/Serializer/selectTable/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#TypeParam(bounds=[kotlin.Any])/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-table.html
-$dokka.location:com.urosjarc.dbmessiah/Serializer/selectTable/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#com.urosjarc.dbmessiah.domain.Cursor[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Comparable[^]])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-table.html
+$dokka.location:com.urosjarc.dbmessiah/Serializer/selectTable/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#com.urosjarc.dbmessiah.domain.Cursor[TypeParam(bounds=[kotlin.Any]),TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-table.html
 $dokka.location:com.urosjarc.dbmessiah/Serializer/selectTable/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]#com.urosjarc.dbmessiah.domain.Page[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-table.html
 $dokka.location:com.urosjarc.dbmessiah/Serializer/selectTable/#kotlin.reflect.KClass[TypeParam(bounds=[kotlin.Any])]/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/select-table.html
 $dokka.location:com.urosjarc.dbmessiah/Serializer/updateRow/#kotlin.Any/PointingToDeclaration/db-messiah/com.urosjarc.dbmessiah/-serializer/update-row.html
