@@ -85,7 +85,6 @@ public open class Exporter(internal open val schemas: List<Schema>) {
         val text = mutableListOf<String>()
 
         val tableGroups = mutableListOf<String>()
-        val relationships = mutableListOf<String>()
         val kclass_to_path = mutableMapOf<KClass<*>, String>()
         val kclass_to_pk = mutableMapOf<KClass<*>, String>()
 

@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "com.urosjarc"
-version = "0.0.1"
+version = "0.0.2"
 val github = "https://github.com/urosjarc/db-messiah"
 
 kotlin {
