@@ -6,7 +6,6 @@ import com.urosjarc.dbmessiah.data.*
 import com.urosjarc.dbmessiah.domain.Cursor
 import com.urosjarc.dbmessiah.domain.Order
 import com.urosjarc.dbmessiah.domain.Page
-import com.urosjarc.dbmessiah.extend.ext_kprops
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -32,7 +31,7 @@ public abstract class Serializer(
     internal val globalInputs: List<KClass<*>> = listOf(),
     internal val globalOutputs: List<KClass<*>> = listOf(),
     internal val globalProcedures: List<KClass<*>> = listOf()
-): Exporter(schemas = schemas) {
+) : Exporter(schemas = schemas) {
 
     init {
         SerializerTests.EmptinessTests(ser = this).also {
@@ -280,11 +279,15 @@ public abstract class Serializer(
      */
     public open fun <T : Any, V : Comparable<V>> selectTable(table: KClass<T>, cursor: Cursor<T, V>): Query {
         val T = this.mapper.getTableInfo(kclass = table)
+        val ser = this.mapper.getSerializer(cursor.orderBy)
         val lge = when (cursor.order) {
             Order.ASC -> ">="
             Order.DESC -> "<="
         }
-        return Query(sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(cursor.orderBy.name)} $lge ${cursor.index} ORDER BY ${escaped(cursor.orderBy.name)} ${cursor.order} LIMIT ${cursor.limit}")
+        return Query(
+            sql = "SELECT * FROM ${escaped(T)} WHERE ${escaped(cursor.orderBy.name)} $lge ? ORDER BY ${escaped(cursor.orderBy.name)} ${cursor.order} LIMIT ${cursor.limit}",
+            QueryValue(name = cursor.orderBy.name, value = cursor.index, jdbcType = ser.jdbcType, encoder = ser.encoder)
+        )
     }
 
     /**

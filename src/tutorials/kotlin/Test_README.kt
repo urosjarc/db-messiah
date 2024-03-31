@@ -1,8 +1,6 @@
 import com.urosjarc.dbmessiah.Profiler
 import com.urosjarc.dbmessiah.data.TypeSerializer
-import com.urosjarc.dbmessiah.domain.C
-import com.urosjarc.dbmessiah.domain.Isolation
-import com.urosjarc.dbmessiah.domain.Table
+import com.urosjarc.dbmessiah.domain.*
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteService
 import com.urosjarc.dbmessiah.serializers.BasicTS
@@ -19,14 +17,18 @@ import java.util.*
 /** TYPE SAFE ID */
 
 @JvmInline
-value class Id<T>(val value: Int) {
+value class Id<T>(val value: Int): Comparable<Id<T>> {
+    /** FOR PAGINATION PURPOSES */
+    override fun compareTo(other: Id<T>): Int = this.value.compareTo(other.value)
+    /** FOR CORRECT VALUE REPRESENTATION */
     override fun toString(): String = this.value.toString()
 }
 
 /** TYPE SAFE UID */
 
 @JvmInline
-value class UId<T>(val value: UUID = UUID.randomUUID()) {
+value class UId<T>(val value: UUID = UUID.randomUUID()) : Comparable<UId<T>> {
+    override fun compareTo(other: UId<T>): Int = this.value.compareTo(other.value)
     override fun toString(): String = this.value.toString()
 }
 // STOP
@@ -59,13 +61,14 @@ data class Unsafe(
 /** SCHEMA */
 
 val serializer = SqliteSerializer(
-    globalSerializers = BasicTS.sqlite + listOf(
-        //        constructor    deconstructor
+    globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(
+        //         constructor    deconstructor
         IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
         //                 constructor
         IdTS.uuid.sqlite({ UId<Any>(it) })       // Serializer for UId<T>
     ),
     tables = listOf(
+        Table(Unsafe::pk),
         Table(Parent::pk),
         Table(
             Child::pk,
@@ -73,7 +76,8 @@ val serializer = SqliteSerializer(
                 Child::parent_pk to Parent::class
             ),
             constraints = listOf( // Column constraints
-                Child::parent_pk to listOf(C.UNIQUE, C.CASCADE_DELETE, C.CASCADE_UPDATE)
+                Child::parent_pk to listOf(C.CASCADE_DELETE, C.CASCADE_UPDATE),
+                Child::value to listOf(C.UNIQUE)
             )
         ),
     ),
@@ -118,12 +122,11 @@ fun main() {
     // START 'Operations'
     sqlite.autocommit {
 
-        Profiler.active = true // Activate profiler
-
         /** CREATE */
 
         it.table.create<Parent>()
         it.table.create<Child>()
+        it.table.create<Unsafe>()
 
         /** INSERT */
 
@@ -131,19 +134,42 @@ fun main() {
         it.row.insert(row = parent)
         assert(parent.pk != null)
 
-        /** INSERT */
+        /** BATCH INSERT */
 
-        val child = Child(pk = UId(), parent_pk = parent.pk!!, value = "child value")
-        it.row.insert(row = child)
+        val children = arrayOfNulls<Child>(3000).mapIndexed { i, _ ->
+            Child(pk = UId(), parent_pk = parent.pk!!, value = "value_$i")
+        }
+        it.batch.insert(rows = children) // INSERT 1000 rows per batch
 
         /** SELECT */
 
         val parents = it.table.select<Parent>()
         assert(parents.contains(parent))
 
+        /** SELECT PAGE */
+
+        val page = it.table.select<Child>(
+            page = Page(
+                number = 2, limit = 5,
+                orderBy = Child::pk,
+                order = Order.DESC
+            )
+        )
+        assert(page.size == 5)
+
+        /** SELECT CURSOR */
+
+        val cursor = it.table.select<Child, UId<Child>>(
+            cursor = Cursor(
+                row = children[3], limit = 5,
+                orderBy = Child::pk, order = Order.ASC
+            )
+        )
+        assert(cursor.size == 5)
+
         /** UPDATE */
 
-        parent.value = "child value"
+        parent.value = "value_3"
         it.row.update(parent)
 
         /** WHERE */
@@ -151,7 +177,7 @@ fun main() {
         val someChildren = it.query.get(output = Child::class, input = parent) {
             """ ${it.SELECT<Child>()} WHERE ${it.column(Child::value)} = ${it.input(Parent::value)} """
         }
-        assert(someChildren.size > 0)
+        assert(someChildren == listOf(children[3]))
 
         /** JOIN */
 
@@ -159,12 +185,11 @@ fun main() {
             """
             ${it.SELECT<Child>()}
             INNER JOIN ${it.table<Parent>()} ON ${it.column(Parent::pk)} = ${it.column(Child::parent_pk)}
-            WHERE ${it.column(Parent::value)} = ${it.input(Parent::value)}
+            WHERE ${it.column(Child::value)} = ${it.input(Parent::value)}
         """
         }
-        assert(moreChildren.size > 0)
-
-        Profiler.active = false // Deactivate profiler
+        println(moreChildren)
+        assert(moreChildren == listOf(children[3]))
     }
     // STOP
 
@@ -205,46 +230,43 @@ fun main() {
 
 
     // START 'Profiler'
-    /** TOP 5 SLOWEST QUERIES */
+    sqlite.autocommit {
+        Profiler.active = true
 
-    val top5 = Profiler.logs.values
+        repeat(10) { _ -> it.table.select<Parent>() }
+        repeat(5) { _ -> it.table.select<Child>() }
+        repeat(2) { _ -> it.table.select<Unsafe>() }
+
+        Profiler.active = false
+    }
+
+    val profilerLogs = Profiler.logs.values
         .filter { !it.sql.contains("DROP TABLE") }
         .filter { !it.sql.contains("CREATE TABLE") }
         .sortedByDescending { it.duration / it.repetitions }
-        .subList(0, 5)
 
-    for (ql in top5) {
-        println("\nQuery: ${ql.sql}")
-        println("  * Type: ${ql.type}")
-        println("  * Exec: ${ql.repetitions}")
-        println("  * Time: ${ql.duration / ql.repetitions}")
+    profilerLogs.forEach {
+        println("\n* Query: ${it.sql}")
+        println("*    type: ${it.type}")
+        println("*    exec: ${it.repetitions}")
+        println("*    time: ${it.duration / it.repetitions}")
     }
 
     /**
-    Query: SELECT * FROM "main"."Parent"
-     * Type: QUERY
-     * Exec: 1
-     * Time: 318.53us
+     * Query: SELECT * FROM "main"."Parent"
+     *    type: QUERY
+     *    exec: 10
+     *    time: 285.528us
 
-    Query: INSERT INTO "main"."Parent" ("value") VALUES (?)
-     * Type: INSERT
-     * Exec: 1
-     * Time: 317.288us
+     * Query: SELECT * FROM "main"."Unsafe"
+     *    type: QUERY
+     *    exec: 2
+     *    time: 65.601us
 
-    Query: INSERT INTO "main"."Child" ("pk", "parent_pk", "value") VALUES (?, ?, ?)
-     * Type: UPDATE
-     * Exec: 1
-     * Time: 185.032us
-
-    Query: UPDATE "main"."Parent" SET "value" = ? WHERE "main"."Parent"."pk" = ?
-     * Type: UPDATE
-     * Exec: 1
-     * Time: 153.494us
-
-    Query:  SELECT * FROM "main"."Child" WHERE "main"."Child"."value" = ?
-     * Type: QUERY
-     * Exec: 1
-     * Time: 149.654us
+     * Query: SELECT * FROM "main"."Child"
+     *    type: QUERY
+     *    exec: 5
+     *    time: 40.525us
      */
     // STOP
 }

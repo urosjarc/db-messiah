@@ -379,11 +379,17 @@ abstract class Test_Serializer {
     fun `test selectTable cursor`() {
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, cursor = Cursor(index = 123, orderBy = Parent::pk, limit = 15, order = Order.DESC)),
-            expected = Query(sql = "SELECT * FROM ${wrap("main")}.${wrap("Parent")} WHERE ${wrap("pk")} <= 123 ORDER BY ${wrap("pk")} DESC LIMIT 15")
+            expected = Query(
+                sql = "SELECT * FROM ${wrap("main")}.${wrap("Parent")} WHERE ${wrap("pk")} <= ? ORDER BY ${wrap("pk")} DESC LIMIT 15",
+                QueryValue("pk", 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
+            )
         )
         assertEquals(
             actual = this.ser.selectTable(table = Parent::class, cursor = Cursor(index = 123, orderBy = Parent::pk, limit = 15, order = Order.ASC)),
-            expected = Query(sql = "SELECT * FROM ${wrap("main")}.${wrap("Parent")} WHERE ${wrap("pk")} >= 123 ORDER BY ${wrap("pk")} ASC LIMIT 15")
+            expected = Query(
+                sql = "SELECT * FROM ${wrap("main")}.${wrap("Parent")} WHERE ${wrap("pk")} >= ? ORDER BY ${wrap("pk")} ASC LIMIT 15",
+                QueryValue("pk", 123, jdbcType = JDBCType.INTEGER, encoder = NumberTS.int.encoder)
+            )
         )
     }
 
@@ -419,7 +425,7 @@ abstract class Test_Serializer {
                 listOf(
                     it.table<Parent>(),
                     it.name(Parent::pk),
-                    if(this.testProcedures) it.procedure<TestProcedure>() else "",
+                    if (this.testProcedures) it.procedure<TestProcedure>() else "",
                     it.DELETE<Parent>(),
                     it.SELECT<Parent>(),
                 ).joinToString()
@@ -428,7 +434,7 @@ abstract class Test_Serializer {
                 sql = listOf(
                     "${wrap("main")}.${wrap("Parent")}",
                     wrap("pk"),
-                    if(this.testProcedures) wrap("TestProcedure") else "",
+                    if (this.testProcedures) wrap("TestProcedure") else "",
                     "DELETE FROM ${wrap("main")}.${wrap("Parent")}",
                     "SELECT * FROM ${wrap("main")}.${wrap("Parent")}"
                 ).joinToString()
@@ -446,7 +452,7 @@ abstract class Test_Serializer {
                     it.input(Child::fk),
                     it.table<Parent>(),
                     it.name(Parent::pk),
-                    if(this.testProcedures) it.procedure<TestProcedure>() else "",
+                    if (this.testProcedures) it.procedure<TestProcedure>() else "",
                     it.DELETE<Parent>(),
                     it.SELECT<Parent>(),
                 ).joinToString()
@@ -456,7 +462,7 @@ abstract class Test_Serializer {
                     "?",
                     "${wrap("main")}.${wrap("Parent")}",
                     wrap("pk"),
-                    if(this.testProcedures) wrap("TestProcedure") else "",
+                    if (this.testProcedures) wrap("TestProcedure") else "",
                     "DELETE FROM ${wrap("main")}.${wrap("Parent")}",
                     "SELECT * FROM ${wrap("main")}.${wrap("Parent")}"
                 ).joinToString(),
