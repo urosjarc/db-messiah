@@ -72,10 +72,10 @@ val serializer = SqliteSerializer(
         Table(Parent::pk),
         Table(
             Child::pk,
-            foreignKeys = listOf( // Foreign keys
+            foreignKeys = listOf(
                 Child::parent_pk to Parent::class
             ),
-            constraints = listOf( // Column constraints
+            constraints = listOf(
                 Child::parent_pk to listOf(C.CASCADE_DELETE, C.CASCADE_UPDATE),
                 Child::value to listOf(C.UNIQUE)
             )

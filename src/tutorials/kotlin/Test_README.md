@@ -123,25 +123,25 @@
 
 <p align="center">
 All tutorials are tested and defined as kotlin files inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/tutorials/kotlin">src/tutorials/kotlin</a> directory.<br>
-Sample project is inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/chinook/kotlin">src/chinook/kotlin</a> directory and it implements<br>
-for all supported databases famous <a href="https://github.com/lerocha/chinook-database">Chinook sample database</a>.<br>
+Sample project is inside <a href="https://github.com/urosjarc/db-messiah/tree/master/src/chinook/kotlin">src/chinook/kotlin</a> directory and it implements,<br>
+for all supported databases, famous <a href="https://github.com/lerocha/chinook-database">Chinook sample database</a>.<br>
 
 </p>
 
 <br> <h3 align="center">Configuration</h3>
 
 <p align="center">
-User provided config property object is on initialization passed directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library
+User provided config property object is on initialization, passed directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library,
 <br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection pooling and configuration</a>.
 </p>
 
 <br><h3 align="center">Testing</h3>
-<p align="center">Only at initialization library uses <a href = "https://kotlinlang.org/docs/reflection.html">Kotlin reflection</a>, to introspect the user provided db structure.<br>
+<p align="center">Library uses <a href = "https://kotlinlang.org/docs/reflection.html">Kotlin reflection</a> only at initialization, to introspect the user provided db structure.<br>
 System will create <a href="https://github.com/urosjarc/db-messiah/blob/master/src/main/kotlin/com/urosjarc/dbmessiah/MapperCache.kt">mapping rules</a> on how kotlin classes will be mapped into db tables.<br>
 System will also test resulting rules, in order to find any user errors or inconsistency.<br>
 The list of all tests can be found inside <a href="https://github.com/urosjarc/db-messiah/blob/master/src/main/kotlin/com/urosjarc/dbmessiah/SerializerTests.kt">SerializerTests.kt</a>.<br>
 System will for E2E testing use db servers defined inside docker <a href="https://github.com/urosjarc/db-messiah/tree/master/compose.yaml">compose.yaml</a> file.<br>
-You can start start those servers with <code>docker-compose up</code>.
+You can start those servers with <code>docker-compose up</code>.
 
 </p>
 
@@ -171,22 +171,22 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 
 <br><br><h3 align="center">Type system</h3>
 
-|      Class     |    COLUMN    |               Databases              |        db-messiah         |        db-messiah-extra         |
+|     KClass     |    COLUMN    |               Databases              |        db-messiah         |        db-messiah-extra         |
 |:--------------:|:------------:|:------------------------------------:|:-------------------------:|:-------------------------------:|
-|     Boolean    |     BOOL     |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
+|    Boolean     |     BOOL     |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |      Char      |     CHAR     |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |     String     | VARCHAR(100) |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
-|      Float     |     FLOAT    |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
+|     Float      |     FLOAT    |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |     Double     |    DOUBLE    |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |  Byte / UByte  |    TINYINT   |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 | Short / UShort |   SMALLINT   |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |   Int / Uint   |    INTEGER   |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
 |  Long / ULong  |    BIGINT    |          :white_check_mark:          |    :white_check_mark:     |               :x:               |
-|     Instant    |   DATETIME   | Sqlite, Mysql, MSSql, Maria, H2, DB2 |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
-|     Instant    |   TIMESTAMP  |        Derby, Postgres, Oracle       |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
-|    LocalDate   |     DATE     |          :white_check_mark:          |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
-|    LocalTime   |     TIME     |     :white_check_mark: but Oracle    |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
-|    LocalTime   | NUMBER(5, 0) |                Oracle                |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |>
+|    Instant     |   DATETIME   | Sqlite, Mysql, MSSql, Maria, H2, DB2 |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
+|    Instant     |   TIMESTAMP  |        Derby, Postgres, Oracle       |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
+|   LocalDate    |     DATE     |          :white_check_mark:          |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
+|   LocalTime    |     TIME     |     :white_check_mark: but Oracle    |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |
+|   LocalTime    | NUMBER(5, 0) |                Oracle                |  Java :white_check_mark:  |   kotlinx :white_check_mark:    |>
 
 
 <br><br><h3 align="center">PRIMARY KEY</h3>
@@ -233,122 +233,122 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 
 <br><br><h2 align="center">Arhitecture</h3>
 
-```text
+```kotlin
 src/main/kotlin/com/urosjarc/dbmessiah/
-??? builders
-?   ??? ProcedureBuilder.kt
-?   ??? QueryBuilder.kt
-?   ??? RowBuilder.kt
-?   ??? SqlBuilder.kt
-??? ConnectionPool.kt
-??? data
-?   ??? BatchQuery.kt
-?   ??? Column.kt
-?   ??? DbValue.kt
-?   ??? DecodeInfo.kt
-?   ??? Decoder.kt
-?   ??? Encoder.kt
-?   ??? ForeignColumn.kt
-?   ??? OtherColumn.kt
-?   ??? PrimaryColumn.kt
-?   ??? ProcedureArg.kt
-?   ??? Procedure.kt
-?   ??? Query.kt
-?   ??? QueryValue.kt
-?   ??? TableInfo.kt
-?   ??? TypeSerializer.kt
-??? domain
-?   ??? C.kt
-?   ??? Cursor.kt
-?   ??? Isolation.kt
-?   ??? Order.kt
-?   ??? Page.kt
-?   ??? QueryLog.kt
-?   ??? Rollback.kt
-?   ??? Table.kt
-??? Driver.kt
-??? exceptions
-?   ??? base
-?   ?   ??? IssueException.kt
-?   ?   ??? UnknownException.kt
-?   ?   ??? WarningException.kt
-?   ??? ConnectionException.kt
-?   ??? DbValueException.kt
-?   ??? DriverException.kt
-?   ??? MapperException.kt
-?   ??? QueryException.kt
-?   ??? SerializerTestsException.kt
-??? Exporter.kt
-??? extend
-?   ??? Iterable.kt
-?   ??? KClass.kt
-?   ??? KProperty1.kt
-??? impl
-?   ??? db2
-?   ?   ??? Db2Schema.kt
-?   ?   ??? Db2Serializer.kt
-?   ?   ??? Db2Service.kt
-?   ??? derby
-?   ?   ??? DerbySchema.kt
-?   ?   ??? DerbySerializer.kt
-?   ?   ??? DerbyService.kt
-?   ??? h2
-?   ?   ??? H2Schema.kt
-?   ?   ??? H2Serializer.kt
-?   ?   ??? H2Service.kt
-?   ??? maria
-?   ?   ??? MariaSchema.kt
-?   ?   ??? MariaSerializer.kt
-?   ?   ??? MariaService.kt
-?   ??? mssql
-?   ?   ??? MssqlSchema.kt
-?   ?   ??? MssqlSerializer.kt
-?   ?   ??? MssqlService.kt
-?   ??? mysql
-?   ?   ??? MysqlSchema.kt
-?   ?   ??? MysqlSerializer.kt
-?   ?   ??? MysqlService.kt
-?   ??? oracle
-?   ?   ??? OracleSchema.kt
-?   ?   ??? OracleSerializer.kt
-?   ?   ??? OracleService.kt
-?   ??? postgresql
-?   ?   ??? PgSchema.kt
-?   ?   ??? PgSerializer.kt
-?   ?   ??? PgService.kt
-?   ??? sqlite
-?       ??? SqliteSerializer.kt
-?       ??? SqliteService.kt
-??? MapperCache.kt
-??? Mapper.kt
-??? Profiler.kt
-??? queries
-?   ??? BatchQueries.kt
-?   ??? GetManyQueries.kt
-?   ??? GetOneQueries.kt
-?   ??? NoReturnProcedureQueries.kt
-?   ??? ProcedureQueries.kt
-?   ??? RowQueries.kt
-?   ??? SchemaCascadeQueries.kt
-?   ??? SchemaQueries.kt
-?   ??? TableCascadeQueries.kt
-?   ??? TableQueries.kt
-??? Schema.kt
-??? Serializer.kt
-??? serializers
-?   ??? BasicTS.kt
-?   ??? BooleanTS.kt
-?   ??? CharTS.kt
-?   ??? DecimalTS.kt
-?   ??? IdTS.kt
-?   ??? InstantTS.kt
-?   ??? JavaTimeTS.kt
-?   ??? LocalDateTS.kt
-?   ??? LocalTimeTS.kt
-?   ??? NumberTS.kt
-?   ??? StringTS.kt
-?   ??? UNumber.kt
-?   ??? UUIDTS.kt
-??? SerializerTests.kt
-??? Service.kt
+|-- builders
+|   |-- ProcedureBuilder.kt
+|   |-- QueryBuilder.kt
+|   |-- RowBuilder.kt
+|   `-- SqlBuilder.kt
+|-- ConnectionPool.kt
+|-- data
+|   |-- BatchQuery.kt
+|   |-- Column.kt
+|   |-- DbValue.kt
+|   |-- DecodeInfo.kt
+|   |-- Decoder.kt
+|   |-- Encoder.kt
+|   |-- ForeignColumn.kt
+|   |-- OtherColumn.kt
+|   |-- PrimaryColumn.kt
+|   |-- ProcedureArg.kt
+|   |-- Procedure.kt
+|   |-- Query.kt
+|   |-- QueryValue.kt
+|   |-- TableInfo.kt
+|   `-- TypeSerializer.kt
+|-- domain
+|   |-- C.kt
+|   |-- Cursor.kt
+|   |-- Isolation.kt
+|   |-- Order.kt
+|   |-- Page.kt
+|   |-- QueryLog.kt
+|   |-- Rollback.kt
+|   `-- Table.kt
+|-- Driver.kt
+|-- exceptions
+|   |-- base
+|   |   |-- IssueException.kt
+|   |   |-- UnknownException.kt
+|   |   `-- WarningException.kt
+|   |-- ConnectionException.kt
+|   |-- DbValueException.kt
+|   |-- DriverException.kt
+|   |-- MapperException.kt
+|   |-- QueryException.kt
+|   `-- SerializerTestsException.kt
+|-- Exporter.kt
+|-- extend
+|   |-- Iterable.kt
+|   |-- KClass.kt
+|   `-- KProperty1.kt
+|-- impl
+|   |-- db2
+|   |   |-- Db2Schema.kt
+|   |   |-- Db2Serializer.kt
+|   |   `-- Db2Service.kt
+|   |-- derby
+|   |   |-- DerbySchema.kt
+|   |   |-- DerbySerializer.kt
+|   |   `-- DerbyService.kt
+|   |-- h2
+|   |   |-- H2Schema.kt
+|   |   |-- H2Serializer.kt
+|   |   `-- H2Service.kt
+|   |-- maria
+|   |   |-- MariaSchema.kt
+|   |   |-- MariaSerializer.kt
+|   |   `-- MariaService.kt
+|   |-- mssql
+|   |   |-- MssqlSchema.kt
+|   |   |-- MssqlSerializer.kt
+|   |   `-- MssqlService.kt
+|   |-- mysql
+|   |   |-- MysqlSchema.kt
+|   |   |-- MysqlSerializer.kt
+|   |   `-- MysqlService.kt
+|   |-- oracle
+|   |   |-- OracleSchema.kt
+|   |   |-- OracleSerializer.kt
+|   |   `-- OracleService.kt
+|   |-- postgresql
+|   |   |-- PgSchema.kt
+|   |   |-- PgSerializer.kt
+|   |   `-- PgService.kt
+|   `-- sqlite
+|       |-- SqliteSerializer.kt
+|       `-- SqliteService.kt
+|-- MapperCache.kt
+|-- Mapper.kt
+|-- Profiler.kt
+|-- queries
+|   |-- BatchQueries.kt
+|   |-- GetManyQueries.kt
+|   |-- GetOneQueries.kt
+|   |-- NoReturnProcedureQueries.kt
+|   |-- ProcedureQueries.kt
+|   |-- RowQueries.kt
+|   |-- SchemaCascadeQueries.kt
+|   |-- SchemaQueries.kt
+|   |-- TableCascadeQueries.kt
+|   `-- TableQueries.kt
+|-- Schema.kt
+|-- Serializer.kt
+|-- serializers
+|   |-- BasicTS.kt
+|   |-- BooleanTS.kt
+|   |-- CharTS.kt
+|   |-- DecimalTS.kt
+|   |-- IdTS.kt
+|   |-- InstantTS.kt
+|   |-- JavaTimeTS.kt
+|   |-- LocalDateTS.kt
+|   |-- LocalTimeTS.kt
+|   |-- NumberTS.kt
+|   |-- StringTS.kt
+|   |-- UNumber.kt
+|   `-- UUIDTS.kt
+|-- SerializerTests.kt
+`-- Service.kt
 ```
