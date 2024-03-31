@@ -1,4 +1,5 @@
 import com.urosjarc.dbmessiah.Profiler
+import com.urosjarc.dbmessiah.builders.SqlBuilder
 import com.urosjarc.dbmessiah.data.TypeSerializer
 import com.urosjarc.dbmessiah.domain.*
 import com.urosjarc.dbmessiah.impl.sqlite.SqliteSerializer
@@ -62,10 +63,10 @@ data class Unsafe(
 
 val serializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(
-        //         constructor    deconstructor
-        IdTS.int({ Id<Any>(it) }, { it.value }), // Serializer for Id<T>
-        //                 constructor
-        IdTS.uuid.sqlite({ UId<Any>(it) })       // Serializer for UId<T>
+        /** Serializer for Id<T> */
+        IdTS.int(construct = { Id<Any>(it) }, deconstruct = { it.value }),
+        /** Serializer for UId<T> */
+        IdTS.uuid.sqlite(construct = { UId<Any>(it) })
     ),
     tables = listOf(
         Table(Unsafe::pk),
@@ -139,7 +140,7 @@ fun main() {
         val children = arrayOfNulls<Child>(3000).mapIndexed { i, _ ->
             Child(pk = UId(), parent_pk = parent.pk!!, value = "value_$i")
         }
-        it.batch.insert(rows = children) // INSERT 1000 rows per batch
+        it.batch.insert(rows = children) // INSERT 1000 rows / batch.
 
         /** SELECT */
 
@@ -210,8 +211,6 @@ fun main() {
     // STOP
 
     // START 'Serializers'
-    /** SERIALIZE: Instant(TIMESTAMP) */
-
     val DURATION = TypeSerializer(
         kclass = Duration::class,
         dbType = "INTEGER",
@@ -269,6 +268,19 @@ fun main() {
      *    time: 40.525us
      */
     // STOP
+
+    sqlite.autocommit {
+        // START 'builders'
+        it.query.get<Child> { sb: SqlBuilder ->
+            """ ${sb.SELECT<Child>()} """
+        }
+        // STOP
+
+        // START 'IdTS'
+        IdTS.int(construct = { Id<Any>(it) }, deconstruct = { it.value })
+        IdTS.uuid.sqlite(construct = { UId<Any>(it) })
+        // STOP
+    }
 }
 
 class Test_README {

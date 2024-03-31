@@ -24,8 +24,8 @@
                 <p><a href="#tutorials">Tutorials</a></p>
                 <p><a href="#configuration">Configuration</a></p>
                 <p><a href="#specifications">Specifications</a></p>
-                <p><a href="https://urosjarc.github.io/db-messiah/">Documentation</a></p>
                 <p><a href="#arhitecture">Arhitecture</a></p>
+                <p><a href="https://urosjarc.github.io/db-messiah/">Documentation</a></p>
         </td>
         <td width="33%">
             <h3 align="center"><a href="https://github.com/urosjarc/db-analyser">db-analyser</a></h3>
@@ -132,7 +132,9 @@ for all supported databases, famous <a href="https://github.com/lerocha/chinook-
 
 <p align="center">
 User provided config property object is on initialization, passed directly to the <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> library,
-<br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection pooling and configuration</a>.
+<br>which handles everything around database <a href="https://github.com/brettwooldridge/HikariCP?tab=readme-ov-file#gear-configuration-knobs-baby">connection pooling and configuration</a>.<br>
+For customizing SQL generation, see the tutorial for<br>
+<a href="https://github.com/urosjarc/db-messiah/blob/master/src/tutorials/kotlin/011_custom_database_serializers.kt">creating custom database serializers</a>.
 </p>
 
 <br><h3 align="center">Testing</h3>
@@ -150,8 +152,8 @@ You can start those servers with <code>docker-compose up</code>.
 
 <p align="center">
 The recommend logging configuration is located here <a href="https://github.com/urosjarc/db-messiah/blob/master/src/test/resources/log4j2.xml">src/test/resources/log4j2.xml</a>,<br>
-where you can find logger for non-blocking Async Rolling log files (one log file per session)<br>
-and non-blocking async console logger with pretty padding for maximum readability.<br>
+where you can find logger for async rolling log files (one log file per session)<br>
+and async console logger with pretty padding for maximum readability.<br>
 For detailed explanation read about <a href="https://logging.apache.org/log4j/2.x/manual/appenders.html">Log4j Appenders</a>.
 </p>
 
@@ -233,21 +235,25 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 
 <br><br><h2 align="center">Arhitecture</h3>
 
-```kotlin
+```text
 src/main/kotlin/com/urosjarc/dbmessiah/
-|-- builders
-|   |-- ProcedureBuilder.kt
-|   |-- QueryBuilder.kt
-|   |-- RowBuilder.kt
-|   `-- SqlBuilder.kt
-|-- ConnectionPool.kt
-|-- data
+        
+|-- builders...........................| Builders to help you build type safe queries.
+|   |-- ProcedureBuilder.kt............| Builder for procedures.
+|   |-- QueryBuilder.kt................| Builder for custom queries.
+|   |-- RowBuilder.kt..................| Builder for creating row queries.
+|   `-- SqlBuilder.kt..................| Builder for SQL templates.
+
+// START 'builders'
+
+|-- ConnectionPool.kt..................| For getting db autocommit or transactional connections.
+|-- data...............................| Internal data representations of db elements.
 |   |-- BatchQuery.kt
 |   |-- Column.kt
 |   |-- DbValue.kt
-|   |-- DecodeInfo.kt
-|   |-- Decoder.kt
-|   |-- Encoder.kt
+|   |-- DecodeInfo.kt..................| Additional info for Decoder about the decoding value.
+|   |-- Decoder.kt.....................| TypeSerializer callback for decoding value.
+|   |-- Encoder.kt.....................| TypeSerializer callback for encoding value.
 |   |-- ForeignColumn.kt
 |   |-- OtherColumn.kt
 |   |-- PrimaryColumn.kt
@@ -256,38 +262,38 @@ src/main/kotlin/com/urosjarc/dbmessiah/
 |   |-- Query.kt
 |   |-- QueryValue.kt
 |   |-- TableInfo.kt
-|   `-- TypeSerializer.kt
+|   `-- TypeSerializer.kt..............| Structure that holds information on how some KClass will be mapped to db value.
 |-- domain
-|   |-- C.kt
+|   |-- C.kt...........................| All user available constraints, other are inferred with the reflection.
 |   |-- Cursor.kt
 |   |-- Isolation.kt
 |   |-- Order.kt
 |   |-- Page.kt
-|   |-- QueryLog.kt
+|   |-- QueryLog.kt....................| Log structure used for profiling.
 |   |-- Rollback.kt
 |   `-- Table.kt
-|-- Driver.kt
+|-- Driver.kt..........................| Driver for preparing and executing Query on JDBC.
 |-- exceptions
 |   |-- base
-|   |   |-- IssueException.kt
-|   |   |-- UnknownException.kt
-|   |   `-- WarningException.kt
+|   |   |-- IssueException.kt..........| Exception that needs to be reported on issue tracker.
+|   |   |-- UnknownException.kt........| Exception when system does not know if this is an issue or a warning.
+|   |   `-- WarningException.kt........| Warning to the user that he did something wrong.
 |   |-- ConnectionException.kt
 |   |-- DbValueException.kt
 |   |-- DriverException.kt
 |   |-- MapperException.kt
 |   |-- QueryException.kt
 |   `-- SerializerTestsException.kt
-|-- Exporter.kt
+|-- Exporter.kt........................| Logic for exporting db structure to PlantUML, dbdiagram.io, ...
 |-- extend
-|   |-- Iterable.kt
-|   |-- KClass.kt
-|   `-- KProperty1.kt
+|   |-- Iterable.kt....................| All extends functions attached to Iterable.
+|   |-- KClass.kt......................| All extends functions attached to KClass.
+|   `-- KProperty1.kt..................| All extends functions attached to KProperty1.
 |-- impl
 |   |-- db2
-|   |   |-- Db2Schema.kt
-|   |   |-- Db2Serializer.kt
-|   |   `-- Db2Service.kt
+|   |   |-- Db2Schema.kt...............| Structure that will user use to create schema.
+|   |   |-- Db2Serializer.kt...........| Serializer for mapping user command to appropriate SQL Query string.
+|   |   `-- Db2Service.kt..............| Service for executing user commands on database connection.
 |   |-- derby
 |   |   |-- DerbySchema.kt
 |   |   |-- DerbySerializer.kt
@@ -319,36 +325,139 @@ src/main/kotlin/com/urosjarc/dbmessiah/
 |   `-- sqlite
 |       |-- SqliteSerializer.kt
 |       `-- SqliteService.kt
-|-- MapperCache.kt
-|-- Mapper.kt
-|-- Profiler.kt
-|-- queries
+|-- MapperCache.kt.....................| Internal mapping cache containing hashmaps like KClass to TableInfo, KProperty1 to TypeSerializer, etc...
+|-- Mapper.kt..........................| User friendly API for MapperCache.
+|-- Profiler.kt........................| Simple static class that logs every query executed on Driver.
+|-- queries............................| Execution logic for db queries.
 |   |-- BatchQueries.kt
-|   |-- GetManyQueries.kt
-|   |-- GetOneQueries.kt
+|   |-- GetManyQueries.kt..............| Some databases support multiple db calls per query.
+|   |-- GetOneQueries.kt...............| For databases that only support one db call per query.
 |   |-- NoReturnProcedureQueries.kt
 |   |-- ProcedureQueries.kt
 |   |-- RowQueries.kt
-|   |-- SchemaCascadeQueries.kt
-|   |-- SchemaQueries.kt
+|   |-- SchemaCascadeQueries.kt........| Some databases support cascading queries on schema. 
+|   |-- SchemaQueries.kt...............| For databases that does not support cascading queries.
 |   |-- TableCascadeQueries.kt
 |   `-- TableQueries.kt
-|-- Schema.kt
-|-- Serializer.kt
-|-- serializers
-|   |-- BasicTS.kt
+|-- Schema.kt..........................| Interface defining common schema logic.
+|-- Serializer.kt......................| Interface defining common serializer logic.
+|-- serializers........................| Here are all type serializers (TS) that are supported by the system.
+|   |-- BasicTS.kt.....................| User friendly API for accessing all TS for specific database.
 |   |-- BooleanTS.kt
 |   |-- CharTS.kt
 |   |-- DecimalTS.kt
-|   |-- IdTS.kt
+|   |-- IdTS.kt........................| User friendly API for creating custom inline primary key type serializer.
+        
+// START 'IdTS'        
+        
 |   |-- InstantTS.kt
-|   |-- JavaTimeTS.kt
+|   |-- JavaTimeTS.kt..................| User friendly API for accessing all java.time.* supported TS for specific database. 
 |   |-- LocalDateTS.kt
 |   |-- LocalTimeTS.kt
 |   |-- NumberTS.kt
 |   |-- StringTS.kt
 |   |-- UNumber.kt
 |   `-- UUIDTS.kt
-|-- SerializerTests.kt
-`-- Service.kt
+|-- SerializerTests.kt.................| Initialization tests for serializer to find any error and inconsistency in user defined db schema.
+`-- Service.kt.........................| Interface defining common service logic.
+```
+
+<br><br><h2 align="center">Sources</h2>
+
+```text
+src/
+|-- main...............................| Already described in architecture.
+|-- chinook............................| Implementation of chinook sample database for all supported databases.
+|   |-- kotlin
+|   |   |-- domain
+|   |   |   |-- Album.kt
+|   |   |   |-- Artist.kt
+|   |   |   |-- Customer.kt
+|   |   |   |-- Employee.kt
+|   |   |   |-- Genre.kt
+|   |   |   |-- Invoice.kt
+|   |   |   |-- InvoiceLine.kt
+|   |   |   |-- MediaType.kt
+|   |   |   |-- Playlist.kt
+|   |   |   |-- PlaylistTrack.kt
+|   |   |   `-- Track.kt
+|   |   |-- Id.kt
+|   |   |-- Schemas.kt
+|   |   |-- Seed.kt....................| INSERT elements to tables.
+|   |   |-- Serializers.kt
+|   |   |-- Services.kt
+|   |   `-- Test_Chinook.kt............| Main testing entry.
+|   `-- resources
+|       `-- log4j2.xml
+|-- e2e
+|   |-- kotlin
+|   |   |-- domain.kt
+|   |   |-- Test_Benchmarks.kt.........| Testing speed of the system.
+|   |   |-- Test_Contract.kt...........| Testing interface for all db tests.
+|   |   |-- Test_Db2.kt
+|   |   |-- Test_Derby.kt
+|   |   |-- Test_H2.kt
+|   |   |-- Test_Maria.kt
+|   |   |-- Test_Mssql.kt
+|   |   |-- Test_Mysql.kt
+|   |   |-- Test_Oracle.kt
+|   |   |-- Test_Postgresql.kt
+|   |   `-- Test_Sqlite.kt
+|   `-- resources
+|       `-- log4j2.xml
+|-- test
+|   |-- kotlin
+|   |   `-- com
+|   |       `-- urosjarc
+|   |           `-- dbmessiah
+|   |               |-- builders
+|   |               |   |-- Test_ProcedureBuilder.kt
+|   |               |   |-- Test_QueryBuilder.kt
+|   |               |   |-- Test_RowBuilder.kt
+|   |               |   `-- Test_SqlBuilder.kt
+|   |               |-- data
+|   |               |   |-- Test_Column.kt
+|   |               |   |-- Test_OtherColumn.kt
+|   |               |   |-- Test_PrimaryColumn.kt
+|   |               |   |-- Test_ProcedureArg.kt
+|   |               |   |-- Test_Procedure.kt
+|   |               |   `-- Test_Query.kt
+|   |               |-- domain
+|   |               |   `-- Test_Table.kt
+|   |               |-- extend
+|   |               |   |-- Test_Iterable.kt
+|   |               |   |-- Test_KClass.kt
+|   |               |   `-- Test_KProperty.kt
+|   |               |-- impl
+|   |               |   |-- Test_Db2Serializer.kt
+|   |               |   |-- Test_DerbySerializer.kt
+|   |               |   |-- Test_H2Serializer.kt
+|   |               |   |-- Test_MariaSerializer.kt
+|   |               |   |-- Test_MssqlSerializer.kt
+|   |               |   |-- Test_MysqlSerializer.kt
+|   |               |   |-- Test_OracleSerializer.kt
+|   |               |   |-- Test_PgSerializer.kt
+|   |               |   `-- Test_SqliteSerializer.kt
+|   |               `-- Test_Serializer.kt
+|   `-- resources
+|       `-- log4j2.xml
+`-- tutorials
+    |-- kotlin
+    |   |-- 000_basic_sqlite.kt
+    |   |-- 001_basic_postgresql.kt
+    |   |-- 002_query_sqlite.kt
+    |   |-- 003_query_postgresql.kt
+    |   |-- 004_primary_keys.kt
+    |   |-- 005_constraints.kt
+    |   |-- 006_transactions.kt
+    |   |-- 007_procedures.kt
+    |   |-- 008_indexing_and_profiling.kt
+    |   |-- 009_exceptions.kt
+    |   |-- 010_custom_type_serializers.kt
+    |   |-- 011_custom_database_serializers.kt
+    |   |-- Test_README.kt...............................| Code from where README.md is generated.
+    |   |-- Test_README.md...............................| Template from where README.md is generated.
+    |   `-- Test_Tutorials.kt............................| Main testing entry.
+    `-- resources
+        `-- log4j2.xml
 ```
