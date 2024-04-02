@@ -16,6 +16,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 
+
 // START 'Primary keys'
 /** TYPE SAFE ID */
 
@@ -56,6 +57,10 @@ data class Unsafe(
     val pk: UUID = UUID.randomUUID(),    // Unsafe UUID manual primary key
     val created: Instant = Instant.now() // Support for java.time.*
 )
+
+/** QUERY DTO */
+
+data class Out(val child_value: String, val parent_value: String)
 // STOP
 
 // START 'Database'
@@ -63,37 +68,30 @@ data class Unsafe(
 
 val sqliteSerializer = SqliteSerializer(
     globalSerializers = BasicTS.sqlite + JavaTimeTS.sqlite + listOf(
-        /** Serializer for Id<T> */
         IdTS.int(construct = { Id<Any>(it) }, deconstruct = { it.value }),
-        /** Serializer for UId<T> */
         IdTS.uuid.sqlite(construct = { UId<Any>(it) })
     ),
     tables = listOf(
         Table(Unsafe::pk),
         Table(Parent::pk),
         Table(
-            Child::pk,
-            foreignKeys = listOf(
-                Child::parent_pk to Parent::class
-            ),
+            primaryKey = Child::pk,
+            foreignKeys = listOf(Child::parent_pk to Parent::class),
             constraints = listOf(
                 Child::parent_pk to listOf(C.CASCADE_DELETE, C.CASCADE_UPDATE),
                 Child::value to listOf(C.UNIQUE)
             )
         ),
     ),
+    globalOutputs = listOf(Out::class),
 )
 
 /** POSTGRES */
 
 val pgSerializer = PgSerializer(
-    globalSerializers = BasicTS.sqlite + JavaTimeTS.postgresql,
+    globalSerializers = BasicTS.postgresql + JavaTimeTS.postgresql,
     schemas = listOf(
-        PgSchema(
-            name = "name", tables = listOf(
-                Table(Unsafe::pk),
-            )
-        ),
+        PgSchema(name = "other", tables = listOf(Table(Unsafe::pk)))
     ),
 )
 
@@ -202,10 +200,21 @@ fun main() {
             WHERE ${it.column(Child::value)} = ${it.input(Parent::value)}
         """
         }
-        println(moreChildren)
         assert(moreChildren == listOf(children[3]))
+
+        // START 'Selective join'
+        val result = it.query.get(output = Out::class, input = parent) {
+            """
+            SELECT ${it.column(Child::value)}  AS ${it.name(Out::child_value)},
+                   ${it.column(Parent::value)} AS ${it.name(Out::parent_value)}
+            FROM ${it.table<Child>()}
+            JOIN ${it.table<Parent>()} ON ${it.column(Parent::pk)} = ${it.column(Child::parent_pk)}
+            WHERE ${it.column(Child::value)} = ${it.input(Parent::value)}
+            """
+        }
+        // STOP
+        assert(result == listOf(Out(child_value = "value_3", parent_value = "value_3")))
     }
-    // STOP
 
     // START 'Transactions'
     sqlite.transaction { // Any exception inside will trigger rollback ALL!
@@ -294,6 +303,28 @@ fun main() {
         IdTS.uuid.sqlite(construct = { UId<Any>(it) })
         // STOP
     }
+
+    // START 'Minimal example'
+    data class TestTable(var id: Int? = null, val column: String)
+
+    val db = SqliteService(
+        config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
+        ser = SqliteSerializer(
+            tables = listOf(Table(TestTable::id)),
+            globalSerializers = BasicTS.sqlite
+        )
+    )
+    // STOP
+    // START 'Minimal syntax'
+    db.transaction {
+        it.table.drop<TestTable>()
+        it.table.create<TestTable>()
+        it.table.delete<TestTable>()
+        it.row.insert(TestTable(column = "col0"))
+        it.table.delete<TestTable>()
+        // ...
+    }
+    // STOP
 }
 
 class Test_README {

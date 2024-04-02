@@ -1,5 +1,8 @@
 <h1 align="center">db-messiah</h1>
-<h3 align="center">Kotlin lib. for enterprise database development</h3>
+<h3 align="center">
+    Type safe SQL framework for Kotlin, built on top of JDBC and reflection.<br>
+    Strong focus on simplicity and minimal developer interference.<br>
+</h3>
 <p align="center">
     +<b>290</b> <a href="https://github.com/urosjarc/db-messiah/blob/master/src/test">unit</a>,
     +<b>210</b> <a href="https://github.com/urosjarc/db-messiah/blob/master/src/e2e">e2e</a>,
@@ -11,6 +14,42 @@
     <a href="https://github.com/urosjarc/db-messiah/blob/master/src/tutorials/kotlin/Test_README.kt">tested</a><br>
     +<b>86%</b> instruction coverage
 </p>
+
+<p align="center">
+    Db Messiah scans user provided data classes and all their properties with reflection<br>
+    in order to know how to decode user actions like `db.table.create&#60;T&#62;()`<br>
+    into prepared SQL statements that are type safe, escaped, and free from SQL injections.
+</p>
+
+<p align="center">
+    Because everything is scanned with reflection, your data classes will<br>
+    directly represent your whole database structure, without the need of any additional work.<br>
+    Here is an minimalistic example how would you define database with one table...
+</p>
+
+```kotlin
+// START 'Minimal example'
+```
+
+<p align="center">
+    Db Messiah provides simplistic but feature complete clean syntax for database interactions...
+</p>
+
+```kotlin
+// START 'Minimal syntax'
+```
+
+Because of reflection, it provides very simple solution for writing complex queries.<br> 
+There are only 4 methods to be remembered: it.<b>name</b>, it.<b>column</b>, it.<b>table</b>, it.<b>input</b><br>
+Thats it! Everything else is joust ordinary SQL syntax that you know and love.<br>
+This is an example how the most complex query in db-messiah looks like,
+it's basically raw SQL with additional features like type safety and SQL injection .
+</p>
+
+```kotlin
+// START 'Selective join'
+```
+
 <br>
 <br>
 <table width="100%" border="0">
@@ -158,52 +197,51 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 
 <br><br><h2 align="center">Specifications</h3>
 
-|          |    Schema     |    Serializer    |    Service    |     Basic types     |   java.time.* types    |
-|:--------:|:-------------:|:----------------:|:-------------:|:-------------------:|:----------------------:|
-|    DB2   |   Db2Schema   |  Db2Serializer   |  Db2Service   |     BasicTS.db2     |     JavaTimeTS.db2     |
-|   Derby  |  DerbySchema  | DerbySerializer  | DerbyService  |    BasicTS.derby    |    JavaTimeTS.derby    |
-|    H2    |   H2Schema    |   H2Serializer   |   H2Service   |     BasicTS.h2      |     JavaTimeTS.h2      |
-|   Maria  |  MariaSchema  | MariaSerializer  | MariaService  |    BasicTS.maria    |    JavaTimeTS.maria    |
-|  MS SQL  |  MssqlSchema  | MssqlSerializer  | MssqlService  |    BasicTS.mssql    |    JavaTimeTS.mssql    |
-|   MySQL  |  MysqlSchema  | MysqlSerializer  | MysqlService  |    BasicTS.mysql    |    JavaTimeTS.mysql    |
-|  Oracle  | OracleSchema  | OracleSerializer | OracleService |   BasicTS.oracle    |   JavaTimeTS.oracle    |
-| Postgres |   PgSchema    |   PgSerializer   |   PgService   | BasicTS. postgresql | JavaTimeTS. postgresql |
-|  Sqlite  |      :x:      | SqliteSerializer | SqliteService |   BasicTS.sqlite    |   JavaTimeTS.sqlite    |
+|          |    Schema    |    Serializer    |    Service    |     Basic types     |   java.time.* types    |
+|:--------:|:------------:|:----------------:|:-------------:|:-------------------:|:----------------------:|
+|   DB2    |  Db2Schema   |  Db2Serializer   |  Db2Service   |     BasicTS.db2     |     JavaTimeTS.db2     |
+|  Derby   | DerbySchema  | DerbySerializer  | DerbyService  |    BasicTS.derby    |    JavaTimeTS.derby    |
+|    H2    |   H2Schema   |   H2Serializer   |   H2Service   |     BasicTS.h2      |     JavaTimeTS.h2      |
+|  Maria   | MariaSchema  | MariaSerializer  | MariaService  |    BasicTS.maria    |    JavaTimeTS.maria    |
+|  MS SQL  | MssqlSchema  | MssqlSerializer  | MssqlService  |    BasicTS.mssql    |    JavaTimeTS.mssql    |
+|  MySQL   | MysqlSchema  | MysqlSerializer  | MysqlService  |    BasicTS.mysql    |    JavaTimeTS.mysql    |
+|  Oracle  | OracleSchema | OracleSerializer | OracleService |   BasicTS.oracle    |   JavaTimeTS.oracle    |
+| Postgres |   PgSchema   |   PgSerializer   |   PgService   | BasicTS. postgresql | JavaTimeTS. postgresql |
+|  Sqlite  |     :x:      | SqliteSerializer | SqliteService |   BasicTS.sqlite    |   JavaTimeTS.sqlite    |
 
 <br><h3 align="center">Features</h3>
 
-|          | Escape |         Schema         |     Auto INT PK    |    Auto UUID PK    |  UUID column |    Many queries    |                Cascade                |        Procedure       |
+|          | Escape |         Schema         |    Auto INT PK     |    Auto UUID PK    | UUID column  |    Many queries    |                Cascade                |       Procedure        |
 |:--------:|:------:|:----------------------:|:------------------:|:------------------:|:------------:|:------------------:|:-------------------------------------:|:----------------------:|
-|    DB2   |  "%s"  | :large_orange_diamond: | :white_check_mark: |         :x:        |   CHAR(36)   |         :x:        |                  :x:                  | :large_orange_diamond: |
-|   Derby  |  "%s"  |   :white_check_mark:   | :white_check_mark: |         :x:        |   CHAR(36)   |         :x:        |                  :x:                  |           :x:          |
-|    H2    |  "%s"  |   :white_check_mark:   | :white_check_mark: | :white_check_mark: |     UUID     |         :x:        |          :white_check_mark:           |           :x:          |
-|   Maria  | \`%s\` |   :white_check_mark:   | :white_check_mark: |         :x:        |     UUID     |         :x:        |                  :x:                  |   :white_check_mark:   |
-|  MS SQL  |  [%s]  |   :white_check_mark:   | :white_check_mark: |         :x:        | UNIQUEIDE... | :white_check_mark: |                  :x:                  |   :white_check_mark:   |
-|   MySQL  | \`%s\` |   :white_check_mark:   | :white_check_mark: |         :x:        |   CHAR(36)   |         :x:        |                  :x:                  |   :white_check_mark:   |
-|  Oracle  |  "%s"  | :large_orange_diamond: | :white_check_mark: |         :x:        | VARCHAR2(36) |         :x:        |          :white_check_mark:           |   :white_check_mark:   |
-| Postgres |  "%s"  |   :white_check_mark:   | :white_check_mark: | :white_check_mark: |     UUID     | :white_check_mark: | :white_check_mark: :white_check_mark: |           :x:          |
-|  Sqlite  |  "%s"  |           :x:          | :white_check_mark: |         :x:        |   CHAR(36)   |         :x:        |                  :x:                  |           :x:          |
+|   DB2    |  "%s"  | :large_orange_diamond: | :white_check_mark: |        :x:         |   CHAR(36)   |        :x:         |                  :x:                  | :large_orange_diamond: |
+|  Derby   |  "%s"  |   :white_check_mark:   | :white_check_mark: |        :x:         |   CHAR(36)   |        :x:         |                  :x:                  |          :x:           |
+|    H2    |  "%s"  |   :white_check_mark:   | :white_check_mark: | :white_check_mark: |     UUID     |        :x:         |          :white_check_mark:           |          :x:           |
+|  Maria   | \`%s\` |   :white_check_mark:   | :white_check_mark: |        :x:         |     UUID     |        :x:         |                  :x:                  |   :white_check_mark:   |
+|  MS SQL  |  [%s]  |   :white_check_mark:   | :white_check_mark: |        :x:         | UNIQUEIDE... | :white_check_mark: |                  :x:                  |   :white_check_mark:   |
+|  MySQL   | \`%s\` |   :white_check_mark:   | :white_check_mark: |        :x:         |   CHAR(36)   |        :x:         |                  :x:                  |   :white_check_mark:   |
+|  Oracle  |  "%s"  | :large_orange_diamond: | :white_check_mark: |        :x:         | VARCHAR2(36) |        :x:         |          :white_check_mark:           |   :white_check_mark:   |
+| Postgres |  "%s"  |   :white_check_mark:   | :white_check_mark: | :white_check_mark: |     UUID     | :white_check_mark: | :white_check_mark: :white_check_mark: |          :x:           |
+|  Sqlite  |  "%s"  |          :x:           | :white_check_mark: |        :x:         |   CHAR(36)   |        :x:         |                  :x:                  |          :x:           |
 
 <br><br><h3 align="center">Type system</h3>
 
-|     KClass      |    COLUMN    |              Databases               |       db-messiah        |      db-messiah-extra      |
-|:---------------:|:------------:|:------------------------------------:|:-----------------------:|:--------------------------:|
-|     Boolean     |     BOOL     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|      Char       |     CHAR     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|     String      | VARCHAR(100) |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|      Float      |    FLOAT     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|     Double      |    DOUBLE    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|  Byte / UByte   |   TINYINT    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-| Short / UShort  |   SMALLINT   |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|   Int / Uint    |   INTEGER    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|  Long / ULong   |    BIGINT    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
-|     Instant     |   DATETIME   | Sqlite, Mysql, MSSql, Maria, H2, DB2 | Java :white_check_mark: | kotlinx :white_check_mark: |
-|     Instant     |  TIMESTAMP   |       Derby, Postgres, Oracle        | Java :white_check_mark: | kotlinx :white_check_mark: |
-|  LocalDateTime  |     :x:      |                 :x:                  |        Java :x:         |        kotlinx :x:         |
-|    LocalDate    |     DATE     |          :white_check_mark:          | Java :white_check_mark: | kotlinx :white_check_mark: |
-|    LocalTime    |     TIME     |    :white_check_mark: but Oracle     | Java :white_check_mark: | kotlinx :white_check_mark: |
-|    LocalTime    | NUMBER(5, 0) |                Oracle                | Java :white_check_mark: | kotlinx :white_check_mark: |>
-
+|     KClass     |    COLUMN    |              Databases               |       db-messiah        |      db-messiah-extra      |
+|:--------------:|:------------:|:------------------------------------:|:-----------------------:|:--------------------------:|
+|    Boolean     |     BOOL     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|      Char      |     CHAR     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|     String     | VARCHAR(100) |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|     Float      |    FLOAT     |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|     Double     |    DOUBLE    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|  Byte / UByte  |   TINYINT    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+| Short / UShort |   SMALLINT   |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|   Int / Uint   |   INTEGER    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|  Long / ULong  |    BIGINT    |          :white_check_mark:          |   :white_check_mark:    |            :x:             |
+|    Instant     |   DATETIME   | Sqlite, Mysql, MSSql, Maria, H2, DB2 | Java :white_check_mark: | kotlinx :white_check_mark: |
+|    Instant     |  TIMESTAMP   |       Derby, Postgres, Oracle        | Java :white_check_mark: | kotlinx :white_check_mark: |
+| LocalDateTime  |     :x:      |                 :x:                  |        Java :x:         |        kotlinx :x:         |
+|   LocalDate    |     DATE     |          :white_check_mark:          | Java :white_check_mark: | kotlinx :white_check_mark: |
+|   LocalTime    |     TIME     |    :white_check_mark: but Oracle     | Java :white_check_mark: | kotlinx :white_check_mark: |
+|   LocalTime    | NUMBER(5, 0) |                Oracle                | Java :white_check_mark: | kotlinx :white_check_mark: |>
 
 <br><br><h3 align="center">PRIMARY KEY</h3>
 <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/constraints/PRIMARY_KEY.png">
@@ -213,7 +251,6 @@ For detailed explanation read about <a href="https://logging.apache.org/log4j/2.
 
 <br><br><h3 align="center">INSERT BATCH</h3>
 <img width="100%" src="https://github.com/urosjarc/db-messiah/blob/master/docs/queries/BATCH_INSERT.png">
-
 
 <br><br><h3 align="center">UPDATE / DELETE</h3>
 <table align="center" width="100%">

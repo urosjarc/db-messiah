@@ -152,7 +152,7 @@ publishing {
             artifact(javadocJar)
             pom {
                 name = "Db Messiah"
-                description = "Kotlin lib. for enterprise database development"
+                description = "Db Messiah, kotlin lib. for enterprise database development "
                 url = github
                 issueManagement {
                     system = "Github"
@@ -203,8 +203,8 @@ tasks.register<GradleBuild>("readme") {
         var readme = File("./src/tutorials/kotlin/Test_README.md").readText()
 
         val dependencies = mutableListOf(
-            "implementation(\"${project.group}:${project.name}:$version\") // Required",
-            "implementation(\"${project.group}:${project.name}-extra:$version\") // Optional",
+            "implementation(\"${project.group}:${project.name}:${project.version}\") // Required",
+            "implementation(\"${project.group}:${project.name}-extra:${project.version}\") // Optional",
         )
         dependencies += optionals.map { "implementation(\"$it\") //Optional" }
 
