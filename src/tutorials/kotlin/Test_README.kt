@@ -305,12 +305,12 @@ fun main() {
     }
 
     // START 'Minimal example'
-    data class TestTable(var id: Int? = null, val column: String)
+    data class TestTable(var id: Int? = null, val col0: String, val col1: Double)
 
     val db = SqliteService(
         config = Properties().apply { this["jdbcUrl"] = "jdbc:sqlite::memory:" },
         ser = SqliteSerializer(
-            tables = listOf(Table(TestTable::id)),
+            tables = listOf(Table(primaryKey = TestTable::id)),
             globalSerializers = BasicTS.sqlite
         )
     )
@@ -318,10 +318,13 @@ fun main() {
     // START 'Minimal syntax'
     db.transaction {
         it.table.drop<TestTable>()
+        it.roolback.all()
         it.table.create<TestTable>()
+        val s0 = it.roolback.savePoint()
         it.table.delete<TestTable>()
-        it.row.insert(TestTable(column = "col0"))
+        it.row.insert(TestTable(col0 = "col0", col1 = 1.3))
         it.table.delete<TestTable>()
+        it.roolback.to(s0)
         // ...
     }
     // STOP
